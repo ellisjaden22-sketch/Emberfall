@@ -88,7 +88,7 @@ const server = http.createServer((req, res) => {
   if (GAME_FILES.has(name) && name !== 'index.html') return sendFile(res, path.join(ROOT, name));   // older game links
   if (name === 'Play Emberfall.html') return sendFile(res, path.join(ROOT, name), { 'Content-Disposition': 'attachment; filename="Play Emberfall.html"' });
   // ---- the website ----
-  if (name === '' || name === 'index.html') return sendFile(res, path.join(ROOT, 'site', 'index.html'));
+  if (name === '' || name === 'index.html' || name === 'website.html') return sendFile(res, path.join(ROOT, fs.existsSync(path.join(ROOT, 'website.html')) ? 'website.html' : path.join('site', 'index.html')));
   if (name.startsWith('site/')) { const f = path.join(ROOT, path.normalize(name)); if (!f.startsWith(path.join(ROOT, 'site'))) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, f, { 'Cache-Control': 'public, max-age=300' }); }
   res.writeHead(404, { 'Content-Type': 'text/html' }); res.end('<meta http-equiv="refresh" content="0;url=/">Not found');
 });
