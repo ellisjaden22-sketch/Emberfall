@@ -35,11 +35,18 @@ function ownerByIp(req) {
 }
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8' };
-const PUBLIC = new Set(['index.html','game.js','style.css','config.js']);
+const PUBLIC = new Set(['index.html','game.js','style.css','config.js','download.html','icon.png','Play Emberfall.html']);
 
 const server = http.createServer((req, res) => {
   let name = decodeURIComponent((req.url || '/').split('?')[0]).replace(/^\/+/, '') || 'index.html';
   if (name === 'health') { res.writeHead(200, {'Content-Type':'application/json'}); return res.end(JSON.stringify({ ok: true, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c })), uptime: Math.round(process.uptime()) })); }
+  if (name === 'download' || name === 'download/') name = 'download.html';
+  if (name.startsWith('downloads/') && /\.zip$/i.test(name)) {   // game downloads for players
+    const f = path.join(ROOT, path.normalize(name));
+    if (!f.startsWith(path.join(ROOT, 'downloads'))) { res.writeHead(404); return res.end('Not found'); }
+    return fs.stat(f, (err, st) => { if (err) { res.writeHead(404); return res.end('Not found'); }
+      res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': st.size, 'Content-Disposition': `attachment; filename="${path.basename(f)}"` }); fs.createReadStream(f).pipe(res); });
+  }
   const file = path.join(ROOT, path.normalize(name));
   if (!file.startsWith(ROOT) || !(PUBLIC.has(name) || name.startsWith('assets/'))) { res.writeHead(404); return res.end('Not found'); }
   fs.readFile(file, (err, data) => {
