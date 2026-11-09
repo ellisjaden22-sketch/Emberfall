@@ -34,26 +34,63 @@ function ownerByIp(req) {
   return OWNER_IPS.includes(real) || OWNER_IPS.includes(sockIp.replace('::ffff:', ''));
 }
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
-  '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8' };
-const PUBLIC = new Set(['index.html','game.js','style.css','config.js','download.html','icon.png','Play Emberfall.html']);
+  '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8' };
+const GAME_FILES = new Set(['index.html','game.js','style.css','config.js','icon.png']);
+// ---------- armory: character snapshots sent by players' games ----------
+const ARMORY_FILE = path.join(__dirname, 'armory.json');
+let armory = {}; try { armory = JSON.parse(fs.readFileSync(ARMORY_FILE, 'utf8')) || {}; } catch (e) {}
+let armDirty = false; setInterval(() => { if (armDirty) { armDirty = false; fs.writeFile(ARMORY_FILE, JSON.stringify(armory), () => {}); } }, 10000);
+const GIFTS_FILE = path.join(__dirname, 'gifts.json');      // donation rewards waiting for offline players
+let pendingGifts = {}; try { pendingGifts = JSON.parse(fs.readFileSync(GIFTS_FILE, 'utf8')) || {}; } catch (e) {}
+const saveGifts = () => fs.writeFile(GIFTS_FILE, JSON.stringify(pendingGifts), () => {});
+function cleanStr(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u001f<>]/g, '').slice(0, n); }
+function storeArmory(c, a) {
+  if (!a || typeof a !== 'object' || typeof a.name !== 'string') return;
+  const name = cleanStr(a.name, 14).trim(); if (name.length < 2) return;
+  const key = cleanStr(a.pid, 16) + ':' + name.toLowerCase();
+  const eq = {}; for (const s of ['weapon', 'armor', 'trinket']) { const it = a.eq && a.eq[s]; if (it && typeof it === 'object') eq[s] = { name: cleanStr(it.name, 48), rar: Math.max(0, Math.min(4, it.rar | 0)), slot: s, pow: it.pow | 0, sta: it.sta | 0, up: Math.min(9, it.up | 0), lv: it.lv | 0, leg: it.leg ? cleanStr(it.leg, 12) : null, desc: it.desc ? cleanStr(it.desc, 140) : null }; }
+  const S = a.stats && typeof a.stats === 'object' ? a.stats : {}; const bosses = {}; for (const k in (S.bosses || {})) bosses[cleanStr(k, 16)] = S.bosses[k] | 0;
+  const ach = {}; for (const k in (a.ach || {})) ach[cleanStr(k, 20)] = +a.ach[k] || 0;
+  armory[key] = { name, cls: cleanStr(a.cls, 10), lvl: Math.max(1, Math.min(15, a.lvl | 0)), xp: a.xp | 0, xpNeed: a.xpNeed | 0, gold: a.gold | 0, zone: cleanStr(a.zone, 10),
+    eq, hp: a.hp | 0, res: a.res | 0, pow: a.pow | 0, sta: a.sta | 0,
+    quests: (Array.isArray(a.quests) ? a.quests : []).slice(0, 80).map(q => cleanStr(q, 20)), disc: (Array.isArray(a.disc) ? a.disc : []).slice(0, 40).map(q => cleanStr(q, 20)),
+    mounts: (Array.isArray(a.mounts) ? a.mounts : []).slice(0, 10).map(n => n | 0), mount: a.mount | 0,
+    stats: { kills: S.kills | 0, deaths: S.deaths | 0, gathered: S.gathered | 0, goldEarned: S.goldEarned | 0, legendary: S.legendary | 0, bosses }, ach,
+    cos: { title: cleanStr(a.cos && a.cos.title, 20), wings: !!(a.cos && a.cos.wings), aura: !!(a.cos && a.cos.aura) },
+    created: +a.created || 0, seen: Date.now(), online: true };
+  c.armKey = key; armDirty = true;
+}
+function armoryList() { const now = Date.now(); const online = new Set([...clients.values()].map(c => c.armKey)); return Object.entries(armory).map(([k, v]) => ({ ...v, online: online.has(k) })); }
+function json(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
+function sendFile(res, file, extra) {
+  fs.readFile(file, (err, data) => { if (err) { res.writeHead(404); return res.end('Not found'); }
+    res.writeHead(200, Object.assign({ 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-cache' }, extra || {})); res.end(data); });
+}
 
 const server = http.createServer((req, res) => {
-  let name = decodeURIComponent((req.url || '/').split('?')[0]).replace(/^\/+/, '') || 'index.html';
-  if (name === 'health') { res.writeHead(200, {'Content-Type':'application/json'}); return res.end(JSON.stringify({ ok: true, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c })), uptime: Math.round(process.uptime()) })); }
-  if (name === 'download' || name === 'download/') name = 'index.html';   // the game's own start screen, with download buttons
-  if (name.startsWith('downloads/') && /\.zip$/i.test(name)) {   // game downloads for players
-    const f = path.join(ROOT, path.normalize(name));
+  const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+  // ---- API ----
+  if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
+  if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);
+    const all = armoryList(); const exact = all.filter(a => a.name.toLowerCase() === q); const part = all.filter(a => a.name.toLowerCase() !== q && a.name.toLowerCase().includes(q));
+    return json(res, 200, [...exact, ...part].sort((a, b) => b.lvl - a.lvl || b.seen - a.seen).slice(0, 12)); }
+  if (name === 'api/top') { const all = armoryList().sort((a, b) => b.lvl - a.lvl || b.xp - a.xp || Object.keys(b.ach).length - Object.keys(a.ach).length).slice(0, 25);
+    return json(res, 200, all.map(a => ({ name: a.name, cls: a.cls, lvl: a.lvl, ach: Object.keys(a.ach).length, kills: a.stats.kills, title: a.cos.title, online: a.online, seen: a.seen }))); }
+  // ---- downloads ----
+  if (name === 'download' || name === 'download/') { res.writeHead(302, { Location: '/#download' }); return res.end(); }
+  if (name.startsWith('downloads/') && /\.zip$/i.test(name)) { const f = path.join(ROOT, path.normalize(name));
     if (!f.startsWith(path.join(ROOT, 'downloads'))) { res.writeHead(404); return res.end('Not found'); }
     return fs.stat(f, (err, st) => { if (err) { res.writeHead(404); return res.end('Not found'); }
-      res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': st.size, 'Content-Disposition': `attachment; filename="${path.basename(f)}"` }); fs.createReadStream(f).pipe(res); });
-  }
-  const file = path.join(ROOT, path.normalize(name));
-  if (!file.startsWith(ROOT) || !(PUBLIC.has(name) || name.startsWith('assets/'))) { res.writeHead(404); return res.end('Not found'); }
-  fs.readFile(file, (err, data) => {
-    if (err) { res.writeHead(404); return res.end('Not found'); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
-    res.end(data);
-  });
+      res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': st.size, 'Content-Disposition': `attachment; filename="${path.basename(f)}"` }); fs.createReadStream(f).pipe(res); }); }
+  // ---- the game at /play/ ----
+  if (name === 'play') { res.writeHead(302, { Location: '/play/' }); return res.end(); }
+  if (name.startsWith('play/')) { let g = name.slice(5) || 'index.html'; if (!GAME_FILES.has(g)) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, path.join(ROOT, g)); }
+  if (GAME_FILES.has(name) && name !== 'index.html') return sendFile(res, path.join(ROOT, name));   // older game links
+  if (name === 'Play Emberfall.html') return sendFile(res, path.join(ROOT, name), { 'Content-Disposition': 'attachment; filename="Play Emberfall.html"' });
+  // ---- the website ----
+  if (name === '' || name === 'index.html') return sendFile(res, path.join(ROOT, 'site', 'index.html'));
+  if (name.startsWith('site/')) { const f = path.join(ROOT, path.normalize(name)); if (!f.startsWith(path.join(ROOT, 'site'))) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, f, { 'Cache-Control': 'public, max-age=300' }); }
+  res.writeHead(404, { 'Content-Type': 'text/html' }); res.end('<meta http-equiv="refresh" content="0;url=/">Not found');
 });
 
 // ---------- minimal WebSocket (RFC 6455) ----------
@@ -105,7 +142,7 @@ function onData(c, chunk) {
   }
 }
 function onMessage(c, text) {
-  if (text.length > 8000) return;            // presence must stay small
+  if (text.length > 16000) return;            // messages must stay small
   const nowMs = Date.now(); if (nowMs - c.rateT > 1000) { c.rateT = nowMs; c.rate = 0; }
   if (++c.rate > 40) { if (c.rate > 200) drop(c); return; }   // flood protection
   let d; try { d = JSON.parse(text); } catch (e) { return; }
@@ -115,12 +152,20 @@ function onMessage(c, text) {
     const gid = pid + ':' + String(d.p.n || '').toLowerCase();   // GM rights belong to one character, not the whole device
     if (pid && !c.master) { const should = grants.includes(gid); if (should && !c.gm) { c.gm = true; send(c, { t: 'gm', ok: true, granted: 1 }); log(`* ${d.p.n} is a Game Master (appointed)`); } else if (!should && c.gm) { c.gm = false; send(c, { t: 'gm', ok: false, revoked: 1 }); } }
     c.p = d.p; broadcast(c, pmsg(c));
+    const who = String(d.p.n || '').toLowerCase(); if (who && pendingGifts[who] && pendingGifts[who].length && d.p.u) { for (const what of pendingGifts[who]) send(c, { t: 'gift', what, from: 'the Realm' }); delete pendingGifts[who]; saveGifts(); }
   } else if (d && d.t === 'gm') {
     // GM login: only the server knows the password, and it tells everyone else who is a real GM.
     if (c.gmTries >= 5 || !GM_PASSWORD) return send(c, { t: 'gm', ok: false });
     const ok = crypto.timingSafeEqual(sha(d.pw || ''), sha(GM_PASSWORD));
     if (!ok) { c.gmTries++; log(`! ${c.id} failed GM login`); return send(c, { t: 'gm', ok: false }); }
     c.gm = true; c.master = true; log(`* ${c.id} is now the realm owner (master GM)`); send(c, { t: 'gm', ok: true, master: 1, token: OWNER_TOKEN }); if (c.p.v) broadcast(c, pmsg(c));
+  } else if (d && d.t === 'arm' && d.c) {
+    storeArmory(c, d.c);
+  } else if (d && d.t === 'gift' && c.gm && typeof d.name === 'string' && typeof d.what === 'string') {
+    const who = d.name.toLowerCase().slice(0, 20), what = d.what.slice(0, 40); let done = false;
+    for (const o of clients.values()) if (o.p && String(o.p.n || '').toLowerCase() === who) { send(o, { t: 'gift', what, from: 'the Realm' }); done = true; }
+    if (!done) { (pendingGifts[who] = pendingGifts[who] || []).push(what); saveGifts(); }
+    log(`$ gift "${what}" for ${d.name}${done ? '' : ' (waiting until they log in)'}`);
   } else if (d && d.t === 'gmtok' && typeof d.token === 'string') {
     if (OWNER_TOKEN && d.token.length === OWNER_TOKEN.length && crypto.timingSafeEqual(Buffer.from(d.token), Buffer.from(OWNER_TOKEN))) { c.gm = true; c.master = true; log(`* ${c.id} recognised as the realm owner (remembered device)`); send(c, { t: 'gm', ok: true, master: 1 }); if (c.p.v) broadcast(c, pmsg(c)); }
     else send(c, { t: 'gm', ok: false, forget: 1 });

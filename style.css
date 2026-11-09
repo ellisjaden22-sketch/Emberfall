@@ -327,6 +327,7 @@ body.touch canvas{touch-action:none}
 /* keep the game's own colours even with high-contrast / forced-colour modes or dark-mode extensions */
 *,*::before,*::after{forced-color-adjust:none!important}
 .bar.hp > i{background-color:#22b036}.bar.mana > i{background-color:#2262e8}.bar.rage > i{background-color:#c01810}
+.cospan{margin-top:10px;padding-top:6px;border-top:1px solid rgba(92,68,34,.5)}.cospan h4{font-family:Cinzel,serif;color:var(--gold);font-size:13px;margin-bottom:4px}.cospan label{display:block;font-size:13px;margin:3px 0}.cospan select{background:#120c08;color:#f3e6c8;border:1px solid #6a4a20}
 #dlBar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin:-4px auto 14px;font-family:'Alegreya Sans',sans-serif;font-size:14px;color:#d8c49a}
 #dlBar.hidden{display:none}.dlb{padding:6px 14px;border-radius:5px;border:1px solid #ffe6a0;background:linear-gradient(#ffd56a,#b8761a);color:#2a1604;font-weight:800;text-decoration:none}.dlb:hover{filter:brightness(1.1)}#dlBar small{color:#a8987a;width:100%;text-align:center}
 #dlBar.flash{animation:dlf 1.2s ease-in-out 3}@keyframes dlf{50%{filter:drop-shadow(0 0 14px #ffb84a)}}

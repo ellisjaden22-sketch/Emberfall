@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 12;
+const VERSION = 13;
 const TS = 32, MW = 160, MH = 112;
 const now = () => performance.now() / 1000;
 
@@ -381,6 +381,7 @@ function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_
   const finish=r=>{ if(!done){ done=true; resolve(r); } };
   const api={ presence(patch){ for(const k in patch){ if(patch[k]===null) delete mine[k]; else mine[k]=patch[k]; } rebuild(); if(conn&&ws.readyState===1) ws.send(JSON.stringify({t:'p',p:mine})); return Promise.resolve(); },
     peers:()=>snap, onPeers:()=>()=>{}, onConnection(fn){ connCbs.push(fn); setTimeout(()=>fn(conn),0); return ()=>{}; }, connected:()=>conn,
+    armory(data){ if(conn) ws.send(JSON.stringify({t:'arm',c:data})); }, gift(name,what){ if(conn) ws.send(JSON.stringify({t:'gift',name,what})); },
     bug(text){ if(conn) ws.send(JSON.stringify({t:'bug',text:String(text).slice(0,2000)})); }, admin(cmd,pid,name){ if(conn) ws.send(JSON.stringify({t:'admin',cmd,pid,name})); },
     master:false, gmGrant(pid,on){ if(conn) ws.send(JSON.stringify({t:'mkgm',pid,on:!!on})); },
     gmLogin(pw){ return new Promise(res=>{ if(!conn) return res(false); gmWait=res; ws.send(JSON.stringify({t:'gm',pw:String(pw).slice(0,200)})); setTimeout(()=>{ if(gmWait===res){ gmWait=null; res(false); } },5000); }); } };
@@ -394,6 +395,7 @@ function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_
         else if(d.ok&&d.master&&!isGM){ setGM(true,'master'); if(me) sysMsg('Welcome back, realm owner. Your Game Master tools are ready (/gm).','c-gm'); }
         else if(d.granted&&!isGM){ setGM(true,'server'); sysMsg('The realm owner made you a Game Master. Type /gm for your tools.','c-gm'); }
         else if(d.revoked&&isGM){ setGM(false); gm.god=gm.nocd=gm.fly=gm.invis=false; gm.speed=1; sysMsg('Your Game Master powers were removed.','c-err'); sendPresence(true); } }
+      else if(d.t==='gift'&&typeof d.what==='string'){ applyGift(d.what,d.from||'the Realm'); }
       else if(d.t==='sys'){ sysMsg(String(d.msg||'').slice(0,200),'c-err'); } };
     ws.onclose=()=>{ clearTimeout(to); const was=conn; conn=false; peers.clear(); rebuild(); if(!done) return finish(null); if(was) connCbs.forEach(f=>f(false)); if(isGM&&gmSrc==='server') setGM(false); setTimeout(open,3000); };
     ws.onerror=()=>{}; }
@@ -449,7 +451,7 @@ function sendPresence(force){
   const p={v:VERSION,u:MY_U,n:me.c.name,c:me.c.cls,l:me.c.lvl,x:Math.round(me.x),y:Math.round(me.y),f:+me.face.toFixed(2),
     hp:Math.round(me.hp),mhp:me.mhp,d:me.dead?1:0,pt:me.party||'',mt:me.mounted||null,em:me.emote?me.emote.k:null,wr:me.c.eq.weapon?me.c.eq.weapon.rar:0,ar:me.c.eq.armor?me.c.eq.armor.rar:0,
     b:(me.bulwark>t?1:0)|(me.hots.length?2:0)|(me.cast?4:0)|(me.absorb>0&&me.absorbU>t?8:0)|(me.rootU>t?16:0)|(me.dots.length?32:0)|(me.avatarU>t?64:0),
-    z:zoneAtPx(me.x,me.y), gm:isGM?1:null, pid:MY_PID, iv:gm.invis?1:null, own:isRealmOwner()?1:null, au:gm.aura&&isGM&&!gm.invis?1:null, gl:isRealmOwner()&&(saves.gmGrants||[]).length?saves.gmGrants.map(g=>g.gid||g.pid).slice(0,20):null,
+    z:zoneAtPx(me.x,me.y), gm:isGM?1:null, pid:MY_PID, iv:gm.invis?1:null, cs:cosBits()||null, ti:myTitle()||null, own:isRealmOwner()?1:null, au:gm.aura&&isGM&&!gm.invis?1:null, gl:isRealmOwner()&&(saves.gmGrants||[]).length?saves.gmGrants.map(g=>g.gid||g.pid).slice(0,20):null,
     inv:myInv, ir:myIr, kk:myKick, pl:me.party&&amLeader()?1:null, cn:me.cast&&!me.cast.node?[String(me.cast.ab.name||'').slice(0,24),Math.round(clamp((t-me.cast.t0)/me.cast.dur,0,1)*100),Math.round(me.cast.dur*1000)]:null, a:myActs.slice(-18), ch:myChat.slice(-3),
     w: amHost? packMobs(): null, md: amHost? myMd.slice(-16): null, tg: amHost? myTg.slice(-8): null, hs: amHost?1:null };
   let s=JSON.stringify(p);
@@ -484,7 +486,7 @@ function syncPeers(){
     if(o.last===pr) continue; o.last=pr;
     o.n=clean(pr.n).slice(0,14)||'Stranger'; o.c=CLS[pr.c]?pr.c:'warden'; o.l=clamp(pr.l|0,1,MAXLVL);
     o.x=+pr.x||0;o.y=+pr.y||0;o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);o.d=!!pr.d;
-    o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.seenAt=t;
+    o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.seenAt=t;
     if(o.isNew){ o.isNew=false; o.rx=o.x; o.ry=o.y; if(me&&seenO(o)) sysMsg(`${o.n} the ${CLS[o.c].name} has entered Emberfall.`); }
     else if(o.wasVis!==undefined&&o.wasVis!==seenO(o)&&me) sysMsg(seenO(o)?`${o.n} the ${CLS[o.c].name} has entered Emberfall.`:`${o.n} has left the realm.`); o.wasVis=seenO(o);
     partyNet(o,pr);
@@ -664,6 +666,8 @@ function enterWorld(name,cls,existing,fresh){
   sysMsg(`Welcome to Emberfall, ${name}. Press H for help. Talk to Captain Oriel (F) for your first quest.`);
   if(netState==='solo') sysMsg(SOLO_WHY(),'c-err');
   if(me.party) sysMsg(`You rejoined the party "${me.party}".`);
+  if(saves.pendingGifts&&saves.pendingGifts.length){ const G=saves.pendingGifts; saves.pendingGifts=[]; saveAll(saves); setTimeout(()=>G.forEach(g=>applyGift(g,'the Realm')),1500); }
+  setTimeout(()=>armorySync(true),3000);
   applyOwner(); if(isGM){ sysMsg('You are a Game Master. Type /gm or press the GM button for your tools.','c-gm'); $('gmBtn').classList.remove('hidden'); } else $('gmBtn').classList.add('hidden');
   sendPresence(true);
 }
@@ -686,13 +690,13 @@ function takeDamage(amt,mob,vis){
 }
 function healMe(amt,from){ if(me.dead) return; const before=me.hp; me.hp=Math.min(me.mhp,me.hp+amt); const h=Math.round(me.hp-before);
   if(h>0) fct(me.x,me.y-30,'+'+h,'#6dff7a'); sparkle(me.x,me.y,'#9dffb0'); }
-function die(){ me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
+function die(){ stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
 function release(){ me.dead=false; me.x=SPAWN.x; me.y=SPAWN.y; me.rootU=0; me.hp=Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
 function gainXp(n){
   const c=me.c; if(c.lvl>=MAXLVL){ return; }
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
   while(c.lvl<MAXLVL && c.xp>=xpNeed(c.lvl)){ c.xp-=xpNeed(c.lvl); c.lvl++; recalc(); me.hp=me.mhp; if(CLS[c.cls].res==='mana') me.res=me.mres;
-    toast(`Level ${c.lvl}!`); sfx('level'); if(c.lvl===3&&!c.mounts.length){ setTimeout(()=>toast('Mounts unlocked! Visit Hilde the Stable Master','small'),900); sysMsg('You can now ride! Hilde the Stable Master in Hearthmere sells mounts. Look for the golden horseshoe on your map.'); renderTracker(); } burst(me.x,me.y,'#ffd66a',40,200,{glow:true}); for(const ab of curAbils()) if(ab.lvl===c.lvl) { sysMsg(`New ability learned: ${ab.name} (key ${curAbils().indexOf(ab)+1})`); toast('New ability: '+ab.name,'small'); } sysMsg(`You have reached level ${c.lvl}. Your power grows.`); ring(me.x,me.y,'#ffd66a',90); }
+    toast(`Level ${c.lvl}!`); sfx('level'); setTimeout(()=>armorySync(true),500); if(c.lvl===3&&!c.mounts.length){ setTimeout(()=>toast('Mounts unlocked! Visit Hilde the Stable Master','small'),900); sysMsg('You can now ride! Hilde the Stable Master in Hearthmere sells mounts. Look for the golden horseshoe on your map.'); renderTracker(); } burst(me.x,me.y,'#ffd66a',40,200,{glow:true}); for(const ab of curAbils()) if(ab.lvl===c.lvl) { sysMsg(`New ability learned: ${ab.name} (key ${curAbils().indexOf(ab)+1})`); toast('New ability: '+ab.name,'small'); } sysMsg(`You have reached level ${c.lvl}. Your power grows.`); ring(me.x,me.y,'#ffd66a',90); }
   if(c.lvl>=MAXLVL) c.xp=0;
   persist();
 }
@@ -724,7 +728,7 @@ function lootFor(m){
   let pots=0;
   const items=[];
   const BL=BOSSLOOT[mt.key];
-  if(BL){ for(let k=0;k<BL.n;k++){ const r=rollRar(BL.p); const it=r===4?legendaryFor(c.cls):genItem(m.lv,r); items.push(it); if(r===4){ banner('LEGENDARY!',it.name,'win'); sfx('legend'); chatLine(`A legendary weapon drops: [${it.name}]!`,'c-loot t4'); } } }
+  if(BL){ for(let k=0;k<BL.n;k++){ const r=rollRar(BL.p); const it=r===4?legendaryFor(c.cls):genItem(m.lv,r); items.push(it); if(r===4){ banner('LEGENDARY!',it.name,'win'); sfx('legend'); stat('legendary',1); chatLine(`A legendary weapon drops: [${it.name}]!`,'c-loot t4'); } } }
   else if(mt.boss){ items.push(genItem(m.lv,Math.random()<.3?3:2)); }
   else if(mt.elite){ items.push(genItem(m.lv,Math.random()<.5?2:1)); }
   else if(!mt.summon && Math.random()<.24){ const r=Math.random(); items.push(genItem(m.lv, r<.06?2:r<.36?1:0)); }
@@ -746,7 +750,7 @@ function onMobDeath(m){
   gainXp(xp); fct(m.rx,m.ry-30,'+'+xp+' xp','#c9a0f0');
   if(m.t.elite&&!m.t.boss) toast(`${m.t.name} defeated!`);
   lootFor(m);
-  questEvent('kill',m.t.key,1);
+  questEvent('kill',m.t.key,1); trackKill(m);
 }
 
 /* =====================================================================
@@ -1732,7 +1736,8 @@ function buildScene(dt){
     if(mt) drawHorse({x:x/TS,y:Y0,z:y/TS,face,mv:st.mvS||0,walk:st.walkP||0,m:mt});
     drawHumanoid({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?.72:0,ride:!!mt,swim,emote:emo,
       cast:isMe?!!me.cast:!!(o.b&4),castCol,dead:dead?t-st.deadAt:-1,L:playerLook(cls,u,isMe?(me.c.eq.armor?me.c.eq.armor.rar:0):(o.ar||0)),skin:SKIN[hashU(u)%SKIN.length],hair:HAIR[hashU(u)%HAIR.length],big:(isMe?me.avatarU>t:(o.b&64))?1.25:1,wr:isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0)});
-    { const au=isMe?(gm.aura&&isGM):o.au; if(au&&!dead) drawAura(x/TS,Y0,y/TS,t,'#ffb03a'); }
+    { const au=isMe?(gm.aura&&isGM):o.au; if(au&&!dead) drawAura(x/TS,Y0,y/TS,t,'#ffb03a');
+      const cb=isMe?cosBits():(o.cs|0); if(!dead&&(cb&2)&&!au) drawAura(x/TS,Y0,y/TS,t,'#ff7ad9'); if(!dead&&(cb&1)) drawCosWings(x/TS,Y0+(mt?.72:0),y/TS,face,t); }
     if(isMe&&me.dash&&Math.random()<.9){ P3(x/TS+(Math.random()-.5)*.4,Y0+.3+Math.random()*1.4,y/TS+(Math.random()-.5)*.4,0,.2,0,.45,.18,'#ffd9a0',{glow:true,drag:.9}); }
     if(!dead&&!mt&&cls==='warden'&&sw>=0&&sw<.8){ const pr=Math.min(1,sw/.35), al=sw<.4?1:1-(sw-.4)/.4; const N=9; const big=(isMe?me.avatarU>t:(o.b&64))?1.3:1;
       for(let k=0;k<N;k++){ const q=k/(N-1); if(q>pr) break; const an=face+1.2-2.4*q, R=1.1*big; const px=x/TS+Math.cos(an)*R, pz=y/TS+Math.sin(an)*R, py=Y0+(1.5-.7*q)*big;
@@ -1947,11 +1952,11 @@ function drawOverlay(t){
       plate(s[0],s[1],mt.name,tagged?'#a0a0a0':m.tgt===MY_U?'#ff6a5a':mt.boss||mt.elite?'#ffd34a':diff>=3?'#ff8a6a':'#f0d8a0',m.hp/m.mhp,te||m.hp<m.mhp,(mt.boss?'☠ Boss · ':mt.elite?'★ Elite · ':'')+'Lv '+m.lv,mt.boss||mt.elite,te?1:a,null,true);
       if(m.flags&2||m.stunU>t){ g.fillStyle='#ffe66a'; g.font='14px sans-serif'; for(let i=0;i<3;i++){ const an=t*4+i*2.1; g.fillText('✦',s[0]+Math.cos(an)*14,s[1]-30+Math.sin(an)*4); } }
       if(m.flags&4||m.rootU>t){ g.fillStyle='#bfe8ff'; g.font='16px sans-serif'; g.fillText('❄',s[0]+40,s[1]-2); } if(m.bubbleT>t) bubble(s[0],s[1]-30,m.bubble); }}); }
-  const pl=(x,y,name,hpF,isMe,dead,party,bub,mtd,cls,isgm,cast)=>{ const s=toScreen(x/TS,standY(x,y)+2.15+(mtd?.8:0)+(isMe?(me.jumpH||0):0),y/TS); if(!s) return;
-    items.push({w:s[2],d:()=>{ const a=isMe?1:clamp(1.6-s[2]/55,0,1); plate(s[0],s[1],name+(dead?' (spirit)':''),CLS[cls]?CLS[cls].col:'#ffffff',hpF,!isMe,isgm?'<GM>':party?'<Party>':'',false,a,isgm?'#ff9a3a':'#8fc8ff'); if(bub) bubble(s[0],s[1]-12,bub);
+  const pl=(x,y,name,hpF,isMe,dead,party,bub,mtd,cls,isgm,cast,title)=>{ const s=toScreen(x/TS,standY(x,y)+2.15+(mtd?.8:0)+(isMe?(me.jumpH||0):0),y/TS); if(!s) return;
+    items.push({w:s[2],d:()=>{ const a=isMe?1:clamp(1.6-s[2]/55,0,1); plate(s[0],s[1],name+(dead?' (spirit)':''),CLS[cls]?CLS[cls].col:'#ffffff',hpF,!isMe,isgm?'<GM>':title?'<'+title+'>':party?'<Party>':'',false,a,isgm?'#ff9a3a':title?'#ffd36a':'#8fc8ff'); if(bub) bubble(s[0],s[1]-12,bub);
       if(cast){ const p=clamp(cast.p0/100+(t-cast.t0)/cast.dur,0,1); if(p<1){ g.globalAlpha=a; g.fillStyle='rgba(0,0,0,.8)'; g.fillRect(s[0]-36,s[1]+13,72,9); const gr=g.createLinearGradient(s[0]-35,0,s[0]+35,0); gr.addColorStop(0,'#b8761a'); gr.addColorStop(1,'#ffe27a'); g.fillStyle=gr; g.fillRect(s[0]-35,s[1]+14,70*p,7); g.font='700 10px "Alegreya Sans",sans-serif'; g.textAlign='center'; g.lineWidth=3; g.strokeStyle='#000'; g.strokeText(cast.nm,s[0],s[1]+32); g.fillStyle='#ffe9a0'; g.fillText(cast.nm,s[0],s[1]+32); g.globalAlpha=1; } } }}); };
-  for(const o of others.values()) if(seenO(o)) pl(o.rx,o.ry,o.n+(o.iv?' (invisible)':''),o.hp/o.mhp,false,o.d,!!(o.pt&&me&&o.pt===me.party),o.bubbleT>t?o.bubble:'',o.mt,o.c,o.gm&&isGM,o.cast);
-  if(me) pl(me.x,me.y,me.c.name,me.hp/me.mhp,true,me.dead,false,me.bubbleT>t?me.bubble:'',me.mounted,me.c.cls,isGM);
+  for(const o of others.values()) if(seenO(o)) pl(o.rx,o.ry,o.n+(o.iv?' (invisible)':''),o.hp/o.mhp,false,o.d,!!(o.pt&&me&&o.pt===me.party),o.bubbleT>t?o.bubble:'',o.mt,o.c,o.gm&&isGM,o.cast,o.ti);
+  if(me) pl(me.x,me.y,me.c.name,me.hp/me.mhp,true,me.dead,false,me.bubbleT>t?me.bubble:'',me.mounted,me.c.cls,isGM,null,myTitle());
   items.sort((a,b)=>b.w-a.w); if(OPT.names) for(const it of items) it.d();
   for(let i=texts.length-1;i>=0;i--){ const f=texts[i]; const a=(t-f.t)/1.3; if(a>1){texts.splice(i,1);continue} const s=toScreen(f.X,f.Y+a*1.4,f.Z); if(!s) continue;
     const pop=a<.12?1+(.12-a)*4:1; g.globalAlpha=1-a*a; g.font=`700 ${Math.round((f.big?22:16)*pop)}px "Alegreya Sans",sans-serif`; g.textAlign='center'; g.lineWidth=3; g.strokeStyle='#000';
@@ -2223,7 +2228,7 @@ function renderInv(){
 }
 let dragI=-1, dragOk=false;
 function moveItem(from,to){ const c=me.c; if(from===to) return; const it=c.inv[from]; if(!it) return; if(to>=c.inv.length){ c.inv.splice(from,1); c.inv.push(it); } else { c.inv[from]=c.inv[to]; c.inv[to]=it; } renderInv(); persist(); }
-function equipItem(it){ const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; const cur=c.eq[it.slot]; c.eq[it.slot]=it; c.inv.splice(i,1); if(cur) c.inv.splice(i,0,cur); chatLine(`Equipped [${it.name}].`,'c-loot t'+it.rar); recalc(); renderInv(); persist(); sendPresence(true); }
+function equipItem(it){ setTimeout(()=>armorySync(true),500); const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; const cur=c.eq[it.slot]; c.eq[it.slot]=it; c.inv.splice(i,1); if(cur) c.inv.splice(i,0,cur); chatLine(`Equipped [${it.name}].`,'c-loot t'+it.rar); recalc(); renderInv(); persist(); sendPresence(true); }
 function sellItem(it){ const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; if(it.rar>=3&&!it._sellOk){ return askConfirm(`Sell <b class="t${it.rar}">${esc(it.name)}</b> for ${it.val} gold?`,'Sell',()=>{ it._sellOk=1; sellItem(it); }); }
   c.inv.splice(i,1); c.gold+=it.val; coinFx(it.val); chatLine(`Sold [${it.name}] for ${it.val} gold.`,'c-loot'); renderInv(); persist(); }
 function destroyItem(it){ const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; c.inv.splice(i,1); chatLine(`Destroyed [${it.name}].`,'c-err'); renderInv(); persist(); }
@@ -2363,7 +2368,7 @@ function startGather(n){ if(!me||me.dead||me.cast) return; if(me.mounted) dismou
   me.cast={ab:{id:'gather',name:(MATS[n.mat].kind==='herb'?'Gathering ':'Mining ')+MATS[n.mat].name},t0:now(),dur:1.6,node:n}; }
 function finishGather(n){ if(n.resp>now()) return; const M=MATS[n.mat]; const amt=1+(Math.random()<.35?1:0); me.c.mats[n.mat]=(me.c.mats[n.mat]||0)+amt; n.resp=now()+75;
   chatLine(`You gather ${amt} ${M.name}.`,'c-loot'); const [X,Y,Z]=ph3(n.x,n.y,.4); burst3(X,Y,Z,M.col,22,2.5,{glow:true,up:1.5});
-  gainXp(8+4*me.c.lvl); questEvent('gather',n.mat,amt); renderInv(); persist(); }
+  gainXp(8+4*me.c.lvl); questEvent('gather',n.mat,amt); stat('gathered',amt); renderInv(); persist(); }
 
 /* ---------- mounts ---------- */
 function isWaterAt(px,py){ return tAt(Math.floor(px/TS),Math.floor(py/TS))===T.WATER; }
@@ -2428,7 +2433,7 @@ function partyDlg(){
   setTimeout(()=>$('ptIn')&&$('ptIn').focus(),30);
 }
 function joinParty(name,quiet){ name=clean(name).trim().toLowerCase().replace(/[^a-z0-9 _-]/g,'').slice(0,20);
-  const had=me.party; me.party=name; if(!name) me.lead=0; else if(!quiet&&!partyMembers().length) me.lead=1; saves.party=name; saveAll(saves); if(quiet){ sendPresence(true); renderPartyWin(); return; } if(!name&&had) banner('You left the party'); if(name) sysMsg(`You joined the party "${name}". Friends can type /party ${name} to join.`); else sysMsg('You left your party.'); sendPresence(true); }
+  const had=me.party; me.party=name; if(name) stat('partied',1); if(!name) me.lead=0; else if(!quiet&&!partyMembers().length) me.lead=1; saves.party=name; saveAll(saves); if(quiet){ sendPresence(true); renderPartyWin(); return; } if(!name&&had) banner('You left the party'); if(name) sysMsg(`You joined the party "${name}". Friends can type /party ${name} to join.`); else sysMsg('You left your party.'); sendPresence(true); }
 function sendChat(raw){
   let txt=clean(raw).trim(); if(!txt) return;
   if(txt[0]==='/'){ const [cmd,...rest]=txt.slice(1).split(' '); const arg=rest.join(' ').trim();
@@ -2494,7 +2499,7 @@ const abilIcon=ab=>iconSVG(ab.id)||ab.icon;
    ===================================================================== */
 let isGM=false, gmSrc='';
 const gm={god:false,nocd:false,fly:false,speed:1,tOff:null,wx:null};
-const GMCMDS=new Set(['movegm','boot','ban','unban','aura','invis','makegm','removegm','gmlist','gm','gold','level','levelup','xp','god','nocd','fly','speed','tp','heal','revive','item','mats','mount','kill','time','weather','questdone','announce']);
+const GMCMDS=new Set(['gift','movegm','boot','ban','unban','aura','invis','makegm','removegm','gmlist','gm','gold','level','levelup','xp','god','nocd','fly','speed','tp','heal','revive','item','mats','mount','kill','time','weather','questdone','announce']);
 let ownerOK=false, ownerSrc='';
 function gmCharId(){ const RL=rosterList(); if(!saves.gmChar||!RL.some(c=>c.id===saves.gmChar)){ const S=RL.slice().sort((a,b)=>(b.lvl||1)-(a.lvl||1)||(a.created||a.lastT||0)-(b.created||b.lastT||0)); if(S[0]){ saves.gmChar=S[0].id; saveAll(saves); } } return saves.gmChar; }
 function myGid(){ return me?MY_PID+':'+me.c.name.toLowerCase():''; }
@@ -2560,6 +2565,7 @@ function gmCmd(cmd,arg){
       if(a==='auto'||a==='reset'||!a){ gm.wx=null; return gmOk('Weather follows the realm again.'); }
       if(k===undefined) return chatLine('Use /weather clear, cloudy, rain, storm or auto.','c-err'); gm.wx=k; return gmOk(`Weather set to ${a} (only on your screen).`); }
     case 'questdone': { let k=0; for(const q of activeQuests()){ const s=c.qs[q.id]; if(s&&s.st!=='done'){ s.st='done'; s.c=q.n||1; k++; } } renderTracker(); persist(); return gmOk(k?`Completed the objectives of ${k} quest${k>1?'s':''}. Return to the quest giver.`:'You have no unfinished quests.'); }
+    case 'gift': return giftCmd(arg);
     case 'movegm': { if(!isRealmOwner()) return chatLine('Only the realm owner can do that.','c-err'); const ch=rosterList().find(c=>c.name.toLowerCase()===arg.toLowerCase());
       if(!ch) return chatLine('Usage: /movegm <one of YOUR character names on this device>','c-err'); saves.gmChar=ch.id; saveAll(saves); gmOk(`Your owner/GM powers now belong to ${ch.name}. Log in as ${ch.name} to use them.`); applyOwner(); return; }
     case 'boot': case 'ban': case 'unban': { if(!(room&&typeof room.admin==='function')) return chatLine('Removing and banning players works on your own server (see the README in the download).','c-err');
@@ -2590,7 +2596,7 @@ function renderGMWin(){ const w=$('gmWin'); if(!w||w.classList.contains('hidden'
     <div class="gmrow">X <input id="gmTx" type="number" min="0" max="${MW-1}" value="${Math.round(me.x/TS)}"> Y <input id="gmTy" type="number" min="0" max="${MH-1}" value="${Math.round(me.y/TS)}"> <button id="gmTgo">Go</button></div></div>
   <div class="gmsec"><h4>Announce to everyone</h4><div class="gmrow"><input id="gmAnn" maxlength="120" placeholder="Server message…" style="flex:1"> <button id="gmAgo">Send</button></div></div>
   <div class="gmsec" style="font-size:13px;color:var(--dim)">Owner character on this device: <b style="color:#ff9a3a">${esc((rosterList().find(c=>c.id===saves.gmChar)||{}).name||'—')}</b>. Your other characters are normal players. Use <code>/movegm name</code> to move GM to another of your characters.</div>
-  <div class="gmsec gmcmds"><h4>Chat commands</h4><code>/gold n</code> add gold · <code>/level n</code> set level · <code>/levelup n</code> · <code>/xp n</code> · <code>/god</code> · <code>/nocd</code> · <code>/fly</code> noclip · <code>/speed 1–6</code> · <code>/tp x y</code> · <code>/tp town</code> · <code>/tp place|npc|boss|player</code> · <code>/heal</code> · <code>/revive</code> · <code>/item 0–3</code> · <code>/mats n</code> · <code>/mount</code> · <code>/kill</code> · <code>/kill all</code> · <code>/time day|dusk|night|dawn|auto</code> · <code>/weather clear|cloudy|rain|storm|auto</code> · <code>/questdone</code> · <code>/announce msg</code> · <code>/aura</code> glowing GM aura · <code>/invis</code> invisible · <code>/makegm name</code> · <code>/removegm name</code> · <code>/gmlist</code> · <code>/boot name</code> · <code>/ban name</code> · <code>/unban name</code> (owner only; boot/ban need your own server) · <code>/gm</code> this window<div style="margin-top:6px">Everything you do with these tools is private: other players never see a GM tag or GM effects, only the result (for example, a monster dying). Time and weather change on your screen only.</div></div>`;
+  <div class="gmsec gmcmds"><h4>Chat commands</h4><code>/gold n</code> add gold · <code>/level n</code> set level · <code>/levelup n</code> · <code>/xp n</code> · <code>/god</code> · <code>/nocd</code> · <code>/fly</code> noclip · <code>/speed 1–6</code> · <code>/tp x y</code> · <code>/tp town</code> · <code>/tp place|npc|boss|player</code> · <code>/heal</code> · <code>/revive</code> · <code>/item 0–3</code> · <code>/mats n</code> · <code>/mount</code> · <code>/kill</code> · <code>/kill all</code> · <code>/time day|dusk|night|dawn|auto</code> · <code>/weather clear|cloudy|rain|storm|auto</code> · <code>/questdone</code> · <code>/announce msg</code> · <code>/gift name wings|aura|steed|supporter|founder|title text</code> (donation rewards; works even if they are offline) · <code>/aura</code> glowing GM aura · <code>/invis</code> invisible · <code>/makegm name</code> · <code>/removegm name</code> · <code>/gmlist</code> · <code>/boot name</code> · <code>/ban name</code> · <code>/unban name</code> (owner only; boot/ban need your own server) · <code>/gm</code> this window<div style="margin-top:6px">Everything you do with these tools is private: other players never see a GM tag or GM effects, only the result (for example, a monster dying). Time and weather change on your screen only.</div></div>`;
   w.querySelectorAll('[data-gm]').forEach(b=>b.onclick=()=>{ const [c,...r]=b.dataset.gm.split(' '); gmCmd(c,r.join(' ')); renderGMWin(); });
   const pl=gmPlaces(); w.querySelectorAll('[data-tpi]').forEach(b=>b.onclick=()=>{ const p=pl[+b.dataset.tpi]; gmTpTo(p.x,p.y,p.n); });
   w.querySelectorAll('[data-tpp]').forEach(b=>b.onclick=()=>{ const o=othersByU.get(b.dataset.tpp); if(o) gmTpTo(o.x+30,o.y,o.n); });
@@ -2618,7 +2624,7 @@ function castFail(msg){ me.castFail=now(); me.castFailMsg=msg; }
 function qProg(text,done){ const el=$('qprog'); const d=document.createElement('div'); d.textContent=text; if(done) d.className='done'; el.appendChild(d); while(el.children.length>3) el.firstChild.remove(); setTimeout(()=>d.remove(),2600); }
 function banner(title,sub,cls){ const el=$('qbanner'); el.innerHTML=''; const d=document.createElement('div'); d.className='qb '+(cls||''); const h=document.createElement('div'); h.className='qbt'; h.textContent=title; d.appendChild(h);
   if(sub){ const s=document.createElement('div'); s.className='qbs'; s.textContent=sub; d.appendChild(s); } el.appendChild(d); setTimeout(()=>d.classList.add('out'),2600); setTimeout(()=>d.remove(),3300); }
-function coinFx(n){ if(!n) return; sfx('coin'); fct(me.x,me.y-44,'+'+n+' gold','#ffd34a',true); const [X,Y,Z]=ph3(me.x,me.y,1.2); for(let i=0;i<Math.min(14,4+n);i++) P3(X,Y,Z,(Math.random()-.5)*3,2+Math.random()*2,(Math.random()-.5)*3,.8,.1,'#ffd34a',{glow:true,grav:-6}); bagPulse(); }
+function coinFx(n){ if(!n) return; sfx('coin'); if(n>0) stat('goldEarned',n); fct(me.x,me.y-44,'+'+n+' gold','#ffd34a',true); const [X,Y,Z]=ph3(me.x,me.y,1.2); for(let i=0;i<Math.min(14,4+n);i++) P3(X,Y,Z,(Math.random()-.5)*3,2+Math.random()*2,(Math.random()-.5)*3,.8,.1,'#ffd34a',{glow:true,grav:-6}); bagPulse(); }
 function bagPulse(){ const b=document.querySelector('#menuBtns [data-k="inv"]'); if(!b) return; b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); }
 /* ---------- loot bags ---------- */
 const LOOTS=[]; let lootSeq=0, lootOpen=null;
@@ -2948,11 +2954,17 @@ const IKP={sword:'<path d="M44 8 L52 8 L52 16 L26 42 L20 36Z" fill="#eef2f8" str
   amulet:'<path d="M18 10 Q32 34 46 10" fill="none" stroke="#c8a040" stroke-width="2.5"/><circle cx="32" cy="38" r="12" fill="#e8c050" stroke="#1a1208" stroke-width="1.5"/><circle cx="32" cy="38" r="6" fill="#ff6a8a"/>'};
 function itemSVG(it){ const c=RARCOL[it.rar]||'#888'; const id='ir'+it.rar; return `<svg class="isv" viewBox="0 0 64 64"><defs><radialGradient id="${id}" cx="40%" cy="35%" r="80%"><stop offset="0" stop-color="${c}" stop-opacity=".55"/><stop offset=".6" stop-color="#1a1008"/><stop offset="1" stop-color="#050302"/></radialGradient></defs><rect width="64" height="64" fill="url(#${id})"/>${IKP[itemKind(it)]}${it.rar>=4?'<rect x="1" y="1" width="62" height="62" fill="none" stroke="#ffb03a" stroke-width="2.5"/>':''}<rect width="64" height="64" fill="url(#igloss)"/></svg>`; }
 /* ---------- character panel ---------- */
+function cosPanel(){ const C=cos(); const titles=C.titles||(C.title?[C.title]:[]); if(!C.wings&&!C.aura&&!titles.length) return '';
+  return `<div class="cospan"><h4>Cosmetics</h4>${C.wings?`<label><input type="checkbox" data-cos="wingsOn" ${C.wingsOn!==false?'checked':''}> Phoenix Wings</label>`:''}${C.aura?`<label><input type="checkbox" data-cos="auraOn" ${C.auraOn!==false?'checked':''}> Supporter Aura</label>`:''}${titles.length?`<label>Title <select id="cosTitle"><option value="">(none)</option>${titles.map(x=>`<option ${x===C.title&&C.showTitle!==false?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`:''}</div>`; }
+function bindCos(){ document.querySelectorAll('[data-cos]').forEach(i=>i.onchange=()=>{ cos()[i.dataset.cos]=i.checked; persist(); sendPresence(true); });
+  const sel=$('cosTitle'); if(sel) sel.onchange=()=>{ const C=cos(); if(sel.value){ C.title=sel.value; C.showTitle=true; } else C.showTitle=false; persist(); sendPresence(true); armorySync(true); }; }
 function renderChar(){ const w=$('charWin'); if(!w||w.classList.contains('hidden')||!me) return; const c=me.c, cl=CLS[c.cls];
   $('chName').textContent=c.name; $('chName').style.color=cl.col; $('chSub').textContent=`Level ${c.lvl} ${cl.name} · ${cl.role}`; $('chPort').innerHTML=iconSVG(CLSICON[c.cls])||cl.glyph; $('chPort').style.setProperty('--cc',cl.col);
   const qd=Object.values(c.qs).filter(s=>s.st==='complete').length; const wpn=c.eq.weapon;
   const st=[['Health',me.mhp],[cl.res==='rage'?'Rage':'Mana',me.mres],['Power',me.pow],['Stamina',me.sta],['Damage bonus','+'+Math.round((me.pow*.8)/(10+c.lvl*4)*100)+'%'+(wpn&&wpn.rar===4?' · legendary +10%':'')],['Damage taken',Math.round(cl.mit*100)+'%'],['Mount',c.mount?MOUNTS[c.mount].name:'None'],['Gold',c.gold],['Quests completed',qd],['Places discovered',`${c.disc.length}/${POIS.length}`]];
-  $('statBox').innerHTML=st.map(([a,b])=>`<div class="strow"><span>${a}</span><b>${esc(String(b))}</b></div>`).join('');
+  const ach=c.ach||{}; st.push(['Achievements',`${Object.keys(ach).length}/${ACH.length}`]); st.push(['Monsters defeated',cstats().kills]);
+  $('statBox').innerHTML=st.map(([a,b])=>`<div class="strow"><span>${a}</span><b>${esc(String(b))}</b></div>`).join('')+cosPanel();
+  bindCos();
   const xpn=xpNeed(c.lvl); $('chXp').innerHTML=c.lvl>=MAXLVL?'Max level':`<i style="width:${Math.round(c.xp/xpn*100)}%"></i><span>XP ${c.xp} / ${xpn}</span>`; }
 /* ---------- GM aura ---------- */
 function drawAura(X,Y,Z,t,col){ const c=C3(col); mreset(); mtr(X,Y+.06,Z); mry(t*.9); P(GEO.cyl,1.9,.02,1.9,c,1.3,0,0,0,.22); mry(-t*1.8); P(GEO.cyl,1.35,.02,1.35,[1,.95,.8],1.2,0,.01,0,.1);
@@ -3076,6 +3088,76 @@ function doAction(a){ if(!me) return;
     case 'chat': chatIn.classList.remove('hidden'); chatIn.focus(); return;
     case 'interact': { if(nearLoot()) return openLoot(nearLoot()); if(nearNode()&&!NPCS.some(n=>dist(n.x,n.y,me.x,me.y)<70)) return startGather(nearNode());
       const near=NPCS.find(n=>dist(n.x,n.y,me.x,me.y)<110); if(near){ me.target={kind:'n',id:near.id}; talk(near); } else if(me.target&&me.target.kind==='n') talk(NPCS.find(n=>n.id===me.target.id)); return; } } }
+
+/* =====================================================================
+   ACHIEVEMENTS, STATS, COSMETICS, GIFTS, ARMORY SYNC
+   ===================================================================== */
+const ACH=[
+  {id:"lvl5",n:"Seasoned",d:"Reach level 5",ic:"\u2b50",f:(c,S,QDONE,EPICALL,FORGE5)=>c.lvl>=5},
+  {id:"lvl10",n:"Veteran",d:"Reach level 10",ic:"\ud83c\udf1f",f:(c,S,QDONE,EPICALL,FORGE5)=>c.lvl>=10},
+  {id:"lvl15",n:"Hero of Emberfall",d:"Reach the maximum level, 15",ic:"\ud83d\udc51",f:(c,S,QDONE,EPICALL,FORGE5)=>c.lvl>=15},
+  {id:"kill1",n:"First Blood",d:"Defeat your first monster",ic:"\ud83d\udde1\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>S.kills>=1},
+  {id:"kill100",n:"Monster Hunter",d:"Defeat 100 monsters",ic:"\u2694\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>S.kills>=100},
+  {id:"kill1000",n:"Scourge of Beasts",d:"Defeat 1,000 monsters",ic:"\ud83d\udc80",f:(c,S,QDONE,EPICALL,FORGE5)=>S.kills>=1000},
+  {id:"boss_oldtusk",n:"Tusk Breaker",d:"Defeat Old Tusk",ic:"\ud83d\udc17",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.oldtusk||0)>0},
+  {id:"boss_fangmaw",n:"Alpha Slayer",d:"Defeat Fangmaw",ic:"\ud83d\udc3a",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.fangmaw||0)>0},
+  {id:"boss_hking",n:"Kingslayer",d:"Defeat the Hollow King",ic:"\ud83d\udddd\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.hking||0)>0},
+  {id:"boss_wyrm",n:"Wyrmbane",d:"Defeat the Cinder Wyrm",ic:"\ud83d\udc09",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.wyrm||0)>0},
+  {id:"boss_frostgiant",n:"Giant Felled",d:"Defeat Hrimgar the Frost Giant",ic:"\ud83e\uddca",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.frostgiant||0)>0},
+  {id:"boss_lich",n:"Deathless",d:"Defeat Morvath the Lich",ic:"\u2620\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.lich||0)>0},
+  {id:"explore5",n:"Wanderer",d:"Discover 5 landmarks",ic:"\ud83e\udded",f:(c,S,QDONE,EPICALL,FORGE5)=>c.disc.length>=5},
+  {id:"exploreall",n:"Cartographer",d:"Discover every landmark in Emberfall",ic:"\ud83d\uddfa\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>c.disc.length>=POIS.length},
+  {id:"quest10",n:"Helping Hand",d:"Complete 10 quests",ic:"\ud83d\udcdc",f:(c,S,QDONE,EPICALL,FORGE5)=>QDONE>=10},
+  {id:"questall",n:"Lorekeeper",d:"Complete every quest",ic:"\ud83d\udcda",f:(c,S,QDONE,EPICALL,FORGE5)=>QDONE>=QUESTS.length},
+  {id:"mount1",n:"Saddle Up",d:"Own a mount",ic:"\ud83d\udc0e",f:(c,S,QDONE,EPICALL,FORGE5)=>c.mounts.length>=1},
+  {id:"celestial",n:"Among the Stars",d:"Own the Celestial Steed",ic:"\u2728",f:(c,S,QDONE,EPICALL,FORGE5)=>c.mounts.includes(4)},
+  {id:"gold1000",n:"Coin Collector",d:"Earn 1,000 gold",ic:"\ud83d\udcb0",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.goldEarned||0)>=1000},
+  {id:"legend",n:"Legend Born",d:"Obtain a legendary weapon",ic:"\ud83d\udd25",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.legendary||0)>=1},
+  {id:"epicgear",n:"Clad in Glory",d:"Wear epic or better gear in every slot",ic:"\ud83d\udc9c",f:(c,S,QDONE,EPICALL,FORGE5)=>EPICALL},
+  {id:"forge5",n:"Master of the Forge",d:"Upgrade an item to +5",ic:"\ud83d\udd28",f:(c,S,QDONE,EPICALL,FORGE5)=>FORGE5},
+  {id:"gather50",n:"Green Thumb",d:"Gather 50 herbs or ore",ic:"\ud83c\udf3f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.gathered||0)>=50},
+  {id:"party",n:"Better Together",d:"Join a party",ic:"\ud83e\udd1d",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.partied||0)>=1},
+  {id:"deaths10",n:"Back from the Brink",d:"Die 10 times and keep going",ic:"\ud83e\udea6",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.deaths||0)>=10}
+];
+function cstats(){ const c=me.c; c.stats=c.stats||{}; const S=c.stats; S.kills=S.kills||0; S.bosses=S.bosses||{}; return S; }
+function stat(k,n){ if(!me) return; const S=cstats(); S[k]=(S[k]||0)+n; }
+function trackKill(m){ const S=cstats(); S.kills++; if(m.t.boss||m.t.elite) S.bosses[m.t.key]=(S.bosses[m.t.key]||0)+1; }
+function questsDone(c){ return Object.values(c.qs||{}).filter(s=>s.st==='complete').length; }
+function checkAch(){ if(!me) return; const c=me.c; c.ach=c.ach||{}; const S=cstats(); const eq=c.eq||{}; const QD=questsDone(c);
+  const EP=['weapon','armor','trinket'].every(s=>eq[s]&&eq[s].rar>=3); const F5=['weapon','armor','trinket'].some(s=>eq[s]&&(eq[s].up||0)>=5); let any=false;
+  for(const a of ACH){ if(c.ach[a.id]) continue; let ok=false; try{ ok=a.f(c,S,QD,EP,F5); }catch(e){} if(ok){ c.ach[a.id]=Date.now(); any=true; banner('Achievement unlocked',a.ic+' '+a.n,'win'); chatLine(`Achievement unlocked: ${a.n} (${a.d})`,'c-loot t3'); sfx('quest'); } }
+  if(any){ persist(); armorySync(true); } }
+setInterval(()=>{ try{ checkAch(); }catch(e){} },3000);
+/* ---------- cosmetics ---------- */
+const COS_TITLES=['Supporter','Founder','Champion','the Generous','Wyrmbane','Deathless'];
+function cos(){ const c=me.c; c.cos=c.cos||{}; return c.cos; }
+function cosBits(){ if(!me) return 0; const C=cos(); return (C.wings&&C.wingsOn!==false?1:0)|(C.aura&&C.auraOn!==false?2:0); }
+function myTitle(){ if(!me) return ''; const C=cos(); return C.showTitle!==false&&C.title?C.title:''; }
+function drawCosWings(X,Y,Z,face,t){ mreset(); mtr(X,Y+1.42,Z); mry(-face); for(const s of [-1,1]){ mpush(); mtr(-.24,0,s*.12); mrx(-s*(.45+Math.sin(t*2.6)*.2)); P(GEO.wing,.95,.75,.95*s,[1,.42,.08],1.3,0,0,0,.72); P(GEO.wing,.6,.75,.6*s,[1,.82,.3],1.7,.04,.02,0,.55); mpop(); }
+  if(Math.random()<.25){ const a=face+Math.PI+(Math.random()-.5)*1.6; P3(X+Math.cos(a)*.6,Y+1.3+Math.random()*.6,Z+Math.sin(a)*.6,0,.5,0,.9,.08,Math.random()<.5?'#ff8a1a':'#ffd36a',{glow:true}); } }
+const GIFTS={wings:'Phoenix Wings',aura:'Supporter Aura',steed:'Celestial Steed',supporter:'Supporter Pack',founder:"Founder's Pack"};
+function applyGift(what,from){ if(!me) { (saves.pendingGifts=saves.pendingGifts||[]).push(what); saveAll(saves); return; } const C=cos(); const c=me.c; let label=GIFTS[what]||what;
+  if(what==='wings') C.wings=1; else if(what==='aura') C.aura=1; else if(what==='steed'){ if(!c.mounts.includes(4)) c.mounts.push(4); }
+  else if(what==='supporter'){ C.aura=1; C.title=C.title||'Supporter'; C.titles=[...new Set([...(C.titles||[]),'Supporter'])]; }
+  else if(what==='founder'){ C.aura=1; C.wings=1; if(!c.mounts.includes(4)) c.mounts.push(4); C.title='Founder'; C.titles=[...new Set([...(C.titles||[]),'Founder','Supporter'])]; }
+  else if(what.startsWith('title:')){ const tt=clean(what.slice(6)).slice(0,20); if(!tt) return; C.title=tt; C.titles=[...new Set([...(C.titles||[]),tt])]; label='Title: '+tt; }
+  else return;
+  banner('A gift has arrived!',label+(from?' — from '+from:''),'win'); sfx('legend'); chatLine(`You received: ${label}. Thank you for supporting Emberfall! Open your Character panel (C) to show or hide cosmetics.`,'c-loot t4');
+  persist(); renderChar(); sendPresence(true); armorySync(true); }
+function giftCmd(arg){ const m=arg.match(/^(\S+)\s+(.+)$/); if(!m) return chatLine('Usage: /gift <player> wings|aura|steed|supporter|founder|title <text>','c-err');
+  const who=m[1], what0=m[2].trim().toLowerCase(); const what=what0.startsWith('title ')?'title:'+m[2].trim().slice(6):what0;
+  if(!GIFTS[what]&&!what.startsWith('title:')) return chatLine('Gift must be one of: wings, aura, steed, supporter, founder, title <text>','c-err');
+  if(room&&typeof room.gift==='function'){ room.gift(who,what); return gmOk(`Gift "${GIFTS[what]||what}" sent to ${who}. If they are offline they receive it next time they log in.`); }
+  if(me.c.name.toLowerCase()===who.toLowerCase()) return applyGift(what,'the Realm');
+  chatLine('Gifts to other players work on your online realm server.','c-err'); }
+/* ---------- armory sync (server realms only) ---------- */
+let armLast=0;
+function armorySnapshot(){ const c=me.c; const eq={}; for(const s of ['weapon','armor','trinket']){ const it=c.eq[s]; if(it) eq[s]={name:it.name,rar:it.rar,slot:it.slot,pow:it.pow,sta:it.sta,up:it.up||0,lv:it.lv,leg:it.leg||null,desc:it.desc||null}; }
+  return {pid:MY_PID,name:c.name,cls:c.cls,lvl:c.lvl,xp:c.xp,xpNeed:xpNeed(c.lvl),gold:c.gold,zone:zoneAtPx(me.x,me.y),eq,hp:me.mhp,res:me.mres,pow:me.pow,sta:me.sta,
+    quests:Object.keys(c.qs||{}).filter(k=>c.qs[k].st==='complete'),disc:c.disc||[],mounts:c.mounts||[],mount:c.mount||0,stats:cstats(),ach:c.ach||{},
+    cos:{title:myTitle(),wings:!!cos().wings,aura:!!cos().aura},party:me.party||'',created:c.created||0,v:VERSION}; }
+function armorySync(force){ if(!me||!room||typeof room.armory!=='function') return; const t=now(); if(!force&&t-armLast<45) return; armLast=t; try{ room.armory(armorySnapshot()); }catch(e){} }
+setInterval(()=>armorySync(false),5000);
 
 /* =====================================================================
    INPUT

@@ -1,0 +1,13 @@
+Upload to GitHub (repo ellisjaden22-sketch/Emberfall, branch main) in 3 batches.
+Add file -> Upload files, drag in, then "Commit changes". Wait for each one to finish.
+
+  Batch 1: server.js, game.js, style.css, index.html, Play Emberfall.html
+  Batch 2: the whole "site" folder (drag the folder itself so it stays a folder)
+  Batch 3: the whole "downloads" folder
+
+Render redeploys by itself after each commit (2-3 minutes).
+Your website:   https://emberfall-sb6p.onrender.com
+The game:       https://emberfall-sb6p.onrender.com/play/
+
+To turn on donations: open site/config.js on GitHub, click the pencil, paste your
+PayPal.me or Ko-fi link into donateUrl, and commit.
