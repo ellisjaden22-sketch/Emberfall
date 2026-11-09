@@ -3,7 +3,10 @@
 <head>
 <meta name="color-scheme" content="dark"><meta name="darkreader-lock">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="/play/manifest.webmanifest"><meta name="theme-color" content="#140c06">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Emberfall">
+<link rel="apple-touch-icon" href="/play/apple-touch-icon.png"><link rel="icon" href="/play/icon-192.png">
 <title>Emberfall Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -17,7 +20,7 @@
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.9</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.15</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -112,5 +115,21 @@
 
 <script src="config.js"></script>
 <script src="game.js"></script>
+<div id="installTip" class="hidden"><b>Install Emberfall</b><span id="installTxt"></span><button id="installBtn" class="hidden">Install app</button><button id="installX" title="Hide">✕</button></div>
+<style>#installTip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:94vw;padding:10px 14px;border-radius:10px;background:rgba(20,12,6,.94);border:1px solid #b8862a;color:#f0dfb8;font:15px "Alegreya Sans",sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.6)}#installTip b{font-family:Cinzel,serif;color:#ffd36a}#installTip.hidden,#login.hidden~#installTip{display:none!important}#installTip button{padding:6px 12px;border-radius:6px;border:1px solid #ffe6a0;background:linear-gradient(#ffd56a,#b8761a);color:#2a1604;font-weight:800}#installX{background:none!important;border:none!important;color:#c8b48a!important}html,body{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}</style>
+<script>
+(function(){ document.addEventListener('gesturestart',e=>e.preventDefault()); document.addEventListener('dblclick',e=>{ if(e.target&&e.target.id==='c') e.preventDefault(); });
+  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)) navigator.serviceWorker.register('/play/sw.js',{scope:'/play/'}).catch(()=>{});
+  const standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  const box=document.getElementById('installTip'), txt=document.getElementById('installTxt'), btn=document.getElementById('installBtn');
+  let dismissed=false; try{ dismissed=localStorage.getItem('ef_install_x')==='1'; }catch(e){}
+  if(standalone||dismissed||/^(127\.|localhost)/.test(location.hostname)&&location.port==='47811') return;
+  document.getElementById('installX').onclick=()=>{ box.classList.add('hidden'); try{ localStorage.setItem('ef_install_x','1'); }catch(e){} };
+  if(ios){ txt.innerHTML='Tap <b style="font-family:inherit">Share</b> <svg width="16" height="18" viewBox="0 0 16 18" style="vertical-align:-3px"><path d="M8 1v11M4 5l4-4 4 4M2 9v8h12V9" fill="none" stroke="#ffd36a" stroke-width="1.8"/></svg> then <b style="font-family:inherit">Add to Home Screen</b> to play full screen like an app.'; box.classList.remove('hidden'); }
+  setInterval(()=>{ const lg=document.getElementById('login'); let inG=false; try{ inG=!!me; }catch(e){} if(inG||(lg&&lg.classList.contains('hidden'))) box.classList.add('hidden'); },800);
+  addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); const ev=e; txt.textContent='Play in its own full-screen window.'; btn.classList.remove('hidden'); box.classList.remove('hidden'); btn.onclick=()=>{ ev.prompt(); ev.userChoice.finally(()=>box.classList.add('hidden')); }; });
+})();
+</script>
 </body>
 </html>

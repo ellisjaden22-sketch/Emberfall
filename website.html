@@ -60,7 +60,7 @@ section{padding:56px 0}
 .hero .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .hero .online{margin-top:20px;font-size:14px;color:#e8d8b0;text-shadow:0 1px 4px #000}
 /* feature cards */
-.grid{display:grid;gap:18px}.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.grid{display:grid;gap:18px}.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.g5{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
 .feat{padding:22px}.feat .ic{font-size:30px;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,#5a3418,#1a0c06);border:1px solid var(--gold);margin-bottom:12px;box-shadow:0 0 16px rgba(255,150,40,.25)}
 .feat h3{font-size:19px;color:var(--gold2)}.feat p{margin:0;color:#dccca6}
 .cls{padding:24px;text-align:center;position:relative;overflow:hidden}.cls::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--cc),transparent 60%);opacity:.18}
@@ -198,6 +198,10 @@ window.NEWS=[
 [
 "imp",
 "Rarity and themes (\"of Cinders\", \"of the Mire\"…) change metal, cloth and glow colours"
+],
+[
+"new",
+"Install on iPad, iPhone and Android: Share → Add to Home Screen gives Emberfall its own icon and full-screen play"
 ],
 [
 "new",
@@ -783,6 +787,7 @@ const GUIDE={
   faq:()=>`<h2>FAQ</h2><h3>Is it free?</h3><p>Yes. Everything that affects gameplay can be earned in game. Supporting the game only unlocks cosmetics (see <a href="#store">Support</a>).</p>
    <h3>Where are my characters saved?</h3><p>On your own device, in the browser or desktop app you play with. Playing in a different browser starts fresh.</p>
    <h3>The game takes a minute to load</h3><p>The realm server sleeps when nobody is playing. The first visitor wakes it up, which can take up to a minute.</p>
+   <h3>Can I play on an iPad or phone?</h3><p>Yes. Open the game in Safari (iPad/iPhone) or Chrome (Android), then use <b>Share → Add to Home Screen</b> (or <b>Install app</b> on Android). It opens full screen with its own icon. Note: on iPad the home-screen app keeps its own save, so create your character there.</p>
    <h3>Windows says "Windows protected your PC"</h3><p>The desktop app is new and not yet signed. Click <b>More info → Run anyway</b>.</p>
    <h3>I found a bug</h3><p>Press <kbd>Esc</kbd> in game and choose <b>Report a bug</b>${S.contactEmail?`, or email <a href="mailto:${S.contactEmail}">${S.contactEmail}</a>`:''}.</p>`
 };
@@ -807,14 +812,17 @@ function store(){
 
 function download(){
   app.innerHTML=`<section><div class="wrap">${secTitle('Download Emberfall','Play in your browser instantly, or install the game app for its own window and taskbar icon.')}
-   <div class="grid g4">
+   <div class="grid g5">
      <div class="panel dl"><div class="os">🌐</div><h3>Browser</h3><p>Nothing to install. Works on PC, Mac, phones and tablets.</p><a class="btn gold" href="/play/">▶ Play now</a></div>
      <div class="panel dl"><div class="os">🪟</div><h3>Windows</h3><p>Windows 10 or 11.<br>Unzip and run Emberfall.exe</p><a class="btn" href="/downloads/Emberfall-Windows.zip" download>⬇ Download</a></div>
      <div class="panel dl"><div class="os">🍎</div><h3>Mac</h3><p>macOS 11 or newer, Apple Silicon and Intel.</p><a class="btn" href="/downloads/Emberfall-Mac.zip" download>⬇ Download</a></div>
-     <div class="panel dl"><div class="os">🐧</div><h3>Linux</h3><p>64-bit, with Chrome or Chromium installed.</p><a class="btn" href="/downloads/Emberfall-Linux.zip" download>⬇ Download</a></div></div>
+     <div class="panel dl"><div class="os">🐧</div><h3>Linux</h3><p>64-bit, with Chrome or Chromium installed.</p><a class="btn" href="/downloads/Emberfall-Linux.zip" download>⬇ Download</a></div>
+     <div class="panel dl"><div class="os">📱</div><h3>iPad, iPhone &amp; Android</h3><p>Install it from the browser, no app store needed.</p><a class="btn gold" href="/play/">Open the game</a></div></div>
    <div class="panel gbody" style="margin-top:22px"><h3 style="margin-top:0">Installing</h3><ul>
      <li><b>Windows:</b> unzip, double-click <code>Emberfall.exe</code>. If you see "Windows protected your PC", click <b>More info → Run anyway</b> (first time only).</li>
      <li><b>Mac:</b> unzip, right-click <code>Emberfall.app</code> → <b>Open</b> → <b>Open</b>. If it is still blocked: System Settings → Privacy &amp; Security → <b>Open Anyway</b>.</li>
+     <li><b>iPad / iPhone:</b> open <a href="/play/">the game</a> in <b>Safari</b>, tap the <b>Share</b> button (the square with an arrow), then <b>Add to Home Screen</b> → <b>Add</b>. Emberfall gets its own icon and opens full screen like an app.</li>
+     <li><b>Android tablets &amp; phones:</b> open <a href="/play/">the game</a> in Chrome and tap <b>Install app</b> (or menu ⋮ → <b>Add to Home screen</b>).</li>
      <li>The app connects to this realm automatically and always runs the latest version.</li></ul></div></div></section>`;
 }
 route();

@@ -34,8 +34,8 @@ function ownerByIp(req) {
   return OWNER_IPS.includes(real) || OWNER_IPS.includes(sockIp.replace('::ffff:', ''));
 }
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
-  '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8' };
-const GAME_FILES = new Set(['index.html','game.js','style.css','config.js','icon.png']);
+  '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8', '.webmanifest':'application/manifest+json' };
+const GAME_FILES = new Set(['index.html','game.js','style.css','config.js','icon.png','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png']);
 // ---------- armory: character snapshots sent by players' games ----------
 const ARMORY_FILE = path.join(__dirname, 'armory.json');
 let armory = {}; try { armory = JSON.parse(fs.readFileSync(ARMORY_FILE, 'utf8')) || {}; } catch (e) {}

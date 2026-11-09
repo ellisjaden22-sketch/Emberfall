@@ -355,7 +355,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.9</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.15</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -1329,7 +1329,7 @@ const cv=document.getElementById('c'), ov=document.getElementById('ov'), g=ov.ge
 const gl=cv.getContext('webgl2',{antialias:true,powerPreference:'high-performance'});
 if(!gl){ document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99;background:#0b0806;color:#f3e6c8;font:20px sans-serif;text-align:center;padding:30px">Emberfall needs WebGL 2. Please open it in an up-to-date Chrome, Edge, Firefox or Safari.</div>'); throw new Error('WebGL2 unavailable'); }
 let W=0,H=0,DPR=1;
-const GFX=(function(){ const mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&innerWidth<1100); let q=((typeof saves!=='undefined'&&saves.opts&&saves.opts.gfx)||'auto'); if(q==='auto') q=mob?'low':'high';
+const GFX=(function(){ const ua=navigator.userAgent, tablet=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)||(/Android/.test(ua)&&!/Mobile/.test(ua)), mob=/Android|iPhone|iPod/i.test(ua)||(navigator.maxTouchPoints>1&&innerWidth<1100); let q=((typeof saves!=='undefined'&&saves.opts&&saves.opts.gfx)||'auto'); if(q==='auto') q=tablet?'medium':mob?'low':'high';
   const T={low:{rs:1,rmin:.6,sm:1024,grass:.6,gd:28},medium:{rs:1.25,rmin:.75,sm:2048,grass:.85,gd:38},high:{rs:1.5,rmin:.85,sm:2048,grass:1,gd:48},ultra:{rs:2,rmin:1,sm:4096,grass:1.15,gd:64}}; return Object.assign({q},T[q]||T.high); })();
 let RSCALE=0, RSMAX=1; function resize(){ DPR=Math.min(2,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; RSMAX=Math.max(.6,Math.min(DPR,GFX.rs)); if(!RSCALE||RSCALE>RSMAX) RSCALE=RSMAX; const rs=RSCALE; cv.width=Math.round(W*rs); cv.height=Math.round(H*rs); ov.width=Math.round(W*DPR); ov.height=Math.round(H*DPR); }
 addEventListener('resize',resize); resize();
@@ -3724,7 +3724,7 @@ function renderOptions(){ const w=$('optWin'); if(w.classList.contains('hidden')
   if($('gfxReload')) $('gfxReload').onclick=()=>{ try{ if(me) persist(); }catch(e){} location.reload(); };
   if(optTab==='sound') renderSound($('optSound')); }
 /* ---------- full screen ---------- */
-const FS_IOS=/iPhone|iPod/i.test(navigator.userAgent);
+const FS_IOS=/iPhone|iPod/i.test(navigator.userAgent)||!!navigator.standalone;
 function windowIsFull(){ return innerWidth>=screen.width-2&&innerHeight>=screen.height-2; }
 function goFullscreen(){ const el=document.documentElement; if(document.fullscreenElement||FS_IOS||!el.requestFullscreen) return; const p=el.requestFullscreen({navigationUI:'hide'}); if(p&&p.then) p.then(()=>{ try{ if(navigator.keyboard&&navigator.keyboard.lock) navigator.keyboard.lock(['Escape']); }catch(e){} }).catch(()=>{}); }
 function toggleFullscreen(){ if(document.fullscreenElement){ try{ navigator.keyboard&&navigator.keyboard.unlock&&navigator.keyboard.unlock(); }catch(e){} document.exitFullscreen().catch(()=>{}); } else goFullscreen(); }

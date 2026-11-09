@@ -863,7 +863,7 @@ const cv=document.getElementById('c'), ov=document.getElementById('ov'), g=ov.ge
 const gl=cv.getContext('webgl2',{antialias:true,powerPreference:'high-performance'});
 if(!gl){ document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99;background:#0b0806;color:#f3e6c8;font:20px sans-serif;text-align:center;padding:30px">Emberfall needs WebGL 2. Please open it in an up-to-date Chrome, Edge, Firefox or Safari.</div>'); throw new Error('WebGL2 unavailable'); }
 let W=0,H=0,DPR=1;
-const GFX=(function(){ const mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&innerWidth<1100); let q=((typeof saves!=='undefined'&&saves.opts&&saves.opts.gfx)||'auto'); if(q==='auto') q=mob?'low':'high';
+const GFX=(function(){ const ua=navigator.userAgent, tablet=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)||(/Android/.test(ua)&&!/Mobile/.test(ua)), mob=/Android|iPhone|iPod/i.test(ua)||(navigator.maxTouchPoints>1&&innerWidth<1100); let q=((typeof saves!=='undefined'&&saves.opts&&saves.opts.gfx)||'auto'); if(q==='auto') q=tablet?'medium':mob?'low':'high';
   const T={low:{rs:1,rmin:.6,sm:1024,grass:.6,gd:28},medium:{rs:1.25,rmin:.75,sm:2048,grass:.85,gd:38},high:{rs:1.5,rmin:.85,sm:2048,grass:1,gd:48},ultra:{rs:2,rmin:1,sm:4096,grass:1.15,gd:64}}; return Object.assign({q},T[q]||T.high); })();
 let RSCALE=0, RSMAX=1; function resize(){ DPR=Math.min(2,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; RSMAX=Math.max(.6,Math.min(DPR,GFX.rs)); if(!RSCALE||RSCALE>RSMAX) RSCALE=RSMAX; const rs=RSCALE; cv.width=Math.round(W*rs); cv.height=Math.round(H*rs); ov.width=Math.round(W*DPR); ov.height=Math.round(H*DPR); }
 addEventListener('resize',resize); resize();
@@ -3258,7 +3258,7 @@ function renderOptions(){ const w=$('optWin'); if(w.classList.contains('hidden')
   if($('gfxReload')) $('gfxReload').onclick=()=>{ try{ if(me) persist(); }catch(e){} location.reload(); };
   if(optTab==='sound') renderSound($('optSound')); }
 /* ---------- full screen ---------- */
-const FS_IOS=/iPhone|iPod/i.test(navigator.userAgent);
+const FS_IOS=/iPhone|iPod/i.test(navigator.userAgent)||!!navigator.standalone;
 function windowIsFull(){ return innerWidth>=screen.width-2&&innerHeight>=screen.height-2; }
 function goFullscreen(){ const el=document.documentElement; if(document.fullscreenElement||FS_IOS||!el.requestFullscreen) return; const p=el.requestFullscreen({navigationUI:'hide'}); if(p&&p.then) p.then(()=>{ try{ if(navigator.keyboard&&navigator.keyboard.lock) navigator.keyboard.lock(['Escape']); }catch(e){} }).catch(()=>{}); }
 function toggleFullscreen(){ if(document.fullscreenElement){ try{ navigator.keyboard&&navigator.keyboard.unlock&&navigator.keyboard.unlock(); }catch(e){} document.exitFullscreen().catch(()=>{}); } else goFullscreen(); }
