@@ -337,6 +337,9 @@ body.touch canvas{touch-action:none}
 /* keep the game's own colours even with high-contrast / forced-colour modes or dark-mode extensions */
 *,*::before,*::after{forced-color-adjust:none!important}
 .bar.hp > i{background-color:#22b036}.bar.mana > i{background-color:#2262e8}.bar.rage > i{background-color:#c01810}
+#dlBar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin:-4px auto 14px;font-family:'Alegreya Sans',sans-serif;font-size:14px;color:#d8c49a}
+#dlBar.hidden{display:none}.dlb{padding:6px 14px;border-radius:5px;border:1px solid #ffe6a0;background:linear-gradient(#ffd56a,#b8761a);color:#2a1604;font-weight:800;text-decoration:none}.dlb:hover{filter:brightness(1.1)}#dlBar small{color:#a8987a;width:100%;text-align:center}
+#dlBar.flash{animation:dlf 1.2s ease-in-out 3}@keyframes dlf{50%{filter:drop-shadow(0 0 14px #ffb84a)}}
 #realmBox{margin:0 auto 14px;max-width:620px;text-align:left}#realmBox .rbt{font-family:Cinzel,serif;color:var(--gold);font-size:14px;margin-bottom:4px}
 #realmBox .rbr{display:flex;gap:6px}#realmIn{flex:1;padding:8px 10px;background:rgba(0,0,0,.45);border:1px solid #6a4a20;border-radius:5px;color:#fff3d8;font-size:15px}
 </style>
@@ -351,6 +354,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-wrap">
     <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.9</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
+    <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb">⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb"> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb">🐧 Linux</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
       <div class="lg-roster panel"><h3>Your Characters <span id="rosterCount"></span></h3><div id="roster"></div><div class="lg-note">Characters are saved in this browser, on this device.</div></div>
       <div class="lg-create panel"><h3>Create a Hero</h3>
@@ -831,6 +835,7 @@ function initRealmBox(){ const box=document.getElementById('realmBox'); if(!box)
   document.getElementById('realmSolo').onclick=()=>{ delete saves.realm; saveAll(saves); location.reload(); };
   inp.onkeydown=e=>{ e.stopPropagation(); if(e.key==='Enter') document.getElementById('realmGo').click(); }; }
 setTimeout(initRealmBox,0);
+setTimeout(()=>{ const d=document.getElementById('dlBar'); if(!d||!/^https?:$/.test(location.protocol)||/^(127\.|localhost)/.test(location.hostname)&&location.port==='47811') return; d.classList.remove('hidden'); if(/^\/download/.test(location.pathname)){ d.classList.add('flash'); d.scrollIntoView({block:'center'}); } },0);
 function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_CONFIG||{};
   const url=cfg.serverUrl||realmWs()||(/^https?:$/.test(location.protocol)?(location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws':null); if(!url) return resolve(null);
   let ws=null, myId=null, conn=false, done=false, mine={}, gmWait=null; const peers=new Map(), connCbs=[]; let snap=Object.freeze([]);

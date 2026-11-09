@@ -40,7 +40,7 @@ const PUBLIC = new Set(['index.html','game.js','style.css','config.js','download
 const server = http.createServer((req, res) => {
   let name = decodeURIComponent((req.url || '/').split('?')[0]).replace(/^\/+/, '') || 'index.html';
   if (name === 'health') { res.writeHead(200, {'Content-Type':'application/json'}); return res.end(JSON.stringify({ ok: true, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c })), uptime: Math.round(process.uptime()) })); }
-  if (name === 'download' || name === 'download/') name = 'download.html';
+  if (name === 'download' || name === 'download/') name = 'index.html';   // the game's own start screen, with download buttons
   if (name.startsWith('downloads/') && /\.zip$/i.test(name)) {   // game downloads for players
     const f = path.join(ROOT, path.normalize(name));
     if (!f.startsWith(path.join(ROOT, 'downloads'))) { res.writeHead(404); return res.end('Not found'); }

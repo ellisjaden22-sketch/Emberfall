@@ -372,6 +372,7 @@ function initRealmBox(){ const box=document.getElementById('realmBox'); if(!box)
   document.getElementById('realmSolo').onclick=()=>{ delete saves.realm; saveAll(saves); location.reload(); };
   inp.onkeydown=e=>{ e.stopPropagation(); if(e.key==='Enter') document.getElementById('realmGo').click(); }; }
 setTimeout(initRealmBox,0);
+setTimeout(()=>{ const d=document.getElementById('dlBar'); if(!d||!/^https?:$/.test(location.protocol)||/^(127\.|localhost)/.test(location.hostname)&&location.port==='47811') return; d.classList.remove('hidden'); if(/^\/download/.test(location.pathname)){ d.classList.add('flash'); d.scrollIntoView({block:'center'}); } },0);
 function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_CONFIG||{};
   const url=cfg.serverUrl||realmWs()||(/^https?:$/.test(location.protocol)?(location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws':null); if(!url) return resolve(null);
   let ws=null, myId=null, conn=false, done=false, mine={}, gmWait=null; const peers=new Map(), connCbs=[]; let snap=Object.freeze([]);
