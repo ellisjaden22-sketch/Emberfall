@@ -1,0 +1,3 @@
+#!/bin/bash
+DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ "$(uname -m)" = "arm64" ]; then exec "$DIR/emberfall-arm64"; else exec "$DIR/emberfall-amd64"; fi

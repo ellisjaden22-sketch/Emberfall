@@ -1,0 +1,7 @@
+EMBERFALL ONLINE (BETA) - Mac
+
+1. Drag Emberfall.app into your Applications folder (optional).
+2. The first time: right-click Emberfall.app and choose Open, then Open again.
+   If macOS still blocks it: System Settings > Privacy & Security > scroll down > "Open Anyway".
+3. The game opens in its own window (uses Google Chrome, Edge or Brave if installed, otherwise your browser).
+4. Create your own hero. Your characters are saved on this Mac.
