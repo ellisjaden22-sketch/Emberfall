@@ -174,6 +174,98 @@ window.SITE = {
 /* Emberfall website data. NEWS = patch notes (add new entries at the top). TIERS = support packs. GD and ACH are generated from the game. */
 window.NEWS=[
 {
+"v": "v0.15",
+"date": "10 Nov 2026",
+"title": "Gear you can see",
+"sum": "Every weapon, armour and trinket you equip now changes how your hero looks.",
+"items": [
+[
+"new",
+"Armour styles: leather Jerkins with straps, chainmail Hauberks, plate Brigandines, Robes, Vestments with a stole, and Mantles with a collar and cape"
+],
+[
+"new",
+"Weapons appear in your hand as you equip them: swords, spellblades, morningstars, greataxes, staves and wands"
+],
+[
+"new",
+"New models for the three legendary weapons: Dawnwarden, Solace and Cinderheart"
+],
+[
+"new",
+"Trinkets show on your hero: talismans, lockets, charms, signets and a floating idol"
+],
+[
+"imp",
+"Rarity and themes (\"of Cinders\", \"of the Mire\"…) change metal, cloth and glow colours"
+],
+[
+"new",
+"Zoom the minimap with + and − or the mouse wheel"
+],
+[
+"new",
+"Zoom and drag the world map (M), with a button to centre on yourself"
+],
+[
+"imp",
+"Monsters respawn more slowly (about 40-55 seconds instead of 16)"
+],
+[
+"imp",
+"Monsters are spread out a little more"
+]
+]
+},
+{
+"v": "v0.14",
+"date": "10 Nov 2026",
+"title": "Graphics overhaul",
+"sum": "A big visual upgrade: smoother models, richer lighting, lush trees and full-screen play.",
+"items": [
+[
+"new",
+"Graphics quality setting (Auto, Low, Medium, High, Ultra) in Esc → Graphics"
+],
+[
+"new",
+"The game now starts in full screen, with a Full screen button in the menu"
+],
+[
+"imp",
+"Smooth, rounded character models with real hands, faces, eyes and joints"
+],
+[
+"imp",
+"Wolves, boars, deer and rabbits rebuilt with proper anatomy, fur ruffs and tails"
+],
+[
+"imp",
+"The Cinder Wyrm gained horns, claws, belly plates, wing bones and a longer tail"
+],
+[
+"imp",
+"Rock golems, thornlings, yetis and skeletons reshaped"
+],
+[
+"imp",
+"Lush lumpy tree canopies, layered pines, natural rocks and finer grass"
+],
+[
+"imp",
+"Filmic lighting, skin and foliage light scattering, anti-aliasing and sharper image"
+],
+[
+"fix",
+"Rounded parts were lit from the wrong side, which made characters look flat"
+],
+[
+"fix",
+"Download buttons work even if the files were uploaded without their folder"
+]
+]
+},
+{
 "v": "v0.13",
 "date": "9 Nov 2026",
 "title": "The Armory & achievements",
@@ -713,9 +805,9 @@ function download(){
   app.innerHTML=`<section><div class="wrap">${secTitle('Download Emberfall','Play in your browser instantly, or install the game app for its own window and taskbar icon.')}
    <div class="grid g4">
      <div class="panel dl"><div class="os">🌐</div><h3>Browser</h3><p>Nothing to install. Works on PC, Mac, phones and tablets.</p><a class="btn gold" href="/play/">▶ Play now</a></div>
-     <div class="panel dl"><div class="os">🪟</div><h3>Windows</h3><p>Windows 10 or 11.<br>Unzip and run Emberfall.exe</p><a class="btn" href="/downloads/Emberfall-Windows.zip">⬇ Download</a></div>
-     <div class="panel dl"><div class="os">🍎</div><h3>Mac</h3><p>macOS 11 or newer, Apple Silicon and Intel.</p><a class="btn" href="/downloads/Emberfall-Mac.zip">⬇ Download</a></div>
-     <div class="panel dl"><div class="os">🐧</div><h3>Linux</h3><p>64-bit, with Chrome or Chromium installed.</p><a class="btn" href="/downloads/Emberfall-Linux.zip">⬇ Download</a></div></div>
+     <div class="panel dl"><div class="os">🪟</div><h3>Windows</h3><p>Windows 10 or 11.<br>Unzip and run Emberfall.exe</p><a class="btn" href="/downloads/Emberfall-Windows.zip" download>⬇ Download</a></div>
+     <div class="panel dl"><div class="os">🍎</div><h3>Mac</h3><p>macOS 11 or newer, Apple Silicon and Intel.</p><a class="btn" href="/downloads/Emberfall-Mac.zip" download>⬇ Download</a></div>
+     <div class="panel dl"><div class="os">🐧</div><h3>Linux</h3><p>64-bit, with Chrome or Chromium installed.</p><a class="btn" href="/downloads/Emberfall-Linux.zip" download>⬇ Download</a></div></div>
    <div class="panel gbody" style="margin-top:22px"><h3 style="margin-top:0">Installing</h3><ul>
      <li><b>Windows:</b> unzip, double-click <code>Emberfall.exe</code>. If you see "Windows protected your PC", click <b>More info → Run anyway</b> (first time only).</li>
      <li><b>Mac:</b> unzip, right-click <code>Emberfall.app</code> → <b>Open</b> → <b>Open</b>. If it is still blocked: System Settings → Privacy &amp; Security → <b>Open Anyway</b>.</li>

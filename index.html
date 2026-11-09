@@ -19,7 +19,7 @@
   <div class="lg-wrap">
     <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.9</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
-    <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb">⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb"> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb">🐧 Linux</a><small>or just play right here in your browser</small></div>
+    <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
       <div class="lg-roster panel"><h3>Your Characters <span id="rosterCount"></span></h3><div id="roster"></div><div class="lg-note">Characters are saved in this browser, on this device.</div></div>
       <div class="lg-create panel"><h3>Create a Hero</h3>
@@ -51,7 +51,7 @@
   </div>
   <div id="buffs"></div>
   <div id="party"></div>
-  <div id="mini" class="panel"><canvas id="miniC" width="356" height="356"></canvas><div id="zoneName"></div><div id="netline" title="Who is online"></div></div>
+  <div id="mini" class="panel"><canvas id="miniC" width="356" height="356"></canvas><div class="mzb"><button id="mzIn" title="Zoom in (mouse wheel)">+</button><button id="mzOut" title="Zoom out">−</button></div><div id="zoneName"></div><div id="netline" title="Who is online"></div></div>
   <div id="tracker" class="panel"></div>
   <div id="castbar" class="hidden"><i></i><em class="cbic"></em><span class="cbn"></span><b class="cbt"></b></div>
   <div id="bar" class="panel"></div>
@@ -100,13 +100,13 @@
     <div style="margin-top:8px"><b>Parties:</b> click a player and press <b>Invite to party</b>, use the <kbd>P</kbd> window, or type <kbd>/invite name</kbd>. Party members share kill credit and quest progress; <kbd>/p message</kbd> talks to your party.</div>
     <div style="margin-top:8px"><b>Game Masters:</b> the owner of the game is a GM and sees an orange <b style="color:#ff9a3a">GM</b> button. Type <kbd>/gm</kbd> for the GM tools: gold, levels, god mode, no cooldowns, noclip, speed, teleport, items, time, weather, kill and server announcements. Other players get "You are not a Game Master."</div>
   </div>
-  <div id="mapWin" class="win panel hidden"><button class="close" data-close="mapWin">×</button><h2>Emberfall</h2><canvas id="mapC" width="800" height="560"></canvas><div class="mapbar"><span id="mapCoords"></span><span class="mapleg"><label><input type="checkbox" data-mf="quests" checked> Quests</label><label><input type="checkbox" data-mf="bosses" checked> Bosses</label><label><input type="checkbox" data-mf="players" checked> Players</label><label><input type="checkbox" data-mf="gather" checked> Herbs &amp; ore</label></span></div>
+  <div id="mapWin" class="win panel hidden"><button class="close" data-close="mapWin">×</button><h2>Emberfall</h2><div id="mapWrap"><canvas id="mapC" width="800" height="560"></canvas><div id="mapZoom"><button id="mapZin" title="Zoom in (mouse wheel)">+</button><button id="mapZout" title="Zoom out">−</button><button id="mapZme" title="Centre on me" style="font-size:15px">◎</button></div></div><div class="mapbar"><span id="mapCoords"></span><span class="mapleg"><label><input type="checkbox" data-mf="quests" checked> Quests</label><label><input type="checkbox" data-mf="bosses" checked> Bosses</label><label><input type="checkbox" data-mf="players" checked> Players</label><label><input type="checkbox" data-mf="gather" checked> Herbs &amp; ore</label></span></div>
   <div class="mapkey"><span><i class="k-boss"></i>Boss</span><span><i class="k-elite"></i>Elite</span><span><i class="k-poi"></i>Landmark</span><span><b style="color:#d89a10">!</b> Quest</span><span><i class="k-q"></i>Quest area</span><span><i class="k-me"></i>You</span><span style="color:var(--dim)">Hover icons for details · M to close</span></div></div>
   <div id="qlogWin" class="win panel hidden"><button class="close" data-close="qlogWin">×</button><h2>Quest Log</h2><div id="qlogList"></div></div>
   <div id="deathWin" class="win panel hidden"><h2>You have fallen</h2><p style="color:var(--dim)">Your spirit drifts back toward Hearthmere.</p><button id="releaseBtn">Release Spirit</button></div>
 </div>
 <div id="tip" class="panel hidden"></div>
-<div id="escMenu" class="panel hidden"><h2>Game Menu</h2><button data-e="resume" class="gold">Resume</button><button data-e="options">Options</button><button data-e="keys">Keybinds</button><button data-e="sound">Sound &amp; music</button><button data-e="help">How to play</button><button data-e="bug">Report a bug</button><button data-e="repick">Character select</button><div class="escver">Emberfall Online · Beta v0.9</div></div>
+<div id="escMenu" class="panel hidden"><h2>Game Menu</h2><button data-e="resume" class="gold">Resume</button><button data-e="options">Options</button><button data-e="fs">Full screen</button><button data-e="gfx">Graphics</button><button data-e="keys">Keybinds</button><button data-e="sound">Sound &amp; music</button><button data-e="help">How to play</button><button data-e="bug">Report a bug</button><button data-e="repick">Character select</button><div class="escver">Emberfall Online · Beta v0.9</div></div>
 <div id="optWin" class="win panel hidden"><button class="close" data-close="optWin">×</button><h2>Options</h2><div class="obodywrap"></div></div>
 <div id="bugWin" class="win panel hidden"><button class="close" data-close="bugWin">×</button><h2>Report a bug</h2><p style="color:var(--dim);font-size:13px">What happened, and what did you expect? Your position, level and browser are added automatically. The report is emailed to the game's owner.</p><textarea id="bugTxt" maxlength="1500" rows="6"></textarea><div class="btns" style="display:flex;justify-content:flex-end;margin-top:8px"><button id="bugSend" class="gold">Send report</button></div></div><div id="ctxMenu" class="panel hidden"></div><div id="confirmPop" class="panel hidden"></div>
 

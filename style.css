@@ -72,6 +72,8 @@ kbd{font-family:inherit;background:#2a1e12;border:1px solid #5c4422;border-botto
 .pmember.dead{opacity:.5}
 #mini{position:absolute;right:12px;top:12px;padding:8px;width:196px}
 #mini canvas{display:block;width:178px;height:178px;border-radius:50%;border:2px solid var(--bronze);background:#000}
+#mini .mzb{position:absolute;left:4px;top:4px;display:flex;flex-direction:column;gap:3px;pointer-events:auto}#mini .mzb button{width:24px;height:24px;padding:0;border-radius:50%;font:800 16px/1 sans-serif;background:rgba(20,12,6,.85);color:#ffe6a0;border:1px solid var(--bronze);cursor:pointer}#mini .mzb button:hover{background:#3a2410}
+#mapWrap{position:relative}#mapZoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px}#mapZoom button{width:32px;height:32px;padding:0;font:800 18px/1 sans-serif;border-radius:6px;background:rgba(40,26,10,.85);color:#ffe6a0;border:1px solid #8a6a30;cursor:pointer}#mapZoom button:hover{background:#5a3a14}#mapC.drag{cursor:grabbing!important}
 #zoneName{font-family:Cinzel,serif;font-weight:700;text-align:center;font-size:14px;color:var(--gold);margin-top:6px}
 #netline{font-size:12px;text-align:center;color:var(--dim);margin-top:2px;cursor:pointer}
 #tracker{position:absolute;right:12px;top:252px;width:230px;padding:10px 12px;font-size:14px}
