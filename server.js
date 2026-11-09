@@ -78,8 +78,10 @@ const server = http.createServer((req, res) => {
     return json(res, 200, all.map(a => ({ name: a.name, cls: a.cls, lvl: a.lvl, ach: Object.keys(a.ach).length, kills: a.stats.kills, title: a.cos.title, online: a.online, seen: a.seen }))); }
   // ---- downloads ----
   if (name === 'download' || name === 'download/') { res.writeHead(302, { Location: '/#download' }); return res.end(); }
-  if (name.startsWith('downloads/') && /\.zip$/i.test(name)) { const f = path.join(ROOT, path.normalize(name));
-    if (!f.startsWith(path.join(ROOT, 'downloads'))) { res.writeHead(404); return res.end('Not found'); }
+  if ((name.startsWith('downloads/') || /^Emberfall-[\w-]+\.zip$/i.test(name)) && /\.zip$/i.test(name)) { const base = path.basename(name);
+    // the zip may sit in downloads/ or (if the folder got flattened on upload) next to server.js
+    const f = [path.join(ROOT, 'downloads', base), path.join(ROOT, base)].find(x => { try { return fs.statSync(x).isFile(); } catch (e) { return false; } });
+    if (!f) { res.writeHead(302, { Location: 'https://github.com/' + (process.env.GITHUB_REPO || 'ellisjaden22-sketch/Emberfall') + '/raw/main/downloads/' + encodeURIComponent(base) }); return res.end(); }
     return fs.stat(f, (err, st) => { if (err) { res.writeHead(404); return res.end('Not found'); }
       res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': st.size, 'Content-Disposition': `attachment; filename="${path.basename(f)}"` }); fs.createReadStream(f).pipe(res); }); }
   // ---- the game at /play/ ----
