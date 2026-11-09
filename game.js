@@ -1362,15 +1362,16 @@ function drawHumanoid(o){
   if(o.dead>=0){ const k=Math.min(1,o.dead/.6); mrz(-k*1.45); mtr(0,k*.12,0); }
   const legA=Math.sin(ph)*.75*mv, armA=Math.sin(ph)*.6*mv;
   const limbW=bone?.075:(L.rock?.2:.15), legCol=bone||L.legs, armCol=bone||L.arms, boots=L.boots||legCol;
-  for(const s of [-1,1]){ mpush(); mtr(0,.92,s*.12); let a=(s>0?legA:-legA); if(o.ride){ mrx(-s*.5); a=1.2; } else if(sitting) a=1.5; else if(kneel) a=s>0?1.4:-.1; else if(o.swim) a=Math.sin(t*5+s*2)*.45; mrz(a);
-    P(GEO.limb,limbW*1.18,.44,limbW*1.18,legCol,hitE); if(!bone&&!L.robe) P(GEO.sph,limbW*1.28,limbW*1.2,limbW*1.35,legCol,hitE,0,-.04,0); mtr(0,-.44,0); P(GEO.sph,limbW*1.08,limbW*1.08,limbW*1.08,bone||(L.metal&&!bone?L.metal:legCol),hitE);
+  for(const s of [-1,1]){ mpush(); mtr(0,.93,s*.115); let a=(s>0?legA:-legA); if(o.ride){ mrx(-s*.5); a=1.2; } else if(sitting) a=1.5; else if(kneel) a=s>0?1.4:-.1; else if(o.swim) a=Math.sin(t*5+s*2)*.45; mrz(a);
+    P(GEO.limb,limbW*1.12,.45,limbW*1.15,legCol,hitE); if(!bone&&!L.robe){ P(GEO.sph,limbW*1.5,limbW*2.3,limbW*1.5,legCol,hitE,.02,-.15,0); } mtr(0,-.45,0); P(GEO.sph,limbW*1.08,limbW*1.08,limbW*1.08,bone||(L.metal&&!bone?L.metal:legCol),hitE);
     if(L.metal&&!bone) P(GEO.sph,.17,.15,.17,L.metal,hitE,.03,0,0);
     let knee=Math.max(0,Math.cos(ph+(s>0?0:Math.PI)))*.95*mv+(L.hunch||0)*.25; if(o.ride) knee=1.5; else if(sitting) knee=.1; else if(kneel) knee=s>0?1.5:1.6; mrz(-knee);
-    P(GEO.limb,limbW,.42,limbW,bone?legCol:boots,hitE); if(!bone) P(GEO.cyl,limbW*1.35,.07,limbW*1.35,L.fur?[.85,.84,.8]:boots.map(v=>v*1.2),hitE,0,-.2,0);
+    P(GEO.limb,limbW*.92,.42,limbW*.92,bone?legCol:boots,hitE); if(!bone){ P(GEO.sph,limbW*1.22,limbW*1.9,limbW*1.2,boots,hitE,-.035,-.12,0); P(GEO.frus,limbW*1.7,.1,limbW*1.7,L.fur?[.85,.84,.8]:boots.map(v=>v*1.15),hitE,0,-.08,0); }
     mtr(0,-.43,0); mrz(knee-a*.6);
     if(bone){ P(GEO.box,.26,.06,.12,boots,hitE,.06,-.05,0); for(let k=-1;k<=1;k++) P(GEO.sph,.08,.04,.035,boots,hitE,.18,-.06,k*.035); }
     else { P(GEO.box,.27,.11,.15,boots,hitE,.04,-.03,0); P(GEO.sph,.16,.11,.15,boots,hitE,.15,-.035,0); P(GEO.box,.32,.035,.165,boots.map(v=>v*.55),hitE,.06,-.085,0); P(GEO.sph,.13,.13,.15,boots,hitE,-.06,.01,0); } mpop(); }
-  if(L.robe){ mpush(); mtr(0,.96,0); mrz(Math.sin(ph)*.05*mv); P(GEO.frus,.64,.9,.68,L.robe,hitE,0,-.9,0); P(GEO.cyl,.64,.07,.68,L.trim||L.robe,hitE,0,-.9,0); P(GEO.cyl,.645,.025,.685,L.trim||L.robe,hitE+.1,0,-.78,0);
+  if(L.robe){ mpush(); mtr(0,.96,0); mrz(Math.sin(ph)*.05*mv); P(GEO.frus,.62,.92,.7,L.robe,hitE,0,-.92,0);
+    for(let k=0;k<12;k++){ const a=k/12*6.283+.26; mpush(); mtr(Math.cos(a)*.155,-.02,Math.sin(a)*.17); mry(-a); mrz(.16+Math.sin(ph+k)*.04*mv); P(GEO.limb,.075,.8,.065,L.robe.map(v=>v*(k%2?.86:1.04)),hitE); mpop(); } P(GEO.cyl,.64,.07,.68,L.trim||L.robe,hitE,0,-.9,0); P(GEO.cyl,.645,.025,.685,L.trim||L.robe,hitE+.1,0,-.78,0);
     if(L.det==='a') for(let k=0;k<4;k++) P(GEO.box,.02,.06,.06,L.gem||[.82,.62,1],2.2+Math.sin(t*3+k)*.6,.25+k*.02,-.15-k*.18,0);
     if(L.det==='m'){ P(GEO.box,.03,.8,.16,L.trim,hitE+.08,.27,-.45,0); P(GEO.sph,.02,.1,.1,[1,.86,.4],1.2,.29,-.3,0); }
     P(GEO.box,.04,.82,.12,L.trim||L.robe,hitE,.3,-.45,0); mpop(); }
@@ -1378,12 +1379,14 @@ function drawHumanoid(o){
   if(bone){ P(GEO.sph,.2,.14,.34,bone,hitE,0,.0,0); for(const s of [-1,1]) P(GEO.sph,.08,.08,.08,bone,hitE,0,-.04,s*.13); for(let k=0;k<8;k++) P(GEO.sph,.075,.06,.075,bone,hitE,-.05,.08+k*.075,0); for(const s of [-1,1]){ mpush(); mtr(.06,.62,s*.12); mrx(s*1.35); P(GEO.limb,.035,.15,.035,bone,hitE); mpop(); }
     for(let k=0;k<5;k++){ const w=.42-Math.abs(k-1.5)*.05; P(GEO.box,.05,.035,w,bone,hitE,.1,.2+k*.075,0); P(GEO.box,.22,.035,.035,bone,hitE,0,.2+k*.075,w/2-.02); P(GEO.box,.22,.035,.035,bone,hitE,0,.2+k*.075,-w/2+.02); }
     P(GEO.box,.06,.3,.06,bone,hitE,.13,.3,0); if(L.metal){ P(GEO.sph,.34,.36,.5,L.metal,hitE,.02,.44,0); P(GEO.box,.04,.3,.05,L.metal.map(v=>v*1.2),hitE+.1,.19,.44,0); } }
-  else { P(GEO.box,.28,.22,.37,L.legs||L.torso,hitE,0,.05,0); P(GEO.sph,.37,.64,.52,L.torso,hitE,0,.37,0);
-    if(L.metal){ P(GEO.sph,.3,.5,.46,L.metal,hitE,.06,.4,0); P(GEO.box,.04,.36,.06,L.trim||L.metal,hitE+.1,.2,.42,0); P(GEO.cyl,.26,.08,.3,L.metal,hitE,0,.66,0); }
+  else { const tor=L.torso; P(GEO.sph,.34,.27,.43,L.legs||tor,hitE,0,.04,0); if(L.robe){ P(GEO.sph,.35,.66,.48,tor,hitE,0,.35,0); P(GEO.sph,.3,.3,.5,tor,hitE,-.01,.55,0); } else { P(GEO.sph,.3,.4,.38,tor,hitE,0,.2,0); P(GEO.sph,.37,.44,.52,tor,hitE,.01,.42,0); }
+    if(!L.robe) for(const s of [-1,1]) P(GEO.sph,.2,.17,.23,tor,hitE,.08,.5,s*.1); P(GEO.sph,.27,.17,L.robe?.52:.58,tor,hitE,-.03,.6,0); P(GEO.cyl,.2,.07,.22,tor.map(v=>v*.9),hitE,0,.62,0);
+    if(L.metal){ const mt=L.metal; P(GEO.sph,.4,.44,.54,mt,hitE,.025,.43,0); P(GEO.sph,.33,.32,.42,mt,hitE,.03,.2,0); for(let k=0;k<3;k++) P(GEO.sph,.3-k*.01,.06,.4-k*.01,mt.map(v=>v*.88),hitE,.035,.08+k*.075,0);
+      P(GEO.box,.03,.32,.045,L.trim||mt,hitE+.1,.225,.44,0); P(GEO.cyl,.25,.08,.28,mt,hitE,0,.62,0); P(GEO.cyl,.26,.022,.29,L.trim||mt,hitE+.08,0,.69,0); }
     if(L.fur){ for(let k=0;k<10;k++){ const a=k/10*Math.PI*2; P(GEO.blob,.2,.18,.2,k%2?[.86,.85,.8]:[.78,.76,.72],hitE,Math.cos(a)*.17,.62+Math.sin(k*1.7)*.03,Math.sin(a)*.25); } for(let k=0;k<8;k++){ const a=k/8*Math.PI*2; P(GEO.blob,.13,.2,.13,L.torso.map(v=>v*.92),hitE,Math.cos(a)*.18,.25+Math.sin(k)*.05,Math.sin(a)*.24); } }
     if(L.rock){ P(GEO.blob,.42,.4,.4,L.torso,hitE,.12,.42,.14); P(GEO.blob,.38,.36,.38,L.torso,hitE,-.05,.52,-.16); for(const s of [-1,1]){ P(GEO.blob,.36,.32,.34,L.arms,hitE,-.02,.7,s*.3); P(GEO.blob,.18,.16,.18,L.torso,hitE,.0,.86,s*.3); } for(let k=0;k<5;k++) P(GEO.box,.02,.16,.03,L.core,1.8+Math.sin(t*4+k)*.6,.25,.2+k*.1,(k-2)*.07); P(GEO.sph,.2,.2,.2,L.core,2.2+Math.sin(t*4)*.6,.17,.4,0); addLight(o.x,o.y+1.2*sc,o.z,6,[1.2,.5,.1]); }
     P(GEO.cyl,.39,.08,.54,L.trim?L.trim.map(v=>v*.5):[.25,.16,.08],hitE,0,.1,0); P(GEO.box,.05,.09,.09,[.92,.76,.32],hitE+.15,.2,.14,0); P(GEO.box,.12,.14,.1,[.35,.22,.12],hitE,.1,.08,.22);
-    if(L.tabard){ P(GEO.box,.03,.52,.25,L.tabard,hitE,.2,.24,0); P(GEO.sph,.03,.13,.13,L.trim||[.9,.75,.3],hitE+.25,.215,.32,0); }
+    if(L.tabard){ const tx=L.metal?.24:.215; P(GEO.box,.03,.6,.24,L.tabard,hitE,tx,.2,0); P(GEO.box,.032,.025,.25,L.trim||[.9,.75,.3],hitE+.1,tx,-.09,0); P(GEO.sph,.03,.13,.13,L.trim||[.9,.75,.3],hitE+.25,tx+.012,.32,0); }
     if(L.tassets&&L.metal) for(const s of [-1,1]){ P(GEO.box,.2,.26,.15,L.metal,hitE,.06,-.1,s*.17); P(GEO.box,.21,.04,.16,L.trim||L.metal,hitE+.1,.06,-.22,s*.17); }
     if(L.gearX) gearExtras(L,o,t,hitE);
     if(L.gem) P(GEO.sph,.07,.07,.05,L.gem,2.4,.21,.12,0);
@@ -1401,7 +1404,11 @@ function drawHumanoid(o){
   if(L.pack) P(GEO.box,.28,.42,.36,[.45,.3,.16],hitE,-.3,.42,0);
   if(L.cape){ mpush(); mtr(-.17,.62,0); const fl=.06+mv*.55+(o.ride?.3:0); for(let k=0;k<3;k++){ mrz(-(k?fl*.35:fl)-Math.sin(t*3+o.x+k*.9)*.045*(k+1)); P(GEO.box,.04,.36,.47-k*.02,L.cape,hitE,0,-.17,0); if(k===0&&L.det){ mpush(); mtr(-.025,-.16,0); mrx(.785); P(GEO.box,.02,.15,.15,L.trim,hitE+.2,0,0,0); P(GEO.box,.025,.08,.08,L.crest||L.gem||L.cape,hitE+.6,0,0,0); mpop(); } if(k===2&&L.det) P(GEO.box,.045,.05,.46,L.trim,hitE+.1,0,-.33,0); mtr(0,-.34,0); }
     mpop(); if(L.cape&&!bone) P(GEO.cyl,.2,.06,.46,L.cape.map(v=>v*.8),hitE,-.08,.66,0); }
-  if(L.pauld) for(const s of [-1,1]){ P(GEO.sph,.28,.22,.28,L.pauld,hitE,0,.64,s*.28); P(GEO.cyl,.3,.04,.3,L.trim||L.pauld,hitE+.05,0,.6,s*.28); if(L.spikes) P(GEO.cone,.06,.14,.06,L.metal||L.pauld,hitE,0,.75,s*.3); if(L.gem) P(GEO.sph,.06,.06,.06,L.gem,2.2,.12,.66,s*.3); if(L.rune) P(GEO.cyl,.31,.03,.31,L.rune,1.6+Math.sin(t*3)*.5,0,.58,s*.28); }
+  if(L.pauld) for(const s of [-1,1]){ mpush(); mtr(0,.63,s*.3); mrx(-s*.32); const pd=L.pauld;
+    P(GEO.sph,.31,.24,.3,pd,hitE,0,.03,0); P(GEO.sph,.3,.15,.31,pd.map(v=>v*.93),hitE,0,-.05,s*.02); P(GEO.sph,.28,.13,.29,pd.map(v=>v*.86),hitE,0,-.11,s*.035);
+    P(GEO.sph,.315,.035,.305,L.trim||pd,hitE+.08,0,-.02,0); P(GEO.sph,.295,.03,.3,L.trim||pd,hitE+.08,0,-.08,s*.02);
+    if(L.spikes) for(let k=-1;k<=1;k++) P(GEO.cone,.05,.13-Math.abs(k)*.03,.05,L.metal||pd,hitE,k*.08,.12,s*.03);
+    if(L.gem) P(GEO.sph,.05,.05,.05,L.gem,2.2,.13,.04,s*.02); if(L.rune) P(GEO.sph,.3,.025,.3,L.rune,1.6+Math.sin(t*3)*.5,0,-.13,s*.035); mpop(); }
   if(L.iceSpikes) for(const s of [-1,1]) for(let k=0;k<3;k++){ mpush(); mtr(-.06+k*.09,.72,s*(.3+k*.03)); mrx(-s*(.35+k*.3)); P(GEO.cone,.09,.42-k*.09,.09,[.75,.92,1],.9); mpop(); }
   // head
   mpush(); mtr(0,.72,0); mrz(L.hunch?L.hunch*.8:0); if(o.dead<0) mry(Math.sin(t*.6+o.x*1.7)*.16*(1-mv)); mrz(Math.sin(t*1.8+o.x)*.015); if(!bone&&L.head!=='rock') P(GEO.cyl,.11,.1,.11,skin,hitE,0,0,0);
@@ -1425,15 +1432,15 @@ function drawHumanoid(o){
   else if(L.head==='giant'){ P(GEO.sph,.3,.32,.29,skin,hitE,0,.15,0); for(const s of [-1,1]){ P(GEO.sph,.05,.045,.04,[.85,.95,1],0,.12,.19,s*.06); P(GEO.sph,.028,.028,.028,eyeC,eyeE,.14,.19,s*.06); }
     for(let k=0;k<7;k++){ const a=(k/6-.5)*1.6; P(GEO.cone,.05,.24+.08*Math.cos(a*2),.05,[.82,.94,1],.35,.1+Math.cos(a)*.05,-.05,Math.sin(a)*.12); } P(GEO.sph,.3,.12,.3,[.88,.92,.98],hitE,-.02,.28,0);
     for(const s of [-1,1]) P(GEO.limb,.06,.3,.06,[.75,.8,.85],hitE,-.08,.15,s*.13); }
-  else { P(GEO.sph,.27,.3,.26,skin,hitE,0,.15,0); face();
+  else { P(GEO.sph,.27,.3,.26,skin,hitE,0,.15,0); if(L.head!=='helm') face();
     switch(L.head){
-      case 'helm': P(GEO.sph,.31,.31,.3,L.metal,hitE,-.01,.18,0); P(GEO.box,.04,.05,.26,[.08,.08,.1],0,.14,.17,0); P(GEO.box,.05,.2,.04,L.metal,hitE,.15,.1,0); P(GEO.cyl,.33,.04,.32,L.trim,hitE+.1,-.01,.13,0); P(GEO.cone,.06,.14,.06,L.trim,.2,0,.34,0);
-        for(const s of [-1,1]){ P(GEO.box,.14,.16,.03,L.metal,hitE,.08,.06,s*.15); for(let k=0;k<3;k++) P(GEO.sph,.025,.025,.025,L.trim,hitE+.2,-.05+k*.08,.21,s*.152); } P(GEO.box,.03,.012,.2,[.4,.7,1],L.crest?1.4:0,.145,.175,0);
+      case 'helm': { const hm=L.metal; P(GEO.sph,.34,.36,.33,hm,hitE,-.01,.17,0); P(GEO.box,.12,.3,.27,hm,hitE,.095,.12,0); P(GEO.box,.03,.3,.035,L.trim||hm,hitE+.1,.155,.14,0); P(GEO.box,.025,.028,.22,[.03,.03,.04],0,.158,.2,0); for(let k=0;k<3;k++) for(const q of [-1,1]) P(GEO.sph,.012,.012,.012,[.03,.03,.04],0,.157,.08-k*.035,q*.06); P(GEO.cyl,.345,.035,.335,L.trim,hitE+.1,-.01,.27,0); P(GEO.cyl,.28,.06,.3,hm.map(v=>v*.9),hitE,-.01,-.04,0); P(GEO.cone,.06,.14,.06,L.trim,.2,0,.34,0); }
+        for(const s of [-1,1]) for(let k=0;k<3;k++) P(GEO.sph,.025,.025,.025,L.trim,hitE+.2,-.05+k*.08,.21,s*.165); P(GEO.box,.012,.01,.2,L.crest?[.4,.7,1]:[.03,.03,.04],L.crest?1.6:0,.165,.2,0);
         if(L.crest) for(let k=0;k<6;k++) P(GEO.box,.07,.09+Math.sin(k*.6)*.05,.05,L.crest,hitE+.15,-.17+k*.065,.38-Math.abs(k-2.5)*.02,0); break;
       case 'plume': P(GEO.sph,.31,.31,.3,L.metal,hitE,-.01,.18,0); P(GEO.box,.04,.05,.26,[.08,.08,.1],0,.14,.17,0); P(GEO.sph,.14,.3,.06,[.75,.1,.1],hitE,-.08,.42,0); break;
       case 'horned': P(GEO.sph,.31,.28,.3,L.metal,hitE,-.01,.2,0); P(GEO.box,.05,.16,.04,L.metal,hitE,.15,.12,0); for(const s of [-1,1]){ mpush(); mtr(-.02,.25,s*.15); mrx(-s*1.0); mrz(.3); P(GEO.cone,.08,.32,.08,[.92,.88,.78],hitE); mpop(); }
         P(GEO.sph,.18,.22,.22,L.beard||[.6,.4,.2],hitE,.1,.0,0); break;
-      case 'hood': P(GEO.sph,.33,.34,.32,L.hood,hitE,-.04,.17,0); P(GEO.sph,.2,.28,.26,[.05,.04,.04],0,.03,.13,0); for(const s of [-1,1]) P(GEO.sph,.04,.04,.04,eyeC||[.9,.85,.7],eyeC?eyeE:.6,.115,.16,s*.05); P(GEO.cone,.2,.2,.2,L.hood,hitE,-.12,.3,0);
+      case 'hood': P(GEO.sph,.33,.35,.33,L.hood,hitE,-.06,.18,0); for(let k=0;k<11;k++){ const a=(k/10)*Math.PI; P(GEO.sph,.07,.07,.07,L.hood.map(v=>v*.92),hitE,.06,.13+Math.sin(a)*.17,Math.cos(a)*.15); } P(GEO.cone,.2,.2,.2,L.hood,hitE,-.14,.3,0); P(GEO.sph,.3,.12,.4,L.hood,hitE,-.04,-.04,0);
         if(L.det==='m'){ for(let k=0;k<9;k++){ const a=k/8*Math.PI; P(GEO.sph,.045,.045,.045,L.trim,hitE+.15,.13,.13+Math.sin(a)*.17,Math.cos(a)*.15); } P(GEO.sph,.045,.045,.03,[1,.9,.5],2.4,.15,.29,0); } break;
       case 'skullhood': P(GEO.sph,.34,.35,.33,L.hood,hitE,-.04,.17,0); P(GEO.sph,.2,.24,.22,L.skin,hitE,.06,.13,0); for(const s of [-1,1]){ P(GEO.sph,.05,.05,.04,[0,0,0],0,.15,.16,s*.05); P(GEO.sph,.025,.025,.025,eyeC,3,.17,.16,s*.05); } P(GEO.cone,.2,.24,.2,L.hood,hitE,-.12,.32,0); break;
       case 'hoodopen': P(GEO.sph,.33,.33,.31,L.hood,hitE,-.06,.18,0); break;
@@ -1448,7 +1455,7 @@ function drawHumanoid(o){
   mpop();
   // arms
   const sw=o.swing??-1;
-  for(const s of [-1,1]){ mpush(); mtr(0,.62,s*.29);
+  for(const s of [-1,1]){ mpush(); mtr(0,.62,s*.3);
     let a=s>0?-armA:armA, spread=.12, elbow=.25+(L.hunch||0)*.5;
     if(o.cast){ a=1.25+Math.sin(t*6)*.05; spread=.35; elbow=.15; }
     else if(!(s>0&&sw>=0)){ if(o.ride){a=.6;elbow=.9;spread=.05;} else if(o.swim){ a=1.3+Math.sin(t*4+s)*.6; spread=.7; elbow=.3; } else if(EM==='dance'){ a=(s>0?2.6:1.2)+Math.sin(t*6+s)*.5; spread=.5; } else if(EM==='wave'&&s>0){ a=2.9; spread=.55+Math.sin(t*9)*.25; elbow=.5; } else if(EM==='cheer'){ a=3.0; spread=.35; elbow=.1; } else if(sitting){ a=.35; spread=.3; } else if(EM==='bow'&&s>0){ a=.9; elbow=1.2; } }
@@ -1456,8 +1463,9 @@ function drawHumanoid(o){
     if(L.longArms) a+=.15; if(L.weapon==='lantern'&&s>0&&sw<0&&!o.cast) a=.6;
     mrz(a); mrx(-s*spread);
     const ua=L.longArms?.42:.31, la=L.longArms?.4:.29;
-    if(!bone&&!L.pauld) P(GEO.sph,limbW*1.3,limbW*1.25,limbW*1.35,armCol,hitE,0,-.02,0); P(GEO.limb,limbW*.98,ua,limbW*.98,armCol,hitE); mtr(0,-ua,0); P(GEO.sph,limbW*.95,limbW*.95,limbW*.95,bone?armCol:(L.metal||armCol),hitE); mrz(elbow);
-    P(GEO.limb,limbW*.86,la,limbW*.86,bone?armCol:(L.metal||armCol),hitE); if(!bone) P(GEO.cyl,limbW*1.2,.08,limbW*1.2,L.metal||L.trim||armCol,hitE,0,-la+.06,0); if(L.robe&&!bone){ P(GEO.cyl,limbW*1.9,.15,limbW*1.9,armCol,hitE,0,-la+.12,0); P(GEO.cyl,limbW*1.95,.04,limbW*1.95,L.trim||armCol,hitE+.1,0,-la+.05,0); }
+    if(!bone&&!L.pauld) P(GEO.sph,limbW*(L.robe?1.2:1.45),limbW*(L.robe?1.25:1.5),limbW*(L.robe?1.2:1.45),armCol,hitE,0,-.03,0); P(GEO.limb,limbW*.95,ua,limbW*.95,armCol,hitE); if(!bone&&!L.robe) P(GEO.sph,limbW*1.15,limbW*1.85,limbW*1.1,armCol,hitE,.02,-ua*.5,0); mtr(0,-ua,0); P(GEO.sph,limbW*.95,limbW*.95,limbW*.95,bone?armCol:(L.metal||armCol),hitE); mrz(elbow);
+    const fa=bone?armCol:(L.metal||armCol); P(GEO.limb,limbW*.8,la,limbW*.8,fa,hitE); if(!bone){ P(GEO.sph,limbW*1.08,limbW*1.7,limbW*1.05,fa,hitE,0,-la*.28,0); if(L.metal) P(GEO.frus,limbW*1.45,.13,limbW*1.45,L.metal.map(v=>v*1.05),hitE,0,-la+.0,0); else P(GEO.cyl,limbW*1.12,.06,limbW*1.12,L.trim||armCol,hitE,0,-la+.05,0); }
+    if(L.robe&&!bone){ P(GEO.frus,limbW*2.5,.3,limbW*2.5,armCol,hitE,0,-la-.03,0); P(GEO.cyl,limbW*2.52,.035,limbW*2.52,L.trim||armCol,hitE+.1,0,-la-.03,0); }
     mtr(0,-la-.04,0);
     const hand=bone||(L.rock?L.arms:(L.gloves||(L.metal?L.metal.map(v=>v*.8):skin)));
     drawHand(hand,hitE,s,!!bone);
