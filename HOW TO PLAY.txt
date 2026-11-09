@@ -1,0 +1,22 @@
+EMBERFALL ONLINE - BETA
+=======================
+
+PLAYING (for testers)
+1. Double-click "Play Emberfall.html". It opens in your web browser (Chrome, Edge, Firefox or Safari).
+2. On the start screen, type the REALM ADDRESS your host gave you into "Join a realm" and press Join.
+   Examples:  myrealm.onrender.com      or      192.168.1.20:8080
+3. Create your own hero: pick a name and a class. Your characters are saved on your own computer.
+   No address? Press "Play solo" to explore on your own.
+
+Controls: WASD move, mouse to look, 1-8 abilities, F talk/loot, R mount, M map, C character, B bags,
+P party, Esc menu (options, keybinds, sound, bug reports). On a phone or tablet: joystick + drag to look.
+
+Found a bug? Esc -> Report a bug.
+
+HOSTING (for the realm owner)
+- Easiest for friends anywhere: put the folder online on Render.com (see README.md, about 10 minutes, free).
+- Friends on the same Wi-Fi: double-click "Start Emberfall Server" (Windows .bat / Mac .command).
+  The window shows an address like 192.168.1.20:8080 - give that to your friends.
+  (Needs Node.js from https://nodejs.org. Allow it through the firewall if asked.)
+- Friends elsewhere joining your own PC: forward port 8080 on your router to your PC and give them your
+  public IP (search "what is my IP"), e.g. 41.13.22.7:8080. Render is easier and safer.

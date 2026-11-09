@@ -1,0 +1,9 @@
+{
+  "name": "emberfall-online",
+  "version": "1.0.0",
+  "description": "A browser 3D fantasy MMO you can host and mod. Zero dependencies.",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=16" },
+  "license": "MIT"
+}

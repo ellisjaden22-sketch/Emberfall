@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="color-scheme" content="dark"><meta name="darkreader-lock">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emberfall Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<canvas id="ov"></canvas>
+
+<div id="login">
+  <div class="lg-bg"></div><div class="embers" id="embers"></div>
+  <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
+  <div class="lg-wrap">
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.9</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
+    <div class="lg-cols">
+      <div class="lg-roster panel"><h3>Your Characters <span id="rosterCount"></span></h3><div id="roster"></div><div class="lg-note">Characters are saved in this browser, on this device.</div></div>
+      <div class="lg-create panel"><h3>Create a Hero</h3>
+        <input id="nameIn" maxlength="14" placeholder="Choose a name" autocomplete="off" spellcheck="false"><div id="nameErr"></div>
+        <div class="classes" id="classCards"></div>
+        <button id="enterBtn" class="gold big">Create &amp; Enter World</button></div>
+    </div>
+    <div id="realmStatus"><span class="dot"></span>Contacting realm…</div>
+    <div class="keys"><kbd>WASD</kbd> move · <kbd>Mouse</kbd> look · <kbd>1</kbd>–<kbd>8</kbd> abilities · <kbd>F</kbd> talk / loot / gather · <kbd>R</kbd> mount · <kbd>M</kbd> map · <kbd>P</kbd> party · <kbd>C</kbd> bags · <kbd>H</kbd> help</div>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="pframe" class="uframe panel">
+    <div class="portrait" id="pPort"></div>
+    <div class="uinfo">
+      <div class="uname"><span id="pName"></span><span class="lvl" id="pLvl"></span></div>
+      <div class="bar hp" id="pHpBar"><i id="pHp"></i><b id="pAbs"></b><span id="pHpT"></span></div>
+      <div class="bar" id="pResBar"><i id="pRes"></i><span id="pResT"></span></div>
+    </div>
+  </div>
+  <div id="tframe" class="uframe panel hidden">
+    <div class="portrait" id="tPort"></div>
+    <div class="uinfo">
+      <div class="uname"><span id="tName"></span><span class="lvl" id="tLvl"></span></div>
+      <div class="bar hp"><i id="tHp"></i><span id="tHpT"></span></div>
+      <div class="ttag" id="tTag"></div><div id="tActs"></div>
+    </div>
+  </div>
+  <div id="buffs"></div>
+  <div id="party"></div>
+  <div id="mini" class="panel"><canvas id="miniC" width="356" height="356"></canvas><div id="zoneName"></div><div id="netline" title="Who is online"></div></div>
+  <div id="tracker" class="panel"></div>
+  <div id="castbar" class="hidden"><i></i><em class="cbic"></em><span class="cbn"></span><b class="cbt"></b></div>
+  <div id="bar" class="panel"></div>
+  <div id="xpbar"><i></i><span></span></div>
+  <div id="chat"><div id="chatlog"></div><input id="chatin" class="hidden" maxlength="120" placeholder="Say something…  (/p party · /party name · /leave)"></div>
+  <div id="toast"></div>
+  <div id="joy"><i></i></div>
+  <div id="touchBtns"><button data-t="jump">Jump</button><button data-t="interact">Use</button><button data-t="target">Target</button><button data-t="mount">Mount</button><button data-t="autorun">Run</button><button data-t="chat">Chat</button></div>
+  <div id="errmsg"></div>
+  <div id="zoneBanner"></div>
+  <div id="bossFrame" class="hidden"><div class="bfn"><span id="bfName"></span><span id="bfTag"></span></div><div class="bfbar"><i id="bfHp"></i><b class="m50"></b><b class="m20"></b><span id="bfHpT"></span></div><div id="bfCast" class="hidden"><i></i><span></span></div><div id="bfDrop"></div></div>
+  <div id="qArrow" class="hidden" title="Click to switch quest"><div class="qa"><svg viewBox="0 0 40 40"><path d="M20 3 L34 30 L20 23 L6 30Z" fill="#ffd34a" stroke="#2a1604" stroke-width="2.5" stroke-linejoin="round"/></svg></div><div class="qatx"><div class="qat"></div><div class="qad"></div></div><span class="qan"></span></div>
+  <div id="qprog"></div><div id="qbanner"></div>
+  <div id="invPop" class="panel hidden"></div>
+  <div id="lootWin" class="panel hidden"></div>
+  <div id="partyWin" class="win panel hidden"><button class="close" data-close="partyWin">×</button><h2>⚔ Party</h2><div class="pwbody"></div></div>
+  <div id="menuBtns"><button data-k="map">Map</button><button data-k="qlog">Quests</button><button data-k="who">Players</button><button data-k="party">Party</button><button data-k="char">Character</button><button data-k="inv">Bags</button><button data-k="sound" title="Music &amp; sound">♪</button><button data-k="help">Help</button><button id="escBtn" title="Game menu (Esc)">☰</button><button id="gmBtn" class="hidden" title="Game Master tools (/gm)">GM</button></div>
+  <div id="gmWin" class="win panel hidden"><button class="close" data-close="gmWin">×</button><h2>⚙ Game Master Tools</h2><div class="gmbody"></div></div>
+
+  <div id="invWin" class="win panel hidden">
+    <button class="close" data-close="invWin">×</button>
+    <h2>Bags</h2>
+    <div class="baghead"><span id="bagCount"></span><button id="bagSort" title="Sort by rarity">Sort</button></div>
+    <div class="bag" id="bag"></div>
+    <div class="dropzones"><div class="dz sell" id="dzSell">🪙 Drag here to <b>sell</b></div><div class="dz trash" id="dzTrash">🗑 Drag here to <b>destroy</b></div></div>
+    <div id="gold"></div>
+    <div class="baghint">Drag items to move, equip, sell or destroy · right-click for options</div>
+  </div>
+  <div id="charWin" class="win panel hidden"><button class="close" data-close="charWin">×</button><h2>Character</h2>
+    <div class="chtop"><div class="chport" id="chPort"></div><div class="chid"><div id="chName"></div><div id="chSub"></div><div id="chXp" class="chxp"></div></div></div>
+    <div id="eqSlots"></div><div class="stats" id="statBox"></div><div class="baghint">Click an item to unequip it · drag items from your bags onto a slot to equip</div></div>
+  <div id="soundWin" class="win panel hidden"><button class="close" data-close="soundWin">×</button><h2>♪ Sound</h2><div class="sbody"></div></div>
+  <div id="whoWin" class="win panel hidden"><button class="close" data-close="whoWin">×</button><h2>Adventurers online</h2><div id="whoList"></div></div>
+  <div id="dlg" class="win panel hidden"></div>
+  <div id="helpWin" class="win panel hidden">
+    <button class="close" data-close="helpWin">×</button>
+    <h2>How to play</h2>
+    <div><b>Move</b> with WASD (A/D strafe). <b>Drag</b> with the left mouse button to turn the camera, drag with the right button to turn your character too, hold both buttons to run, scroll to zoom, <kbd>Space</kbd> to jump. <b>Target</b> enemies with Tab or a click; click another player or a party frame to target a friend. Abilities are on <kbd>1</kbd>–<kbd>6</kbd> (new ones unlock at levels 2, 3, 4 and 6), your potion is <kbd>Q</kbd>. Using an attack also starts auto-attacking. Moving interrupts spells that have a cast time. <b>Red and orange circles on the ground</b> are incoming attacks: step out before they fill.</div>
+    <div style="margin-top:8px"><b>The open world:</b> people with <b style="color:#ffd34a">!</b> over their heads have quests, and there are camps in every zone. Press <kbd>M</kbd> for the world map and <kbd>L</kbd> for your quest log. Glowing herbs and ore veins can be gathered with <kbd>F</kbd>; Mira brews them into potions and elixirs, Doran uses ore to upgrade your gear. Buy a mount from Hilde and press <kbd>R</kbd> to ride. You can swim in lakes. Try <kbd>/dance</kbd>, <kbd>/wave</kbd>, <kbd>/sit</kbd> (or <kbd>X</kbd>). Discover all the landmarks for bonus experience, and watch out for storms.</div>
+    <div style="margin-top:8px"><b>Frostpeak &amp; Hollowdeep Crypt (level 10–15):</b> ride east through the mountain pass past the Ruins of Vael to reach the frozen frontier. Jarl Hakon's quests lead to the Frost Giant and into the crypt, where Morvath the Lich waits. New abilities unlock at levels 8 and 11 (keys 7 and 8). Look up at night in Frostpeak.</div>
+    <div style="margin-top:8px"><b>Hearthmere</b> is the safe town. Talk to <span style="color:var(--gold)">Captain Oriel</span> for quests and <span style="color:var(--gold)">Mira the Peddler</span> to buy potions and sell loot (stand close and press <kbd>F</kbd>, or click them).</div>
+    <div style="margin-top:8px"><b>Playing together:</b> everyone with this page open is in the same world. Monsters, their health and their attacks are shared. The first player to hit a monster tags it. Join the same party (<kbd>/party name</kbd> or the Party button) to share kill credit, quest progress and party chat (<kbd>/p</kbd>). Menders can heal anyone.</div>
+    <div style="margin-top:8px"><b>Zones:</b> Amberfield (lvl 1–2) · Thornwood (2–4) · Gloamfen (3–5) · Ruins of Vael (5–7) · Cinder Caldera (7–10, home of the Cinder Wyrm). Elites (★) and bosses (☠) hit hard and drop better loot. Day turns to night every 10 minutes. Your character is saved in this browser.</div>
+    <div style="margin-top:8px"><b>Mounts:</b> from level 3, visit <span style="color:var(--gold)">Hilde the Stable Master</span> at the stables in Hearthmere (golden horseshoe 🐎 over her head and on your map). Press <kbd>R</kbd> to ride.</div>
+    <div style="margin-top:8px"><b>Loot:</b> defeated monsters drop a glowing bag. Walk up and press <kbd>F</kbd> to open it, then click items or <b>Take all</b>. Item colours: <span class="t0">Common</span> · <span class="t1">Uncommon</span> · <span class="t2">Rare</span> · <span class="t3">Epic</span> · <span class="t4">Legendary</span>. Each boss shows its drop chances; the last bosses can drop your class's legendary weapon. In your bags, drag items to move, equip, sell or destroy them (or right-click).</div>
+    <div style="margin-top:8px"><b>Parties:</b> click a player and press <b>Invite to party</b>, use the <kbd>P</kbd> window, or type <kbd>/invite name</kbd>. Party members share kill credit and quest progress; <kbd>/p message</kbd> talks to your party.</div>
+    <div style="margin-top:8px"><b>Game Masters:</b> the owner of the game is a GM and sees an orange <b style="color:#ff9a3a">GM</b> button. Type <kbd>/gm</kbd> for the GM tools: gold, levels, god mode, no cooldowns, noclip, speed, teleport, items, time, weather, kill and server announcements. Other players get "You are not a Game Master."</div>
+  </div>
+  <div id="mapWin" class="win panel hidden"><button class="close" data-close="mapWin">×</button><h2>Emberfall</h2><canvas id="mapC" width="800" height="560"></canvas><div class="mapbar"><span id="mapCoords"></span><span class="mapleg"><label><input type="checkbox" data-mf="quests" checked> Quests</label><label><input type="checkbox" data-mf="bosses" checked> Bosses</label><label><input type="checkbox" data-mf="players" checked> Players</label><label><input type="checkbox" data-mf="gather" checked> Herbs &amp; ore</label></span></div>
+  <div class="mapkey"><span><i class="k-boss"></i>Boss</span><span><i class="k-elite"></i>Elite</span><span><i class="k-poi"></i>Landmark</span><span><b style="color:#d89a10">!</b> Quest</span><span><i class="k-q"></i>Quest area</span><span><i class="k-me"></i>You</span><span style="color:var(--dim)">Hover icons for details · M to close</span></div></div>
+  <div id="qlogWin" class="win panel hidden"><button class="close" data-close="qlogWin">×</button><h2>Quest Log</h2><div id="qlogList"></div></div>
+  <div id="deathWin" class="win panel hidden"><h2>You have fallen</h2><p style="color:var(--dim)">Your spirit drifts back toward Hearthmere.</p><button id="releaseBtn">Release Spirit</button></div>
+</div>
+<div id="tip" class="panel hidden"></div>
+<div id="escMenu" class="panel hidden"><h2>Game Menu</h2><button data-e="resume" class="gold">Resume</button><button data-e="options">Options</button><button data-e="keys">Keybinds</button><button data-e="sound">Sound &amp; music</button><button data-e="help">How to play</button><button data-e="bug">Report a bug</button><button data-e="repick">Character select</button><div class="escver">Emberfall Online · Beta v0.9</div></div>
+<div id="optWin" class="win panel hidden"><button class="close" data-close="optWin">×</button><h2>Options</h2><div class="obodywrap"></div></div>
+<div id="bugWin" class="win panel hidden"><button class="close" data-close="bugWin">×</button><h2>Report a bug</h2><p style="color:var(--dim);font-size:13px">What happened, and what did you expect? Your position, level and browser are added automatically. The report is emailed to the game's owner.</p><textarea id="bugTxt" maxlength="1500" rows="6"></textarea><div class="btns" style="display:flex;justify-content:flex-end;margin-top:8px"><button id="bugSend" class="gold">Send report</button></div></div><div id="ctxMenu" class="panel hidden"></div><div id="confirmPop" class="panel hidden"></div>
+
+<script src="config.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
