@@ -364,7 +364,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.22</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.23</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -445,7 +445,7 @@ body.touch canvas{touch-action:none}
     <div style="margin-top:8px"><b>Hearthmere</b> is the safe town. Talk to <span style="color:var(--gold)">Captain Oriel</span> for quests and <span style="color:var(--gold)">Mira the Peddler</span> to buy potions and sell loot (stand close and press <kbd>F</kbd>, or click them).</div>
     <div style="margin-top:8px"><b>Playing together:</b> everyone with this page open is in the same world. Monsters, their health and their attacks are shared. The first player to hit a monster tags it. Join the same party (<kbd>/party name</kbd> or the Party button) to share kill credit, quest progress and party chat (<kbd>/p</kbd>). Menders can heal anyone.</div>
     <div style="margin-top:8px"><b>Zones:</b> Amberfield (lvl 1–2) · Thornwood (2–4) · Gloamfen (3–5) · Ruins of Vael (5–7) · Cinder Caldera (7–10, home of the Cinder Wyrm). Elites (★) and bosses (☠) hit hard and drop better loot. Day turns to night every 10 minutes. Your character is saved in this browser.</div>
-    <div style="margin-top:8px"><b>Mounts:</b> from level 10, visit <span style="color:var(--gold)">Hilde the Stable Master</span> at the stables in Hearthmere (golden horseshoe 🐎 over her head and on your map). Press <kbd>R</kbd> to ride.</div>
+    <div style="margin-top:8px"><b>Mounts:</b> from level 10, visit <span style="color:var(--gold)">Hilde the Stable Master</span> at the stables outside the East Gate of Hearthmere (golden horseshoe 🐎 over her head and on your map). Press <kbd>R</kbd> to ride.</div>
     <div style="margin-top:8px"><b>Loot:</b> defeated monsters drop a glowing bag. Walk up and press <kbd>F</kbd> to open it, then click items or <b>Take all</b>. Item colours: <span class="t0">Common</span> · <span class="t1">Uncommon</span> · <span class="t2">Rare</span> · <span class="t3">Epic</span> · <span class="t4">Legendary</span>. Each boss shows its drop chances; the last bosses can drop your class's legendary weapon. In your bags, drag items to move, equip, sell or destroy them (or right-click).</div>
     <div style="margin-top:8px"><b>Parties:</b> click a player and press <b>Invite to party</b>, use the <kbd>P</kbd> window, or type <kbd>/invite name</kbd>. Party members share kill credit and quest progress; <kbd>/p message</kbd> talks to your party.</div>
     <div style="margin-top:8px"><b>Game Masters:</b> the owner of the game is a GM and sees an orange <b style="color:#ff9a3a">GM</b> button. Type <kbd>/gm</kbd> for the GM tools: gold, levels, god mode, no cooldowns, noclip, speed, teleport, items, time, weather, kill and server announcements. Other players get "You are not a Game Master."</div>
@@ -484,7 +484,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 22;
+const VERSION = 23;
 const TS = 32, MW = 160, MH = 160, OWH = 112;
 const now = () => performance.now() / 1000;
 
@@ -505,8 +505,8 @@ const rid = n => Array.from({length:n},()=> 'abcdefghjkmnpqrstuvwxyz23456789'[Ma
    WORLD
    ===================================================================== */
 const T={GRASS:0,FOREST:1,TREE:2,WATER:3,PATH:4,SAND:5,SWAMP:6,RUIN:7,WALL:8,ASH:9,LAVA:10,COBBLE:11,HOUSE:12,ROCK:13,BRIDGE:14,FOUNT:15};
-T.ICE=17; T.SNOW=18; T.TWALL=19; T.VOID=20; T.DWALL=21; T.DFLOOR=22; T.COLUMN=23; T.DOOR=24; T.DGATE=25;
-const SOLID=new Set([T.TREE,T.WATER,T.WALL,T.LAVA,T.HOUSE,T.ROCK,T.FOUNT,T.TWALL,T.VOID,T.DWALL,T.COLUMN,T.DGATE]);
+T.ICE=17; T.SNOW=18; T.TWALL=19; T.VOID=20; T.DWALL=21; T.DFLOOR=22; T.COLUMN=23; T.DOOR=24; T.DGATE=25; T.FENCE=26;
+const SOLID=new Set([T.TREE,T.WATER,T.WALL,T.LAVA,T.HOUSE,T.ROCK,T.FOUNT,T.TWALL,T.VOID,T.DWALL,T.COLUMN,T.DGATE,T.FENCE]);
 const TOWN={x:56,y:82,r:19,wallR:18.65,gates:[],gatePts:[]};
 const LAIR={x:56,y:9};
 const ZONES={
@@ -563,6 +563,11 @@ function edgeOf(tx,ty){ return ty<OWH?Math.min(tx,ty,MW-1-tx,OWH-1-ty):Math.min(
 const inVault=(px,py)=>py>=OWH*TS;
 function doorClosedAt(tx,ty){ for(const d of VAULT.doors) if(tx===d.x&&ty>=d.y0&&ty<=d.y1){ const b=VAULT.boss[d.boss]; return !(b&&b.dead); } return false; }
 /* the gate in the Ruins of Vael: a flattened forecourt, a path down to the road, and the gatehouse itself (solid) */
+function carveStable(){ const X0=85,X1=97,Z0=64,Z1=73;
+  for(let y=62;y<=81;y++)for(let x=84;x<=99;x++){ const t=tAt(x,y); if(t===T.TREE||t===T.ROCK||t===T.WALL) setT(x,y,T.GRASS); }
+  for(let x=X0;x<=X1;x++){ setT(x,Z0,T.FENCE); if(x<87||x>89) setT(x,Z1,T.FENCE); } for(let y=Z0;y<=Z1;y++){ setT(X0,y,T.FENCE); setT(X1,y,T.FENCE); }
+  for(let y=75;y<=78;y++)for(let x=92;x<=97;x++) setT(x,y,T.HOUSE);
+  for(let y=74;y<=80;y++)for(let x=88;x<=89;x++) setT(x,y,T.PATH); for(let x=78;x<=89;x++)for(const y of [79,80]){ const t=tAt(x,y); if(t!==T.WATER&&t!==T.BRIDGE&&t!==T.HOUSE) setT(x,y,T.PATH); } }
 function carveVaultGate(){
   for(let y=42;y<=55;y++)for(let x=93;x<=106;x++){ if(Math.hypot(x-99.5,y-48.5)>5.6) continue; const t=tAt(x,y); if(t!==T.PATH&&t!==T.BRIDGE) setT(x,y,T.RUIN); }
   for(let y=51;y<=57;y++)for(let x=98;x<=100;x++) if(tAt(x,y)!==T.BRIDGE) setT(x,y,T.PATH);
@@ -621,7 +626,7 @@ function genWorld(){
     const inGate=a=>TOWN.gates.some(g=>Math.abs(Math.atan2(Math.sin(a-g.c),Math.cos(a-g.c)))<half);
     for(let y=TOWN.y-21;y<=TOWN.y+21;y++)for(let x=TOWN.x-21;x<=TOWN.x+21;x++){ const d=Math.hypot(x-TOWN.x,y-TOWN.y); if(d<R-.75||d>=R+.8) continue;
       if(Math.abs(y-TOWN.y)<=1&&inGate(Math.atan2(y-TOWN.y,x-TOWN.x))) continue; setT(x,y,T.TWALL); } }
-  carveVault(); carveVaultGate();
+  carveVault(); carveVaultGate(); carveStable();
 }
 genWorld();
 const isSolidPx=(px,py)=>{ const tx=Math.floor(px/TS), ty=Math.floor(py/TS), t=tAt(tx,ty); return SOLID.has(t)||(t===T.DOOR&&doorClosedAt(tx,ty)); };
@@ -723,7 +728,7 @@ const NPCS=[
 ];
 function addNPC(id,name,title,tx,ty,col){ const [x,y]=findOpen(tx,ty); NPCS.push({id,name,title,x:x*TS+16,y:y*TS+16,col}); }
 addNPC('doran','Doran Ironhand','Blacksmith',TOWN.x-6,TOWN.y+8,'#8a5a3a');
-addNPC('hilde','Hilde','Stable Master',TOWN.x+8,TOWN.y-2,'#a07a4a');
+addNPC('hilde','Hilde','Stable Master',90,77,'#a07a4a');
 { let gi=0; for(const g of TOWN.gates) for(const q of [-1,1]){ const a=g.c, r=15; addNPC('guard'+(gi++),'Hearthmere Guard','Town Watch',Math.round(TOWN.x+Math.cos(a)*r),TOWN.y+q*2,'#8a8a9a'); } }
 addNPC('sylas','Ranger Sylas','Thornwood Camp',20,43,'#3a6a3a');
 addNPC('marla','Old Marla','Gloamfen Herbalist',18,98,'#6a5a3a');
@@ -938,7 +943,7 @@ const mobs=[], mobById={};
       else if(mt.spots){x=mt.spots[k][0]*TS+16;y=mt.spots[k][1]*TS+16}
       else do{ x=(3+R()*(MW-6))*TS; y=(3+R()*(OWH-6))*TS; tries++;
         const tx=Math.floor(x/TS),ty=Math.floor(y/TS);
-        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5,ty-48)>8;
+        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5,ty-48)>8 && Math.hypot(tx-91,ty-72)>11;
         if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30 && ty<TOWN.y;
         if(ok){ const gap=tries<1500?112:tries<3000?96:70; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
@@ -1049,7 +1054,7 @@ function pushMd(u,amt,mobId,vis){ const a=[++mdSeq,u,Math.round(amt),mobId,vis||
   if(u===MY_U) mobHitsMe(a); else visualMobHit(mobById[mobId],u,vis); }
 function pushTg(x,y,r,dur,kind){ const a=[++tgSeq,Math.round(x),Math.round(y),Math.round(r),Math.round(dur*1000),kind]; myTg.push(a); if(myTg.length>8) myTg.shift(); addTel(a); return a; }
 function packMobs(){ const t=now(); const ps=[]; if(me) ps.push([me.x,me.y]); for(const o of others.values()) ps.push([o.x,o.y]);
-  const out=[]; for(const m of mobs){ if(!m.tgt&&!(m.t.vault&&m.t.boss)&&!ps.some(p=>Math.abs(p[0]-m.x)<1700&&Math.abs(p[1]-m.y)<1700)) continue;
+  const out=[]; for(const m of mobs){ if(!m.tgt&&!m.t.vault&&!ps.some(p=>Math.abs(p[0]-m.x)<1700&&Math.abs(p[1]-m.y)<1700)) continue;
     if(m.dead){ out.push([m.id]); continue; } const fl=(m.stunU>t?2:0)|(m.rootU>t?4:0)|(m.evade?8:0)|(m.enr?16:0);
     if(m.hp>=m.mhp && !fl && !m.tgt && !m.tag) out.push([m.id,Math.round(m.x),Math.round(m.y)]);
     else out.push([m.id,Math.round(m.x),Math.round(m.y),Math.max(0,Math.round(m.hp)),fl,m.tgt||'',m.tag||'']); } return out; }
@@ -1093,7 +1098,7 @@ function syncPeers(){
     othersByU.set(o.u,o);
     if(o.last===pr) continue; o.last=pr;
     o.n=clean(pr.n).slice(0,14)||'Stranger'; o.c=CLS[pr.c]?pr.c:'warden'; o.l=clamp(pr.l|0,1,MAXLVL);
-    o.x=+pr.x||0;o.y=+pr.y||0;o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);o.d=!!pr.d;
+    { const nx=+pr.x||0, ny=+pr.y||0, tn=now(), dtp=tn-(o.tr||0); if(o.tr&&dtp>.03&&dtp<1){ o.vx=clamp((nx-o.x)/dtp,-700,700); o.vy=clamp((ny-o.y)/dtp,-700,700); } else { o.vx=0; o.vy=0; } o.tr=tn; o.x=nx; o.y=ny; }o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);o.d=!!pr.d;
     o.sl=!!pr.sl; if(Array.isArray(pr.ws)&&pr.gm&&p.gm!==false) applyWorldWs(pr.ws); o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,4); o.gv=parseGV(pr.gv); o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.seenAt=t;
     if(o.isNew){ o.isNew=false; o.rx=o.x; o.ry=o.y; if(me&&seenO(o)) sysMsg(`${o.n} the ${CLS[o.c].name} has entered Emberfall.`); }
     else if(o.wasVis!==undefined&&o.wasVis!==seenO(o)&&me) sysMsg(seenO(o)?`${o.n} the ${CLS[o.c].name} has entered Emberfall.`:`${o.n} has left the realm.`); o.wasVis=seenO(o);
@@ -1140,7 +1145,7 @@ function applySnapshot(w){
   for(const s of w){ if(!Array.isArray(s)) continue; const m=mobById[s[0]]; if(!m) continue;
     const wasDead=m.dead;
     if(s.length===1){ if(!wasDead){ m.dead=true; m.tgt=''; onMobDeath(m); } continue; }
-    m.x=+s[1]; m.y=+s[2];
+    { const nx=+s[1], ny=+s[2], tn=now(), dtp=tn-(m.tr||0); if(m.tr&&dtp>.03&&dtp<1&&!wasDead){ m.vx=clamp((nx-m.x)/dtp,-500,500); m.vy=clamp((ny-m.y)/dtp,-500,500); } else { m.vx=0; m.vy=0; } m.tr=tn; m.x=nx; m.y=ny; }
     let hp=m.mhp,fl=0,tg='',tag='';
     if(s.length>=7){ hp=+s[3]; fl=s[4]|0; tg=String(s[5]||''); tag=String(s[6]||''); }
     if(hp<m.hp && !wasDead) m.hit=t;
@@ -1283,9 +1288,10 @@ function recalc(){ const c=me.c, cl=CLS[c.cls]; const g=gearStats(c);
 const costOf=ab=> Math.round((CLS[me.c.cls].res!=='mana'? ab.cost : ab.cost*(1+.22*(me.c.lvl-1)))*(1-TAL('cost')));
 let SV_MUL=1;
 const scaleV=v=>SV_MUL*(v[0]+v[1]*(me.c.lvl-1)+me.pow*.8)*(buffOn('might')?1.2:1)*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?1.1:1)*(me.avatarU>now()?1.4:1);
+function fixClassGear(c){ for(const sl of ['weapon','armor']){ const it=c.eq[sl]; if(it&&!canUse(it,c.cls)){ c.eq[sl]=null; c.inv.push(it); setTimeout(()=>sysMsg(`[${it.name}] cannot be used by a ${CLS[c.cls].name} and was moved to your bags.`,'c-err'),2500); } } }
 function enterWorld(name,cls,existing,fresh){ TALC=null;
   try{ audInit(); }catch(e){}
-  const RL=rosterList(); let c=existing||(!fresh&&RL.find(x=>x.name===name&&x.cls===cls)); if(!c){ c=newChar(name,cls); c.id=rid(6); c.created=Date.now(); RL.push(c); } migrateChar(c);
+  const RL=rosterList(); let c=existing||(!fresh&&RL.find(x=>x.name===name&&x.cls===cls)); if(!c){ c=newChar(name,cls); c.id=rid(6); c.created=Date.now(); RL.push(c); } migrateChar(c); fixClassGear(c);
   me={c,x:SPAWN.x,y:SPAWN.y,face:-Math.PI/2,hp:null,res:null,dead:false,target:null,cast:null,gcd:0,cds:{},auto:false,autoT:0,
     bulwark:0,hots:[],mounted:0,emote:null,jumpH:0,jumpV:0,absorb:0,absorbU:0,rootU:0,dots:[],dash:null,swingT:0,spinT:0,stepT:0,lastCombat:-99,lastSpend:-99,potCd:0,party:saves.party||'',moving:false,zone:'',tabIdx:0,cp:0,stealth:false,evasionU:0,stepU:0};
   recalc(); me.hp=me.mhp; me.res=CLS[cls].res==='rage'?0:me.mres;
@@ -1316,23 +1322,32 @@ function takeDamage(amt,mob,vis){
   if(mob) visualMobHit(mob,MY_U,vis||0,true);
   hurtFlash=Math.min(1,hurtFlash+d/me.mhp*3); if(d>me.mhp*.12) shake(6);
   if(me.cast && !me.cast.pushed){ me.cast.t0+=.25; me.cast.pushed=true; }
+  if(d>0&&cdOk('hurt',.75)) snd('hurt',null,null,me.c.cls==='mender'||me.c.cls==='assassin'?1.35:1);
   if(me.hp<=0){ me.hp=0; die(); }
 }
 function healMe(amt,from){ if(me.dead) return; const before=me.hp; me.hp=Math.min(me.mhp,me.hp+amt); const h=Math.round(me.hp-before);
   if(h>0) fct(me.x,me.y-30,'+'+h,'#6dff7a'); sparkle(me.x,me.y,'#9dffb0'); }
-function die(){ stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
+function die(){ try{ snd('die'); }catch(e){} stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
 function release(){ me.dead=false; if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { me.x=SPAWN.x; me.y=SPAWN.y; } me.rootU=0; me.hp=Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
 function gainXp(n){
   const c=me.c; if(c.lvl>=MAXLVL){ return; }
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
   while(c.lvl<MAXLVL && c.xp>=xpNeed(c.lvl)){ c.xp-=xpNeed(c.lvl); c.lvl++; recalc(); me.hp=me.mhp; if(CLS[c.cls].res==='mana') me.res=me.mres;
-    toast(`Level ${c.lvl}!`); sfx('level'); setTimeout(()=>{ toast('Talent point! Press N to spend it','small'); sysMsg('You earned a talent point. Open Talents (N) to spend it.','c-xp'); },1400); TALC=null; setTimeout(()=>armorySync(true),500); if(c.lvl===10&&!c.mounts.length){ setTimeout(()=>toast('Mounts unlocked! Visit Hilde the Stable Master','small'),900); sysMsg('You can now ride! Hilde the Stable Master in Hearthmere sells mounts. Look for the golden horseshoe on your map.'); renderTracker(); } burst(me.x,me.y,'#ffd66a',40,200,{glow:true}); for(const ab of curAbils()) if(ab.lvl===c.lvl) { sysMsg(`New ability learned: ${ab.name} (key ${curAbils().indexOf(ab)+1})`); toast('New ability: '+ab.name,'small'); } sysMsg(`You have reached level ${c.lvl}. Your power grows.`); ring(me.x,me.y,'#ffd66a',90); }
+    toast(`Level ${c.lvl}!`); sfx('level'); setTimeout(()=>{ toast('Talent point! Press N to spend it','small'); sysMsg('You earned a talent point. Open Talents (N) to spend it.','c-xp'); },1400); TALC=null; setTimeout(()=>armorySync(true),500); if(c.lvl===10&&!c.mounts.length){ setTimeout(()=>toast('Mounts unlocked! Visit Hilde the Stable Master','small'),900); sysMsg('You can now ride! Hilde the Stable Master, just outside the East Gate of Hearthmere, sells mounts. Look for the golden horseshoe on your map.'); renderTracker(); } burst(me.x,me.y,'#ffd66a',40,200,{glow:true}); for(const ab of curAbils()) if(ab.lvl===c.lvl) { sysMsg(`New ability learned: ${ab.name} (key ${curAbils().indexOf(ab)+1})`); toast('New ability: '+ab.name,'small'); } sysMsg(`You have reached level ${c.lvl}. Your power grows.`); ring(me.x,me.y,'#ffd66a',90); }
   if(c.lvl>=MAXLVL) c.xp=0;
   persist();
 }
 
 /* ---------- items ---------- */
-const BASES={weapon:['Longsword','Warstaff','Spellblade','Morningstar','Wand','Greataxe'],armor:['Jerkin','Robes','Hauberk','Brigandine','Vestments','Mantle'],trinket:['Charm','Signet','Talisman','Locket','Idol']};
+const ARMT={plate:['Breastplate','Warplate','Hauberk'],leather:['Jerkin','Brigandine','Hide Tunic'],cloth:['Robes','Vestments','Mantle']};
+const CLS_ARMOR={warden:'plate',assassin:'leather',mender:'cloth',arcanist:'cloth'}, ARMNAME={plate:'Plate',leather:'Leather',cloth:'Cloth'};
+const CLS_WEAP={warden:['Longsword','Morningstar','Greataxe'],mender:['Warstaff','Morningstar','Wand'],arcanist:['Wand','Warstaff','Spellblade'],assassin:['Daggers','Dirks']};
+const BASES={weapon:['Longsword','Warstaff','Spellblade','Morningstar','Wand','Greataxe','Daggers','Dirks'],armor:[...ARMT.plate,...ARMT.leather,...ARMT.cloth],trinket:['Charm','Signet','Talisman','Locket','Idol']};
+function armorType(it){ if(!it||it.slot!=='armor') return null; if(it.at) return it.at; const n=String(it.name||''); for(const k in ARMT) if(ARMT[k].some(b=>n.includes(b))) return k; return null; }
+function weaponBase(it){ if(!it||it.slot!=='weapon') return null; const n=String(it.name||''); return BASES.weapon.find(b=>n.includes(b))||null; }
+function canUse(it,cls){ if(!it) return true; if(it.leg) return it.leg===cls; if(it.slot==='armor'){ const at=armorType(it); return !at||at===CLS_ARMOR[cls]; }
+  if(it.slot==='weapon'){ const b=weaponBase(it); return !b||CLS_WEAP[cls].includes(b); } return true; }
+function useReason(it,cls){ if(it.slot==='armor') return `${CLS[cls].name}s can only wear ${ARMNAME[CLS_ARMOR[cls]].toLowerCase()} armour.`; return `${CLS[cls].name}s cannot use a ${weaponBase(it)||'weapon like that'}.`; }
 const PRE=[['Worn','Rough','Plain','Dented'],['Sturdy','Keen','Hunter\'s','Tempered'],['Gleaming','Runed','Vaelborn','Moonlit'],['Emberforged','Wyrmscale','Cinderheart']];
 const SUF=['of the Hollow','of Cinders','of the Mire','of Dawnlight','of the Wolf','of Embers'];
 const LEGEND={
@@ -1345,13 +1360,14 @@ function legendaryFor(cls){ const L=LEGEND[cls]||LEGEND.warden; return {id:rid(6
 const BOSSLOOT={oldtusk:{n:1,p:[55,40,5,0,0]},fangmaw:{n:1,p:[0,55,40,5,0]},hking:{n:1,p:[0,20,65,15,0]},wyrm:{n:2,p:[0,0,60,38,2]},frostgiant:{n:2,p:[0,0,45,52,3]},lich:{n:2,p:[0,0,0,92,8]}};
 function rollRar(p){ let r=Math.random()*100; for(let i=0;i<p.length;i++){ r-=p[i]; if(r<0) return i; } return p.findIndex(v=>v>0); }
 function dropText(key){ const B=BOSSLOOT[key]; if(!B) return ''; return B.p.map((v,i)=>v?`${RAR[i]} ${v}%`:'').filter(Boolean).join(' · '); }
-function genItem(lv,rar){ if(rar>=4) return legendaryFor(me?me.c.cls:'warden');
+function genItem(lv,rar,cls){ cls=cls||(me?me.c.cls:'warden'); if(rar>=4) return legendaryFor(cls);
   const R=Math.random, slot=SLOTS[R()*3|0];
   const budget=(2.2+lv*1.7)*[1,1.45,2,2.8,3.8][rar];
   const pf=[.72,.25,.5][SLOTS.indexOf(slot)];
   const pow=Math.max(0,Math.round(budget*pf)), sta=Math.max(1,Math.round(budget*(1-pf)));
-  let name=PRE[rar][R()*PRE[rar].length|0]+' '+BASES[slot][R()*BASES[slot].length|0]; if(rar>=2) name+=' '+SUF[R()*SUF.length|0];
-  return {id:rid(6),slot,name,rar,pow,sta,lv,val:Math.max(1,Math.round(lv*[.5,1.4,3,7][rar]))};
+  const pool=slot==='armor'?ARMT[CLS_ARMOR[cls]]:slot==='weapon'?CLS_WEAP[cls]:BASES.trinket;
+  let name=PRE[rar][R()*PRE[rar].length|0]+' '+pool[R()*pool.length|0]; if(rar>=2) name+=' '+SUF[R()*SUF.length|0];
+  const it={id:rid(6),slot,name,rar,pow,sta,lv,val:Math.max(1,Math.round(lv*[.5,1.4,3,7][rar]))}; if(slot==='armor') it.at=CLS_ARMOR[cls]; return it;
 }
 function lootFor(m){
   const c=me.c, mt=m.t;
@@ -1370,6 +1386,7 @@ function lootFor(m){
 
 /* ---------- death credit ---------- */
 function onMobDeath(m){
+  try{ mobSnd(m,'die'); }catch(e){}
   m.deathT=now(); m.dx=m.rx; m.dy=m.ry; deathBurst(m);
   if(!me) return; bossDied(m);
   if(me.target && me.target.kind==='m' && me.target.id===m.id){ me.target=null; me.auto=false; if(me.cast&&me.cast.ab.hostile) me.cast=null; }
@@ -1416,7 +1433,7 @@ function useAbility(i){
   if(ab.charge && me.rootU>t) return err('You are rooted');
   if(!ab.noGcd) me.gcd=t+(gm.nocd?.25:1);
   flashSlot(i);
-  if(ab.cast){ me.cast={ab,t0:t,dur:ab.cast,tgt:me.target?{...me.target}:null,tgtEnt:tgt}; return; }
+  if(ab.cast){ try{ snd('castStart'); }catch(e){} me.cast={ab,t0:t,dur:ab.cast,tgt:me.target?{...me.target}:null,tgtEnt:tgt}; return; }
   execAbility(ab,tgt);
 }
 function execAbility(ab,tgt){
@@ -1509,7 +1526,7 @@ function updateAuto(dt){
   }
 }
 function usePotion(){ if(!me||me.dead) return; const t=now(); if(me.c.pots<=0) return err('No potions left'); if(me.potCd>t) return err('Potion not ready');
-  me.c.pots--; me.potCd=t+30; healMe(Math.round(me.mhp*.38)); persist(); }
+  me.c.pots--; me.potCd=t+30; try{ snd('potion'); }catch(e){} healMe(Math.round(me.mhp*.38)); persist(); }
 
 /* =====================================================================
    EMBERFALL 3D ENGINE — WebGL2, no libraries
@@ -1607,7 +1624,7 @@ out vec4 o;
 ${GLSL_NOISE}
 const vec2 PD[12]=vec2[12](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));
 float shadowF(){ vec3 p=vS.xyz/vS.w*.5+.5; if(p.x<0.||p.x>1.||p.y<0.||p.y>1.||p.z>1.) return 1.;
-  vec2 ts=1./vec2(textureSize(uShadow,0)); float s=0.; for(int i=0;i<12;i++){ s+= (p.z-.0015 > texture(uShadow,p.xy+PD[i]*ts*1.8).r) ? 0. : 1.; } return s/12.; }
+  vec2 ts=1./vec2(textureSize(uShadow,0)); float bias=.0011+.0012*(1.-abs(dot(normalize(vN),uSunDir))); float s=0.; for(int i=0;i<12;i++){ s+= (p.z-bias > texture(uShadow,p.xy+PD[i]*ts*1.9).r) ? 0. : 1.; } return smoothstep(0.,1.,s/12.); }
 void main(){
   vec3 N=normalize(vN); if(!gl_FrontFacing&&uFol<2.5) N=-N;
   vec3 base=vC.rgb*uTint; float trans=0.;
@@ -1855,7 +1872,15 @@ const HEADK=(function(){ const G=(v,s)=>Math.exp(-(v*v)/(2*s*s)), ss=(a,b,x)=>{ 
       idx[j].push(gPush(d,p[0]+p[0]/n*th2,p[1]+p[1]/n*th2*.9-sag,p[2]+p[2]/n*th2,ux,uy,uz)); } }
     for(let j=0;j<ring;j++)for(let i=0;i<seg;i++){ const a=idx[j][i],b=idx[j+1][i],c=idx[j][i+1],e=idx[j+1][i+1]; if(a<0||b<0||c<0||e<0) continue; d.i.push(a,c,b,b,c,e); }
     return gNormals(d); }
-  return {pt,frontX,geo,hairGeo,rx,ry,rz,wz}; })();
+  function hoodGeo(seg,ring){ const d=G0(), idx=[];
+    for(let j=0;j<=ring;j++){ const th=j/ring*Math.PI; idx.push([]); for(let i=0;i<=seg;i++){ const ph=i/seg*Math.PI*2; const ux=Math.sin(th)*Math.cos(ph), uy=Math.cos(th), uz=Math.sin(th)*Math.sin(ph);
+      const face=ux>.3&&uy<.46&&uy>-.82&&Math.abs(uz)<.8; if(face&&!(uy<-.62)){ idx[j].push(-1); continue; }
+      const p=pt(ux,Math.max(uy,-.7),uz); const n=Math.hypot(p[0],p[1],p[2])||1; const th2=.1+.035*ss(.2,1,uy)+.05*ss(.1,-.7,uy)*(ux<.3?1:0);
+      let x=p[0]+p[0]/n*th2, y=p[1]+p[1]/n*th2, z=p[2]+p[2]/n*th2; if(ux<0&&uy>.4) { x-=.06*ss(.4,1,uy)*(-ux); y+=.05*ss(.6,1,uy); } if(uy<-.55) y-=.08*ss(-.55,-1,uy);
+      idx[j].push(gPush(d,x,y,z,ux,uy,uz)); } }
+    for(let j=0;j<ring;j++)for(let i=0;i<seg;i++){ const a=idx[j][i],b=idx[j+1][i],c=idx[j][i+1],e=idx[j+1][i+1]; if(a<0||b<0||c<0||e<0) continue; d.i.push(a,c,b,b,c,e); }
+    return gNormals(d); }
+  return {pt,frontX,geo,hairGeo,hoodGeo,rx,ry,rz,wz}; })();
 /* a shaped boot: rounded heel, high ankle, instep sloping down to a rounded toe, flat sole */
 function gFoot(){ const d=G0(), NX=22, NA=20;
   for(let i=0;i<=NX;i++){ const t=i/NX, x=-.105+.335*t; const end=Math.sqrt(Math.max(0,Math.sin(Math.PI*Math.min(1,t*1.04)))); const w=(.13+.03*Math.sin(Math.PI*t))*Math.max(.12,end);
@@ -1865,7 +1890,7 @@ function gFoot(){ const d=G0(), NX=22, NA=20;
   return gNormals(d,{cy:-.04}); }
 
 const TORSO_PROF=[[0,.3],[.04,.4],[.12,.45],[.24,.41],[.36,.39],[.5,.43],[.64,.48],[.78,.5],[.88,.47],[.95,.37],[.99,.2],[1,.05]];
-const GEO={head:mkVAO(HEADK.geo(72,64)),hair:mkVAO(HEADK.hairGeo(72,64,0)),hairL:mkVAO(HEADK.hairGeo(72,64,1)),foot:mkVAO(gFoot()),torso:mkVAO(gLoft(28,TORSO_PROF)),uarm:mkVAO(gLoft(18,[[0,.16],[.05,.4],[.22,.5],[.5,.46],[.8,.38],[.95,.34],[1,.16]],1)),farm:mkVAO(gLoft(18,[[0,.16],[.05,.42],[.22,.5],[.55,.42],[.85,.32],[.96,.3],[1,.14]],1)),thigh:mkVAO(gLoft(18,[[0,.2],[.05,.44],[.2,.5],[.55,.44],[.85,.36],[.96,.34],[1,.16]],1)),shin:mkVAO(gLoft(18,[[0,.18],[.05,.4],[.25,.5],[.5,.42],[.8,.31],[.95,.29],[1,.14]],1)),box:mkVAO(gRBox(.2)),cube:mkVAO(gBox()),sph:mkVAO(gSphere(28,18)),lsph:mkVAO(gSphere(12,8)),cyl:mkVAO(gCyl(24,.5,.5)),lcyl:mkVAO(gCyl(10,.5,.5)),cone:mkVAO(gCyl(24,0,.5)),lcone:mkVAO(gCyl(10,0,.5)),limb:mkVAO(gLimb(20)),llimb:mkVAO(gLimb(8)),wing:mkVAO(gWing()),prism:mkVAO(gPrism()),frus:mkVAO(gCyl(26,.32,.5)),blob:mkVAO(gBlob(22,15,.22,5,1.6))};
+const GEO={hoodM:mkVAO(HEADK.hoodGeo(64,56)),head:mkVAO(HEADK.geo(72,64)),hair:mkVAO(HEADK.hairGeo(72,64,0)),hairL:mkVAO(HEADK.hairGeo(72,64,1)),foot:mkVAO(gFoot()),torso:mkVAO(gLoft(28,TORSO_PROF)),uarm:mkVAO(gLoft(18,[[0,.16],[.05,.4],[.22,.5],[.5,.46],[.8,.38],[.95,.34],[1,.16]],1)),farm:mkVAO(gLoft(18,[[0,.16],[.05,.42],[.22,.5],[.55,.42],[.85,.32],[.96,.3],[1,.14]],1)),thigh:mkVAO(gLoft(18,[[0,.2],[.05,.44],[.2,.5],[.55,.44],[.85,.36],[.96,.34],[1,.16]],1)),shin:mkVAO(gLoft(18,[[0,.18],[.05,.4],[.25,.5],[.5,.42],[.8,.31],[.95,.29],[1,.14]],1)),box:mkVAO(gRBox(.2)),cube:mkVAO(gBox()),sph:mkVAO(gSphere(28,18)),lsph:mkVAO(gSphere(12,8)),cyl:mkVAO(gCyl(24,.5,.5)),lcyl:mkVAO(gCyl(10,.5,.5)),cone:mkVAO(gCyl(24,0,.5)),lcone:mkVAO(gCyl(10,0,.5)),limb:mkVAO(gLimb(20)),llimb:mkVAO(gLimb(8)),wing:mkVAO(gWing()),prism:mkVAO(gPrism()),frus:mkVAO(gCyl(26,.32,.5)),blob:mkVAO(gBlob(22,15,.22,5,1.6))};
 
 /* =====================================================================
    3D WORLD
@@ -1874,7 +1899,7 @@ const HR=2, HN=MW*HR+1, HNZ=MH*HR+1, HG=new Float32Array(HN*HNZ), HLM=new Float3
 const WATER_Y=0, LAVA_Y=2.6;
 const LAMPS=[[-6,-3],[6,-3],[-6,6],[6,6],[0,8],[-11,-2],[10,2],[1,-11],[-4,12.5],[4,12.5],[-8,-9],[8,-9],[12,-2],[-12,2],[11,8],[-16,-2],[16,2],[0,-13.5],[0,16],[-12,-13],[12,-13],[-11,12],[9,13]].map(([dx,dy])=>({x:(TOWN.x+dx)*TS+16,y:(TOWN.y+dy)*TS+16})).filter(L=>!SOLID.has(tAt(Math.floor(L.x/TS),Math.floor(L.y/TS))));
 const GC={20:[30,29,31],22:[86,90,92],17:[150,190,218],18:[200,208,222],0:[96,142,62],1:[60,100,46],4:[168,142,98],5:[214,192,140],6:[78,90,52],7:[140,137,126],9:[66,55,51],11:[146,138,120],14:[120,88,55],3:[120,104,78],10:[46,26,20]};
-function groundT(t,tx,ty){ if(t>=20) return t===T.DGATE?T.RUIN:t===T.VOID?T.VOID:T.DFLOOR; const z=zmap[clamp(ty,0,MH-1)*MW+clamp(tx,0,MW-1)];
+function groundT(t,tx,ty){ if(t===T.FENCE) t=T.GRASS; else if(t>=20) return t===T.DGATE?T.RUIN:t===T.VOID?T.VOID:T.DFLOOR; const z=zmap[clamp(ty,0,MH-1)*MW+clamp(tx,0,MW-1)];
   if(t===T.TREE||t===T.ROCK||t===T.PROP) return z==='ash'?T.ASH:z==='forest'?T.FOREST:z==='swamp'?T.SWAMP:z==='town'?T.COBBLE:z==='ruins'?T.RUIN:T.GRASS;
   if(t===T.HOUSE||t===T.FOUNT||t===T.TWALL) return T.COBBLE; if(t===T.WALL) return T.RUIN; return t; }
 function cellType(wx,wy){
@@ -2064,7 +2089,7 @@ const miniBase=document.createElement('canvas'); miniBase.width=MW; miniBase.hei
 const cmds=[], tcmds=[], L3=[]; let LOD_FAR=false, LOD_MID=false, CAST_SH=true;
 const METALS=new WeakSet(), SKINSET=new WeakSet(), CLOTHS=new WeakSet(), LEATHERS=new WeakSet(), HAIRS=new WeakSet(); let MATD=0;
 let HALPHA=1;
-function P(geo,sx,sy,sz,col,emis,ox,oy,oz,alpha){ const mxs=Math.max(Math.abs(sx),Math.abs(sy),Math.abs(sz)); if(LOD_MID&&mxs<.075) return; if(LOD_FAR){ if(mxs<.16) return; geo=geo===GEO.head||geo===GEO.hair||geo===GEO.hairL?GEO.lsph:geo===GEO.torso?GEO.torso:geo===GEO.box?GEO.cube:geo===GEO.sph?GEO.lsph:geo===GEO.limb?GEO.llimb:geo===GEO.cyl?GEO.lcyl:geo===GEO.cone?GEO.lcone:geo; } else if(GFX.q==='low'){ if(Math.abs(sx)<.05&&Math.abs(sy)<.05&&Math.abs(sz)<.05) return; geo=geo===GEO.sph?GEO.lsph:geo===GEO.limb?GEO.llimb:geo; } const m=CUR.slice(); if(ox||oy||oz) for(let i=0;i<4;i++) m[12+i]+=m[i]*(ox||0)+m[4+i]*(oy||0)+m[8+i]*(oz||0);
+function P(geo,sx,sy,sz,col,emis,ox,oy,oz,alpha){ const mxs=Math.max(Math.abs(sx),Math.abs(sy),Math.abs(sz)); if(LOD_MID&&mxs<.075) return; if(LOD_FAR){ if(mxs<.16) return; geo=geo===GEO.head||geo===GEO.hair||geo===GEO.hairL||geo===GEO.hoodM?GEO.lsph:geo===GEO.torso?GEO.torso:geo===GEO.box?GEO.cube:geo===GEO.sph?GEO.lsph:geo===GEO.limb?GEO.llimb:geo===GEO.cyl?GEO.lcyl:geo===GEO.cone?GEO.lcone:geo; } else if(GFX.q==='low'){ if(Math.abs(sx)<.05&&Math.abs(sy)<.05&&Math.abs(sz)<.05) return; geo=geo===GEO.sph?GEO.lsph:geo===GEO.limb?GEO.llimb:geo; } const m=CUR.slice(); if(ox||oy||oz) for(let i=0;i<4;i++) m[12+i]+=m[i]*(ox||0)+m[4+i]*(oy||0)+m[8+i]*(oz||0);
   for(let i=0;i<4;i++){ m[i]*=sx; m[4+i]*=sy; m[8+i]*=sz; }
   const c={g:geo,m,c:col,e:emis||0,inv:[1/(sx*sx),1/(sy*sy),1/(sz*sz)],a:(alpha??1)*HALPHA,sh:CAST_SH&&mxs>.06&&HALPHA>.9,sp:METALS.has(col)?.95:SKINSET.has(col)?.26:.12,mt:METALS.has(col)?3:SKINSET.has(col)?4:HAIRS.has(col)?5:LEATHERS.has(col)?2:CLOTHS.has(col)?1:((emis||0)>.3?0:MATD)}; (c.a<1?tcmds:cmds).push(c); }
 const addLight=(x,y,z,r,c)=>L3.push({x,y,z,r,c});
@@ -2104,14 +2129,15 @@ function drawHumanoid0(o){
   const skin=L.skin||o.skin||SKIN[0]; const bone=L.bone; if(L.metal) METALS.add(L.metal); if(L.pauld) METALS.add(L.pauld); if(L.trim) METALS.add(L.trim); for(const k of ['torso','legs','robe','cape','hood','tabard','hat','arms','crest']) if(L[k]&&!METALS.has(L[k])) CLOTHS.add(L[k]); for(const k of ['boots','gloves','strapC','mask']) if(L[k]&&!METALS.has(L[k])) LEATHERS.add(L[k]); if(L.hair) HAIRS.add(L.hair); if(o.hair) HAIRS.add(o.hair); if(L.skin&&!L.rock) SKINSET.add(L.skin); const hitE=o.hit?.9:0;
   const EM=o.emote&&o.emote.k, sitting=EM==='sit', kneel=EM==='kneel';
   const emL=sitting?-.5:kneel?-.4:EM==='dance'?Math.abs(Math.sin(t*6))*.1:EM==='cheer'?Math.abs(Math.sin(t*5))*.22:0;
-  mreset(); const bob=Math.abs(Math.cos(ph))*(.07-.02*heavy)*mv+Math.sin(t*2.1+o.x)*.008-cr*.08-stl*.05;
+  mreset(); const bob=Math.abs(Math.cos(ph))*(.07-.02*heavy)*mv+Math.sin(t*2.1+o.x)*.008-cr*.08-stl*.05+Math.abs(Math.sin(t*3.2+o.x))*.014*rdy-STKb(o)*.05;
   mtr(o.x,o.y+(o.lift||0)+emL+bob*sc,o.z); mry(-o.face-(EM==='dance'?Math.sin(t*2.5)*.9:0)); msc(sc);
   if(o.pitch){ mtr(0,.58,0); mrz(o.pitch); mtr(0,-.58,0); }
-  if(nr&&o.dead<0){ mtr(0,0,-Math.cos(ph)*.035*mv); mrx(bank-Math.cos(ph)*.022*mv); }
+  const STK=SWG>=0&&nr?Math.sin(Math.PI*clamp((SWG-.25)/.55,0,1)):0; if(STK) mtr(STK*.1,0,0);
+  if(nr&&o.dead<0){ const wd=heavy?.45:1; mtr(0,0,-Math.cos(ph)*.035*mv*wd); mrx((bank-Math.cos(ph)*.022*mv)*wd); }
   if(o.dead>=0){ const k=Math.min(1,o.dead/.6); mrz(-k*1.45); mtr(0,k*.12,0); }
   const legA=Math.sin(ph)*(stl?.55:.8)*mv, armA=Math.sin(ph)*(stl?.3:.68)*mv;
   const limbW=bone?.075:(L.rock?.2:.15), legCol=bone||L.legs, armCol=bone||L.arms, boots=L.boots||legCol;
-  for(const s of [-1,1]){ mpush(); mtr(0,.93,0); if(nr){ mry(Math.sin(ph)*.09*mv); mrx(Math.cos(ph)*.05*mv); } mtr(0,0,s*.115); let a=(s>0?legA:-legA)+cr*(s>0?.38:.12); if(o.ride){ mrx(-s*.5); a=1.2; } else if(o.air) a=s>0?.85:.2; else if(sitting) a=1.5; else if(kneel) a=s>0?1.4:-.1; else if(o.swim) a=Math.sin(t*5+s*2)*.45; mrz(a);
+  for(const s of [-1,1]){ mpush(); mtr(0,.93,0); if(nr){ mry(Math.sin(ph)*.09*mv); mrx(Math.cos(ph)*.05*mv); } mtr(0,0,s*.115); let a=(s>0?legA:-legA)+cr*(s>0?.38:.12)+STK*(s>0?.34:-.22); if(o.ride){ mrx(-s*.5); a=1.2; } else if(o.air) a=s>0?.85:.2; else if(sitting) a=1.5; else if(kneel) a=s>0?1.4:-.1; else if(o.swim) a=Math.sin(t*5+s*2)*.45; mrz(a);
     if(bone) P(GEO.limb,limbW*1.12,.45,limbW*1.15,legCol,hitE); else P(GEO.thigh,limbW*(L.lean?1.3:1.5),.47,limbW*(L.lean?1.3:1.48),legCol,hitE); mtr(0,-.45,0); P(GEO.sph,limbW*1.08,limbW*1.08,limbW*1.08,bone||(L.metal&&!bone?L.metal:legCol),hitE);
     if(L.metal&&!bone) P(GEO.sph,.17,.15,.17,L.metal,hitE,.03,0,0);
     let knee=Math.max(0,Math.cos(ph+(s>0?0:Math.PI)))*1.1*mv+(L.hunch||0)*.25+cr*.55; if(o.ride) knee=1.5; else if(o.air) knee=s>0?1.25:.75; else if(sitting) knee=.1; else if(kneel) knee=s>0?1.5:1.6; mrz(-knee);
@@ -2119,7 +2145,8 @@ function drawHumanoid0(o){
     mtr(0,-.43,0); mrz(knee-a*.6);
     if(bone){ P(GEO.box,.26,.06,.12,boots,hitE,.06,-.05,0); for(let k=-1;k<=1;k++) P(GEO.sph,.08,.04,.035,boots,hitE,.18,-.06,k*.035); }
     else { P(GEO.foot,1,1,1.05,boots,hitE,0,.012,0); P(GEO.box,.34,.028,.15,boots.map(v=>v*.45),hitE,.06,-.088,0); P(GEO.box,.07,.04,.14,boots.map(v=>v*.45),hitE,-.07,-.075,0); } mpop(); }
-  if(AN&&mv>.55&&nr&&!o.swim&&o.dead<0){ const sg=Math.cos(ph)>0; if(AN._ff!==undefined&&AN._ff!==sg&&GFX.q!=='low'){ const fx=Math.cos(o.face), fz=Math.sin(o.face);
+  if(AN&&mv>.55&&nr&&!o.swim&&o.dead<0){ const sg=Math.cos(ph)>0; if(AN===me&&AN._ff!==undefined&&AN._ff!==sg) try{ footSnd(); }catch(e){}
+    if(AN._ff!==undefined&&AN._ff!==sg&&GFX.q!=='low'){ const fx=Math.cos(o.face), fz=Math.sin(o.face);
       for(let k=0;k<(heavy?7:2);k++) P3(o.x-fx*.1+(Math.random()-.5)*.3*sc,o.y+.05,o.z-fz*.1+(Math.random()-.5)*.3*sc,(Math.random()-.5)*.6-fx*.3,.25+Math.random()*.3,(Math.random()-.5)*.6-fz*.3,heavy?1.1:.55,heavy?.5:.15,heavy?'#9a9488':'#b0a284',{big:heavy,drag:.92});
       if(heavy&&me&&Math.hypot(o.x*TS-me.x,o.z*TS-me.y)<260) shake(1.4); } AN._ff=sg; }
   if(L.robe){ mpush(); mtr(0,.96,0); mrz(Math.sin(ph)*.05*mv); P(GEO.frus,.62,.92,.7,L.robe,hitE,0,-.92,0);
@@ -2127,7 +2154,7 @@ function drawHumanoid0(o){
     if(L.det==='a') for(let k=0;k<4;k++) P(GEO.box,.02,.06,.06,L.gem||[.82,.62,1],2.2+Math.sin(t*3+k)*.6,.25+k*.02,-.15-k*.18,0);
     if(L.det==='m'){ P(GEO.box,.03,.8,.16,L.trim,hitE+.08,.27,-.45,0); P(GEO.sph,.02,.1,.1,[1,.86,.4],1.2,.29,-.3,0); }
     P(GEO.box,.04,.82,.12,L.trim||L.robe,hitE,.3,-.45,0); mpop(); }
-  mpush(); mtr(0,.94+Math.sin(t*1.9+o.x)*.008*(1-mv),0); mry((-Math.sin(ph)*.17*mv)*nr+twist); mrz(-.15*mv-cr*.14-stl*.16-(SWG>=0?Math.sin(SWG*Math.PI)*.12:0)+Math.sin(t*1.9+o.x)*.012*(1-mv)-(L.hunch||0)-(EM==='bow'?.8:0)-(o.ride?.12+(o.rmv||0)*.16:0)-(o.swim?.25:0));
+  mpush(); mtr(0,.94+Math.sin(t*1.9+o.x)*.008*(1-mv),0); mry((-Math.sin(ph)*.17*mv)*nr+twist); mrz(-.15*mv-cr*.14-stl*.16-(SWG>=0?Math.sin(SWG*Math.PI)*.12:0)+Math.sin(t*1.9+o.x)*.012*(1-mv)-(L.hunch||0)-(EM==='bow'?.8:0)-(o.ride?.12+(o.rmv||0)*.16:0)-(o.swim?.25:0)+(o.cast?.07:0)-STK*.06);
   if(bone){ P(GEO.sph,.2,.14,.34,bone,hitE,0,.0,0); for(const s of [-1,1]) P(GEO.sph,.08,.08,.08,bone,hitE,0,-.04,s*.13); for(let k=0;k<8;k++) P(GEO.sph,.075,.06,.075,bone,hitE,-.05,.08+k*.075,0); for(const s of [-1,1]){ mpush(); mtr(.06,.62,s*.12); mrx(s*1.35); P(GEO.limb,.035,.15,.035,bone,hitE); mpop(); }
     for(let k=0;k<5;k++){ const w=.42-Math.abs(k-1.5)*.05; P(GEO.box,.05,.035,w,bone,hitE,.1,.2+k*.075,0); P(GEO.box,.22,.035,.035,bone,hitE,0,.2+k*.075,w/2-.02); P(GEO.box,.22,.035,.035,bone,hitE,0,.2+k*.075,-w/2+.02); }
     P(GEO.box,.06,.3,.06,bone,hitE,.13,.3,0); if(L.metal){ P(GEO.sph,.34,.36,.5,L.metal,hitE,.02,.44,0); P(GEO.box,.04,.3,.05,L.metal.map(v=>v*1.2),hitE+.1,.19,.44,0); } }
@@ -2211,11 +2238,22 @@ function drawHumanoid0(o){
       case 'plume': P(GEO.sph,.31,.31,.3,L.metal,hitE,-.01,.18,0); P(GEO.box,.04,.05,.26,[.08,.08,.1],0,.14,.17,0); P(GEO.sph,.14,.3,.06,[.75,.1,.1],hitE,-.08,.42,0); break;
       case 'horned': P(GEO.sph,.31,.28,.3,L.metal,hitE,-.01,.2,0); P(GEO.box,.05,.16,.04,L.metal,hitE,.15,.12,0); for(const s of [-1,1]){ mpush(); mtr(-.02,.25,s*.15); mrx(-s*1.0); mrz(.3); P(GEO.cone,.08,.32,.08,[.92,.88,.78],hitE); mpop(); }
         P(GEO.sph,.18,.22,.22,L.beard||[.6,.4,.2],hitE,.1,.0,0); break;
-      case 'hood': P(GEO.sph,.33,.35,.33,L.hood,hitE,-.06,.18,0); for(let k=0;k<11;k++){ const a=(k/10)*Math.PI; P(GEO.sph,.07,.07,.07,L.hood.map(v=>v*.92),hitE,.06,.13+Math.sin(a)*.17,Math.cos(a)*.15); } P(GEO.cone,.2,.2,.2,L.hood,hitE,-.14,.3,0); P(GEO.sph,.3,.12,.4,L.hood,hitE,-.04,-.04,0);
+      case 'hood': { const hc=L.hood; P(GEO.hoodM,.3,.3,.3,hc,hitE,0,.15,0); P(GEO.sph,.36,.14,.44,hc.map(v=>v*.96),hitE,-.05,-.03,0);
+        if(L.trim){ for(let k=0;k<18;k++){ const a=k/18*6.283; P(GEO.sph,.024,.024,.024,L.trim,hitE+.35,.15-.02*Math.abs(Math.cos(a)),.14+.09*Math.sin(a),.1*Math.cos(a)); } }
+        if(L.halo){ P(GEO.sph,.034,.05,.024,[.55,.85,1],2.6,.17,.27,0); mpush(); mtr(-.24,.32,0); mry(Math.PI/2); for(let k=0;k<36;k++){ const a=k/36*6.283; P(GEO.sph,.08,.08,.06,[1,.88,.5],3,Math.cos(a)*.4,Math.sin(a)*.4,0); }
+          for(let k=0;k<12;k++){ const a=k/12*6.283-t*.25; mpush(); mtr(Math.cos(a)*.52,Math.sin(a)*.52,0); mrz(a-Math.PI/2); P(GEO.cone,.05,.16,.02,[1,.95,.75],2.4); mpop(); } mpop(); } break; }
         if(L.det==='m'){ for(let k=0;k<9;k++){ const a=k/8*Math.PI; P(GEO.sph,.045,.045,.045,L.trim,hitE+.15,.13,.13+Math.sin(a)*.17,Math.cos(a)*.15); } P(GEO.sph,.045,.045,.03,[1,.9,.5],2.4,.15,.29,0); } break;
       case 'skullhood': P(GEO.sph,.34,.35,.33,L.hood,hitE,-.04,.17,0); P(GEO.sph,.2,.24,.22,L.skin,hitE,.06,.13,0); for(const s of [-1,1]){ P(GEO.sph,.05,.05,.04,[0,0,0],0,.15,.16,s*.05); P(GEO.sph,.025,.025,.025,eyeC,3,.17,.16,s*.05); } P(GEO.cone,.2,.24,.2,L.hood,hitE,-.12,.32,0); break;
+      case 'drowned': { const hc=L.hair, gold=L.trim; HAIRS.add(hc);
+        P(GEO.hairL,.3,.3,.3,hc,hitE,0,.15,0); for(let k=0;k<7;k++){ const a=(k/6-.5)*2.2; mpush(); mtr(-.06-Math.cos(a)*.08,.12,Math.sin(a)*.14); mrz(-.15+Math.sin(t*1.2+k)*.05); P(GEO.limb,.05,.5,.04,hc.map(v=>v*(k%2?.85:1.1)),hitE); mpop(); }
+        P(GEO.cyl,.31,.07,.31,gold,hitE+.4,-.01,.27,0); for(let k=0;k<9;k++){ const a=k/9*6.283, f=Math.cos(a), hh=.12+(f>.7?.12:0)+(k%2)*.05; mpush(); mtr(Math.cos(a)*.145-.01,.3,Math.sin(a)*.145); mrz(-f*.12); P(GEO.cone,.05,hh,.05,gold,hitE+.5); mpop(); }
+        P(GEO.sph,.055,.07,.04,[.3,1,.85],2.8,.15,.31,0); for(const q of [-1,1]) P(GEO.sph,.03,.03,.03,[.25,.9,.75],2.2,.12,.3,q*.09);
+        for(const [bx,by,bz] of [[-.1,.3,.11],[.02,.31,-.13],[-.13,.28,-.06]]) P(GEO.sph,.035,.03,.035,[.62,.66,.58],hitE,bx,by,bz);
+        P(GEO.sph,.13,.07,.13,skin.map(v=>v*.92),hitE,.08,.05,0);
+        for(let k=0;k<6;k++){ const z=(k/5-.5)*.14; mpush(); mtr(.11-Math.abs(z)*.3,.04,z); mrz(.1+Math.sin(t*1.6+k*1.3)*.08); mrx(z*.8); P(GEO.limb,.026,.26+(k%3)*.06,.02,[.14,.34,.22].map(v=>v*(k%2?.8:1.1)),hitE+.1); mpop(); }
+        if(Math.random()<.12) burst3(o.x,o.y+1.45*sc,o.z,'#6affe0',1,.15,{glow:true}); break; }
       case 'hoodopen': P(GEO.sph,.33,.33,.31,L.hood,hitE,-.06,.18,0); break;
-      case 'hat': P(GEO.sph,.28,.2,.28,o.hair||[.2,.13,.08],hitE,-.06,.14,0); P(GEO.cyl,.64,.03,.64,L.hat,hitE,0,.25,0); mpush(); mtr(0,.26,0); mrz(-.25+Math.sin(t*1.5)*.04); P(GEO.cone,.32,.32,.32,L.hat,hitE,0,0,0); mtr(0,.3,0); mrz(-.5); P(GEO.cone,.16,.3,.16,L.hat,hitE,0,0,0); P(GEO.sph,.05,.05,.05,[1,.9,.5],2,0,.3,0); mpop(); P(GEO.cyl,.34,.05,.34,L.trim,hitE+.1,0,.26,0); P(GEO.sph,.24,.16,.24,[.85,.85,.85],hitE,.06,.0,0); if(L.det==='a'){ P(GEO.sph,.06,.06,.04,L.gem||[.8,.55,1],2.6,.17,.27,0); for(let k=0;k<5;k++){ const a=k/5*6.283+.3; P(GEO.sph,.025,.025,.025,[1,.95,.7],2.2,Math.cos(a)*.28,.27,Math.sin(a)*.28); } } break;
+      case 'hat': P(GEO.hair,.3,.3,.3,o.hair||[.2,.13,.08],hitE,0,.15,0); P(GEO.cyl,.64,.03,.64,L.hat,hitE,0,.25,0); mpush(); mtr(0,.26,0); mrz(-.25+Math.sin(t*1.5)*.04); P(GEO.cone,.32,.32,.32,L.hat,hitE,0,0,0); mtr(0,.3,0); mrz(-.5); P(GEO.cone,.16,.3,.16,L.hat,hitE,0,0,0); P(GEO.sph,.05,.05,.05,[1,.9,.5],2,0,.3,0); mpop(); P(GEO.cyl,.34,.05,.34,L.trim,hitE+.1,0,.26,0); { const bc=[.86,.86,.84]; HAIRS.add(bc); P(GEO.sph,.18,.14,.2,bc,hitE,.1,.05,0); mpush(); mtr(.11,.0,0); mrz(Math.PI+.25+Math.sin(t*1.3)*.04); P(GEO.cone,.15,.26,.15,bc,hitE); mpop(); for(const q of [-1,1]) P(GEO.sph,.1,.04,.07,bc,hitE,.142,.075,q*.035); } if(L.det==='a'){ P(GEO.sph,.06,.06,.04,L.gem||[.8,.55,1],2.6,.17,.27,0); for(let k=0;k<5;k++){ const a=k/5*6.283+.3; P(GEO.sph,.025,.025,.025,[1,.95,.7],2.2,Math.cos(a)*.28,.27,Math.sin(a)*.28); } } break;
       case 'witch': P(GEO.sph,.3,.2,.3,[.15,.15,.15],hitE,-.03,.25,0); P(GEO.cyl,.6,.03,.6,L.hat,hitE,0,.28,0); mpush(); mtr(0,.29,0); mrz(-.5); P(GEO.cone,.3,.6,.3,L.hat,hitE,0,0,0); mpop(); P(GEO.sph,.05,.09,.05,skin,hitE,.17,.08,0); break;
       case 'leafy': for(let k=0;k<6;k++){ const a=k/6*Math.PI*2; P(GEO.blob,.26,.22,.26,L.leaf,hitE,Math.cos(a)*.12-.03,.3+Math.sin(k)*.05,Math.sin(a)*.13); } P(GEO.blob,.32,.28,.32,BRIGHT(L.leaf),hitE,0,.42,0); break;
       case 'bald': P(GEO.sph,.2,.22,.24,[.4,.24,.12],hitE,.1,.02,0); P(GEO.box,.08,.05,.14,[.4,.24,.12],hitE,.12,.1,0); break;
@@ -2228,11 +2266,16 @@ function drawHumanoid0(o){
   const sw=o.swing??-1;
   for(const s of [-1,1]){ mpush(); mtr(0,.62,s*.3);
     let a=(s>0?-armA:armA)+Math.sin(t*1.3+o.x+s)*.035*(1-mv), spread=.12+.05*mv, elbow=.25+(L.hunch||0)*.5+mv*(.4+Math.max(0,s>0?-armA:armA)*.6);
-    if(o.cast){ a=1.25+Math.sin(t*6)*.05; spread=.35; elbow=.15; }
+    if(o.cast){ const ch=Math.sin(t*4.5+s*1.3); if(s>0&&WUP.has(L.weapon)){ a=.75+ch*.04; elbow=1.05; spread=.2; } else { a=1.05+ch*.08; spread=-.16+ch*.06; elbow=.78+Math.sin(t*3.1+s)*.12; } }
     else if(!(s>0&&sw>=0)){ if(o.ride){a=.6;elbow=.9;spread=.05;} else if(o.swim){ a=1.3+Math.sin(t*4+s)*.6; spread=.7; elbow=.3; } else if(EM==='dance'){ a=(s>0?2.6:1.2)+Math.sin(t*6+s)*.5; spread=.5; } else if(EM==='wave'&&s>0){ a=2.9; spread=.55+Math.sin(t*9)*.25; elbow=.5; } else if(EM==='cheer'){ a=3.0; spread=.35; elbow=.1; } else if(sitting){ a=.35; spread=.3; } else if(EM==='bow'&&s>0){ a=.9; elbow=1.2; } }
-    if(cr>0&&!o.cast&&!EM&&!(s>0&&sw>=0)){ a=lerp(a,(s>0?.55:.75)+(s>0?-armA:armA)*.4,cr); elbow=lerp(elbow,1.05,cr); spread=lerp(spread,.28,cr); }
+    const isDag=L.weapon==='dagger'||L.weapon==='nightfang', swArm=sw>=0&&(s>0||isDag);
+    if(cr>0&&!o.cast&&!EM&&!swArm){ const br=Math.sin(t*3.2+o.x)*.05, aw=(s>0?-armA:armA)*.4, wk=s>0?L.weapon:L.off; let ga=.7,ge=1,gs=.25;
+      if(stl){ ga=.55; ge=1.25; gs=.32; } else if(s>0&&WUP.has(L.weapon)){ ga=a; ge=elbow; gs=spread; } else if(s<0&&!L.off&&WUP.has(L.weapon)){ ga=.95; ge=.7; gs=.32; }
+      else if(wk==='shield'){ ga=.8; ge=1.05; gs=.08; } else if(wk==='dagger'||wk==='nightfang'){ ga=.65; ge=1.35; gs=.28; } else if(s>0&&wk&&wk!=='none'){ ga=.85; ge=1.35; gs=.22; }
+      a=lerp(a,ga+br+aw,cr); elbow=lerp(elbow,ge,cr); spread=lerp(spread,gs,cr); }
+    if(o.rel>=0&&o.rel<1&&!o.cast&&sw<0){ const k=Math.sin(Math.PI*o.rel); if(s>0&&!WUP.has(L.weapon)){ a=lerp(a,1.55,k); elbow=lerp(elbow,.05,k); spread=lerp(spread,.05,k); } else if(s<0){ a=lerp(a,1.5,k); elbow=lerp(elbow,.08,k); spread=lerp(spread,-.05,k); } }
     if(o.air&&!o.cast&&!(s>0&&sw>=0)){ a=.9; spread=.38; elbow=.5; }
-    if(s>0&&sw>=0){ a=sw<.3?lerp(.4,2.9,sw/.3):lerp(2.9,.6,(sw-.3)/.7); elbow=sw<.3?lerp(.3,.9,sw/.3):lerp(.9,.1,Math.min(1,(sw-.3)/.3)); }
+    if(sw>=0){ const P2=swingPose(sw,o.swv||0,s,L); if(P2){ a=P2[0]; elbow=P2[1]; spread=P2[2]; } }
     if(L.longArms) a+=.15; if(s>0&&WUP.has(L.weapon)&&sw<0&&!o.cast&&!o.ride&&!o.swim&&!EM&&!o.air){ a=.1-armA*.25; elbow=1.2; spread=.16; }
     mrz(a); mrx(-s*spread);
     const ua=L.longArms?.42:.31, la=L.longArms?.4:.29;
@@ -2300,7 +2343,7 @@ function drawWeapon0(L,o,t){
 function drawLich(m,X,gy,Z,swing,dd,hit,sc){ const t=now(), e=hit?.9:0; const y=gy+.6+Math.sin(t*1.3)*.15; const S=sc*1.6;
   mreset(); mtr(X,gy+.04,Z); mry(t*.4); if(dd<0){ P(GEO.cyl,4.2*sc,.02,4.2*sc,[.4,.8,1],1.3,0,0,0,.35); P(GEO.cyl,3.4*sc,.025,3.4*sc,[.1,.15,.3],.2,0,.005,0,.5); for(let k=0;k<10;k++){ const a=k/10*6.283; mpush(); mtr(Math.cos(a)*1.9*sc,.02,Math.sin(a)*1.9*sc); mry(-a); P(GEO.box,.12,.02,.34,[.55,.9,1],2.2+Math.sin(t*3+k)*.6,0,0,0,.8); mpop(); } }
   const LK=dd>=0?0:lookYaw(m);
-  mreset(); mtr(X,y,Z); mry(-(m.face||0)); msc(S); if(dd>=0){ mrx(Math.min(1,dd)*1.2); mtr(0,-Math.min(1,dd*.5),0); } else { mrx(Math.sin(t*.9)*.05); mrz(Math.sin(t*.7)*.04); }
+  mreset(); mtr(X,y,Z); mry(-(m.rf??m.face??0)); msc(S); if(dd>=0){ mrx(Math.min(1,dd)*1.2); mtr(0,-Math.min(1,dd*.5),0); } else { mrx(Math.sin(t*.9)*.05); mrz(Math.sin(t*.7)*.04); }
   P(GEO.frus,.95,1.6,.95,[.08,.1,.18],e,0,0,0); P(GEO.cyl,.98,.08,.98,[.45,.8,1],1.1,0,0,0); P(GEO.box,.05,1.2,.2,[.45,.8,1],1,.47,.6,0);
   for(let k=0;k<14;k++){ const a=k/14*6.283; mpush(); mtr(Math.cos(a)*.28,1.55,Math.sin(a)*.28); mry(-a); mrz(.2+Math.sin(t*1.2+k)*.04); P(GEO.limb,.12,1.45,.1,k%2?[.07,.09,.16]:[.1,.12,.21],e); mpop(); }
   P(GEO.sph,.62,.85,.62,[.1,.12,.22],e,0,1.75,0); P(GEO.cyl,.75,.16,.75,[.2,.25,.4],e,0,2.05,0);
@@ -2346,7 +2389,7 @@ function drawQuad0(o){
   const pitch=Math.sin(qp+.6)*.075*g+Math.sin(qp*2)*.02*mv*(1-g), qbank=((AN&&AN.bankS)||0)*.8;
   mreset(); mtr(o.x,o.y+Math.abs(Math.sin(qp))*.04*mv*(1-g)+(.5+.5*Math.sin(qp-1.2))*.13*g*(Q.hgt||.5),o.z); mry(-o.face); msc(sc); mrx(qbank);
   if(o.dead>=0){ const k=Math.min(1,o.dead/.6); mrx(k*1.5); mtr(0,k*.1,0); }
-  const lunge=o.swing>=0?Math.sin(o.swing*Math.PI)*.35:0; mtr(lunge,0,0);
+  const sw0=o.swing, lunge=sw0>=0?(sw0<.3?-.1*Math.sin(Math.PI*sw0/.3):Math.sin(Math.PI*clamp((sw0-.3)/.5,0,1))*.42):0; mtr(lunge,0,0); if(sw0>=0) mrz(sw0<.3?.07*Math.sin(Math.PI*sw0/.3):-.09*Math.sin(Math.PI*clamp((sw0-.3)/.5,0,1)));
   const br=1+Math.sin(t*2.3+o.x)*.018, by=H+.12, bw=boar?1.12:deer?.82:1;
   /* legs: shoulder/elbow/paw in front, stifle/hock/paw behind */
   for(const [lx,lz,off0,front,offG] of [[.34,.16,0,1,0],[.34,-.16,Math.PI,1,.6],[-.33,.16,Math.PI,0,Math.PI+.2],[-.33,-.16,0,0,Math.PI+.8]]){ const off=lerp(off0,offG,g);
@@ -2377,7 +2420,7 @@ function drawQuad0(o){
   mpop();
   /* neck and head */
   const sniff=Math.pow(Math.max(0,Math.sin(t*.35+o.x*3)),6)*.55*(1-mv)*(o.rdy?0:1);
-  const look=(o.swing>=0?-Math.sin(o.swing*Math.PI)*.4:Math.sin(t*1.3+o.x)*.06)-pitch*.8-sniff-.1*g+Math.sin(qp*2)*.05*mv*(1-g);
+  const look=(o.swing>=0?(o.swing<.3?.18*Math.sin(Math.PI*o.swing/.3):-.5*Math.sin(Math.PI*clamp((o.swing-.3)/.45,0,1))+(boar?.6*Math.max(0,Math.sin(Math.PI*clamp((o.swing-.6)/.4,0,1))):0)):Math.sin(t*1.3+o.x)*.06-(o.rdy?.12+Math.sin(t*4+o.x)*.03:0))-pitch*.8-sniff-.1*g+Math.sin(qp*2)*.05*mv*(1-g);
   mpush(); mtr(L*.52,by+.1,0); mrz(look); mry(-(o.look||0)*.6+Math.sin(t*.7+o.z)*.12*(1-mv)*(o.rdy?0:1));
   if(canine){ P(GEO.sph,.44,.5,.38,col,e,.1,.12,0); mtr(.28,.3,0); }
   else if(boar){ P(GEO.sph,.46,.48,.5,col,e,.06,.04,0); mtr(.26,.02,0); }
@@ -2415,14 +2458,17 @@ function drawMob3(m,dead){
   if(!dead){ const hh=(MOBH[mt.key]||1.6); const Xs=m.rx/TS, Zs=m.ry/TS, gs=groundY(m.rx,m.ry);
     if(m.stunU>t){ for(let k=0;k<3;k++){ const a=t*5+k*2.09; mreset(); mtr(Xs+Math.cos(a)*.38,gs+hh+.15,Zs+Math.sin(a)*.38); mry(t*6); P(GEO.box,.13,.13,.03,[1,.9,.3],2.8); mrz(.785); P(GEO.box,.13,.13,.03,[1,.9,.3],2.8); } }
     if(m.rootU>t){ const Rr=(mt.r||14)/TS*1.15+.25; for(let k=0;k<8;k++){ const a=k/8*6.283+m.id; mreset(); mtr(Xs+Math.cos(a)*Rr,gs-.05,Zs+Math.sin(a)*Rr); mrz(Math.cos(a)*.4); mrx(-Math.sin(a)*.4); P(GEO.cone,.22,.55+(k%2)*.3,.22,[.72,.9,1],.9,0,0,0,.85); } } }
-  const sw=(t-(m.swingT||0))/.35; const swing=sw>=0&&sw<1?sw:-1; const dd=dead?t-m.deathT:-1;
+  if(m.swingT!==m._swT0){ m._swT0=m.swingT; m.swingN=(m.swingN||0)+1; } const sw=(t-(m.swingT||0))/.55; const swing=sw>=0&&sw<1?sw:-1; const dd=dead?t-m.deathT:-1;
   let sc=1; if(m.spawnT&&t-m.spawnT<.6) sc=.3+.7*(t-m.spawnT)/.6;
-  const base={x:X,y:gy,z:Z,face:m.face||0,mv,walk:ph,swing,dead:dd,hit,sc,an:m,rdy:(m.tgt&&!dead)?1:0,look:dead?0:lookYaw(m)};
+  const base={x:X,y:gy,z:Z,face:smoothFace(m,m.face||0),mv,walk:ph,swing,swv:(m.swingN||0)%3,dead:dd,hit,sc,an:m,rdy:(m.tgt&&!dead)?1:0,look:dead?0:lookYaw(m)};
   if(dead && dd>.9) base.y-=(dd-.9)*1.2;
-  if(LOOK[mt.key]){ drawHumanoid({...base,L:LOOK[mt.key]}); if(mt.key==='hking'&&dd<0){ mreset(); mtr(X,gy+3.35+Math.sin(t*2)*.06,Z); mry(t*.8); P(GEO.cyl,.75,.05,.75,[.5,.95,1],2.4,0,0,0,.7); for(let k=0;k<8;k++){ const an=k/8*6.283; P(GEO.cone,.07,.28+(k%2)*.16,.07,[.6,1,1],3,Math.cos(an)*.36,.03,Math.sin(an)*.36,.8); } for(let k=0;k<2;k++){ const an=t*2+k*3.14+Math.random(); P3(X+Math.cos(an)*1.3,gy+Math.random()*2.6,Z+Math.sin(an)*1.3,0,.8,0,.8,.15,'#7ef0ff',{glow:true}); } addLight(X,gy+2.5,Z,9,[.4,.9,1.2]); } }
+  if(LOOK[mt.key]){ drawHumanoid({...base,L:LOOK[mt.key]}); if((mt.key==='vaelith'||mt.key==='ossric')&&dd<0){ mreset(); mtr(X,gy+.04,Z); mry(t*.15); const R=mt.key==='vaelith'?2.1:1.7; P(GEO.cyl,R,.012,R,[.2,.8,.7],1.1,0,0,0,.35);
+    for(let k=0;k<16;k++){ const an=k/16*6.283; P(GEO.box,.22,.012,.05,[.4,1,.85],2,Math.cos(an)*R*.86,.01,Math.sin(an)*R*.86,.7); }
+    addLight(X,gy+2.8,Z,mt.key==='vaelith'?10:8,[.3,1,.85]); if(Math.random()<.3) P3(X+(Math.random()-.5)*1.4,gy+2.4+Math.random()*.8,Z+(Math.random()-.5)*1.4,0,-2,0,.6,.06,'#9ff6ea',{glow:true}); }
+    if(mt.key==='hking'&&dd<0){ mreset(); mtr(X,gy+3.35+Math.sin(t*2)*.06,Z); mry(t*.8); P(GEO.cyl,.75,.05,.75,[.5,.95,1],2.4,0,0,0,.7); for(let k=0;k<8;k++){ const an=k/8*6.283; P(GEO.cone,.07,.28+(k%2)*.16,.07,[.6,1,1],3,Math.cos(an)*.36,.03,Math.sin(an)*.36,.8); } for(let k=0;k<2;k++){ const an=t*2+k*3.14+Math.random(); P3(X+Math.cos(an)*1.3,gy+Math.random()*2.6,Z+Math.sin(an)*1.3,0,.8,0,.8,.15,'#7ef0ff',{glow:true}); } addLight(X,gy+2.5,Z,9,[.4,.9,1.2]); } }
   else if(QLOOK[mt.key]) drawQuad({...base,Q:QLOOK[mt.key]});
   else switch(mt.key){
-    case 'moth': { const fl=Math.sin(t*18+m.id); mreset(); mtr(X,gy+1.4+Math.sin(t*2+m.id)*.2,Z); mry(-(m.face||0)); msc(sc*(dead?Math.max(.1,1-dd):1));
+    case 'moth': { const fl=Math.sin(t*18+m.id); mreset(); mtr(X,gy+1.4+Math.sin(t*2+m.id)*.2,Z); mry(-(m.rf??m.face??0)); msc(sc*(dead?Math.max(.1,1-dd):1));
       mrx(Math.sin(t*2.3+m.id)*.15+((m.bankS||0)*1.2)); mrz(-.18*mv+Math.sin(t*1.7+m.id)*.06);
       P(GEO.sph,.5,.16,.16,[.35,.3,.4],hit?.9:0,0,0,0); P(GEO.sph,.2,.18,.18,[.42,.36,.48],hit?.9:0,.26,.02,0); P(GEO.sph,.36,.12,.12,[.3,.25,.35],hit?.9:0,-.28,-.01,0);
       for(const s of [-1,1]){ P(GEO.sph,.06,.06,.05,[.15,.1,.2],1.2,.33,.05,s*.06); for(let k=0;k<3;k++){ mpush(); mtr(.1-k*.1,-.05,s*.05); mrx(-s*.5); mrz(Math.sin(t*6+k)*.1); P(GEO.limb,.015,.14,.015,[.3,.25,.3],0); mpop(); } }
@@ -2430,7 +2476,25 @@ function drawMob3(m,dead){
         P(GEO.sph,.2,.032,.2,[.98,.94,1],.9,.08,.004,s*.45); P(GEO.sph,.1,.036,.1,[.3,.18,.5],1.4,.08,.006,s*.45); P(GEO.sph,.36,.03,.5,[.7,.6,.92],.5,-.25,-.004,s*.3); mpop(); }
       for(const s of [-1,1]){ mpush(); mtr(.34,.08,s*.04); mrz(-.7); mrx(-s*.4); P(GEO.limb,.015,.28,.015,[.8,.7,1],.4); for(let k=0;k<4;k++) P(GEO.box,.012,.03,.09,[.85,.78,1],.4,0,-.08-k*.05,0); mpop(); }
       addLight(X,gy+1.4,Z,4,[.6,.5,1]); if(Math.random()<.15) burst3(X,gy+1.3,Z,'#e8d8ff',1,.3,{glow:true}); break; }
-    case 'lurker': case 'crawler': case 'siltling': case 'siltmother': { const LP=LPAL[mt.key]||LPAL.lurker; mreset(); mtr(X,gy,Z); mry(-(m.face||0)); msc(sc*LP[4]); if(dead) mtr(0,-Math.min(.6,dd*.6),0); const e=hit?.9:0;
+    case 'siltmother': { const LP=LPAL.siltmother, e=hit?.9:0, sh=[.16,.15,.11], pl=[.27,.25,.18], rim=[.42,.38,.27], gl=[.45,1,.7];
+      mreset(); mtr(X,gy,Z); mry(-smoothFace(m,m.face||0)); msc(sc*1.55); if(dead) mtr(0,-Math.min(.5,dd*.5),0);
+      const rear=swing>=0&&!dead?(swing<.5?eO(swing/.5):1-eIO((swing-.5)/.5)):0, br=Math.sin(t*1.4+m.id)*.025;
+      mtr(0,Math.abs(Math.sin(ph*1.5))*.04*mv+br,0); mtr(.3,0,0); mrz(rear*.32); mtr(-.3,0,0);
+      for(const sd of [-1,1]) for(let k=0;k<4;k++){ const hx=.5-k*.28, sp=(k-1.5)*.42, lift=Math.max(0,Math.sin(ph*1.5+k*1.57+(sd>0?0:3.14)))*mv, fw=Math.sin(ph*1.5+k*1.57+(sd>0?0:3.14))*.22*mv;
+        mpush(); mtr(hx,.46,sd*.4); mry(sd*(1.5708+sp)-fw*sd); mrz(-(2.25+lift*.35-(k===0?rear*.5:0))); P(GEO.limb,.13,.5,.12,sh,e); P(GEO.sph,.14,.14,.14,pl,e,0,0,0); mtr(0,-.48,0); P(GEO.sph,.11,.11,.11,rim,e);
+        mrz(1.95+lift*.2); P(GEO.limb,.1,.62,.09,pl,e); mtr(0,-.6,0); P(GEO.cone,.07,.2,.07,[.12,.11,.08],e,0,.07,0); mpop(); }
+      mpush(); mtr(0,-.14,0);
+      P(GEO.sph,.86,.46,.7,pl,e,.2,.72,0); for(let k=0;k<4;k++) P(GEO.sph,.5-k*.05,.2,.56-k*.06,k%2?rim:pl,e,.55-k*.2,.98-k*.02,0);
+      for(let k=0;k<5;k++){ mpush(); mtr(.55-k*.2,1.12,0); mrz(.35); P(GEO.cone,.07,.24+(k%2)*.1,.07,rim,e); mpop(); }
+      const pu=.6+Math.sin(t*2.2)*.25; P(GEO.sph,.92,.74,.84,[.34,.42,.26],e+pu*.35,-.78,.92,0); P(GEO.sph,.95,.18,.88,sh,e,-.74,1.28,0);
+      for(let k=0;k<9;k++){ const a=k*2.39, rr=.55+.25*Math.sin(k*1.7); P(GEO.sph,.15,.15,.15,[.8,.95,.55],1.1+Math.sin(t*2.5+k)*.6,-.78-Math.cos(a)*rr*.6,.72+Math.sin(k*1.3)*.18,Math.sin(a)*rr*.55); }
+      for(let k=0;k<6;k++){ const a=k/6*6.283; P(GEO.sph,.12,.06,.12,sh,e,-.78+Math.cos(a)*.7,1.16,Math.sin(a)*.62); }
+      mpush(); mtr(.92,.86,0); mrz(.15+rear*.3+Math.sin(t*.9)*.04); P(GEO.sph,.36,.3,.42,pl,e,0,0,0); P(GEO.sph,.3,.12,.36,rim,e,.02,.18,0);
+      for(const [ey,ez] of [[.12,.14],[.12,-.14],[.2,.07],[.2,-.07],[.04,.22],[.04,-.22]]){ P(GEO.sph,.055,.055,.055,[0,0,0],0,.3,ey,ez); P(GEO.sph,.035,.035,.035,LP[3],2.6,.33,ey,ez); }
+      const op=.15+(swing>=0?Math.sin(swing*Math.PI)*.5:0)+Math.sin(t*3)*.03; for(const sd of [-1,1]){ mpush(); mtr(.28,-.1,sd*.12); mry(sd*op); mrz(-1.9); P(GEO.cone,.08,.26,.08,[.75,.7,.55],e); mpop(); }
+      mpop(); mpop(); addLight(X,gy+2,Z,9,[.5,1,.6]); if(!dead&&Math.random()<.15) P3(X+(Math.random()-.5)*2,gy+1.2,Z+(Math.random()-.5)*2,0,-1.5,0,.7,.07,'#5a5038',{});
+      break; }
+    case 'lurker': case 'crawler': case 'siltling': { const LP=LPAL[mt.key]||LPAL.lurker; mreset(); mtr(X,gy,Z); mry(-smoothFace(m,m.face||0)); msc(sc*LP[4]); if(swing>=0&&!dead) mrz(swing<.55?Math.sin(Math.PI*swing/.55)*.34:-Math.sin(Math.PI*(swing-.55)/.45)*.2); if(dead) mtr(0,-Math.min(.6,dd*.6),0); const e=hit?.9:0;
       mtr(0,Math.abs(Math.sin(ph*1.5))*.08*mv+Math.sin(t*1.5+m.id)*.03,0); mrx(Math.sin(ph*1.5)*.05*mv); const BL=Math.sin(t*.7+m.id*3)>.97?.15:1;
       for(let k=0;k<6;k++){ mpush(); const a=k/6*Math.PI*2; mtr(Math.cos(a)*.45,.3,Math.sin(a)*.45); mry(-a); for(let s=0;s<3;s++){ mrz(-.6+Math.sin(t*3+k+s)*.35+Math.sin(ph*1.5+k*1.05+s*.4)*.32*mv); P(GEO.limb,.14-s*.03,.35,.14-s*.03,LP[0],e); mtr(0,-.33,0); } mpop(); }
       P(GEO.sph,1.25,.75,1.2,LP[1],e,0,.5,0); P(GEO.sph,1.0,.45,.95,LP[2],e,0,.65,0);
@@ -2438,8 +2502,8 @@ function drawMob3(m,dead){
       for(const [ox,oz] of [[.45,-.2],[.5,0],[.45,.2]]){ P(GEO.sph,.14,.14*BL,.14,LP[3],1.5,ox,.75,oz); P(GEO.sph,.06,.06,.06,[0,0,0],0,ox+.06,.76,oz); }
       P(GEO.box,.12,.06+(swing>=0?Math.sin(swing*Math.PI)*.22:0),.5,[.1,.05,.05],0,.58,.55,0); if(swing>=0) P(GEO.box,.1,.04,.44,[.6,.15,.12],.3,.6,.5,0); break; }
     case 'wraith': case 'icewraith': case 'tidewraith': case 'drownedshade': { const ice=mt.key==='icewraith', tide=mt.key==='tidewraith'||mt.key==='drownedshade'; const c1=tide?[.3,.8,.74]:ice?[.6,.82,1]:[.42,.32,.7], c2=tide?[.22,.62,.58]:ice?[.5,.72,.95]:[.35,.25,.6], c3=tide?[.08,.3,.3]:ice?[.25,.4,.6]:[.2,.12,.35];
-      mreset(); mtr(X,gy+.5+Math.sin(t*2+m.id)*.15,Z); mry(-(m.face||0)); msc(sc*(ice?1.15:mt.key==='drownedshade'?1.25:1)); const al=dead?Math.max(0,.75-dd):.75;
-      mrz(-.25*mv+Math.sin(t*1.3+m.id)*.04); mrx(Math.sin(t*.9+m.id)*.05);
+      mreset(); mtr(X,gy+.5+Math.sin(t*2+m.id)*.15,Z); mry(-(m.rf??m.face??0)); msc(sc*(ice?1.15:mt.key==='drownedshade'?1.25:1)); const al=dead?Math.max(0,.75-dd):.75;
+      mrz(-.25*mv+Math.sin(t*1.3+m.id)*.04-(swing>=0?Math.sin(Math.PI*swing)*.35:0)); mrx(Math.sin(t*.9+m.id)*.05);
       for(let k=0;k<7;k++){ const a=k/7*6.283; mpush(); mtr(Math.cos(a)*.28,.3,Math.sin(a)*.28); mry(-a); mrz(.25+mv*.5+Math.sin(t*3+k*1.3)*.18); P(GEO.cone,.12,.55+(k%2)*.2,.05,k%2?c2:c3,.4,0,-.5,0,al*.8); mpop(); }
       if(mv>.2&&Math.random()<.4) P3(X+(Math.random()-.5)*.4,gy+.5+Math.random(),Z+(Math.random()-.5)*.4,0,.2,0,1,.35,tide?'#6affe0':ice?'#bfe8ff':'#8a6acc',{big:true,drag:.97});
       P(GEO.frus,.7,-1.2,.7,c1,.45,0,1.4,0,al); P(GEO.sph,.5,.6,.5,c2,.35,0,1.35,0,al); P(GEO.sph,.36,.4,.36,c3,.3,0,1.85,0,al); P(GEO.sph,.3,.32,.28,[.04,.02,.08],0,.06,1.82,0,al);
@@ -2460,7 +2524,7 @@ function drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const md=MATD; MATD=2; try{ r
 function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
   const t=now(), e=hit?.9:0, col=m.enr?[.85,.22,.1]:[.75,.3,.12], dark=[.3,.1,.05], belly=[1,.6,.2];
   const WB=1+Math.sin(t*1.4)*.025, trk=dd>=0?0:lookYaw(m);
-  mreset(); mtr(X,gy,Z); mry(-(m.face||0)); msc(sc*1.05); if(dd>=0){ mrx(Math.min(1,dd/.8)*1.3); mtr(0,-Math.min(1.2,dd*.5),0); }
+  mreset(); mtr(X,gy,Z); mry(-(m.rf??m.face??0)); msc(sc*1.05); if(dd>=0){ mrx(Math.min(1,dd/.8)*1.3); mtr(0,-Math.min(1.2,dd*.5),0); }
   else { mtr(0,Math.abs(Math.sin(ph*.8))*.12*mv+Math.sin(t*1.4)*.03,0); mrx(Math.sin(ph*.8)*.04*mv); }
   for(const [lx,lz,off] of [[1.1,.8,0],[1.1,-.8,Math.PI],[-1.0,.85,Math.PI],[-1.0,-.85,0]]){ mpush(); mtr(lx,1.6,lz); mrz(Math.sin(ph*.8+off)*.55*mv); P(GEO.limb,.45,.8,.45,col,e); mtr(0,-.8,0); mrz(-.4-Math.max(0,Math.cos(ph*.8+off))*.6*mv); P(GEO.limb,.36,.75,.36,dark,e); mtr(0,-.78,0); P(GEO.box,.5,.16,.42,dark,e,.15,0,0); for(let k=-1;k<=1;k++){ mpush(); mtr(.38,-.02,k*.14); mrz(-Math.PI/2+.3); P(GEO.cone,.07,.22,.07,[.92,.88,.78],0); mpop(); } mpop(); }
   P(GEO.sph,3.4,1.75*WB,2.0*WB,col,e,0,2.15,0);
@@ -2473,7 +2537,7 @@ function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
   for(const s of [-1,1]){ mpush(); mtr(.2,2.9,s*.7); mrx(-s*(.12+flap*.55)); P(GEO.wing,2.3,1,2.3*s,[.42,.1,.05],.35,0,0,0); P(GEO.wing,2.0,1,2.0*s,[.75,.25,.08],.6,.1,.02,0); for(const [px,pz,ln] of [[.95,1.15,1.1],[.7,2.1,1.25],[.25,3,1.35],[-.55,1.6,1.1]]){ mpush(); const a=Math.atan2(pz*2.3*s,px*2.3); mry(-a); mrz(Math.PI/2); P(GEO.limb,.07,Math.hypot(px,pz)*2.3*.75,.07,dark,e); mpop(); } mpush(); mtr(.9,0,0); mrx(-s*Math.PI/2); P(GEO.limb,.16,2.6,.16,dark,e); mpop(); mpush(); mrx(-s*Math.PI/2); mry(.5); P(GEO.limb,.1,2.4,.1,dark,e); mpop(); mpop(); }
   // neck & head
   const breath=m.chanT&&now()-m.chanT<1.6; const jaw=swing>=0?Math.sin(swing*Math.PI)*.5:breath?.6:.08;
-  mpush(); mtr(1.5,2.5,0); for(let k=0;k<5;k++){ mry(-trk/5+Math.sin(t*1.1-k*.6)*.04); mrz(.22+(swing>=0?-Math.sin(swing*Math.PI)*.12:0)); P(GEO.sph,.8,.75-k*.06,.75-k*.06,k%2?col:dark,e,.3,0,0); mtr(.35,0,0); }
+  mpush(); mtr(1.5,2.5,0); for(let k=0;k<5;k++){ mry(-trk/5+Math.sin(t*1.1-k*.6)*.04); mrz(.22-(swing>=0?Math.sin(Math.PI*swing)*.09:0)+(swing>=0?-Math.sin(swing*Math.PI)*.12:0)); P(GEO.sph,.8,.75-k*.06,.75-k*.06,k%2?col:dark,e,.3,0,0); mtr(.35,0,0); }
   mrz(-1.2); P(GEO.sph,1.1,.7,.8,col,e,.35,0,0); P(GEO.box,.8,.25,.5,col,e,.85,.05,0);
   mpush(); mtr(.4,-.18,0); mrz(-jaw); P(GEO.box,.9,.15,.45,dark,e,.4,0,0); for(let k=0;k<4;k++) for(const s of [-1,1]) P(GEO.cone,.04,.1,.04,[.95,.92,.82],0,.2+k*.18,.08,s*.18); mpop();
   for(const s of [-1,1]){ mpush(); mtr(.05,.3,s*.25); mrz(2.3); mrx(-s*.3); P(GEO.cone,.14,.7,.14,[.2,.08,.04],e); mtr(0,.55,0); mrz(-.6); P(GEO.cone,.08,.45,.08,[.16,.06,.03],e); mpop(); P(GEO.sph,.18,.12,.14,dark,e,.5,.22,s*.2); P(GEO.cone,.05,.16,.05,[.2,.08,.04],e,.7,.2,s*.12); for(let k=0;k<3;k++){ mpush(); mtr(-.1-k*.18,.28-k*.03,s*(.2+k*.06)); mrz(2.5); mrx(-s*.7); P(GEO.cone,.07,.34-k*.06,.07,[.25,.1,.05],e); mpop(); } P(GEO.sph,.12,.08,.1,[1,.95,.5],3,.62,.18,s*.25); }
@@ -2481,7 +2545,7 @@ function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
   mpop();
   addLight(X,gy+2,Z,14,m.enr?[1.6,.4,.1]:[1.4,.6,.2]);
   if(Math.random()<.4) burst3(X+(Math.random()-.5)*3,gy+2.5,Z+(Math.random()-.5)*2,'#ff8a2a',1,.3,{glow:true,up:1.2});
-  mreset(); mtr(X,gy,Z); mry(-(m.face||0)); msc(sc*1.05); for(let k=0;k<10;k++){ const a=k*1.3; P(GEO.box,.5,.05,.07,[1,.45,.1],2+Math.sin(t*3+k)*.8,-1.4+k*.3,2.98+Math.sin(a)*.05,Math.sin(a*2.3)*.5); }
+  mreset(); mtr(X,gy,Z); mry(-(m.rf??m.face??0)); msc(sc*1.05); for(let k=0;k<10;k++){ const a=k*1.3; P(GEO.box,.5,.05,.07,[1,.45,.1],2+Math.sin(t*3+k)*.8,-1.4+k*.3,2.98+Math.sin(a)*.05,Math.sin(a*2.3)*.5); }
   if(Math.random()<.25) P3(X+Math.cos(m.face||0)*4.4,gy+3.7,Z+Math.sin(m.face||0)*4.4,0,.7,0,1.4,.35,'#4a3e3a',{big:true});
 }
 
@@ -2541,6 +2605,7 @@ function footDust(x,y){ const z=tAt(Math.floor(x/TS),Math.floor(y/TS)); const co
 function entPos(kind,id){ if(kind==='m'){const m=mobById[id];return m?{x:m.rx,y:m.ry}:null}
   if(id===MY_U) return me?{x:me.x,y:me.y}:null; const o=othersByU.get(id); return o?{x:o.rx,y:o.ry}:null; }
 function visualAct(src,a,mine){
+  try{ actSnd(src,a,mine); }catch(e){}
   const kind=a[1],tgt=a[2],amt=a[3]|0,vis=a[4]|0;
   if(kind===0){
     if(vis===11){ if(!mine){ const from=a[5]?mobById[a[5]]:{rx:src.x,ry:src.y}; const m=mobById[tgt]; if(m&&from) lightningFx(from,m); } }
@@ -2554,7 +2619,7 @@ function visualAct(src,a,mine){
   if(kind===3 && vis===7){ const p=entPos('m',tgt); if(p) fct(p.x,p.y-40,'!','#ff4a3a',true); }
 }
 function visualMobHit(m,u,vis,self){
-  if(!m) return; const p=entPos('p',u); m.swingT=now();
+  if(!m) return; try{ mobSnd(m,'attack'); }catch(e){} const p=entPos('p',u); m.swingT=now();
   if(vis===2||vis===14||vis===6||vis===15||vis===16) proj({x:m.rx,y:m.ry},()=>entPos('p',u),vis===2?10:vis===15?15:vis===16?16:14);
   else if(vis===8){ if(p) fx.push({k:'beam',m,u,t:now(),dur:.6}); }
   else if(vis===5){ if(p){ const [X,Y,Z]=ph3(p.x,p.y,.1); burst3(X,Y,Z,'#5d8a2a',18,2,{grav:-3}); fx.push({k:'vines',u,t:now(),dur:2}); } }
@@ -2653,15 +2718,32 @@ function animState(o,dt,x,y,moving,scale){ const ox=o._ax??x, oy=o._ay??y; const
   o.mvS=lerp(o.mvS||0,(moving||dm>.3)?1:0,Math.min(1,dt*10));
   const kk=Math.min(1,dt*6), sp=dt>0?Math.min(30,dm/TS/dt):0; o.spdS=lerp(o.spdS||0,sp,kk);
   if(dm>.25){ const hd=Math.atan2(y-oy,x-ox); if(o._hd!=null){ let d=hd-o._hd; d=Math.atan2(Math.sin(d),Math.cos(d)); o.bankS=lerp(o.bankS||0,clamp(d/Math.max(dt,.008)*.05,-.28,.28),kk); } o._hd=hd; } else o.bankS=lerp(o.bankS||0,0,kk); }
+const STKb=o=>{ const g=o.swing??-1; return g>=0?Math.sin(Math.PI*clamp((g-.25)/.55,0,1)):0; };
+const eO=x=>1-(1-x)*(1-x), eI=x=>x*x*x, eIO=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+/* three melee swings that alternate (overhead chop, horizontal sweep, rising cut) and quick alternating dagger thrusts.
+   returns [shoulder, elbow, spread] for the arm, or null to leave the arm alone */
+function swingPose(u,v,s,L){ const dag=L.weapon==='dagger'||L.weapon==='nightfang';
+  if(dag){ if((s>0)===(v%2===1)) return null;
+    if(u<.3){ const k=eO(u/.3); return [lerp(.5,.3,k),lerp(1,1.65,k),lerp(.25,.36,k)]; } if(u<.5){ const k=eI((u-.3)/.2); return [lerp(.3,1.55,k),lerp(1.65,.05,k),lerp(.36,.04,k)]; }
+    const k=eIO((u-.5)/.5); return [lerp(1.55,.6,k),lerp(.05,1.2,k),lerp(.04,.28,k)]; }
+  if(s<0) return null;
+  if(v===1){ if(u<.3){ const k=eO(u/.3); return [lerp(.4,1.45,k),lerp(.3,.9,k),lerp(.15,1.25,k)]; } if(u<.52){ const k=eI((u-.3)/.22); return [1.45,lerp(.9,.18,k),lerp(1.25,-.75,k)]; }
+    const k=eIO((u-.52)/.48); return [lerp(1.45,.4,k),lerp(.18,.3,k),lerp(-.75,.15,k)]; }
+  if(v===2){ if(u<.28){ const k=eO(u/.28); return [lerp(.4,-.4,k),lerp(.3,.65,k),.2]; } if(u<.5){ const k=eI((u-.28)/.22); return [lerp(-.4,2.45,k),lerp(.65,.12,k),.2]; }
+    const k=eIO((u-.5)/.5); return [lerp(2.45,.4,k),lerp(.12,.3,k),lerp(.2,.15,k)]; }
+  if(u<.32){ const k=eO(u/.32); return [lerp(.4,2.8,k),lerp(.3,1.2,k),lerp(.15,.3,k)]; } if(u<.52){ const k=eI((u-.32)/.2); return [lerp(2.8,-.15,k),lerp(1.2,.08,k),lerp(.3,.1,k)]; }
+  const k=eIO((u-.52)/.48); return [lerp(-.15,.4,k),lerp(.08,.3,k),lerp(.1,.15,k)]; }
+function smoothFace(o,target){ const t=now(), dt=Math.min(.1,Math.max(0,t-(o._rft||t))); o._rft=t; if(o.rf==null||!isFinite(o.rf)) o.rf=target;
+  const d=Math.atan2(Math.sin(target-o.rf),Math.cos(target-o.rf)); o.rf+=d*(Math.abs(d)>2.6?1:1-Math.pow(.00004,dt)); return o.rf; }
 function lookYaw(m){ let d=0; if(m.tgt&&!m.dead){ const tp=m.tgt===MY_U?me:othersByU.get(m.tgt); if(tp){ const tx=tp===me?me.x:tp.rx, ty=tp===me?me.y:tp.ry; d=Math.atan2(ty-m.ry,tx-m.rx)-(m.face||0); d=clamp(Math.atan2(Math.sin(d),Math.cos(d)),-.8,.8); } } m._lk=lerp(m._lk||0,d,.12); return m._lk; }
 function npcLook(n){ let d=0; if(me&&!me.dead&&dist(n.x,n.y,me.x,me.y)<150){ d=Math.atan2(me.y-n.y,me.x-n.x)-(n.face??Math.PI/2); d=clamp(Math.atan2(Math.sin(d),Math.cos(d)),-1,1); } n._lk=lerp(n._lk||0,d,.06); return n._lk; }
 LOOK.assassin={lean:true,torso:[.17,.16,.19],legs:[.12,.11,.13],arms:[.19,.18,.21],boots:[.1,.09,.1],cape:[.09,.08,.11],trim:[.28,.78,.52],head:'rogue',hood:[.11,.1,.13],mask:[.07,.07,.09],weapon:'dagger',off:'dagger',straps:true,strapC:[.2,.13,.08],gloves:[.09,.09,.11],gearX:true,gem:[.3,1,.6]};
-Object.assign(LOOK.mender,{torso:[.95,.94,.9],robe:[.95,.94,.9],arms:[.95,.94,.9],legs:[.82,.84,.92],boots:[.85,.72,.42],cape:[.14,.2,.48],trim:[.98,.82,.4],head:'circlet',halo:true,stars:true});
+Object.assign(LOOK.mender,{torso:[.95,.94,.9],robe:[.95,.94,.9],arms:[.95,.94,.9],legs:[.82,.84,.92],boots:[.85,.72,.42],cape:[.14,.2,.48],trim:[.98,.82,.4],head:'hood',hood:[.97,.95,.9],halo:true,stars:true,stole:true,stoleC:[.16,.24,.55]});
 LOOK.warden.spikes=true; LOOK.warden.tassets=true; LOOK.warden.det='w'; LOOK.warden.crest=[.15,.3,.75]; LOOK.mender.det='m'; LOOK.arcanist.det='a'; LOOK.arcanist.weapon='crystal'; if(LOOK.frostgiant) LOOK.frostgiant.iceSpikes=true;
 LOOK.vsentry={torso:[.26,.32,.33],legs:[.2,.24,.25],arms:[.3,.36,.37],boots:[.18,.2,.21],gloves:[.36,.42,.42],metal:[.44,.53,.52],pauld:[.42,.5,.49],trim:[.28,.72,.66],head:'helm',crest:[.2,.9,.8],weapon:'sword',off:'shield',tabard:[.08,.28,.3],cape:[.06,.2,.22],spikes:true,tassets:true,scale:1.12};
 LOOK.dacolyte={robe:[.09,.22,.24],torso:[.09,.22,.24],arms:[.11,.26,.28],legs:[.07,.16,.18],boots:[.08,.1,.1],trim:[.4,.85,.75],head:'skullhood',hood:[.05,.15,.17],skin:[.5,.66,.62],eyes:[.3,1,.85],weapon:'staff',orb:[.3,1,.85],cape:[.05,.15,.17]};
 LOOK.ossric={metal:[.46,.52,.5],pauld:[.44,.5,.48],trim:[.78,.64,.3],torso:[.24,.26,.27],legs:[.2,.21,.22],arms:[.26,.28,.29],boots:[.2,.21,.22],gloves:[.42,.46,.45],head:'helm',crest:[.25,1,.85],tabard:[.08,.3,.32],cape:[.06,.22,.24],weapon:'greatsword',spikes:true,tassets:true,rune:[.3,1,.85],aura:'#4affd8',scale:1.8};
-LOOK.vaelith={skel:true,bone:[.56,.68,.62],head:'crown',eyes:[.3,1,.85],cape:[.05,.22,.24],pauld:[.3,.6,.56],metal:[.3,.44,.46],weapon:'trident',scale:1.9};
+LOOK.vaelith={robe:[.07,.22,.24],torso:[.1,.27,.28],arms:[.09,.24,.25],legs:[.06,.17,.18],boots:[.16,.2,.2],gloves:[.32,.46,.44],metal:[.34,.5,.48],pauld:[.38,.55,.52],trim:[.86,.7,.32],skin:[.64,.76,.74],eyes:[.35,1,.88],head:'drowned',hair:[.05,.13,.12],cape:[.04,.17,.19],tabard:[.06,.3,.3],weapon:'trident',tassets:true,spikes:true,rune:[.3,1,.85],aura:'#4affd8',scale:1.9};
 LOOK.selis={torso:[.16,.3,.32],legs:[.2,.18,.15],arms:[.16,.3,.32],boots:[.24,.16,.1],cape:[.1,.22,.24],trim:[.7,.6,.35],head:'hoodopen',hood:[.12,.26,.28],weapon:'lantern',pack:true};
 /* ---------- v14: equipped gear changes how a hero looks ---------- */
 const GEAR_METAL=[[.5,.49,.48],[.66,.68,.72],[.8,.84,.92],[.34,.33,.42],[.94,.78,.36]];
@@ -2682,19 +2764,25 @@ function playerLook(cls,u,gv){ const B=LOOK[cls]||LOOK.warden; if(!gv||!(gv[0]||
   const W=sp(gv[0]), A=sp(gv[1]), T=sp(gv[2]);
   if(A){ const tc=GEAR_TH[A.th]||cc.map(v=>v*.62), metal=GEAR_METAL[A.r], trim=GEAR_TRIM[A.r], cloth=tc.map(v=>Math.min(1,v*(.85+A.r*.06))), dark=cloth.map(v=>v*.55), leather=[.42,.28,.15].map(v=>v*(1+A.r*.05));
     const clear={metal:null,pauld:null,tabard:null,robe:null,tassets:false,chain:false,straps:false,stole:false,mantle:null,fur:false,spikes:false,rune:null};
+    const capeC=tc.map(v=>v*.7), steel=metal.map(v=>v*.92);
     switch(A.b){
-      case 'Jerkin': Object.assign(L,clear,{torso:leather,arms:leather.map(v=>v*.92),legs:[.3,.22,.14],boots:[.24,.15,.09],pauld:A.r>=1?leather.map(v=>v*.75):null,straps:true,strapC:[.2,.13,.07],head:L.head==='helm'||L.head==='plume'?'cap':L.head,hat:leather.map(v=>v*.8)}); break;
-      case 'Hauberk': Object.assign(L,clear,{torso:metal.map(v=>v*.82),arms:metal.map(v=>v*.78),legs:dark,metal:metal.map(v=>v*.9),pauld:A.r>=2?metal:null,tabard:cloth,chain:true,boots:[.22,.18,.15]}); break;
-      case 'Brigandine': Object.assign(L,clear,{torso:metal,arms:metal,legs:dark,metal,pauld:metal,tabard:cloth,tassets:true,boots:metal.map(v=>v*.7)}); break;
-      case 'Robes': Object.assign(L,clear,{head:L.head==='helm'||L.head==='plume'?'hood':L.head,torso:cloth,arms:cloth,legs:dark,robe:cloth,boots:[.3,.22,.14]}); break;
-      case 'Vestments': Object.assign(L,clear,{head:L.head==='helm'||L.head==='plume'?'hood':L.head,torso:[.93,.91,.85],arms:[.93,.91,.85],legs:dark,robe:[.93,.91,.85],stole:true,stoleC:cloth,boots:[.4,.3,.2]}); break;
-      case 'Mantle': Object.assign(L,clear,{head:L.head==='helm'||L.head==='plume'?'hood':L.head,torso:cloth,arms:cloth,legs:dark,robe:cloth,mantle:dark.map(v=>Math.min(1,v*1.4)),cape:dark,boots:[.25,.18,.12]}); break; }
+      case 'Breastplate': Object.assign(L,clear,{torso:steel,arms:steel,legs:metal.map(v=>v*.62),metal,pauld:metal,tabard:cloth,tassets:true,gloves:metal.map(v=>v*.85),boots:metal.map(v=>v*.7),head:'helm',spikes:A.r>=2}); break;
+      case 'Warplate':    Object.assign(L,clear,{torso:metal.map(v=>v*.7),arms:metal.map(v=>v*.7),legs:metal.map(v=>v*.5),metal:metal.map(v=>v*.78),pauld:metal.map(v=>v*.82),tabard:dark,tassets:true,spikes:true,fur:true,gloves:metal.map(v=>v*.65),boots:metal.map(v=>v*.6),head:'helm'}); break;
+      case 'Hauberk':     Object.assign(L,clear,{torso:steel,arms:steel,legs:dark,metal,pauld:metal,tabard:cloth,chain:true,tassets:A.r>=1,gloves:metal.map(v=>v*.8),boots:metal.map(v=>v*.66),head:'helm',spikes:A.r>=3}); break;
+      case 'Jerkin':      Object.assign(L,clear,{torso:leather,arms:leather.map(v=>v*.9),legs:[.26,.2,.14],boots:[.2,.13,.08],gloves:[.16,.11,.07],pauld:leather.map(v=>v*.72),straps:true,strapC:[.18,.12,.07],cape:L.cape||[.1,.09,.12]}); break;
+      case 'Brigandine':  Object.assign(L,clear,{torso:leather.map(v=>v*.7),arms:leather.map(v=>v*.66),legs:[.2,.17,.15],boots:[.16,.12,.09],gloves:[.12,.1,.08],pauld:leather.map(v=>v*.55),straps:true,strapC:[.38,.3,.2],tassets:true,cape:dark}); break;
+      case 'Hide Tunic':  Object.assign(L,clear,{torso:[.4,.33,.25],arms:[.36,.3,.23],legs:[.22,.18,.13],boots:[.26,.18,.1],gloves:[.2,.15,.1],pauld:[.45,.38,.28],fur:true,straps:true,strapC:[.2,.14,.08],cape:[.24,.2,.15]}); break;
+      case 'Robes':       Object.assign(L,clear,{torso:cloth,arms:cloth,legs:dark,robe:cloth,boots:[.3,.22,.14],cape:capeC}); break;
+      case 'Vestments':   Object.assign(L,clear,{torso:[.93,.91,.85],arms:[.93,.91,.85],legs:dark,robe:[.93,.91,.85],stole:true,stoleC:cloth,boots:[.4,.3,.2],cape:capeC}); break;
+      case 'Mantle':      Object.assign(L,clear,{torso:cloth,arms:cloth,legs:dark,robe:cloth,mantle:dark.map(v=>Math.min(1,v*1.4)),cape:dark,boots:[.25,.18,.12]}); break; }
+    { const at=Object.keys(ARMT).find(k=>ARMT[k].includes(A.b)); if(at==='cloth'){ L.head=cls==='arcanist'?'hat':'hood'; if(cls==='mender'){ L.halo=true; L.stars=true; } }
+      else if(at==='leather'&&cls==='assassin') L.head='rogue'; else if(at==='plate'&&cls==='warden') L.head='helm'; }
     L.trim=trim; L.hood=cloth.map(v=>v*.9); if(L.head==='hat') L.hat=dark; if(L.head==='helm'&&!L.metal) L.metal=metal;
     if(A.r>=2&&!L.cape) L.cape=tc.map(v=>v*.7); if(A.r>=2) L.gem=GEAR_GLOW[A.th]||cc; L.crest=GEAR_GLOW[A.th]||cc.map(v=>v*.85);
-    if(A.r>=3){ L.rune=GEAR_GLOW[A.th]||cc; L.spikes=!!L.pauld; const rg=L.rune; L.aura='#'+rg.map(v=>Math.round(Math.min(1,v)*255).toString(16).padStart(2,'0')).join(''); }  if(L.metal) METALS.add(L.metal); if(L.pauld) METALS.add(L.pauld); }
-  if(W){ const map={Longsword:'sword',Warstaff:'staff',Spellblade:'spellblade',Morningstar:'morningstar',Wand:'wand',Greataxe:'greataxe',Lwarden:'dawnwarden',Lmender:'solace',Larcanist:'cinderheart',Lassassin:'nightfang'};
+    if(A.r>=3){ L.rune=GEAR_GLOW[A.th]||cc; L.spikes=!!L.pauld; const rg=L.rune; L.aura='#'+rg.map(v=>Math.round(Math.min(1,v)*255).toString(16).padStart(2,'0')).join(''); }  if(L.metal) METALS.add(L.metal); if(L.pauld&&L.metal) METALS.add(L.pauld); if(L.gloves&&L.metal) METALS.add(L.gloves); }
+  if(W){ const map={Longsword:'sword',Warstaff:'staff',Spellblade:'spellblade',Morningstar:'morningstar',Wand:'wand',Greataxe:'greataxe',Daggers:'dagger',Dirks:'dagger',Lwarden:'dawnwarden',Lmender:'solace',Larcanist:'cinderheart',Lassassin:'nightfang'};
     L.weapon=map[W.b]||L.weapon; L.wcol=GEAR_METAL[W.r]; L.wglow=GEAR_GLOW[W.th]||(W.r>=2?RAR_GLOW[W.r]:null); L.wup=W.up;
-    if(['greataxe','staff','solace'].includes(L.weapon)&&L.off) L.off=null; else if(L.weapon==='nightfang') L.off='nightfang';
+    if(['greataxe','staff','solace'].includes(L.weapon)&&L.off) L.off=null; else if(L.weapon==='nightfang') L.off='nightfang'; else if(L.weapon==='dagger') L.off='dagger';
     else if(cls==='warden'&&!L.off&&['sword','spellblade','morningstar','dawnwarden'].includes(L.weapon)) L.off='shield';
     if(L.orbs&&L.weapon!=='wand'&&L.weapon!=='cinderheart') L.orbs=L.weapon==='spellblade'; }
   if(T) L.trink={k:T.b,c:GEAR_GLOW[T.th]||RAR_GLOW[T.r],r:T.r};
@@ -2762,13 +2850,14 @@ function buildScene(dt){
   const drawP=(o,isMe)=>{ const x=isMe?me.x:o.rx, y=isMe?me.y:o.ry; const cls=isMe?me.c.cls:o.c, u=isMe?MY_U:o.u; const dead=isMe?me.dead:o.d;
     const st=isMe?me:o; animState(st,dt,x,y,isMe?me.moving:o.moving);
     if(dead&&!st.deadAt) st.deadAt=t; if(!dead) st.deadAt=0;
-    const sw=(t-(st.swingT||0))/.32; const spin=st.spinT&&t-st.spinT<.5; const castCol=C3(CLS[cls].col);
+    if(st.swingT!==st._swT0){ st._swT0=st.swingT; st.swingN=(st.swingN||0)+1; } const castF=isMe?!!me.cast:!!(o.b&4); if(castF) st._wasCast=1; else if(st._wasCast){ st._wasCast=0; st.relT=t; }
+    const sw=(t-(st.swingT||0))/.5; const spin=st.spinT&&t-st.spinT<.5; const castCol=C3(CLS[cls].col);
     const mt=dead?0:((isMe?me.mounted:o.mt)||0); const swim=!mt&&!onDock(x,y)&&isWaterAt(x,y)&&hgt(x/TS,y/TS)<-.4;
-    const Y0=standY(x,y)+(isMe?(me.jumpH||0):0), face=isMe?me.face:o.f, emo=isMe?me.emote:o.emote;
+    const Y0=standY(x,y)+(isMe?(me.jumpH||0):0), face=smoothFace(st,isMe?me.face:o.f), emo=isMe?me.emote:o.emote;
     const SMv=mt?steedMotion(st.walkP||0,st.mvS||0,!!(MOUNTS[mt]&&MOUNTS[mt].celestial)):null;
     if(mt) drawHorse({x:x/TS,y:Y0,z:y/TS,face,mv:st.mvS||0,walk:st.walkP||0,m:mt,an:st});
     HALPHA=(isMe?me.stealth:o.sl)?(isMe?.4:.22):1;
-    drawHumanoid({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?.72+SMv.y:0,pitch:mt?SMv.p:0,rmv:mt?(st.mvS||0):0,ride:!!mt,swim,emote:emo,an:st,rdy:isMe?(t-me.lastCombat<4?1:0):0,stl:isMe?!!me.stealth:!!o.sl,air:isMe?(me.jumpH||0)>.08:0,
+    drawHumanoid({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?.72+SMv.y:0,pitch:mt?SMv.p:0,rmv:mt?(st.mvS||0):0,ride:!!mt,swim,emote:emo,an:st,swv:(st.swingN||0)%3,rel:(t-(st.relT||-9))/.38,rdy:isMe?(t-me.lastCombat<4?1:0):(t-(o.swingT||0)<4?1:0),stl:isMe?!!me.stealth:!!o.sl,air:isMe?(me.jumpH||0)>.08:0,
       cast:isMe?!!me.cast:!!(o.b&4),castCol,dead:dead?t-st.deadAt:-1,L:playerLook(cls,u,isMe?myGearVis():o.gv),skin:SKIN[hashU(u)%SKIN.length],hair:HAIR[hashU(u)%HAIR.length],big:(isMe?me.avatarU>t:(o.b&64))?1.25:1,wr:isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0)});
     HALPHA=1;
     { const au=isMe?(gm.aura&&isGM):o.au; if(au&&!dead) drawAura(x/TS,Y0,y/TS,t,'#ffb03a');
@@ -2885,7 +2974,9 @@ vec3 fxaa(vec2 uv){ vec3 nw=texture(uScene,uv+vec2(-1.,-1.)*uPx).rgb, ne=texture
   float lb=dot(B,L); return (lb<mn||lb>mx)?A:B; }
 void main(){ vec3 c=fxaa(vUV); vec3 b=texture(uBloom,vUV).rgb; c+=b*uBK; c=c+b*b*uBK*.4;
   float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,uSat); c=(c-.5)*uCon+.5; c*=uTint; c+=vec3(.012,.008,.02)*(1.-l);
-  vec2 d=vUV-.5; c*=1.-dot(d,d)*.35; o=vec4(c,1.); }`;
+  float l2=dot(c,vec3(.299,.587,.114)); c=mix(c,c*vec3(1.035,1.0,.95),smoothstep(.45,.95,l2)*.6); c=mix(c,c*vec3(.95,.99,1.06),smoothstep(.35,.0,l2)*.6);
+  c=c/(1.+max(c-.92,0.)*1.6);
+  vec2 d=vUV-.5; c*=1.-dot(d,d)*.35; c+=(fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5)/255.; o=vec4(c,1.); }`;
 let PBR=null,PBL=null,PCO=null; const POST={ok:true,w:0,h:0};
 function mkTex(w,h){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
   for(const [k,v] of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D,k,v); return t; }
@@ -3166,13 +3257,36 @@ function addLandmarks(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,r
   { const n=NPCS.find(q=>q.id==='doran'); if(n){ const x=n.x/TS, z=n.y/TS-1.3, y0=.55; box(x,y0+.45,z,.9,.9,.6,[.2,.2,.22]); box(x,y0+.95,z,1.2,.2,.45,[.25,.25,.28]);
     box(x+1.6,y0+.6,z,1.2,1.2,1.2,[.45,.42,.4]); box(x+1.6,y0+.7,z+.61,.6,.45,.05,[1,.5,.1],0,2); STAT_LIGHTS.push({x:x+1.6,y:y0+1,z:z+1,r:6,c:[1.4,.55,.15],fire:true});
     for(const s of [-1,1]) gAdd(d,RC,x+s*1.8+.6,y0,z-.9,0,.12,2.4,.12,wood); box(x+.6,y0+2.4,z-.9,4,.12,.12,wood); } }
-  { const n=NPCS.find(q=>q.id==='hilde'); if(n){ const x=n.x/TS+1.5, z=n.y/TS, y0=hgt(x,z); for(let k=0;k<4;k++) gAdd(d,RC,x+k*1.1,y0,z+1.4,0,.12,1.1,.12,wood); for(const h of [.5,.95]) box(x+1.65,y0+h,z+1.4,3.5,.1,.08,wood);
-    box(x+1.6,y0+.35,z-.6,1.4,.7,.5,[.42,.28,.15]); box(x+1.6,y0+.72,z-.6,1.2,.05,.4,[.75,.68,.3]);
-    for(const [px,pz] of [[x-.1,z-1.5],[x+3.4,z-1.5],[x-.1,z+1.0],[x+3.4,z+1.0]]) gAdd(d,RC,px,hgt(px,pz),pz,0,.16,2.6,.16,dark);
-    gAdd(d,RP,x+1.65,y0+2.55,z-.25,Math.PI/2,3.0,1.0,4.1,[.5,.24,.14]); box(x+1.65,y0+2.55,z-.25,4.0,.12,3.0,wood);
-    for(const [hx,hz,hy] of [[x+.4,z-1.1,0],[x+.95,z-1.1,0],[x+.65,z-1.1,.48]]) gAdd(d,RC,hx,y0+hy,hz,0,.5,.48,.5,[.86,.72,.36]);
-    gAdd(d,RC,x-.55,y0,z-1.3,0,.1,1.9,.1,dark); box(x-.55,y0+1.75,z-1.3,.08,.55,.9,wood); box(x-.5,y0+1.75,z-1.3,.04,.42,.42,[.95,.78,.3],0,.6);
-    STABLE.x=x; STABLE.z=z; STABLE.y=y0; STAT_LIGHTS.push({x:x+1.6,y:y0+2.1,z:z-.3,r:6,c:[1,.7,.35],night:true,lamp:true}); } }
+  /* ---- the Amberfield Stables, outside the East Gate: a timber barn, a fenced paddock, hay, a trough and lanterns ---- */
+  { const wood=[.46,.31,.17], dark=[.27,.18,.1], roofC=[.44,.2,.13], stone=[.52,.5,.47], hay=[.86,.72,.36], twine=[.4,.28,.14];
+    const X0=85,X1=97,Z0=64,Z1=73;
+    const post=(x,z)=>{ const y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.17,1.28,.17,dark); box(x,y0+1.3,z,.22,.06,.22,wood); };
+    const rail=(x0,z0,x1,z1)=>{ const mx=(x0+x1)/2, mz=(z0+z1)/2, y0=hgt(mx,mz), len=Math.hypot(x1-x0,z1-z0), ry=-Math.atan2(z1-z0,x1-x0); for(const h of [.55,1.02]) box(mx,y0+h,mz,len+.02,.1,.07,wood,ry); };
+    for(let x=X0;x<X1;x++){ post(x+.5,Z0+.5); rail(x+.5,Z0+.5,x+1.5,Z0+.5); if(x<86||x>89){ post(x+.5,Z1+.5); rail(x+.5,Z1+.5,x+1.5,Z1+.5); } }
+    for(let z=Z0;z<Z1;z++){ post(X0+.5,z+.5); rail(X0+.5,z+.5,X0+.5,z+1.5); post(X1+.5,z+.5); rail(X1+.5,z+.5,X1+.5,z+1.5); } post(X1+.5,Z1+.5); post(90.5,Z1+.5);
+    { const hx=86.5, hz=Z1+.5, y0=hgt(hx,hz); for(const h of [.5,1.0]) box(hx+.55*Math.cos(1.1),y0+h,hz-.55*Math.sin(1.1),1.15,.1,.07,wood,1.1); gAdd(d,RC,hx+1.1*Math.cos(1.1),y0,hz-1.1*Math.sin(1.1),0,.12,1.1,.12,dark); }
+    const bx=95, bz=77, by=hgt(bx,bz);
+    box(bx,by+.18,bz,6.3,.36,4.3,stone); for(const s of [-1,1]) box(bx,by+1.6,bz+s*1.95,6,2.55,.16,wood); box(bx+2.92,by+1.6,bz,.16,2.55,3.9,wood);
+    for(const s of [-1,1]) box(bx-2.92,by+1.6,bz+s*1.35,.16,2.55,1.2,wood); box(bx-2.92,by+2.68,bz,.16,.42,1.5,wood); box(bx-2.86,by+1.28,bz,.04,1.95,1.5,[.07,.05,.04]);
+    for(const s of [-1,1]){ const hx=bx-2.95, hz=bz+s*.75, a=s*1.05; box(hx-.45*Math.sin(Math.abs(a)),by+1.28,hz+s*.45*Math.cos(a),.07,1.95,.9,wood,-s*(Math.PI/2-1.05)); }
+    for(const [cx,cz] of [[-3,-2],[3,-2],[-3,2],[3,2]]) box(bx+cx,by+1.65,bz+cz,.26,2.75,.26,dark); for(const s of [-1,1]) box(bx,by+2.92,bz+s*2,6.3,.2,.24,dark);
+    for(let k=-2;k<=2;k++) for(const s of [-1,1]) box(bx+k*1.4,by+1.65,bz+s*2.04,.12,2.5,.04,dark);
+    gAdd(d,RP,bx,by+3.0,bz,Math.PI/2,4.9,1.75,6.9,roofC); box(bx,by+4.72,bz,7,.14,.2,dark);
+    box(bx-3.02,by+3.55,bz,.06,.62,.7,[.07,.05,.04]); box(bx-3.1,by+3.3,bz,.18,.14,.6,hay);
+    const bale=(x,z,h,ry)=>{ const y0=hgt(x,z)+h; box(x,y0+.3,z,.95,.6,.62,hay,ry||0); for(const o of [-.25,.25]) box(x+o*Math.cos(ry||0),y0+.3,z-o*Math.sin(ry||0),.05,.62,.64,twine,ry||0); };
+    bale(86.4,65.4,0); bale(87.5,65.4,0); bale(86.95,65.4,.6); bale(91,79.3,0,.4); bale(91.1,80.3,0,.1);
+    { const tx=93, tz=65.4, y0=hgt(tx,tz); box(tx,y0+.28,tz,2.2,.5,.7,wood); box(tx,y0+.5,tz,2,.04,.5,[.24,.44,.55],0,.15); for(const s of [-1,1]) box(tx+s*1.05,y0+.2,tz,.12,.4,.75,dark); }
+    for(const [x,z] of [[91.4,75.6],[91.4,78.4],[88,80.6]]){ const y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.14,2.2,.14,dark); box(x,y0+2.15,z,.5,.08,.08,dark); box(x+.22,y0+1.88,z,.2,.28,.2,[1,.78,.4],0,1.8); STAT_LIGHTS.push({x:x+.22,y:y0+1.9,z,r:6,c:[1,.72,.38],night:true,lamp:true}); }
+    { const x=87.2, z=79.6, y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.12,1.9,.12,dark); box(x,y0+1.7,z,1.1,.4,.07,wood,-.3); box(x+.02,y0+1.7,z+.04,.3,.24,.03,[.95,.78,.3],-.3,.7); }
+    { const x0=90.2; for(const z of [78.9,80.7]){ const y0=hgt(x0,z); gAdd(d,RC,x0,y0,z,0,.15,1.1,.15,dark); } box(x0,hgt(x0,79.8)+.95,79.8,.09,.09,1.9,wood); }
+    for(const [x,z] of [[93.2,79.4],[93.9,79.6]]){ const y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.6,.85,.6,[.42,.28,.15]); for(const h of [.15,.68]) gAdd(d,RC,x,y0+h,z,0,.62,.06,.62,[.25,.22,.2]); }
+    for(const [x,z,r] of [[96.6,79.5,.3],[97.3,79.4,.9]]){ const y0=hgt(x,z); box(x,y0+.3,z,.6,.6,.6,[.5,.36,.2],r); }
+    STABLE.x=91; STABLE.z=68.5; STABLE.y=hgt(91,68.5);
+    /* the old stable yard inside Hearthmere becomes a little well square */
+    { const x=TOWN.x+10.5, z=TOWN.y-2.6, y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,1.5,.72,1.5,[.56,.53,.49]); gAdd(d,RC,x,y0+.7,z,0,1.62,.1,1.62,[.44,.42,.4]); gAdd(d,RC,x,y0+.45,z,0,1.18,.3,1.18,[.1,.2,.26],.12);
+      for(const s of [-1,1]) gAdd(d,RC,x+s*.66,y0+.7,z,0,.1,1.25,.1,dark); box(x,y0+1.95,z,1.5,.08,.1,dark); gAdd(d,RP,x,y0+2.05,z,Math.PI/2,1.1,.55,1.8,roofC); box(x+.25,y0+1.45,z,.18,.2,.18,wood);
+      for(const [bx2,bz2,ry] of [[x+2.3,z-.6,0],[x-2.3,z-.6,0]]){ const yy=hgt(bx2,bz2); box(bx2,yy+.42,bz2,1.4,.08,.42,wood,ry); for(const s of [-1,1]) box(bx2+s*.55,yy+.2,bz2,.08,.4,.38,dark,ry); }
+      for(const [px,pz] of [[x+1.6,z+1.1],[x-1.6,z+1.1],[x+3.3,z+.9]]){ const yy=hgt(px,pz); box(px,yy+.22,pz,.8,.44,.5,[.4,.27,.15]); for(let k=0;k<5;k++) gAdd(d,RS,px-.28+k*.14,yy+.52,pz+(k%2?.08:-.08),0,.16,.16,.16,[[.95,.4,.5],[1,.85,.3],[.7,.5,.95],[1,.6,.3],[.95,.95,.9]][k],.15); } } }
 }
 /* ---------- mount ---------- */
 /* ---------- v17: mounts rebuilt with real anatomy and a four-beat gallop ---------- */
@@ -3181,7 +3295,7 @@ function drawCelestial(o){ return drawHorse(o); }
 const STEED_LEATHER=[.3,.17,.08], STEED_METAL=[.56,.6,.68]; LEATHERS.add(STEED_LEATHER); METALS.add(STEED_METAL);
 function drawHorse(o){ const md=MATD; MATD=6; const M0=MOUNTS[o.m]||MOUNTS[1]; if(M0.mane) HAIRS.add(M0.mane); try{ return drawHorse0(o); } finally{ MATD=md; } }
 function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial, t=now(), mv=o.mv||0, idle=1-mv, free=!!o.free;
-  const SM=steedMotion(o.walk||0,mv,cel), ph=SM.ph, A=cel?.5:1, E=cel?.35:0;
+  const SM=steedMotion(o.walk||0,mv,cel), ph=SM.ph, A=cel?.5:1, E=cel?.35:0; if(o.an===me&&mv>.3&&!cel){ const hb=Math.floor(ph/1.5708); if(me._hb!==hb){ me._hb=hb; try{ snd('hoof',null,null,.55); }catch(e){} } }
   const col=cel?[.42,.68,1]:M.col, deep=cel?[.3,.38,.9]:M.col.map(v=>v*.8), lt=cel?[.62,.82,1]:M.col.map(v=>Math.min(1,v*1.16+.03));
   const mane=cel?[.85,.93,1]:M.mane, hoof=cel?[.8,.95,1]:[.09,.07,.06], hoofE=cel?1.6:0;
   const sock=cel?[.36,.5,.95]:M.armor?[.8,.8,.84]:M.elk?M.col.map(v=>v*.55):M.col.map(v=>v*.5);
@@ -3259,7 +3373,11 @@ function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial,
 /* ---------- dynamic world pieces ---------- */
 function drawExtras(near,t){
   drawLootBags(near,t); drawVaultDyn(near,t);
-  if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,60)){ const hs=[[1.0,2.9,.3,1],[2.6,3.3,2.6,2]]; for(const [dx,dz,f,m] of hs){ const X=STABLE.x+dx, Z=STABLE.z+dz; drawHorse({x:X,y:hgt(X,Z),z:Z,face:f+Math.sin(t*.3+dx)*.25,mv:0,walk:0,m,free:1}); } }
+  if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,70)){ const hs=[[-3.6,-2.2,.3,1,0],[2.4,-1.6,2.6,2,0],[3.6,2,4,3,1],[-1.6,2.1,1,1,1],[.4,-.2,5.4,2,0]];
+    hs.forEach(([dx,dz,f,m,walker],i)=>{ let X=STABLE.x+dx, Z=STABLE.z+dz, face=f+Math.sin(t*.3+dx)*.25, mv=0, walk=0;
+      if(walker){ const w=t*.12+i*2.1; X+=Math.cos(w)*1.3; Z+=Math.sin(w)*.9; face=Math.atan2(Math.cos(w)*.9,-Math.sin(w)*1.3); mv=.32; walk=w*4.2; }
+      drawHorse({x:X,y:hgt(X,Z),z:Z,face,mv,walk,m,free:1}); });
+    { const X=90.9, Z=79.8; drawHorse({x:X,y:hgt(X,Z),z:Z,face:Math.PI*.5+Math.sin(t*.25)*.12,mv:0,walk:0,m:1,free:1}); } }
   if(WINDMILL.x&&near(WINDMILL.x*TS,WINDMILL.z*TS,70)){ mreset(); mtr(WINDMILL.x,WINDMILL.y,WINDMILL.z); P(GEO.sph,.5,.5,.5,[.3,.2,.12]); mrz(t*.7);
     for(let k=0;k<4;k++){ mpush(); mrz(k*Math.PI/2); P(GEO.box,.16,3.4,.12,[.34,.22,.12],0,0,1.7,0); P(GEO.box,.95,2.7,.04,[.86,.8,.66],0,.55,2.0,.03); mpop(); } }
   if(CAULDRON.x&&near(CAULDRON.x*TS,CAULDRON.z*TS,40)&&Math.random()<.3) P3(CAULDRON.x+(Math.random()-.5)*.6,CAULDRON.y,CAULDRON.z+(Math.random()-.5)*.6,0,.6,0,1.2,.18,'#8cff4a',{glow:true});
@@ -3357,9 +3475,9 @@ function updateUI(){
 }
 function renderTracker(){
   const el=$('tracker'); const qs=activeQuests();
-  const mh=me.c.lvl>=3&&!me.c.mounts.length?'<div class="obj" style="margin-top:6px;color:#ffd34a">🐎 Mounts unlocked! Visit <b>Hilde the Stable Master</b> in Hearthmere (golden horseshoe on your map).</div>':'';
+  const mh=me.c.lvl>=3&&!me.c.mounts.length?'<div class="obj" style="margin-top:6px;color:#ffd34a">🐎 Mounts unlocked! Visit <b>Hilde the Stable Master</b> outside the East Gate of Hearthmere (golden horseshoe on your map).</div>':'';
   if(!qs.length){ el.innerHTML=mh+'<h3>Quests</h3><div class="obj">Look for <b style="color:#ffd34a">!</b> above people\'s heads. Captain Oriel in Hearthmere always has work.</div><div class="obj" style="margin-top:4px;color:var(--dim);font-size:12px">M map · L quest log · R mount</div>'; return; }
-  el.innerHTML='<h3>Quests <span style="color:var(--dim);font-size:11px">(L)</span></h3>'+(me.c.lvl>=3&&!me.c.mounts.length?`<div style="margin-top:6px;color:#ffd34a;font-size:13px">🐎 You can buy a mount! Visit <b>Hilde the Stable Master</b> in Hearthmere (look for the golden horseshoe).</div>`:'')+qs.slice(0,6).map(q=>{ const s=me.c.qs[q.id];
+  el.innerHTML='<h3>Quests <span style="color:var(--dim);font-size:11px">(L)</span></h3>'+(me.c.lvl>=3&&!me.c.mounts.length?`<div style="margin-top:6px;color:#ffd34a;font-size:13px">🐎 You can buy a mount! Visit <b>Hilde the Stable Master</b> outside the East Gate of Hearthmere (look for the golden horseshoe).</div>`:'')+qs.slice(0,6).map(q=>{ const s=me.c.qs[q.id];
     return `<div style="margin-top:6px"><div style="font-weight:700;color:#f3e6c8">${esc(q.title)}</div><div class="${s.st==='done'?'done':'obj'}" style="font-size:13px">${s.st==='done'?'✔ Return to '+esc(npcName(q.giver)):esc(objText(q,s))}</div></div>`; }).join('')+(qs.length>6?`<div class="obj" style="margin-top:4px">+${qs.length-6} more…</div>`:''); }
 function renderBuffs(){ const el=$('buffs'); if(!el||!me) return; let h=''; for(const k in me.c.buffs){ const ms=me.c.buffs[k]-Date.now(); if(ms<=0) continue; h+=`<div class="buff" title="${BUFFNAME[k][0]}">${BUFFNAME[k][1]}<span>${Math.ceil(ms/60000)}m</span></div>`; }
   if(me.mounted) h+=`<div class="buff" title="Mounted">🐎<span>R</span></div>`; el.innerHTML=h; }
@@ -3368,7 +3486,7 @@ function showTip(e,html){ const tp=$('tip'); tp.innerHTML=html; tp.classList.rem
 function hideTip(){ $('tip').classList.add('hidden'); }
 const upMul=it=>1+.15*(it.up||0);
 function itemTip(it,cmp){ const P=Math.round(it.pow*upMul(it)), S=Math.round(it.sta*upMul(it));
-  let h=`<div class="nm t${it.rar}">${esc(it.name)}${it.up?' +'+it.up:''}</div><div style="color:var(--dim);font-size:13px">${RAR[it.rar]} ${it.slot} · Item level ${it.lv}</div><div>+${P} Power<br>+${S} Stamina</div>${it.desc?`<div class="t4" style="font-size:13px;font-style:italic;margin-top:3px">${esc(it.desc)}</div>`:''}<div style="color:var(--gold);font-size:13px">Sells for ${it.val} gold</div>`;
+  let h=`<div class="nm t${it.rar}">${esc(it.name)}${it.up?' +'+it.up:''}</div><div style="color:var(--dim);font-size:13px">${RAR[it.rar]} ${it.slot==='armor'&&armorType(it)?ARMNAME[armorType(it)]+' armour':it.slot} · Item level ${it.lv}</div>${me&&!canUse(it,me.c.cls)?`<div style="color:#ff6a5a;font-size:13px">${esc(useReason(it,me.c.cls))}</div>`:''}<div>+${P} Power<br>+${S} Stamina</div>${it.desc?`<div class="t4" style="font-size:13px;font-style:italic;margin-top:3px">${esc(it.desc)}</div>`:''}<div style="color:var(--gold);font-size:13px">Sells for ${it.val} gold</div>`;
   if(cmp){ const cur=me.c.eq[it.slot]; const dp=P-(cur?Math.round(cur.pow*upMul(cur)):0), ds=S-(cur?Math.round(cur.sta*upMul(cur)):0); h+=`<div style="font-size:13px;margin-top:4px">If equipped: <span style="color:${dp>=0?'#6f6':'#f66'}">${dp>=0?'+':''}${dp} pow</span>, <span style="color:${ds>=0?'#6f6':'#f66'}">${ds>=0?'+':''}${ds} sta</span></div><div style="font-size:12px;color:var(--dim)">${shopOpen?'Click to sell':'Click to equip · drag to move, sell or destroy'}</div>`; }
   return h; }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3399,7 +3517,7 @@ function renderInv(){
 }
 let dragI=-1, dragOk=false;
 function moveItem(from,to){ const c=me.c; if(from===to) return; const it=c.inv[from]; if(!it) return; if(to>=c.inv.length){ c.inv.splice(from,1); c.inv.push(it); } else { c.inv[from]=c.inv[to]; c.inv[to]=it; } renderInv(); persist(); }
-function equipItem(it){ setTimeout(()=>armorySync(true),500); const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; const cur=c.eq[it.slot]; c.eq[it.slot]=it; c.inv.splice(i,1); if(cur) c.inv.splice(i,0,cur); chatLine(`Equipped [${it.name}].`,'c-loot t'+it.rar); recalc(); renderInv(); persist(); sendPresence(true); }
+function equipItem(it){ const c=me.c; if(!canUse(it,c.cls)){ err(useReason(it,c.cls)); return; } setTimeout(()=>armorySync(true),500); const i=c.inv.indexOf(it); if(i<0) return; const cur=c.eq[it.slot]; c.eq[it.slot]=it; c.inv.splice(i,1); if(cur) c.inv.splice(i,0,cur); chatLine(`Equipped [${it.name}].`,'c-loot t'+it.rar); recalc(); renderInv(); persist(); sendPresence(true); }
 function sellItem(it){ const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; if(it.rar>=3&&!it._sellOk){ return askConfirm(`Sell <b class="t${it.rar}">${esc(it.name)}</b> for ${it.val} gold?`,'Sell',()=>{ it._sellOk=1; sellItem(it); }); }
   c.inv.splice(i,1); c.gold+=it.val; coinFx(it.val); chatLine(`Sold [${it.name}] for ${it.val} gold.`,'c-loot'); renderInv(); persist(); }
 function destroyItem(it){ const c=me.c; const i=c.inv.indexOf(it); if(i<0) return; c.inv.splice(i,1); chatLine(`Destroyed [${it.name}].`,'c-err'); renderInv(); persist(); }
@@ -3549,7 +3667,7 @@ const isSwimming=()=>me&&!onDock(me.x,me.y)&&isWaterAt(me.x,me.y)&&hgt(me.x/TS,m
 function blockedP(x,y,r){ const f=(px,py)=>{ const t=tAt(Math.floor(px/TS),Math.floor(py/TS)); return t!==T.WATER&&t!==T.LAVA&&(SOLID.has(t)||(t===T.DOOR&&doorClosedAt(Math.floor(px/TS),Math.floor(py/TS)))); }; return f(x-r,y-r)||f(x+r,y-r)||f(x-r,y+r)||f(x+r,y+r); }
 function movePlayer(e,dx,dy,r){ if(e===me&&gm.fly){ e.x=clamp(e.x+dx,20,MW*TS-20); e.y=clamp(e.y+dy,20,MH*TS-20); return; } if(!blockedP(e.x+dx,e.y,r)) e.x+=dx; if(!blockedP(e.x,e.y+dy,r)) e.y+=dy; }
 function toggleMount(){ if(!me||me.dead) return; if(me.mounted){ dismount(); return; } if(me.y>=OWH*TS) return err('You cannot ride inside the Sunken Vault');
-  if(!me.c.mount) return err(me.c.mounts.length?'Pick a mount at the stable':'You have no mount. Visit Hilde the Stable Master in Hearthmere');
+  if(!me.c.mount) return err(me.c.mounts.length?'Pick a mount at the stable':'You have no mount. Visit Hilde the Stable Master, just outside the East Gate of Hearthmere');
   if(inCombat()) return err("You can't mount in combat"); if(isSwimming()) return err("You can't mount while swimming"); if(me.cast) return;
   me.emote=null; me.cast={ab:{id:'mount',name:'Summon '+MOUNTS[me.c.mount].name},t0:now(),dur:1.5,mount:true}; }
 function mountUp(){ me.mounted=me.c.mount; const [X,Y,Z]=ph3(me.x,me.y,.6); burst3(X,Y,Z,'#fff3b0',34,3,{glow:true}); sendPresence(true); }
@@ -3942,7 +4060,7 @@ const MAPF={quests:true,players:true,gather:true,bosses:true}; let mapFeat=[];
 function buildMapBase(){ const W=MW*MAPS, H=MH*MAPS; const PAPER=[226,208,166];
   const tiny=document.createElement('canvas'); tiny.width=MW; tiny.height=MH; const tx=tiny.getContext('2d'); const id=tx.createImageData(MW,MH); const D=id.data;
   for(let j=0;j<MH;j++)for(let i=0;i<MW;i++){ const t=tAt(i,j); let col; const z=zmap[j*MW+i];
-    if(t===T.VOID) col=[34,31,29]; else if(t===T.DWALL||t===T.COLUMN||t===T.DGATE) col=[104,96,86]; else if(t===T.DOOR) col=[70,70,76]; else if(t===T.WATER) col=[86,134,160]; else if(t===T.LAVA) col=[214,96,40]; else if(t===T.TREE) col=z==='swamp'?[78,98,70]:z==='frost'?[120,140,130]:[74,108,62];
+    if(t===T.FENCE) col=[120,86,50]; else if(t===T.VOID) col=[34,31,29]; else if(t===T.DWALL||t===T.COLUMN||t===T.DGATE) col=[104,96,86]; else if(t===T.DOOR) col=[70,70,76]; else if(t===T.WATER) col=[86,134,160]; else if(t===T.LAVA) col=[214,96,40]; else if(t===T.TREE) col=z==='swamp'?[78,98,70]:z==='frost'?[120,140,130]:[74,108,62];
     else { const ct=cellType(i*TS+16,j*TS+16); col=(GC[ct]||GC[0]).slice(); if(t===T.PATH||t===T.BRIDGE) col=[196,170,120]; if(t===T.COBBLE||t===T.HOUSE) col=[186,160,124]; }
     const o=(j*MW+i)*4; for(let k=0;k<3;k++) D[o+k]=col[k]*.72+PAPER[k]*.28; D[o+3]=255; }
   tx.putImageData(id,0,0);
@@ -4041,8 +4159,8 @@ function makeEmbers(){ const el=$('embers'); if(!el) return; let h=''; for(let i
 /* =====================================================================
    AUDIO — procedural music and ambience (no sound files needed)
    ===================================================================== */
-const AUD={ctx:null,on:false,vol:{master:.8,music:.55,amb:.45,sfx:.7,mute:false},track:'',want:'',layers:{},nextNote:0,step:0,bar:0,lastEv:0};
-try{ Object.assign(AUD.vol,(saves.audio||{})); if(!saves.audioV2){ AUD.vol.amb=Math.min(AUD.vol.amb,.45); saves.audioV2=1; } }catch(e){}
+const AUD={ctx:null,on:false,vol:{master:.8,music:.55,amb:.1,sfx:.7,mute:false},track:'',want:'',layers:{},nextNote:0,step:0,bar:0,lastEv:0};
+try{ Object.assign(AUD.vol,(saves.audio||{})); if(!saves.audioV2){ AUD.vol.amb=Math.min(AUD.vol.amb,.45); saves.audioV2=1; } if(!saves.audioV3){ AUD.vol.amb=.1; saves.audioV3=1; saves.audio=AUD.vol; } }catch(e){}
 function audInit(){ if(AUD.ctx) { if(AUD.ctx.state==='suspended') AUD.ctx.resume(); return; }
   const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; const c=AUD.ctx=new AC();
   const g=n=>{ const x=c.createGain(); x.gain.value=0; return x; };
@@ -4133,6 +4251,92 @@ function sfx(k){ if(!AUD.on) return; const t=AUD.ctx.currentTime, D=AUD.sfx;
   if(k==='boss'){ drum(t,.5,true); drum(t+.3,.5,true); sweep(t,110,80,1.4,.12,'sawtooth',D); } }
 setInterval(()=>{ try{ audTick(); }catch(e){} },150);
 addEventListener('pointerdown',()=>{ if(me) audInit(); },{passive:true}); addEventListener('keydown',()=>{ if(me) audInit(); });
+/* ---------- v23: a living soundscape: combat, spells, hurt and creature voices, footsteps and wildlife (all synthesised) ---------- */
+const SFXCD={};
+function sfxSpatial(x,y){ if(!me) return [1,0]; const dx=x-me.x, dy=y-me.y, d=Math.hypot(dx,dy); if(d>760) return [0,0];
+  const v=Math.pow(1-d/760,1.4), yaw=typeof CAM!=='undefined'?CAM.yaw:0; const rx=-Math.sin(yaw), ry=Math.cos(yaw); return [v, clamp((dx*rx+dy*ry)/320,-.85,.85)]; }
+function sOut(vol,pan){ const c=AUD.ctx, g=c.createGain(); g.gain.value=vol; if(c.createStereoPanner){ const p=c.createStereoPanner(); p.pan.value=pan||0; g.connect(p); p.connect(AUD.sfx); } else g.connect(AUD.sfx); return g; }
+function sNz(t,dur,type,f0,f1,q,vol,dest,att){ const c=AUD.ctx, s=c.createBufferSource(); s.buffer=AUD.noise; s.playbackRate.value=.8+Math.random()*.4; const f=c.createBiquadFilter(); f.type=type; f.Q.value=q||.7;
+  f.frequency.setValueAtTime(f0,t); f.frequency.exponentialRampToValueAtTime(Math.max(30,f1),t+dur); const g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+(att||.005)); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(f); f.connect(g); g.connect(dest); s.start(t,Math.random()*1.5,dur+.05); }
+function sOsc(t,type,f0,f1,dur,vol,dest,att,vib){ const c=AUD.ctx, o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
+  if(vib){ const l=c.createOscillator(), lg=c.createGain(); l.frequency.value=vib[0]; lg.gain.value=vib[1]; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t+dur+.05); }
+  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(vol,t+(att||.008)); g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(g); g.connect(dest); o.start(t); o.stop(t+dur+.05); }
+function sForm(t,f0,f1,dur,vol,dest,formants){ const c=AUD.ctx, o=c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(f1,t+dur); const g=c.createGain();
+  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(vol,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  for(const [ff,q,a] of formants){ const f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=ff; f.Q.value=q; const fg=c.createGain(); fg.gain.value=a; o.connect(f); f.connect(fg); fg.connect(g); } g.connect(dest); o.start(t); o.stop(t+dur+.05); }
+function cdOk(k,s){ const n=performance.now()/1000; if(SFXCD[k]&&n-SFXCD[k]<s) return false; SFXCD[k]=n; return true; }
+/* the sound bank */
+function snd(k,x,y,mul){ if(!AUD.on||!AUD.ctx) return; const [v,pan]=x==null?[1,0]:sfxSpatial(x,y); const vol=v*(mul||1); if(vol<.02) return; const t=AUD.ctx.currentTime+.005, D=sOut(vol,pan), R=Math.random;
+  switch(k){
+    case 'whoosh': sNz(t,.2,'bandpass',500,2600,1.4,.32,D,.04); break;
+    case 'slash': sNz(t,.09,'highpass',2600,4200,.8,.42,D); sOsc(t,'square',1500+R()*300,900,.06,.06,D); sOsc(t,'sine',2300+R()*500,2200,.32,.05,D); sOsc(t,'sine',3400+R()*400,3300,.22,.03,D); sNz(t,.12,'lowpass',700,200,.8,.35,D); break;
+    case 'blunt': sNz(t,.14,'lowpass',1000,180,.8,.6,D); sOsc(t,'sine',150,55,.18,.42,D); sOsc(t,'triangle',420,200,.07,.08,D); break;
+    case 'stab': sNz(t,.07,'bandpass',2800,1700,2.2,.42,D); sNz(t,.09,'lowpass',600,150,.8,.3,D); break;
+    case 'crit': sOsc(t,'sine',1900,1880,.5,.07,D); sOsc(t,'sine',2850,2840,.4,.05,D); sNz(t,.16,'lowpass',900,120,.8,.5,D); break;
+    case 'fire': sNz(t,.55,'lowpass',300,2400,.5,.38,D,.05); sOsc(t,'sine',90,45,.45,.3,D); for(let i=0;i<7;i++) sNz(t+.04+R()*.4,.03,'highpass',3500,5000,.7,.12,D); break;
+    case 'fireHit': sNz(t,.45,'lowpass',1600,200,.6,.5,D); sOsc(t,'sine',110,40,.4,.35,D); break;
+    case 'frost': for(const f of [1760,2350,2960,3520]) sOsc(t+R()*.06,'sine',f*(1+R()*.02),f,.55,.045,D); sNz(t,.35,'highpass',4000,7000,.8,.12,D); break;
+    case 'holy': for(const [i,f] of [523,659,784,1047].entries()) sOsc(t+i*.025,'triangle',f,f,.9,.055,D,.04); sNz(t,.6,'highpass',5000,8000,.6,.04,D,.1); break;
+    case 'arcane': sOsc(t,'sine',520,1450,.32,.13,D,.02,[18,40]); sOsc(t,'triangle',1040,2900,.25,.04,D); break;
+    case 'zap': sNz(t,.28,'highpass',1800,5000,.9,.4,D); for(let i=0;i<5;i++) sNz(t+R()*.2,.025,'bandpass',3000+R()*2000,2000,3,.25,D); break;
+    case 'shadow': sNz(t,.4,'bandpass',300,1400,2,.35,D,.06); sOsc(t,'sine',220,80,.4,.15,D); break;
+    case 'heal': for(const [i,f] of [880,1109,1319,1760].entries()) sOsc(t+i*.07,'sine',f,f,.6,.05,D,.03); break;
+    case 'shield': sOsc(t,'sine',380,820,.6,.1,D,.05,[9,18]); sNz(t,.5,'bandpass',1200,2400,4,.08,D,.1); break;
+    case 'stun': sOsc(t,'sine',320,70,.25,.4,D); sNz(t,.12,'lowpass',800,150,.8,.4,D); sOsc(t+.12,'triangle',1800,1700,.4,.04,D); break;
+    case 'root': sNz(t,.5,'bandpass',600,300,3,.3,D,.05); for(let i=0;i<4;i++) sNz(t+i*.09,.05,'bandpass',1200,800,6,.2,D); break;
+    case 'boom': sNz(t,.7,'lowpass',900,60,.7,.7,D); sOsc(t,'sine',80,30,.7,.5,D); break;
+    case 'castStart': sOsc(t,'sine',300,600,.5,.06,D,.2,[6,12]); sNz(t,.5,'bandpass',1800,3200,5,.05,D,.25); break;
+    case 'potion': for(let i=0;i<3;i++) sOsc(t+i*.11,'sine',300+i*40,180,.09,.18,D); sOsc(t+.36,'sine',900,1300,.25,.05,D); break;
+    case 'step': sNz(t,.07,'lowpass',(y===1?2200:y===2?800:1200),(y===1?900:200),.8,.1*(mul||1),D); break;
+    case 'hoof': sNz(t,.06,'lowpass',900,160,.9,.28,D); sOsc(t,'sine',130,70,.07,.2,D); break;
+    case 'hurt': { const m=mul||1; sForm(t,175*m,115*m,.2,.55,D,[[700,4,1],[1150,6,.6],[2600,8,.25]]); sNz(t,.08,'lowpass',600,150,.8,.25,D); break; }
+    case 'die': sForm(t,150,70,.7,.45,D,[[600,4,1],[1000,6,.5]]); break;
+    /* creatures */
+    case 'wolf': sForm(t,260,170,.28,.5,D,[[520,3,1],[1100,5,.5]]); sNz(t,.25,'bandpass',900,500,2,.2,D); break;
+    case 'wolfDie': sForm(t,520,240,.55,.4,D,[[900,4,1],[1600,6,.4]]); break;
+    case 'boar': sForm(t,520,980,.12,.45,D,[[1300,4,1],[2400,6,.5]]); sForm(t+.12,980,420,.2,.4,D,[[1300,4,1],[2400,6,.5]]); break;
+    case 'beast': sForm(t,120,75,.6,.6,D,[[380,3,1],[800,4,.6]]); sNz(t,.6,'lowpass',500,120,.8,.35,D,.05); break;
+    case 'ghost': sNz(t,.55,'bandpass',2200,1400,7,.3,D,.08); sOsc(t,'sine',980,560,.55,.08,D,.06,[7,30]); break;
+    case 'armor': sOsc(t,'square',280,240,.08,.12,D); sOsc(t,'sine',1600+R()*400,1580,.3,.05,D); sNz(t,.1,'highpass',3000,5000,.8,.2,D); break;
+    case 'undead': sForm(t,110,80,.7,.45,D,[[450,3,1],[900,5,.4]]); sNz(t,.6,'bandpass',600,300,3,.15,D,.1); break;
+    case 'bug': for(let i=0;i<7;i++) sNz(t+i*.035,.02,'highpass',3200,4500,1,.28,D); break;
+    case 'slime': sNz(t,.3,'lowpass',500,140,1.5,.45,D); sOsc(t,'sine',220,80,.28,.25,D,.01,[14,25]); break;
+    case 'caster': sForm(t,330,260,.3,.35,D,[[800,4,1],[1300,6,.6],[2800,8,.3]]); break;
+    case 'fireMob': sNz(t,.35,'lowpass',600,2600,.6,.35,D,.04); for(let i=0;i<5;i++) sNz(t+R()*.3,.03,'highpass',3500,5000,.7,.12,D); break;
+    case 'moth': for(let i=0;i<6;i++) sNz(t+i*.04,.03,'bandpass',300,250,3,.2,D); break;
+    case 'plant': sNz(t,.35,'bandpass',500,250,4,.3,D,.04); sNz(t+.05,.2,'highpass',2500,4000,1,.15,D); break;
+    case 'roar': sForm(t,95,55,1.3,.7,D,[[300,3,1],[650,4,.6],[1400,5,.25]]); sNz(t,1.3,'lowpass',700,90,.7,.45,D,.12); sOsc(t,'sine',60,35,1.2,.35,D,.1); break;
+    case 'bird': { const f=2400+R()*1600; for(let i=0;i<2+(R()*3|0);i++){ const tt=t+i*(.09+R()*.05); sOsc(tt,'sine',f*(1+R()*.2),f*(.75+R()*.2),.07,.06,D); } break; }
+    case 'owl': sOsc(t,'sine',420,380,.35,.08,D,.06); sOsc(t+.5,'sine',430,360,.55,.08,D,.06); break;
+    case 'howl': sForm(t,330,520,1.1,.18,D,[[700,4,1],[1300,6,.4]]); sForm(t+1.1,520,300,.9,.16,D,[[700,4,1],[1300,6,.4]]); break;
+    case 'frog': for(let i=0;i<2;i++) sOsc(t+i*.18,'square',180,120,.09,.05,D); break;
+  } }
+const MOBVOICE={wolf:'wolf',frostwolf:'wolf',fangmaw:'wolf',boar:'boar',oldtusk:'boar',yeti:'beast',moth:'moth',thornling:'plant',lurker:'slime',siltmother:'slime',siltling:'bug',crawler:'bug',
+  bogwitch:'caster',cultist:'caster',cryptmage:'caster',dacolyte:'caster',sentinel:'armor',vsentry:'armor',deathguard:'armor',ossric:'armor',wraith:'ghost',icewraith:'ghost',tidewraith:'ghost',drownedshade:'ghost',
+  hking:'undead',thrall:'undead',lich:'undead',vaelith:'undead',magma:'fireMob',emberling:'fireMob',wyrm:'roar',frostgiant:'roar'};
+function mobSnd(m,ev){ if(!m||!m.t) return; const k=MOBVOICE[m.t.key]||'beast', big=m.t.boss?1.25:1;
+  if(ev==='attack'){ if(!cdOk('ma'+m.id,1.4)) return; if(Math.random()<(m.t.boss?.45:.6)) snd(k,m.rx,m.ry,.75*big); snd(k==='armor'||k==='undead'?'slash':'blunt',m.rx,m.ry,.5); }
+  else if(ev==='die'){ snd(k==='wolf'?'wolfDie':k,m.rx,m.ry,.9*big); if(m.t.boss) snd('boom',m.rx,m.ry,.6); }
+  else if(ev==='aggro'){ if(!cdOk('mg'+m.id,8)) return; snd(m.t.boss?'roar':k,m.rx,m.ry,m.t.boss?1:.6); } }
+function actSnd(src,a,mine){ const kind=a[1], vis=a[4]|0, x=src.x, y=src.y; const tm=mobById[a[2]];
+  if(kind===0){ if(vis===0){ const L=mine?playerLook(me.c.cls,MY_U,myGearVis()):null; const w=L?L.weapon:''; const blunt=/morningstar|hammer|club|staff|solace/.test(w||''), stab=/dagger|nightfang/.test(w||'');
+      const px=tm?tm.rx:x, py=tm?tm.ry:y; snd('whoosh',x,y,.6); setTimeout(()=>snd(stab?'stab':blunt?'blunt':'slash',px,py,.85),70); }
+    else if(vis===1) snd('holy',x,y,.7); else if(vis===2) snd('fire',x,y,.8); else if(vis===3) snd('arcane',x,y,.8); else if(vis===4) snd('arcane',x,y,.55); else if(vis===11) snd('zap',x,y,.8); }
+  else if(kind===1||kind===4){ if(cdOk('heal'+(a[2]||''),.25)) snd('heal',x,y,.6); }
+  else if(kind===7) snd('shield',x,y,.8); else if(kind===2) snd('stun',tm?tm.rx:x,tm?tm.ry:y,.8); else if(kind===5) snd('root',tm?tm.rx:x,tm?tm.ry:y,.7);
+  else if(kind===6){ if(vis===28) snd('whoosh',x,y,1); else if(vis===29) snd('shadow',x,y,.9); else if(vis===30) snd('shadow',x,y,.7); else snd('boom',a.length>5?a[5]:x,a.length>5?a[6]:y,.6); } }
+function footSnd(){ if(!me||me.mounted||!cdOk('step',.18)) return; const t=tAt(Math.floor(me.x/TS),Math.floor(me.y/TS)); const hard=[T.COBBLE,T.RUIN,T.DFLOOR,T.BRIDGE,T.PATH,T.DOOR].includes(t)?1:(t===T.SNOW||t===T.ICE)?0:2; snd('step',null,hard===1?1:2,hard===1?1:.8); }
+/* wildlife and distant life, mixed into the ambience bus */
+function wildTick(){ if(!AUD.on||!me||me.dead) return; const z=zoneAtPx(me.x,me.y), night=curDark>.55, R=Math.random, amb=AUD.vol.amb/.45;
+  const at=(k,v)=>{ const a=R()*6.283, d=180+R()*420; snd(k,me.x+Math.cos(a)*d,me.y+Math.sin(a)*d,v*Math.min(1.6,amb)); };
+  if(z==='vault'||z==='crypt') return;
+  if(!night&&(z==='meadow'||z==='forest'||z==='town'||z==='lake')&&R()<.35) at('bird',z==='forest'?.9:.7);
+  if(night&&(z==='forest'||z==='meadow')&&R()<.05) at('owl',.8);
+  if(night&&(z==='forest'||z==='frost')&&R()<.015) at('howl',.7);
+  if((z==='swamp'||z==='lake')&&R()<.12) at('frog',.8); }
+setInterval(()=>{ try{ wildTick(); }catch(e){} },1300);
+
 function renderSound(box){ const w=box||$('soundWin').querySelector('.sbody'); const v=AUD.vol; const row=(k,l)=>`<div class="sndrow"><span>${l}</span><input type="range" min="0" max="1" step=".05" value="${v[k]}" data-v="${k}"><b>${Math.round(v[k]*100)}%</b></div>`;
   w.innerHTML=row('master','Master')+row('music','Music')+row('amb','Ambience')+row('sfx','Effects')+`<label class="sndmute"><input type="checkbox" id="sndMute" ${v.mute?'checked':''}> Mute all sound</label><div class="sndnow">Now playing: <b>${({tavern:'Tavern jig',pastoral:'Open fields',eerie:'Shadows',frost:'Frozen frontier',battle:'Boss battle'})[AUD.track]||'—'}</b></div>`;
   w.querySelectorAll('[data-v]').forEach(i=>i.oninput=()=>{ v[i.dataset.v]=+i.value; i.nextElementSibling.textContent=Math.round(i.value*100)+'%'; audInit(); audVolumes(); });
@@ -4203,9 +4407,12 @@ function vaultEvent(o,txt){ if(!me||me.dead) return;
   if(txt==='E'){ if(!inVault(me.x,me.y)&&vaultNear(me.x,me.y)) vaultEnter(`${o.n} leads your party into the Sunken Vault.`); else if(!inVault(me.x,me.y)) sysMsg(`${o.n} entered the Sunken Vault. You were too far from the gate to follow; come to the gate in the Ruins of Vael and type -e.`,'c-party'); }
   else if(txt==='D'){ if(inVault(me.x,me.y)) vaultLeave(`${o.n} completes the dungeon. You return to the surface together.`); } }
 /* host: an empty vault resets itself after 20 seconds, so the next group finds it whole */
-function vaultHostTick(players,t){ const inside=players.some(p=>p.y>=OWH*TS); if(inside){ VAULT.emptySince=0; return; }
-  if(!VAULT.emptySince){ VAULT.emptySince=t; return; } if(t-VAULT.emptySince<20) return; VAULT.emptySince=t;
-  let any=false; for(const m of mobs) if(m.t.vault&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade)){ respawnMob(m); any=true; } if(any){ despawnAdds('siltmother'); despawnAdds('vaelith'); } }
+/* host: the vault only resets once a run is over: 20 s after the last hero leaves a finished vault (the Drowned King dead),
+   or 15 minutes after an unfinished one was abandoned. Dead heroes still count as inside. */
+function vaultHostTick(players,t){ const inside=(me&&me.y>=OWH*TS)||[...others.values()].some(o=>o.y>=OWH*TS); if(inside){ VAULT.emptySince=0; return; }
+  if(!VAULT.emptySince){ VAULT.emptySince=t; return; } const k=VAULT.boss.vaelith, done=k&&k.dead, any=mobs.some(m=>m.t.vault&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade));
+  if(!any||t-VAULT.emptySince<(done?20:900)) return; VAULT.emptySince=t;
+  for(const m of mobs) if(m.t.vault&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade)) respawnMob(m); despawnAdds('siltmother'); despawnAdds('vaelith'); }
 /* a gentle hint at the gate */
 function vaultHint(){ if(!me||me.dead||inVault(me.x,me.y)) return; const n=vaultNear(me.x,me.y); if(n&&!VAULT.hint){ VAULT.hint=true; sysMsg('The Sunken Vault · Level 10 dungeon. Gather your party within 6 yards of the gate and type -e to descend together.'); } else if(!n&&Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)>200) VAULT.hint=false; }
 setInterval(vaultHint,1000);
@@ -4527,12 +4734,13 @@ function update(dt){
   const k=1-Math.pow(.0005,dt);
   for(const m of mobs){ const ox=m.rx, oy=m.ry;
     if(Math.abs(m.rx-m.x)>200||Math.abs(m.ry-m.y)>200){m.rx=m.x;m.ry=m.y}
-    m.rx=lerp(m.rx,m.x,amHost?1:k*.9); m.ry=lerp(m.ry,m.y,amHost?1:k*.9);
+    if(amHost){ m.rx=m.x; m.ry=m.y; } else { const ag=Math.min(.16,now()-(m.tr||0)), tx=m.x+(m.vx||0)*ag, ty=m.y+(m.vy||0)*ag; m.rx=lerp(m.rx,tx,k*.9); m.ry=lerp(m.ry,ty,k*.9); }
     const mv=dist(ox,oy,m.rx,m.ry);
     if(!amHost){ if(mv>.3) m.face=Math.atan2(m.ry-oy,m.rx-ox); else if(m.tgt){ const p=entPos('p',m.tgt); if(p) m.face=Math.atan2(p.y-m.ry,p.x-m.rx); } }
     if(mv>.8 && !m.t.fly && !m.dead && Math.random()<.04) footDust(m.rx,m.ry);
+    if(m.tgt===MY_U&&m._tgS!==MY_U&&!m.dead) try{ mobSnd(m,'aggro'); }catch(e){} m._tgS=m.tgt;
   }
-  for(const o of others.values()){ const ox=o.rx, oy=o.ry; if(Math.abs(o.rx-o.x)>300||Math.abs(o.ry-o.y)>300){o.rx=o.x;o.ry=o.y} o.rx=lerp(o.rx,o.x,k); o.ry=lerp(o.ry,o.y,k);
+  for(const o of others.values()){ const ox=o.rx, oy=o.ry; if(Math.abs(o.rx-o.x)>300||Math.abs(o.ry-o.y)>300){o.rx=o.x;o.ry=o.y} { const ag=Math.min(.16,now()-(o.tr||0)), tx=o.x+(o.vx||0)*ag, ty=o.y+(o.vy||0)*ag; o.rx=lerp(o.rx,tx,k); o.ry=lerp(o.ry,ty,k); }
     o.moving=dist(ox,oy,o.rx,o.ry)>.4; if(o.moving&&Math.random()<.06) footDust(o.rx,o.ry); }
   ambient(dt); updateParticles(dt);
   shakeMag*=Math.pow(.004,dt); if(shakeMag<.1) shakeMag=0; hurtFlash=Math.max(0,hurtFlash-dt*1.8);
