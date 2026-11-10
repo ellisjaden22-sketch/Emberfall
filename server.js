@@ -51,7 +51,7 @@ function storeArmory(c, a) {
   const eq = {}; for (const s of ['weapon', 'armor', 'trinket']) { const it = a.eq && a.eq[s]; if (it && typeof it === 'object') eq[s] = { name: cleanStr(it.name, 48), rar: Math.max(0, Math.min(4, it.rar | 0)), slot: s, pow: it.pow | 0, sta: it.sta | 0, up: Math.min(9, it.up | 0), lv: it.lv | 0, leg: it.leg ? cleanStr(it.leg, 12) : null, desc: it.desc ? cleanStr(it.desc, 140) : null }; }
   const S = a.stats && typeof a.stats === 'object' ? a.stats : {}; const bosses = {}; for (const k in (S.bosses || {})) bosses[cleanStr(k, 16)] = S.bosses[k] | 0;
   const ach = {}; for (const k in (a.ach || {})) ach[cleanStr(k, 20)] = +a.ach[k] || 0;
-  armory[key] = { name, cls: cleanStr(a.cls, 10), lvl: Math.max(1, Math.min(15, a.lvl | 0)), xp: a.xp | 0, xpNeed: a.xpNeed | 0, gold: a.gold | 0, zone: cleanStr(a.zone, 10),
+  armory[key] = { name, cls: cleanStr(a.cls, 10), lvl: Math.max(1, Math.min(20, a.lvl | 0)), xp: a.xp | 0, xpNeed: a.xpNeed | 0, gold: a.gold | 0, zone: cleanStr(a.zone, 10),
     eq, hp: a.hp | 0, res: a.res | 0, pow: a.pow | 0, sta: a.sta | 0,
     quests: (Array.isArray(a.quests) ? a.quests : []).slice(0, 80).map(q => cleanStr(q, 20)), disc: (Array.isArray(a.disc) ? a.disc : []).slice(0, 40).map(q => cleanStr(q, 20)),
     mounts: (Array.isArray(a.mounts) ? a.mounts : []).slice(0, 10).map(n => n | 0), mount: a.mount | 0,
@@ -107,6 +107,7 @@ function frame(str) {
 function send(c, obj) { if (!c.dead) try { c.sock.write(frame(JSON.stringify(obj))); } catch (e) { drop(c); } }
 function broadcast(from, obj) { const f = frame(JSON.stringify(obj)); for (const c of clients.values()) if (c !== from && !c.dead) try { c.sock.write(f); } catch (e) { drop(c); } }
 function drop(c) { if (c.dead) return; c.dead = true; clients.delete(c.id); try { c.sock.destroy(); } catch (e) {} broadcast(null, { t: 'leave', peer: c.id }); log(`- ${c.id} left (${clients.size} online)`); }
+let worldWs = null;
 const pmsg = c => ({ t: 'p', peer: c.id, p: c.p, gm: c.gm ? 1 : 0 });
 function log(m) { console.log(new Date().toISOString().slice(11, 19), m); }
 
@@ -120,7 +121,7 @@ server.on('upgrade', (req, sock) => {
   sock.setNoDelay(true);
   const c = { id: 'p' + String(++seq).padStart(9, '0'), sock, buf: Buffer.alloc(0), p: {}, alive: true, dead: false, gm: false, master: false, gmTries: 0, ip, rate: 0, rateT: Date.now(), ownerIp: ownerByIp(req) };
   clients.set(c.id, c);
-  send(c, { t: 'hello', you: c.id, peers: [...clients.values()].filter(o => o !== c && o.p.v).map(o => ({ peer: o.id, p: o.p, gm: o.gm ? 1 : 0 })) });
+  send(c, { t: 'hello', you: c.id, ws: worldWs, peers: [...clients.values()].filter(o => o !== c && o.p.v).map(o => ({ peer: o.id, p: o.p, gm: o.gm ? 1 : 0 })) });
   if (c.ownerIp) { c.gm = true; c.master = true; send(c, { t: 'gm', ok: true, master: 1, token: OWNER_TOKEN || undefined }); log(`* ${c.id} recognised as the realm owner (owner IP)`); }
   log(`+ ${c.id} joined (${clients.size} online)`);
   sock.on('data', d => onData(c, d)); sock.on('close', () => drop(c)); sock.on('error', () => drop(c));
@@ -153,6 +154,7 @@ function onMessage(c, text) {
     if (pid && isBanned(pid, '')) { send(c, { t: 'sys', msg: 'You are banned from this realm.' }); return setTimeout(() => drop(c), 200); }
     const gid = pid + ':' + String(d.p.n || '').toLowerCase();   // GM rights belong to one character, not the whole device
     if (pid && !c.master) { const should = grants.includes(gid); if (should && !c.gm) { c.gm = true; send(c, { t: 'gm', ok: true, granted: 1 }); log(`* ${d.p.n} is a Game Master (appointed)`); } else if (!should && c.gm) { c.gm = false; send(c, { t: 'gm', ok: false, revoked: 1 }); } }
+    if (c.gm && Array.isArray(d.p.ws) && d.p.ws.length === 3 && (!worldWs || +d.p.ws[2] > +worldWs[2])) worldWs = d.p.ws.slice(0, 3);   // GM weather/time is shared with everyone, also players who join later
     c.p = d.p; broadcast(c, pmsg(c));
     const who = String(d.p.n || '').toLowerCase(); if (who && pendingGifts[who] && pendingGifts[who].length && d.p.u) { for (const what of pendingGifts[who]) send(c, { t: 'gift', what, from: 'the Realm' }); delete pendingGifts[who]; saveGifts(); }
   } else if (d && d.t === 'gm') {
