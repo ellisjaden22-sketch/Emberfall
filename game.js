@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 23;
+const VERSION = 24;
 const TS = 32, MW = 160, MH = 160, OWH = 112;
 const now = () => performance.now() / 1000;
 
@@ -2288,9 +2288,9 @@ function playerLook(cls,u,gv){ const B=LOOK[cls]||LOOK.warden; if(!gv||!(gv[0]||
     const clear={metal:null,pauld:null,tabard:null,robe:null,tassets:false,chain:false,straps:false,stole:false,mantle:null,fur:false,spikes:false,rune:null};
     const capeC=tc.map(v=>v*.7), steel=metal.map(v=>v*.92);
     switch(A.b){
-      case 'Breastplate': Object.assign(L,clear,{torso:steel,arms:steel,legs:metal.map(v=>v*.62),metal,pauld:metal,tabard:cloth,tassets:true,gloves:metal.map(v=>v*.85),boots:metal.map(v=>v*.7),head:'helm',spikes:A.r>=2}); break;
+      case 'Breastplate': Object.assign(L,clear,{torso:steel,arms:steel,legs:metal.map(v=>v*.62),metal,pauld:metal,tabard:cloth,tassets:true,gloves:metal.map(v=>v*.85),boots:metal.map(v=>v*.7),head:'helm',spikes:true,fur:A.r>=1}); break;
       case 'Warplate':    Object.assign(L,clear,{torso:metal.map(v=>v*.7),arms:metal.map(v=>v*.7),legs:metal.map(v=>v*.5),metal:metal.map(v=>v*.78),pauld:metal.map(v=>v*.82),tabard:dark,tassets:true,spikes:true,fur:true,gloves:metal.map(v=>v*.65),boots:metal.map(v=>v*.6),head:'helm'}); break;
-      case 'Hauberk':     Object.assign(L,clear,{torso:steel,arms:steel,legs:dark,metal,pauld:metal,tabard:cloth,chain:true,tassets:A.r>=1,gloves:metal.map(v=>v*.8),boots:metal.map(v=>v*.66),head:'helm',spikes:A.r>=3}); break;
+      case 'Hauberk':     Object.assign(L,clear,{torso:steel,arms:steel,legs:dark,metal,pauld:metal,tabard:cloth,chain:true,tassets:true,gloves:metal.map(v=>v*.8),boots:metal.map(v=>v*.66),head:'helm',spikes:true}); break;
       case 'Jerkin':      Object.assign(L,clear,{torso:leather,arms:leather.map(v=>v*.9),legs:[.26,.2,.14],boots:[.2,.13,.08],gloves:[.16,.11,.07],pauld:leather.map(v=>v*.72),straps:true,strapC:[.18,.12,.07],cape:L.cape||[.1,.09,.12]}); break;
       case 'Brigandine':  Object.assign(L,clear,{torso:leather.map(v=>v*.7),arms:leather.map(v=>v*.66),legs:[.2,.17,.15],boots:[.16,.12,.09],gloves:[.12,.1,.08],pauld:leather.map(v=>v*.55),straps:true,strapC:[.38,.3,.2],tassets:true,cape:dark}); break;
       case 'Hide Tunic':  Object.assign(L,clear,{torso:[.4,.33,.25],arms:[.36,.3,.23],legs:[.22,.18,.13],boots:[.26,.18,.1],gloves:[.2,.15,.1],pauld:[.45,.38,.28],fur:true,straps:true,strapC:[.2,.14,.08],cape:[.24,.2,.15]}); break;
@@ -3929,11 +3929,11 @@ function vaultEvent(o,txt){ if(!me||me.dead) return;
   if(txt==='E'){ if(!inVault(me.x,me.y)&&vaultNear(me.x,me.y)) vaultEnter(`${o.n} leads your party into the Sunken Vault.`); else if(!inVault(me.x,me.y)) sysMsg(`${o.n} entered the Sunken Vault. You were too far from the gate to follow; come to the gate in the Ruins of Vael and type -e.`,'c-party'); }
   else if(txt==='D'){ if(inVault(me.x,me.y)) vaultLeave(`${o.n} completes the dungeon. You return to the surface together.`); } }
 /* host: an empty vault resets itself after 20 seconds, so the next group finds it whole */
-/* host: the vault only resets once a run is over: 20 s after the last hero leaves a finished vault (the Drowned King dead),
-   or 15 minutes after an unfinished one was abandoned. Dead heroes still count as inside. */
+/* host: nothing in the vault respawns while anyone is inside (dead heroes count, they revive at the entrance stair).
+   Once every hero is out, the whole vault resets 20 s later: all bosses, Vaelith included, and every monster. */
 function vaultHostTick(players,t){ const inside=(me&&me.y>=OWH*TS)||[...others.values()].some(o=>o.y>=OWH*TS); if(inside){ VAULT.emptySince=0; return; }
-  if(!VAULT.emptySince){ VAULT.emptySince=t; return; } const k=VAULT.boss.vaelith, done=k&&k.dead, any=mobs.some(m=>m.t.vault&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade));
-  if(!any||t-VAULT.emptySince<(done?20:900)) return; VAULT.emptySince=t;
+  if(!VAULT.emptySince){ VAULT.emptySince=t; return; } const any=mobs.some(m=>m.t.vault&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade));
+  if(!any||t-VAULT.emptySince<20) return; VAULT.emptySince=t;
   for(const m of mobs) if(m.t.vault&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade)) respawnMob(m); despawnAdds('siltmother'); despawnAdds('vaelith'); }
 /* a gentle hint at the gate */
 function vaultHint(){ if(!me||me.dead||inVault(me.x,me.y)) return; const n=vaultNear(me.x,me.y); if(n&&!VAULT.hint){ VAULT.hint=true; sysMsg('The Sunken Vault · Level 10 dungeon. Gather your party within 6 yards of the gate and type -e to descend together.'); } else if(!n&&Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)>200) VAULT.hint=false; }
