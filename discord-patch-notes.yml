@@ -1,0 +1,24 @@
+# Posts the newest Emberfall patch notes to Discord every time a new patchnotes.json is uploaded to the repository.
+# Lives in the repository at  .github/workflows/discord-patch-notes.yml
+# Needs one repository secret: DISCORD_WEBHOOK  (Settings > Secrets and variables > Actions > New repository secret)
+name: Post patch notes to Discord
+on:
+  push:
+    branches: [main]
+    paths: ['patchnotes.json']
+  workflow_dispatch:
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send the patch notes to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "Add the DISCORD_WEBHOOK secret to the repository first."; exit 1; fi
+          jq '{username: "Emberfall Patch Notes",
+               embeds: [{ title: ("Emberfall " + .version + ": " + .title), url: .url, description: .text, color: 16750140,
+                          fields: [{ name: "Play now", value: .play }],
+                          footer: { text: ("Released " + .date) }, timestamp: .time }]}' patchnotes.json > payload.json
+          curl -sS --fail-with-body -H "Content-Type: application/json" -d @payload.json "$WEBHOOK"
