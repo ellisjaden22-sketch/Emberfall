@@ -20,7 +20,7 @@
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.34</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.36</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -54,7 +54,7 @@
   </div>
   <div id="buffs"></div>
   <div id="party"></div>
-  <div id="mini" class="panel"><canvas id="miniC" width="356" height="356"></canvas><div class="mzb"><button id="mzIn" title="Zoom in (mouse wheel)">+</button><button id="mzOut" title="Zoom out">−</button></div><div id="zoneName"></div><div id="netline" title="Who is online"></div></div>
+  <div id="mini" class="panel"><div class="mring"><canvas id="miniC" width="356" height="356"></canvas><b class="cN">N</b><b class="cE">E</b><b class="cS">S</b><b class="cW">W</b></div><div class="mzb"><button id="mzIn" title="Zoom in (mouse wheel)">+</button><button id="mzOut" title="Zoom out">−</button></div><div id="zoneName"></div><div id="netline" title="Who is online"></div></div>
   <div id="tracker" class="panel"></div>
   <div id="castbar" class="hidden"><i></i><em class="cbic"></em><span class="cbn"></span><b class="cbt"></b></div>
   <div id="bar" class="panel"></div>
@@ -80,12 +80,12 @@
     <h2>Bags</h2>
     <div class="baghead"><span id="bagCount"></span><button id="bagSort" title="Sort by rarity">Sort</button></div>
     <div class="bag" id="bag"></div>
-    <div class="dropzones"><div class="dz sell" id="dzSell">🪙 Drag here to <b>sell</b></div><div class="dz trash" id="dzTrash">🗑 Drag here to <b>destroy</b></div></div>
+    <div class="dropzones"><div class="dz sell" id="dzSell">🪙 Drag here to <b>sell</b></div><div class="dz trash" id="dzTrash">⚒ Drag here to <b>salvage</b></div></div>
     <div id="gold"></div>
-    <div class="baghint">Drag items to move, equip, sell or destroy · right-click for options</div>
+    <div class="baghint">Drag items to move, equip, sell or salvage · right-click for options</div>
   </div>
   <div id="talWin" class="win panel hidden"><button class="close" data-close="talWin">×</button><h2>Talents</h2><div class="talbody"></div></div>
-  <div id="cpBar" class="hidden"><span class="cpst">STEALTH</span><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="auraBar" class="panel hidden"></div><div id="cpBar" class="hidden"><span class="cpst">STEALTH</span><i></i><i></i><i></i><i></i><i></i></div>
   <div id="charWin" class="win panel hidden"><button class="close" data-close="charWin">×</button><h2>Character</h2>
     <div class="chtop"><div class="chport" id="chPort"></div><div class="chid"><div id="chName"></div><div id="chSub"></div><div id="chXp" class="chxp"></div></div></div>
     <div id="eqSlots"></div><div class="stats" id="statBox"></div><div class="baghint">Click an item to unequip it · drag items from your bags onto a slot to equip</div></div>
@@ -115,7 +115,7 @@
 <div id="tip" class="panel hidden"></div>
 <div id="escMenu" class="panel hidden"><h2>Game Menu</h2><button data-e="resume" class="gold">Resume</button><button data-e="options">Options</button><button data-e="fs">Full screen</button><button data-e="gfx">Graphics</button><button data-e="keys">Keybinds</button><button data-e="sound">Sound &amp; music</button><button data-e="help">How to play</button><button data-e="bug">Report a bug</button><button data-e="repick">Character select</button><div class="escver">Emberfall Online · Beta v0.9</div></div>
 <div id="optWin" class="win panel hidden"><button class="close" data-close="optWin">×</button><h2>Options</h2><div class="obodywrap"></div></div>
-<div id="bugWin" class="win panel hidden"><button class="close" data-close="bugWin">×</button><h2>Report a bug</h2><p style="color:var(--dim);font-size:13px">What happened, and what did you expect? Your position, level and browser are added automatically. The report is emailed to the game's owner.</p><textarea id="bugTxt" maxlength="1500" rows="6"></textarea><div class="btns" style="display:flex;justify-content:flex-end;margin-top:8px"><button id="bugSend" class="gold">Send report</button></div></div><div id="ctxMenu" class="panel hidden"></div><div id="confirmPop" class="panel hidden"></div>
+<div id="bugWin" class="win panel hidden"><button class="close" data-close="bugWin">×</button><h2>Report a bug or problem</h2><p style="color:var(--dim);font-size:13px">What happened, and what did you expect? Your report becomes a ticket for the Game Masters, and you get a reply in game when it is handled. Your position, level and game version are added automatically.</p><div class="bugcat">Type: <select id="bugCat"><option>Bug</option><option value="Stuck">Stuck somewhere</option><option value="Player">Player problem</option><option value="Item">Item or gold</option><option>Quest</option><option>Other</option></select></div><textarea id="bugTxt" maxlength="1500" rows="6"></textarea><div class="btns" style="display:flex;justify-content:flex-end;margin-top:8px"><button id="bugSend" class="gold">Send ticket</button></div></div><div id="tkWin" class="win panel hidden"><button class="close" data-close="tkWin">×</button><h2>🎫 Tickets</h2><div class="tkbody"></div></div><div id="ctxMenu" class="panel hidden"></div><div id="confirmPop" class="panel hidden"></div>
 
 <script src="config.js"></script>
 <script src="game.js"></script>

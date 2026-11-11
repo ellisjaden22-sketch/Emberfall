@@ -19,6 +19,32 @@ const saveBans = () => { try { fs.writeFileSync(BANS_FILE, JSON.stringify(bans, 
 const ipOf = req => String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
 const isBanned = (pid, ip) => bans.some(b => (pid && b.pid === pid) || (ip && b.ip && b.ip === ip));
 const BUG_FILE = path.join(__dirname, 'bugs.log');
+// ---------- support tickets: players report bugs and problems in game, GMs work through them with the Tickets window ----------
+// Tickets are kept in tickets.json. Hosts like Render's free plan wipe files when the server restarts, so you can also keep
+// every ticket as a GitHub issue in a PRIVATE repository: set TICKETS_REPO=yourname/emberfall-tickets and GITHUB_TOKEN=<a token
+// that may read and write issues in that repository>. The server then reloads open tickets from there when it starts.
+const TICKETS_FILE = path.join(__dirname, 'tickets.json');
+const TK_REPO = process.env.TICKETS_REPO || '', GH_TOKEN = process.env.GITHUB_TOKEN || '';
+let tickets = []; try { tickets = JSON.parse(fs.readFileSync(TICKETS_FILE, 'utf8')); if (!Array.isArray(tickets)) tickets = []; } catch (e) {}
+const saveTickets = () => fs.writeFile(TICKETS_FILE, JSON.stringify(tickets), () => {});
+const MSGS_FILE = path.join(__dirname, 'messages.json');   // GM replies waiting for players who were offline
+let pendingMsgs = {}; try { pendingMsgs = JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8')) || {}; } catch (e) {}
+const saveMsgs = () => fs.writeFile(MSGS_FILE, JSON.stringify(pendingMsgs), () => {});
+function gh(method, p, body) { return new Promise(res => { if (!TK_REPO || !GH_TOKEN) return res(null);
+  const data = body ? JSON.stringify(body) : null;
+  const rq = require('https').request({ host: 'api.github.com', path: '/repos/' + TK_REPO + p, method, headers: { 'User-Agent': 'emberfall-server', Authorization: 'Bearer ' + GH_TOKEN, Accept: 'application/vnd.github+json', ...(data ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } : {}) } }, r => {
+    let b = ''; r.on('data', x => b += x); r.on('end', () => { try { res(r.statusCode < 300 ? JSON.parse(b || 'null') : null); } catch (e) { res(null); } }); });
+  rq.on('error', () => res(null)); rq.setTimeout(15000, () => { rq.destroy(); res(null); }); if (data) rq.write(data); rq.end(); }); }
+const tkBody = t => `${t.text}\n\n---\n**${t.name}** (level ${t.lvl} ${t.cls}) in ${t.zone} at ${t.pos}, game v${t.ver}\n\n${t.info}\n\n<!--emberfall ${Buffer.from(JSON.stringify({ ...t, gh: undefined })).toString('base64')} -->`;
+async function ghCreate(t) { const r = await gh('POST', '/issues', { title: `#${t.id} ${t.cat}: ${t.text.replace(/\s+/g, ' ').slice(0, 70)} (${t.name})`, body: tkBody(t), labels: ['ticket', t.cat] }); if (r && r.number) { t.gh = r.number; saveTickets(); } }
+async function ghSync(t, comment) { if (!t.gh) return; if (comment) await gh('POST', `/issues/${t.gh}/comments`, { body: comment }); await gh('PATCH', `/issues/${t.gh}`, { state: t.st === 'open' ? 'open' : 'closed', body: tkBody(t) }); }
+async function ghLoad() { if (!TK_REPO || !GH_TOKEN) return; const have = new Set(tickets.map(t => t.id)); let added = 0;
+  for (let page = 1; page <= 5; page++) { const list = await gh('GET', `/issues?state=open&per_page=100&page=${page}`); if (!Array.isArray(list) || !list.length) break;
+    for (const is of list) { const m = /<!--emberfall ([A-Za-z0-9+/=]+) -->/.exec(is.body || ''); if (!m) continue; try { const t = JSON.parse(Buffer.from(m[1], 'base64').toString('utf8')); if (!t.id || have.has(t.id)) continue; t.gh = is.number; t.st = 'open'; tickets.push(t); have.add(t.id); added++; } catch (e) {} } }
+  if (added) { tickets.sort((a, b) => a.id - b.id); saveTickets(); log(`# restored ${added} open ticket(s) from GitHub`); } }
+setTimeout(ghLoad, 1000);
+const nextTicketId = () => tickets.reduce((m, t) => Math.max(m, t.id | 0), 0) + 1;
+const openTickets = () => tickets.filter(t => t.st === 'open').length;
 // Who is the realm owner (master GM)?
 //  1. anyone playing on the same computer as the server (http://localhost:8080),
 //  2. any IP listed in OWNER_IP (comma separated), e.g. OWNER_IP=41.13.22.7
@@ -157,6 +183,8 @@ function onMessage(c, text) {
     if (c.gm && Array.isArray(d.p.ws) && d.p.ws.length === 3 && (!worldWs || +d.p.ws[2] > +worldWs[2])) worldWs = d.p.ws.slice(0, 3);   // GM weather/time is shared with everyone, also players who join later
     c.p = d.p; broadcast(c, pmsg(c));
     const who = String(d.p.n || '').toLowerCase(); if (who && pendingGifts[who] && pendingGifts[who].length && d.p.u) { for (const what of pendingGifts[who]) send(c, { t: 'gift', what, from: 'the Realm' }); delete pendingGifts[who]; saveGifts(); }
+    if (who && d.p.u && pendingMsgs[who] && pendingMsgs[who].length) { for (const msg of pendingMsgs[who]) send(c, { t: 'tkreply', msg }); delete pendingMsgs[who]; saveMsgs(); }
+    if (c.gm && d.p.u && !c.tkTold) { c.tkTold = true; const n = openTickets(); if (n) send(c, { t: 'tknew', open: n }); }
   } else if (d && d.t === 'gm') {
     // GM login: only the server knows the password, and it tells everyone else who is a real GM.
     if (c.gmTries >= 5 || !GM_PASSWORD) return send(c, { t: 'gm', ok: false });
@@ -174,7 +202,30 @@ function onMessage(c, text) {
     if (OWNER_TOKEN && d.token.length === OWNER_TOKEN.length && crypto.timingSafeEqual(Buffer.from(d.token), Buffer.from(OWNER_TOKEN))) { c.gm = true; c.master = true; log(`* ${c.id} recognised as the realm owner (remembered device)`); send(c, { t: 'gm', ok: true, master: 1 }); if (c.p.v) broadcast(c, pmsg(c)); }
     else send(c, { t: 'gm', ok: false, forget: 1 });
   } else if (d && d.t === 'bug' && typeof d.text === 'string') {
-    fs.appendFile(BUG_FILE, `---- ${new Date().toISOString()} ${c.id} ${(c.p && c.p.n) || '?'}\n${d.text.slice(0, 2000)}\n`, () => {}); log(`# bug report from ${(c.p && c.p.n) || c.id}`);
+    // a new ticket (older games send only text; newer ones send the text and the details separately)
+    if (Date.now() - (c.lastTk || 0) < 20000) return send(c, { t: 'tkok', err: 'Please wait a little before sending another ticket.' });
+    c.lastTk = Date.now(); const p = c.p || {};
+    const cats = ['Bug', 'Stuck', 'Player', 'Item', 'Quest', 'Other'];
+    const t = { id: nextTicketId(), at: Date.now(), st: 'open', cat: cats.includes(d.cat) ? d.cat : 'Bug', name: cleanStr(p.n || '?', 20), pid: cleanStr(p.pid, 48), cls: cleanStr(d.cls || p.c, 12), lvl: (d.lvl | 0) || (p.l | 0),
+      zone: cleanStr(d.zone || p.z, 20), pos: cleanStr(d.pos, 20), ver: cleanStr(d.ver, 8), text: String(d.text).replace(/[\u0000-\u0008\u000b-\u001f]/g, '').slice(0, 1500), info: cleanStr(d.info, 900), notes: [], reply: '' };
+    if (!t.text.trim()) return; tickets.push(t); if (tickets.length > 2000) tickets = tickets.filter(x => x.st === 'open' || x.id > t.id - 1500); saveTickets(); ghCreate(t);
+    fs.appendFile(BUG_FILE, `---- ${new Date().toISOString()} #${t.id} ${t.name}\n${t.text}\n`, () => {}); log(`# ticket #${t.id} from ${t.name}`);
+    send(c, { t: 'tkok', id: t.id });
+    const n = openTickets(); for (const o of clients.values()) if (o.gm && o !== c) send(o, { t: 'tknew', id: t.id, name: t.name, cat: t.cat, open: n });
+  } else if (d && d.t === 'tk' && c.gm) {
+    // Game Master ticket tools
+    const t = tickets.find(x => x.id === (d.id | 0)), by = cleanStr((c.p && c.p.n) || 'GM', 20);
+    if (d.op === 'close' && t) { t.st = 'closed'; t.closedBy = by; t.closedAt = Date.now(); const reply = String(d.reply || '').replace(/[\u0000-\u001f]/g, ' ').slice(0, 400).trim();
+      if (reply) { t.reply = reply; const msg = `Reply from ${by} to your ticket #${t.id}: ${reply}`; let done = false;
+        for (const o of clients.values()) if (o.p && o.p.pid === t.pid && String(o.p.n || '').toLowerCase() === t.name.toLowerCase()) { send(o, { t: 'tkreply', id: t.id, msg }); done = true; }
+        if (!done) { const k = t.name.toLowerCase(); (pendingMsgs[k] = pendingMsgs[k] || []).push(msg); saveMsgs(); } }
+      ghSync(t, `Closed by ${by}${reply ? ': ' + reply : ''}`); }
+    else if (d.op === 'reopen' && t) { t.st = 'open'; ghSync(t, `Reopened by ${by}`); }
+    else if (d.op === 'note' && t && typeof d.txt === 'string' && d.txt.trim()) { const txt = d.txt.replace(/[\u0000-\u001f]/g, ' ').slice(0, 400); t.notes.push({ by, at: Date.now(), txt }); ghSync(t, `Note from ${by}: ${txt}`); }
+    else if (d.op === 'claim' && t) { t.claim = t.claim === by ? '' : by; }
+    else if (d.op === 'delete' && t && c.master) { tickets = tickets.filter(x => x !== t); if (t.gh) gh('PATCH', `/issues/${t.gh}`, { state: 'closed' }); }
+    if (d.op && d.op !== 'list') saveTickets();
+    send(c, { t: 'tklist', list: tickets.slice(-300), open: openTickets() });
   } else if (d && d.t === 'admin' && c.master) {
     const pid = String(d.pid || '').slice(0, 16), name = String(d.name || '').slice(0, 20);
     if (d.cmd === 'unban') { bans = bans.filter(b => b.pid !== pid && String(b.n).toLowerCase() !== name.toLowerCase()); saveBans(); return; }

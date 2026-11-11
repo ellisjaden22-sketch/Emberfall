@@ -4,10 +4,9 @@
    multiplayer: set to false to always play solo.
    soloGM:      'file' = you are a Game Master only when you open index.html straight from your own disk (solo, no server).
                 false = never. On a server, the owner is recognised automatically (see README: GM_PASSWORD / OWNER_IP).
-   bugEmail:    where "Report a bug" sends reports (opens the player's email app). */
+   Bug reports: "Report a bug" in game creates a ticket on the realm server. Game Masters open them with /tickets. */
 window.EMBERFALL_CONFIG = {
   serverUrl: null,
   multiplayer: true,
   soloGM: 'file',
-  bugEmail: 'ellis.jaden22@gmail.com',
 };
