@@ -334,6 +334,18 @@ body.touch #touchBtns button{width:50px;height:50px;border-radius:50%;font-size:
 body.touch #chat{left:8px;bottom:auto;top:calc(150px*var(--uis,1));width:300px}body.touch #chatlog{height:100px;font-size:13px}body.touch #tracker{display:none}
 body.touch #menuBtns{bottom:auto;top:calc(200px*var(--uis,1) + 40px);right:8px;flex-wrap:wrap;width:250px;justify-content:flex-end;transform-origin:top right}
 body.touch canvas{touch-action:none}
+#menuTog{display:none}#menuTog.pulse{animation:talp 1.4s ease-in-out infinite;color:#7dff8a}
+@media (orientation:landscape){
+  body.touch #menuTog{display:flex;align-items:center;justify-content:center;flex-direction:column;position:absolute;top:12px;right:calc(212px*var(--uis,1) + 22px);width:54px;height:54px;border-radius:50%;padding:0;z-index:16;font-size:20px;line-height:1;font-weight:800;background:radial-gradient(circle at 40% 35%,rgba(90,60,30,.95),rgba(20,12,6,.95));border:2px solid rgba(224,180,90,.7);touch-action:manipulation}
+  body.touch #menuTog small{font-size:9px;letter-spacing:.5px;margin-top:2px}
+  body.touch #menuBtns{display:none;top:74px;bottom:auto;right:calc(212px*var(--uis,1) + 22px);width:236px;flex-wrap:wrap;justify-content:flex-start;gap:6px;padding:10px;background:rgba(18,12,7,.94);border:1px solid rgba(224,180,90,.55);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.6);z-index:17;transform:none;max-height:calc(100vh - 90px);overflow-y:auto}
+  body.touch.menuOpen #menuBtns{display:flex}
+  body.touch #touchBtns{bottom:12px;right:10px}
+  body.touch #joy{bottom:16px}
+  body.touch #chat{top:calc(70px*var(--uis,1) + 8px)} body.touch #chatlog{height:72px}
+  body.touch #menuBtns button{flex:1 1 98px;min-height:40px;font-size:13px;padding:8px 6px}
+  body.touch.menuOpen #menuTog{border-color:#ffd34a;box-shadow:0 0 12px rgba(255,210,80,.6)}
+}
 
 /* keep the game's own colours even with high-contrast / forced-colour modes or dark-mode extensions */
 *,*::before,*::after{forced-color-adjust:none!important}

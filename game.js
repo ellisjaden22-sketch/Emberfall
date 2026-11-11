@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 24;
+const VERSION = 26;
 const TS = 32, MW = 160, MH = 160, OWH = 112;
 const now = () => performance.now() / 1000;
 
@@ -495,7 +495,9 @@ const MY_U=rid(4);
 let room=null, netState='connecting', joinedAt=0, myPeer=null;
 const others=new Map();  // peer -> other player
 const othersByU=new Map();
-let hostPeer=null, amHost=true, wasHost=false;
+let hostPeer=null, amHost=true, wasHost=false, HOSTPAUSE=false;
+/* coming back after the game was paused (hidden tab, locked phone): someone else has been running the world, so do not grab it back with stale monsters */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) window.__hidAt=performance.now(); else if(window.__hidAt&&performance.now()-window.__hidAt>3000&&room){ HOSTPAUSE=true; } });
 let actSeq=0, mdSeq=0, chSeq=0, tgSeq=0; const myActs=[], myMd=[], myChat=[], myTg=[];
 let lastSend=0;
 
@@ -602,11 +604,13 @@ function syncPeers(){
     if(p.presence&&p.presence.v>VERSION&&!window.__newVer){ window.__newVer=1; setTimeout(()=>{ sysMsg('A newer version of Emberfall is available. Refresh the page to update.','c-err'); toast('New version available — refresh to update','small'); },500); }
     if(p.kind!=='viewer'||!p.presence||p.presence.v!==VERSION||!p.presence.u) continue; cand.push(p.peer); }
   const mine=myPeer||'~';
-  const claim=[]; for(const p of list){ if(!p.sameTab && cand.includes(p.peer) && p.presence.hs) claim.push(p.peer); }
+  const fresh=p=>!(p.updatedAt>0)||Date.now()-p.updatedAt<4000;
+  const claim=[]; for(const p of list){ if(!p.sameTab && cand.includes(p.peer) && p.presence.hs && fresh(p)) claim.push(p.peer); }
   const graceOver=!room||t-joinedAt>1.6; const lowest=a=>a.reduce((x,y)=>y<x?y:x);
   if(!room){ amHost=true; hostPeer=null; }
   else if(!me){ amHost=cand.length===0; hostPeer=claim.length?lowest(claim):cand.length?lowest(cand):null; }
   else { let pool=claim.slice(); if(amHost) pool.push(mine); if(!pool.length){ pool=cand.slice(); pool.push(mine); }
+    if(HOSTPAUSE&&claim.length){ pool=claim.slice(); } else HOSTPAUSE=false;
     const low=lowest(pool); amHost=low===mine&&(graceOver||amHost); hostPeer=low===mine?null:low; }
   if(amHost && !wasHost){ for(const m of mobs){ m.threat={}; if(m.tgt) m.threat[m.tgt]=10; } }
   wasHost=amHost;
@@ -2364,10 +2368,10 @@ function buildScene(dt){
   const near=(px,py,r)=>{ const d=Math.hypot(px/TS-CAM.tx,py/TS-CAM.tz); LOD_FAR=d>(GFX.q==='ultra'?26:20); LOD_MID=d>(GFX.q==='low'?3:GFX.q==='ultra'?12:8); CAST_SH=d<30; return d<r; };
   for(const n of NPCS){ if(!near(n.x,n.y,70)) continue; drawHumanoid({x:n.x/TS,y:groundY(n.x,n.y),z:n.y/TS,face:n.face??Math.PI/2,emote:n.emote,mv:0,walk:0,dead:-1,look:npcLook(n),L:LOOK[n.id]||LOOK.oriel,skin:SKIN[n.id==='mira'?1:2]}); }
   drawExtras(near,t);
-  for(const m of mobs){
+  for(const m of mobs){ try{
     if(m.dead){ if(m.deathT&&t-m.deathT<1.6&&near(m.dx,m.dy,70)) drawMob3(m,true); continue; }
     animState(m,dt,m.rx,m.ry,false,m.t.boss?2:1);
-    if(!near(m.rx,m.ry,m.t.boss?70:55)) continue; drawMob3(m,false);
+    if(!near(m.rx,m.ry,m.t.boss?70:55)) continue; drawMob3(m,false); }catch(e){ HALPHA=1; frameErr(e,'mob '+m.t.key); continue; }
     if(m.t.light&&!LOOK[m.t.key]&&m.t.key!=='wyrm'&&m.t.key!=='emberling'&&m.t.key!=='moth'&&m.t.key!=='wraith') addLight(m.rx/TS,groundY(m.rx,m.ry)+1.4,m.ry/TS,5,C3(m.t.light)); }
   const drawP=(o,isMe)=>{ const x=isMe?me.x:o.rx, y=isMe?me.y:o.ry; const cls=isMe?me.c.cls:o.c, u=isMe?MY_U:o.u; const dead=isMe?me.dead:o.d;
     const st=isMe?me:o; animState(st,dt,x,y,isMe?me.moving:o.moving);
@@ -2395,7 +2399,7 @@ function buildScene(dt){
     if(isMe?me.cast:(o.b&4)) addLight(X,Y+1.4,Z,5,castCol);
     if(isMe?me.avatarU>t:(o.b&64)){ addLight(X,Y+1.5,Z,7,[1.3,1.1,.5]); if(Math.random()<.4) burst3(X,Y+1,Z,'#ffd34a',1,.8,{glow:true,up:1}); }
     if(curDark>.4) addLight(X,Y+2.2,Z,isMe?7:5,[.55,.48,.38].map(v=>v*curDark)); };
-  for(const o of others.values()) if(seenO(o)&&near(o.rx,o.ry,60)) drawP(o,false);
+  for(const o of others.values()) if(seenO(o)&&near(o.rx,o.ry,60)) try{ drawP(o,false); }catch(e){ HALPHA=1; frameErr(e,'player'); }
   if(me){ LOD_FAR=false; LOD_MID=false; CAST_SH=true; drawP(null,true); }
   LOD_FAR=false; LOD_MID=false; CAST_SH=false;
   // fx geometry
@@ -4040,7 +4044,7 @@ function toggleFullscreen(){ if(document.fullscreenElement){ try{ navigator.keyb
   document.addEventListener('fullscreenchange',()=>{ setTimeout(resize,50); }); })();
 /* ---------- bug reports (beta) ---------- */
 function openBug(){ const w=$('bugWin'); w.classList.remove('hidden'); $('bugTxt').value=''; $('bugTxt').focus();
-  $('bugSend').onclick=()=>{ const txt=$('bugTxt').value.trim().slice(0,1500); if(!txt) return; const BUG_EMAIL=(window.EMBERFALL_CONFIG&&window.EMBERFALL_CONFIG.bugEmail)||'ellis.jaden22@gmail.com'; const info=`[${new Date().toISOString()}] v${VERSION} ${me?me.c.name+' L'+me.c.lvl+' '+zoneAtPx(me.x,me.y)+' '+Math.round(me.x/TS)+','+Math.round(me.y/TS):''} ${navigator.userAgent.slice(0,80)}`;
+  $('bugSend').onclick=()=>{ const txt=$('bugTxt').value.trim().slice(0,1500); if(!txt) return; const BUG_EMAIL=(window.EMBERFALL_CONFIG&&window.EMBERFALL_CONFIG.bugEmail)||'ellis.jaden22@gmail.com'; const info=`[${new Date().toISOString()}] v${VERSION} ${me?me.c.name+' L'+me.c.lvl+' '+zoneAtPx(me.x,me.y)+' '+Math.round(me.x/TS)+','+Math.round(me.y/TS):''} ${navigator.userAgent.slice(0,80)} host:${amHost?1:0} online:${countOnline()} fps:${Math.round(1/Math.max(.001,emaDt))}${ERRLOG.length?'\nerrors: '+ERRLOG.join(' | '):''}`;
     if(room&&typeof room.bug==='function') room.bug(info+'\n'+txt);
     const href='mailto:'+BUG_EMAIL+'?subject='+encodeURIComponent('Emberfall bug report'+(me?' from '+me.c.name:''))+'&body='+encodeURIComponent(txt+'\n\n---\n'+info);
     let opened=false; try{ const a=document.createElement('a'); a.href=href; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); opened=true; }catch(e){}
@@ -4185,7 +4189,10 @@ function tabTarget(){
 }
 
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>toggleWin(b.dataset.close,false));
-document.querySelectorAll('#menuBtns button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(k==='who') toggleWin('whoWin'); if(k==='char') toggleWin('charWin'); if(k==='tal') toggleWin('talWin'); if(k==='sound'){ audInit(); toggleWin('soundWin'); } if(k==='inv') toggleWin('invWin'); if(k==='help') toggleWin('helpWin'); if(k==='party'){ toggleWin('partyWin'); renderPartyWin(); } if(k==='map') toggleWin('mapWin'); if(k==='qlog') toggleWin('qlogWin'); b.blur(); });
+{ const mt=$('menuTog'), mb=$('menuBtns'); mt.onclick=e=>{ e.stopPropagation(); document.body.classList.toggle('menuOpen'); };
+  addEventListener('pointerdown',e=>{ if(document.body.classList.contains('menuOpen')&&!mb.contains(e.target)&&e.target!==mt&&!mt.contains(e.target)) document.body.classList.remove('menuOpen'); },true);
+  new MutationObserver(()=>mt.classList.toggle('pulse',!!mb.querySelector('[data-k="tal"].pulse'))).observe(mb,{subtree:true,attributes:true,attributeFilter:['class']}); }
+document.querySelectorAll('#menuBtns button').forEach(b=>b.onclick=()=>{ document.body.classList.remove('menuOpen'); const k=b.dataset.k; if(k==='who') toggleWin('whoWin'); if(k==='char') toggleWin('charWin'); if(k==='tal') toggleWin('talWin'); if(k==='sound'){ audInit(); toggleWin('soundWin'); } if(k==='inv') toggleWin('invWin'); if(k==='help') toggleWin('helpWin'); if(k==='party'){ toggleWin('partyWin'); renderPartyWin(); } if(k==='map') toggleWin('mapWin'); if(k==='qlog') toggleWin('qlogWin'); b.blur(); });
 $('netline').onclick=()=>toggleWin('whoWin');
 $('gmBtn').onclick=e=>{ toggleGMWin(); e.currentTarget.blur(); };
 $('mapC').addEventListener('click',e=>{ if(!isGM||!e.shiftKey||!me||MAPZ.moved) return; const cvm=e.currentTarget, r=cvm.getBoundingClientRect(); const mpx=(e.clientX-r.left)*cvm.width/r.width, mpy=(e.clientY-r.top)*cvm.height/r.height; const V=mapView(); gmTpTo((mpx-V.ox)/V.S*TS,(mpy-V.oy)/V.S*TS); });
@@ -4269,11 +4276,16 @@ function update(dt){
   worldTick(dt);
   if(me) sendPresence(false);
 }
-let emaDt=.016, rsT=0;
+let emaDt=.016, rsT=0; const ERRLOG=[];
+function frameErr(e,where){ console.error(e); const msg=where+': '+String(e&&e.message||e).slice(0,140)+' @'+String(e&&e.stack||'').split('\n')[1]?.trim().slice(0,90);
+  if(!ERRLOG.includes(msg)){ ERRLOG.push(msg); if(ERRLOG.length>8) ERRLOG.shift(); if(ERRLOG.length<=3) try{ sysMsg('⚠ Game hiccup ('+where+'), recovered. If the game misbehaves, use Report a bug: the details are attached automatically.','c-err'); }catch(_){} } }
 function frame(){
   const t=now(); const rawDt=t-lastT; const dt=Math.min(.1,rawDt); lastT=t;
   emaDt=lerp(emaDt,Math.min(.2,rawDt),.05); rsT+=dt; if(rsT>1.5){ rsT=0; const old=RSCALE; if(emaDt>.026&&RSCALE>GFX.rmin) RSCALE=Math.max(GFX.rmin,RSCALE-.1); else if(emaDt<.0145&&RSCALE<RSMAX) RSCALE=Math.min(RSMAX,RSCALE+.1); if(Math.abs(old-RSCALE)>.01) resize(); }
-  try{ update(dt); render(dt); if(me){ updateBar(); if(++uiTick%3===0){ updateUI(); drawMini(); } } }catch(e){ console.error(e); if(!frame.errShown){ frame.errShown=1; } }
+  if(rawDt>3&&room&&amHost) HOSTPAUSE=true;
+  try{ update(dt); }catch(e){ frameErr(e,'update'); }
+  try{ render(dt); }catch(e){ frameErr(e,'render'); }
+  try{ if(me){ updateBar(); if(++uiTick%3===0){ updateUI(); drawMini(); } } }catch(e){ frameErr(e,'ui'); }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
