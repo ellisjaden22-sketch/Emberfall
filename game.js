@@ -6,9 +6,18 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 29;
-const TS = 32, MW = 160, MH = 210, OWH = 112;
-const AR={x0:20,y0:164,w:120,h:40}; AR.x1=AR.x0+AR.w-1; AR.y1=AR.y0+AR.h-1; AR.cx=AR.x0+AR.w/2; AR.cy=AR.y0+AR.h/2; AR.shr=[[AR.x0+9.5,AR.cy],[AR.x1-8.5,AR.cy]]; AR.gate={x:0,y:0};
+const VERSION = 32;
+const TS = 32, MW = 250, OWH = 168, MH = OWH+98;
+const WS=1.7, TL={x:56,y:82,r:19}, TC={x:84,y:128};
+/* logical (old map) -> physical (new map), and back */
+function WP(x,y){ const dx=x-TL.x, dy=y-TL.y, d=Math.hypot(dx,dy); if(d<=TL.r) return [TC.x+dx,TC.y+dy]; const f=(TL.r+(d-TL.r)*WS)/d; return [TC.x+dx*f,TC.y+dy*f]; }
+function WI(X,Y){ const dx=X-TC.x, dy=Y-TC.y, d=Math.hypot(dx,dy); if(d<=TL.r) return [TL.x+dx,TL.y+dy]; const f=(TL.r+(d-TL.r)/WS)/d; return [TL.x+dx*f,TL.y+dy*f]; }
+const WPT=(x,y)=>{ const p=WP(x,y); return [p[0]-x,p[1]-y]; };
+/* structures are moved as a whole (never stretched): the offset of each one's anchor */
+const VGO=WPT(99.5,48.5).map(Math.round), STO=WPT(91,72).map(Math.round), CRO=WPT(140,16).map(Math.round), RUO=WPT(88,40).map(Math.round);
+let OFX=0, OFY=0; const _slp=Array.prototype.push;
+function OFS(o){ OFX=o?o[0]:0; OFY=o?o[1]:0; try{ STAT_LIGHTS.push=OFX||OFY?function(...a){ for(const l of a){ l.x+=OFX; l.z+=OFY; } return _slp.apply(this,a); }:_slp; }catch(e){} }
+const AR={x0:20,y0:OWH+52,w:120,h:40}; AR.x1=AR.x0+AR.w-1; AR.y1=AR.y0+AR.h-1; AR.cx=AR.x0+AR.w/2; AR.cy=AR.y0+AR.h/2; AR.shr=[[AR.x0+9.5,AR.cy],[AR.x1-8.5,AR.cy]]; AR.gate={x:0,y:0};
 const now = () => performance.now() / 1000;
 
 /* ---------- RNG & noise ---------- */
@@ -30,8 +39,8 @@ const rid = n => Array.from({length:n},()=> 'abcdefghjkmnpqrstuvwxyz23456789'[Ma
 const T={GRASS:0,FOREST:1,TREE:2,WATER:3,PATH:4,SAND:5,SWAMP:6,RUIN:7,WALL:8,ASH:9,LAVA:10,COBBLE:11,HOUSE:12,ROCK:13,BRIDGE:14,FOUNT:15};
 T.ICE=17; T.SNOW=18; T.TWALL=19; T.VOID=20; T.DWALL=21; T.DFLOOR=22; T.COLUMN=23; T.DOOR=24; T.DGATE=25; T.FENCE=26;
 const SOLID=new Set([T.TREE,T.WATER,T.WALL,T.LAVA,T.HOUSE,T.ROCK,T.FOUNT,T.TWALL,T.VOID,T.DWALL,T.COLUMN,T.DGATE,T.FENCE]);
-const TOWN={x:56,y:82,r:19,wallR:18.65,gates:[],gatePts:[]};
-const LAIR={x:56,y:9};
+const TOWN={x:TC.x,y:TC.y,r:19,wallR:18.65,gates:[],gatePts:[]};
+const LAIR=(()=>{ const p=WP(56,9); return {x:Math.round(p[0]),y:Math.round(p[1])}; })();
 const ZONES={
   town:{name:'Hearthmere',sub:'Sanctuary',lv:''},
   meadow:{name:'Amberfield',sub:'Level 1–2',lv:''},
@@ -47,6 +56,9 @@ function zoneOf(tx,ty){
   if(ty>=AR.y0-3) return 'arena';
   if(ty>=OWH) return 'vault';
   if(Math.hypot(tx-TOWN.x,ty-TOWN.y)<TOWN.r) return 'town';
+  const L=WI(tx,ty); return zoneOfL(L[0],L[1]); }
+function zoneOfL(tx,ty){
+  if(Math.hypot(tx-TL.x,ty-TL.y)<TL.r) return 'meadow';
   if(tx>=130&&tx<=150&&ty>=8&&ty<=24) return 'crypt';
   if(tx+(fbm(tx*.07,ty*.07,44)-.5)*6>117) return 'frost';
   const x=tx+(fbm(tx*.07,ty*.07,21)-.5)*12, y=ty+(fbm(tx*.07,ty*.07,33)-.5)*12;
@@ -59,10 +71,10 @@ function zoneOf(tx,ty){
 }
 const map=new Uint8Array(MW*MH), zmap=[];
 const houses=[];
-const tAt=(tx,ty)=> (tx<0||ty<0||tx>=MW||ty>=MH)?T.ROCK:map[ty*MW+tx];
-const setT=(tx,ty,v)=>{ if(tx>=0&&ty>=0&&tx<MW&&ty<MH) map[ty*MW+tx]=v; };
+const tAt=(tx,ty)=>{ tx+=OFX|0; ty+=OFY|0; return (tx<0||ty<0||tx>=MW||ty>=MH)?T.ROCK:map[ty*MW+tx]; };
+const setT=(tx,ty,v)=>{ tx+=OFX|0; ty+=OFY|0; if(tx>=0&&ty>=0&&tx<MW&&ty<MH) map[ty*MW+tx]=v; };
 /* ---------- v22: the Sunken Vault, a level 10 dungeon carved below the overworld (rows OWH..MH) ---------- */
-const VAULT={OX:8,OY:OWH+3,range:60,gate:{x:99.5*TS,y:48.75*TS},start:{x:0,y:0},exit:{x:99.5*TS,y:50.7*TS},doors:[],boss:{},emptySince:0,hint:false};
+const VAULT={OX:8,OY:OWH+3,range:60,gate:{x:(99.5+(VGO[0]|0))*TS,y:(48.75+(VGO[1]|0))*TS},start:{x:0,y:0},exit:{x:(99.5+(VGO[0]|0))*TS,y:(50.7+(VGO[1]|0))*TS},doors:[],boss:{},emptySince:0,hint:false};
 function carveVault(){ const V=VAULT, F=(x,y,t)=>setT(V.OX+x,V.OY+y,t);
   const rect=(x0,y0,x1,y1,t)=>{ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) F(x,y,t??T.DFLOOR); };
   const circ=(cx,cy,r,t)=>{ for(let y=Math.floor(cy-r);y<=Math.ceil(cy+r);y++)for(let x=Math.floor(cx-r);x<=Math.ceil(cx+r);x++) if(Math.hypot(x-cx,y-cy)<=r) F(x,y,t??T.DFLOOR); };
@@ -94,7 +106,8 @@ function carveArena(){ const {x0,y0,w,h,cx,cy}=AR;
     for(let i=0;i<len;i++) setT(x+(vert?0:i),y+(vert?i:0),T.DWALL);
   for(const [x,y] of [[40,AR.cy-6],[40,AR.cy+5],[119,AR.cy-6],[119,AR.cy+5],[56,AR.cy],[103,AR.cy-1]]) { setT(x,y,T.COLUMN); setT(x+1,y,T.COLUMN); }
 }
-function edgeOf(tx,ty){ return ty<OWH?Math.min(tx,ty,MW-1-tx,OWH-1-ty):Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); }
+function edgeOf(tx,ty){ if(ty>=OWH) return Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); const L=WI(tx,ty); return Math.min(tx,ty,MW-1-tx,OWH-1-ty,Math.max(0,Math.min(L[0],L[1],159-L[0],111-L[1]))*WS); }
+function ridgeL(tx,ty){ const L=WI(tx,ty); return L[0]>=109.5&&L[0]<=114.5&&!(L[1]>=56&&L[1]<=62); }
 const inVault=(px,py)=>py>=OWH*TS&&py<(AR.y0-3)*TS;
 const inArena=(px,py)=>py>=(AR.y0-3)*TS, arenaSafe=(px,py)=>AR.shr.some(([sx,sy])=>Math.hypot(px/TS-sx,py/TS-sy)<5.2), pvpOn=(px,py)=>inArena(px,py)&&!arenaSafe(px,py);
 function doorClosedAt(tx,ty){ for(const d of VAULT.doors) if(tx===d.x&&ty>=d.y0&&ty<=d.y1){ const b=VAULT.boss[d.boss]; return !(b&&b.dead); } return false; }
@@ -112,7 +125,7 @@ function carveVaultGate(){
 
 function genWorld(){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
-    const z=zoneOf(x,y); zmap[y*MW+x]=z;
+    const z=zoneOf(x,y); zmap[y*MW+x]=z; const LQ=WI(x,y), lx=LQ[0], ly=LQ[1];
     const h=hash2(x,y,3), n=fbm(x*.13,y*.13,1);
     let t=T.GRASS;
     switch(z){
@@ -124,33 +137,38 @@ function genWorld(){
         if(t===T.RUIN && ((x%7===0)||(y%7===0)) && hash2(x>>1,y>>1,4)<.5) t=T.WALL;
         if(t===T.GRASS && h<.05) t=T.TREE; break; }
       case 'ash': t=T.ASH; if(fbm(x*.19,y*.19,9)>.64) t=T.LAVA; else if(h<.035) t=T.ROCK; break;
-      case 'lake': { const d=Math.hypot(x-90,y-93)+(fbm(x*.2,y*.2,11)-.5)*6; t=d<8.5?T.WATER:d<10?T.SAND:T.GRASS; break; }
-      case 'frost': { t=T.SNOW; const d=Math.hypot(x-142,y-84)+(fbm(x*.2,y*.2,12)-.5)*5; if(d<8) t=T.ICE; else if(h<.22&&n>.42) t=T.TREE; else if(h>.985) t=T.ROCK; break; }
+      case 'lake': { const d=Math.hypot(lx-90,ly-93)*WS+(fbm(x*.2,y*.2,11)-.5)*6; t=d<8.5*WS?T.WATER:d<10*WS?T.SAND:T.GRASS; break; }
+      case 'frost': { t=T.SNOW; const d=Math.hypot(lx-142,ly-84)*WS+(fbm(x*.2,y*.2,12)-.5)*5; if(d<8*WS) t=T.ICE; else if(h<.22&&n>.42) t=T.TREE; else if(h>.985) t=T.ROCK; break; }
       case 'crypt': t=T.RUIN; break;
       case 'vault': t=T.VOID; break;
       case 'arena': t=T.VOID; break;
     }
     if(y<OWH){ const eg=edgeOf(x,y); if(eg<2||eg<3&&h<.6) t=T.ROCK;
-    if(x>=110+(h<.3?1:0)&&x<=114-(h>.7?1:0)&&!(y>=56&&y<=62)) t=T.ROCK; }
+    if(lx>=110+(h<.3?.6:0)&&lx<=114-(h>.7?.6:0)&&!(ly>=56&&ly<=62)) t=T.ROCK; }
     map[y*MW+x]=t;
   }
   // paths out of town
   const carve=(x0,y0,x1,y1,seed)=>{const L=Math.hypot(x1-x0,y1-y0);const nx=-(y1-y0)/L, ny=(x1-x0)/L; let gRec=!(x0===TOWN.x&&y0===TOWN.y);
-    for(let i=0;i<=L*3;i++){const t=i/(L*3);const w=(fbm(t*5,seed,seed)-.5)*9*Math.sin(t*Math.PI);
+    for(let i=0;i<=L*3;i++){const t=i/(L*3);const w=(fbm(t*5,seed,seed)-.5)*9*WS*Math.sin(t*Math.PI);
       const cx=x0+(x1-x0)*t+nx*w, cy=y0+(y1-y0)*t+ny*w; if(!gRec&&Math.hypot(cx-TOWN.x,cy-TOWN.y)>=14.6){ gRec=true; TOWN.gatePts.push([cx,cy]); }
       for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){const tx=Math.round(cx+ox),ty=Math.round(cy+oy);
         if(tx<3||ty<3||tx>=MW-3||ty>=MH-3) continue; const cur=tAt(tx,ty);
         if(cur===T.COBBLE) continue; setT(tx,ty, cur===T.WATER||cur===T.LAVA ? T.BRIDGE : T.PATH);}}};
+  const Q=WP, cv=(a,b,sd)=>carve(a[0],a[1],b[0],b[1],sd), ST=(x,y,o)=>[x+o[0],y+o[1]];
   { const gw=TOWN.x-TOWN.r-2, ge=TOWN.x+TOWN.r+2, gy=TOWN.y;
     carve(TOWN.x,gy,gw,gy,13); carve(TOWN.x,gy,ge,gy,14);
-    carve(gw,gy,26,48,3); carve(gw,gy,22,94,4);
-    carve(ge,gy,73,60,15); carve(73,60,57,31,2); carve(57,31,56,12,16); carve(73,60,84,44,5); carve(73,60,86,58,17); carve(ge,gy,82,90,6); }
-  carve(26,48,40,20,7);
-  carve(84,44,88,40,8);
-  carve(86,58,124,59,9); carve(124,59,140,27,10); carve(124,59,144,76,11); carve(124,59,146,56,12);
+    cv([gw,gy],Q(26,48),3); cv([gw,gy],Q(22,94),4);
+    cv([ge,gy],Q(73,60),15); cv(Q(73,60),Q(57,31),2); cv(Q(57,31),Q(56,12),16); cv(Q(73,60),Q(84,44),5); cv(Q(73,60),Q(86,58),17); cv([ge,gy],Q(82,90),6);
+    cv([ge,gy],ST(80,79.5,STO),18); cv(ST(99,57,VGO),Q(99,59),19); }
+  cv(Q(26,48),Q(40,20),7);
+  cv(Q(84,44),ST(88,45,RUO),8);
+  cv(Q(86,58),Q(124,59),9); cv(Q(124,59),ST(140,27,CRO),10); cv(Q(124,59),Q(144,76),11); cv(Q(124,59),Q(146,56),12);
+  OFS(CRO);
   for(let y=8;y<=24;y++)for(let x=130;x<=150;x++){ const edge=x===130||x===150||y===8||y===24; if(edge&&!(y===24&&x>=138&&x<=142)) setT(x,y,T.WALL); else if(!edge) setT(x,y,T.RUIN); }
   for(const [px,py] of [[134,12],[146,12],[134,19],[146,19],[137,16],[143,16]]) setT(px,py,T.WALL);
+  OFS(RUO);
   for(let y=33;y<=47;y++)for(let x=81;x<=95;x++){ const d=Math.hypot(x-88,y-40); if(d<5.6) setT(x,y,T.RUIN); else if(d<6.6 && (x+y)%3===0 && tAt(x,y)!==T.PATH) setT(x,y,T.WALL); }
+  OFS(null);
   // lair clearing
   for(let y=LAIR.y-7;y<=LAIR.y+7;y++)for(let x=LAIR.x-9;x<=LAIR.x+9;x++){const d=Math.hypot((x-LAIR.x)/1.3,y-LAIR.y);
     if(d<6.2) setT(x,y,T.ASH); else if(d<7.2 && tAt(x,y)!==T.PATH && tAt(x,y)!==T.BRIDGE) setT(x,y,T.ROCK);}
@@ -163,7 +181,7 @@ function genWorld(){
     const inGate=a=>TOWN.gates.some(g=>Math.abs(Math.atan2(Math.sin(a-g.c),Math.cos(a-g.c)))<half);
     for(let y=TOWN.y-21;y<=TOWN.y+21;y++)for(let x=TOWN.x-21;x<=TOWN.x+21;x++){ const d=Math.hypot(x-TOWN.x,y-TOWN.y); if(d<R-.75||d>=R+.8) continue;
       if(Math.abs(y-TOWN.y)<=1&&inGate(Math.atan2(y-TOWN.y,x-TOWN.x))) continue; setT(x,y,T.TWALL); } }
-  carveVault(); carveVaultGate(); carveStable();
+  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null);
 }
 genWorld();
 const isSolidPx=(px,py)=>{ const tx=Math.floor(px/TS), ty=Math.floor(py/TS), t=tAt(tx,ty); return SOLID.has(t)||(t===T.DOOR&&doorClosedAt(tx,ty)); };
@@ -252,18 +270,21 @@ const POIS=[
 ];
 const STABLE={x:0,y:0,z:0}; const WINDMILL={}, CAULDRON={}, DOCK={x0:0,x1:0,z:93};
 (function prepWorld(){
-  clearArea(82,70,3); clearArea(18,40,3); clearArea(15,96,3,true); clearArea(97,31,3); clearArea(56,27,2);
-  for(let y=69;y<=71;y++)for(let x=81;x<=83;x++) setT(x,y,T.PROP);
-  for(let y=95;y<=96;y++)for(let x=14;x<=15;x++) setT(x,y,T.PROP);
-  setT(95,31,T.PROP); setT(99,31,T.PROP); setT(54,27,T.PROP); setT(58,27,T.PROP);
-  for(let x=74;x<100;x++){ if(tAt(x,93)===T.WATER){ DOCK.x0=x-1; DOCK.x1=x+6; break; } }
-  if(DOCK.x0){ POIS.find(p=>p.id==='dock').x=DOCK.x0; clearArea(DOCK.x0-1,93,2,true); }
+  for(const p of POIS){ const q=p.id==='throne'?[p.x+RUO[0],p.y+RUO[1]]:WP(p.x,p.y); p.x=Math.round(q[0]); p.y=Math.round(q[1]); }
+  const PO=id=>POIS.find(p=>p.id===id), wm=PO('windmill'), wt=PO('watchtower'), ho=PO('hollow'), ar=PO('archive'), gt=PO('gate');
+  clearArea(wm.x,wm.y,3); clearArea(wt.x,wt.y,3); clearArea(ho.x,ho.y,3,true); clearArea(ar.x,ar.y,3); clearArea(gt.x,gt.y,2);
+  for(let y=-1;y<=1;y++)for(let x=-1;x<=1;x++) setT(wm.x+x,wm.y+y,T.PROP);
+  for(let y=-1;y<=0;y++)for(let x=-1;x<=0;x++) setT(ho.x+x,ho.y+y,T.PROP);
+  setT(ar.x-2,ar.y,T.PROP); setT(ar.x+2,ar.y,T.PROP); setT(gt.x-2,gt.y,T.PROP); setT(gt.x+2,gt.y,T.PROP);
+  { const lk=WP(90,93), dz=Math.round(lk[1]); DOCK.z=dz; for(let x=Math.round(lk[0])-40;x<lk[0];x++){ if(tAt(x,dz)===T.WATER){ DOCK.x0=x-1; DOCK.x1=x+6; break; } } }
+  if(DOCK.x0){ PO('dock').x=DOCK.x0; PO('dock').y=DOCK.z; clearArea(DOCK.x0-1,DOCK.z,2,true); }
 })();
 const NPCS=[
   {id:'oriel',name:'Captain Oriel',title:'Quests',x:(TOWN.x-3.5)*TS,y:(TOWN.y+2.4)*TS,col:'#c9a14a'},
   {id:'mira',name:'Mira the Peddler',title:'Alchemy & Goods',x:(TOWN.x+4.5)*TS,y:(TOWN.y+2.4)*TS,col:'#6fae7a'},
 ];
-function addNPC(id,name,title,tx,ty,col){ const [x,y]=findOpen(tx,ty); NPCS.push({id,name,title,x:x*TS+16,y:y*TS+16,col}); }
+const NPCOFF={hilde:STO,selis:VGO,ithren:RUO};
+function addNPC(id,name,title,tx,ty,col){ if(ty<112&&Math.hypot(tx-TOWN.x,ty-TOWN.y)>TOWN.r+4){ const o=NPCOFF[id], q=o?[tx+o[0],ty+o[1]]:WP(tx,ty); tx=Math.round(q[0]); ty=Math.round(q[1]); } const [x,y]=findOpen(tx,ty); NPCS.push({id,name,title,x:x*TS+16,y:y*TS+16,col}); }
 addNPC('doran','Doran Ironhand','Blacksmith',TOWN.x-6,TOWN.y+8,'#8a5a3a');
 addNPC('hilde','Hilde','Stable Master',90,77,'#a07a4a');
 { let gi=0; for(const g of TOWN.gates) for(const q of [-1,1]){ const a=g.c, r=15; addNPC('guard'+(gi++),'Hearthmere Guard','Town Watch',Math.round(TOWN.x+Math.cos(a)*r),TOWN.y+q*2,'#8a8a9a'); } }
@@ -272,9 +293,9 @@ addNPC('marla','Old Marla','Gloamfen Herbalist',18,98,'#6a5a3a');
 addNPC('ithren','Scholar Ithren','Vael Expedition',95,34,'#4a5a9a');
 addNPC('vok','Sergeant Vok','Ember Gate Watch',60,29,'#8a2a2a');
 addNPC('selis','Seeker Selis','Sunken Vault',103,50,'#3a8a8a');
-addNPC('varro','Varro the Bloodsworn','Bloodsand Arena',106,76,'#a8321e'); POIS.push({id:'arenagate',name:'Bloodsand Arena Gate',x:106,y:76,r:3});
+addNPC('varro','Varro the Bloodsworn','Bloodsand Arena',106,76,'#a8321e'); { const v=NPCS[NPCS.length-1]; POIS.push({id:'arenagate',name:'Bloodsand Arena Gate',x:Math.round(v.x/TS),y:Math.round(v.y/TS),r:3}); }
 { const v=NPCS.find(n=>n.id==='varro'); AR.gate={x:v.x-46,y:v.y+30}; }
-addNPC('keeperw','Arena Keeper','Leave the arena',Math.round(AR.shr[0][0])-2,Math.round(AR.shr[0][1]),'#8a6a3a'); addNPC('keepere','Arena Keeper','Leave the arena',Math.round(AR.shr[1][0])+2,Math.round(AR.shr[1][1]),'#8a6a3a'); POIS.push({id:'vault',name:'The Sunken Vault',x:99,y:48,r:4});
+addNPC('keeperw','Arena Keeper','Leave the arena',Math.round(AR.shr[0][0])-2,Math.round(AR.shr[0][1]),'#8a6a3a'); addNPC('keepere','Arena Keeper','Leave the arena',Math.round(AR.shr[1][0])+2,Math.round(AR.shr[1][1]),'#8a6a3a'); POIS.push({id:'vault',name:'The Sunken Vault',x:99+VGO[0],y:48+VGO[1],r:4});
 addNPC('bram','Fisher Bram','Mirrowmere',(DOCK.x0||82)-2,91,'#4a7a9a');
 const NPCGREET={oriel:'"Hearthmere stands because people like you stand for it. There\'s always work."',mira:'"Herbs in, potions out. Bring me petals and roots and I\'ll brew you something strong."',
   doran:'"Bring me ore and coin, and I\'ll make that blade of yours sing."',hilde:'"Every adventurer needs four good legs under them. Have a look at my beauties."',
@@ -394,6 +415,14 @@ const SONG_R=320;
 function mySongMult(){ if(!me) return 1; return (1+TAL('song')+(me.c.eq.weapon&&me.c.eq.weapon.leg==='bard'?.25:0))*(me.encoreU>now()?2:1); }
 let SFX_T=-9, SFX={dmg:0,mit:0,spd:0,as:0};
 /* what every song and war banner near me is doing for me right now (the strongest of each kind counts; songs do not stack) */
+/* every song reaching a spot: the strongest of each song, who is playing it, and whether it comes from a banner */
+function songBuffsAt(x,y){ const t=now(), best={}; const add=(song,mult,sx,sy,src,ban,enc)=>{ const S=SONGDEF[song]; if(!S||dist(sx,sy,x,y)>SONG_R) return; if(!best[song]||best[song].mult<mult) best[song]={song,mult,src,ban,enc}; };
+  if(me&&!me.dead){ if(me.song) add(me.song,mySongMult(),me.x,me.y,me.c.name,0,me.encoreU>t); if(me.banner&&me.banner.until>t) add(me.banner.song,me.banner.mult,me.banner.x,me.banner.y,me.c.name,1,0); }
+  for(const o of others.values()){ if(o.sg&&!o.d) add(o.sg[0],o.sg[1],o.rx,o.ry,o.n,0,o.sg[1]>1.9); if(o.bn&&o.bn.until>t) add(o.bn.song,o.bn.mult,o.bn.x,o.bn.y,o.n,1,0); }
+  return Object.values(best); }
+function songBuffHTML(b){ const S=SONGDEF[b.song], fx=[]; if(S.dmg) fx.push(`+${Math.round(S.dmg*b.mult*100)}% damage dealt`); if(S.mit) fx.push(`${Math.round(Math.min(.4,S.mit*b.mult)*100)}% less damage taken`); if(S.spd) fx.push(`+${Math.round(S.spd*b.mult*100)}% movement speed`); if(S.as) fx.push(`${Math.round(S.as*b.mult*100)}% faster attacks`);
+  return `<b style="color:${S.col}">${S.n}</b>${b.enc?' <span style="color:#fff3b0">(Encore)</span>':''}<div style="margin:4px 0">${fx.join('<br>')}</div><div style="color:var(--dim);font-size:12px">${b.ban?'War Banner planted by':'Sung by'} ${esc(b.src)}. Lasts while you stay near ${b.ban?'the banner':'the Bard'}.</div>`; }
+function songIcons(list){ return list.map((b,i)=>`<div class="buff sbuff${b.enc?' enc':''}" data-sb="${i}" style="border-color:${SONGDEF[b.song].col}">${iconSVG(['','s_embers','s_stone','s_hunt'][b.song])||'♫'}${b.ban?'<span>🚩</span>':''}</div>`).join(''); }
 function songFx(){ const t=now(); if(t-SFX_T<.1) return SFX; SFX_T=t; const r={dmg:0,mit:0,spd:0,as:0}; if(!me||me.dead) return SFX=r;
   const add=(song,mult,x,y)=>{ const S=SONGDEF[song]; if(!S||dist(x,y,me.x,me.y)>SONG_R) return; for(const k of ['dmg','mit','spd','as']) if(S[k]) r[k]=Math.max(r[k],S[k]*mult); };
   if(me.song) add(me.song,mySongMult(),me.x,me.y); if(me.banner&&me.banner.until>t) add(me.banner.song,me.banner.mult,me.banner.x,me.banner.y);
@@ -467,7 +496,7 @@ TALENTS.bard=[
     {id:'b_chorus',t:2,max:2,n:'Chorus',ic:'🎼',d:'Your songs are a further {15}% stronger.',e:{song:.15}},
     {id:'b_dis',t:2,max:2,n:'Dissonance',ic:'💢',d:'Discord deals {25}% more damage.',e:{'ab:discord':.25}},
     {id:'b_anthem',t:3,max:1,n:'Anthem of Ages',ic:'🚩',d:'Encore lasts 4s longer and War Banner stands 50% longer.',e:{anthem:1}}];
-POIS.push({id:'pass',name:'Frostpeak Pass',x:112,y:59,r:4},{id:'rimewater',name:'Rimewater',x:142,y:84,r:7},{id:'crypt',name:'Hollowdeep Crypt',x:140,y:22,r:5},{id:'giantcamp',name:"Hrimgar's Camp",x:146,y:56,r:6});
+POIS.push(...[{id:'pass',name:'Frostpeak Pass',x:112,y:59,r:4},{id:'rimewater',name:'Rimewater',x:142,y:84,r:7},{id:'crypt',name:'Hollowdeep Crypt',x:140,y:22,r:5},{id:'giantcamp',name:"Hrimgar's Camp",x:146,y:56,r:6}].map(p=>{ const q=p.id==='crypt'?[p.x+CRO[0],p.y+CRO[1]]:WP(p.x,p.y); p.x=Math.round(q[0]); p.y=Math.round(q[1]); return p; }));
 addNPC('hakon','Jarl Hakon','Frostwatch',124,63,'#7a8aa8');
 NPCGREET.varro='"Blood on the sand, glory in the stands! In my arena every hero is your enemy. No mercy, no loot lost, no grudges after."'; NPCGREET.keeperw=NPCGREET.keepere='"Inside the ring of stones you are safe. Step past it and anyone may strike you down. Want to go back up?"';
 NPCGREET.hakon='"Welcome to the frontier, southerner. Up here the cold kills more than the monsters do. Almost."';
@@ -503,7 +532,7 @@ const SLOTS=['weapon','armor','trinket'];
 const SLOTICON={weapon:'🗡',armor:'🥋',trinket:'💍'};
 
 /* ---------- v22: Sunken Vault inhabitants (world tile coordinates = local + (8,115)) ---------- */
-{ const W=a=>a.map(([x,y])=>[x+8,y+115]);
+{ const W=a=>a.map(([x,y])=>[x+8,y+OWH+3]);
   MOBT.push(
   {key:'vsentry',name:'Vault Sentry',lv:[10,10],hp:300,hpL:26,dmg:13,dmgL:2.5,spd:66,rng:46,as:2.2,aggro:140,r:16,col:'#5a8a86',zone:'vault',vault:1,resp:1e8,sp:{k:'slam',cd:11,r:85,delay:1.3,mul:1.05},
     spots:W([[20,5],[20,15],[22,16],[27,11],[84,11],[99,31],[110,30],[110,32],[116,31]])},
@@ -520,19 +549,22 @@ const SLOTICON={weapon:'🗡',armor:'🥋',trinket:'💍'};
   {key:'drownedshade',name:'Drowned Shade',lv:[10,10],hp:260,hpL:0,dmg:16,dmgL:0,spd:88,rng:40,as:1.8,aggro:520,r:14,col:'#4ad8c8',zone:'vault',vault:1,n:3,summon:true,owner:'vaelith',pos:[140,146],fly:true});
   for(const mt of MOBT) if(mt.spots) mt.n=mt.spots.length; }
 
+/* where a fixed-position monster stands on the bigger map */
+function posW(mt){ const [x,y]=mt.pos; if(y>=112) return [x,y+OWH-112]; const k=mt.key; if(k==='lich'||/^lich|crypt/.test(k)||(x>=130&&x<=150&&y>=8&&y<=24)) return [x+CRO[0],y+CRO[1]]; if(k==='hking') return [x+RUO[0],y+RUO[1]]; if(x===56&&y===9) return [LAIR.x,LAIR.y]; return WP(x,y); }
 /* mob spawn table: deterministic so every client agrees on ids */
 const mobs=[], mobById={};
 (function genSpawns(){
   const R=mulberry32(1337); let id=1;
   for(let ti=0;ti<MOBT.length;ti++){const mt=MOBT[ti];
-    for(let k=0;k<mt.n;k++){
+    const NN=(!mt.pos&&!mt.spots&&!mt.boss&&!mt.elite&&!mt.vault&&!mt.summon)?mt.n*2:mt.n;
+    for(let k=0;k<NN;k++){
       let x,y,tries=0;
-      if(mt.pos){x=mt.pos[0]*TS+16+(mt.summon?(k-1)*60:0);y=mt.pos[1]*TS+16+(mt.summon?70:0)}
+      if(mt.pos){ const pp=posW(mt); x=pp[0]*TS+16+(mt.summon?(k-1)*60:0); y=pp[1]*TS+16+(mt.summon?70:0); }
       else if(mt.spots){x=mt.spots[k][0]*TS+16;y=mt.spots[k][1]*TS+16}
       else do{ x=(3+R()*(MW-6))*TS; y=(3+R()*(OWH-6))*TS; tries++;
         const tx=Math.floor(x/TS),ty=Math.floor(y/TS);
-        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5,ty-48)>8 && Math.hypot(tx-91,ty-72)>11;
-        if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30 && ty<TOWN.y;
+        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>8 && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
+        if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
         if(ok){ const gap=tries<1500?112:tries<3000?96:70; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
       const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
@@ -945,7 +977,7 @@ function gainXp(n){
 /* ---------- items ---------- */
 const ARMT={plate:['Breastplate','Warplate','Hauberk'],leather:['Jerkin','Brigandine','Hide Tunic'],cloth:['Robes','Vestments','Mantle']};
 const CLS_ARMOR={warden:'plate',assassin:'leather',mender:'cloth',arcanist:'cloth',bard:'leather'}, ARMNAME={plate:'Plate',leather:'Leather',cloth:'Cloth'};
-const CLS_WEAP={warden:['Longsword','Morningstar','Greataxe'],mender:['Warstaff','Morningstar','Wand'],arcanist:['Wand','Warstaff','Spellblade'],assassin:['Daggers','Dirks'],bard:['Hand Axe','Warspear','Hand Axe']};
+const CLS_WEAP={warden:['Longsword','Morningstar','Greataxe'],mender:['Warstaff','Morningstar','Wand'],arcanist:['Wand','Warstaff','Spellblade'],assassin:['Daggers','Dirks'],bard:['Hand Axe','Warspear','Greataxe','Hand Axe']};
 const BASES={weapon:['Longsword','Warstaff','Spellblade','Morningstar','Wand','Greataxe','Daggers','Dirks','Hand Axe','Warspear'],armor:[...ARMT.plate,...ARMT.leather,...ARMT.cloth],trinket:['Charm','Signet','Talisman','Locket','Idol']};
 function armorType(it){ if(!it||it.slot!=='armor') return null; if(it.at) return it.at; const n=String(it.name||''); for(const k in ARMT) if(ARMT[k].some(b=>n.includes(b))) return k; return null; }
 function weaponBase(it){ if(!it||it.slot!=='weapon') return null; const n=String(it.name||''); return BASES.weapon.find(b=>n.includes(b))||null; }
@@ -1452,7 +1484,7 @@ function gTuft2(){ const d=G0(); const R=mulberry32(31); const B=6;
   return d; }
 
 /* merge transformed parts into one raw geometry (static scenery, trees) */
-function gAdd(dst,src,x,y,z,ry,sx,sy,sz,col,e,rz,rx){ const b=dst.p.length/3; const cy=Math.cos(ry||0),sy2=Math.sin(ry||0), cz=Math.cos(rz||0),szz=Math.sin(rz||0), cx=Math.cos(rx||0), sxx=Math.sin(rx||0);
+function gAdd(dst,src,x,y,z,ry,sx,sy,sz,col,e,rz,rx){ x+=OFX; z+=OFY; const b=dst.p.length/3; const cy=Math.cos(ry||0),sy2=Math.sin(ry||0), cz=Math.cos(rz||0),szz=Math.sin(rz||0), cx=Math.cos(rx||0), sxx=Math.sin(rx||0);
   const rot=(vx,vy,vz)=>{ let a=vx*cz-vy*szz, b2=vx*szz+vy*cz; vx=a; vy=b2; a=vy*cx-vz*sxx; b2=vy*sxx+vz*cx; vy=a; vz=b2; return [vx*cy+vz*sy2, vy, -vx*sy2+vz*cy]; };
   for(let i=0;i<src.p.length;i+=3){ const p=rot(src.p[i]*sx,src.p[i+1]*sy,src.p[i+2]*sz); let n=rot(src.n[i]/sx,src.n[i+1]/sy,src.n[i+2]/sz); const l=Math.hypot(n[0],n[1],n[2])||1;
     const j=i/3*4; dst.p.push(p[0]+x,p[1]+y,p[2]+z); dst.n.push(n[0]/l,n[1]/l,n[2]/l);
@@ -1516,7 +1548,7 @@ function gFoot(){ const d=G0(), NX=22, NA=20;
   return gNormals(d,{cy:-.04}); }
 
 const TORSO_PROF=[[0,.3],[.04,.4],[.12,.45],[.24,.41],[.36,.39],[.5,.43],[.64,.48],[.78,.5],[.88,.47],[.95,.37],[.99,.2],[1,.05]];
-const GEO={hoodM:mkVAO(HEADK.hoodGeo(64,56)),head:mkVAO(HEADK.geo(72,64)),hair:mkVAO(HEADK.hairGeo(72,64,0)),hairL:mkVAO(HEADK.hairGeo(72,64,1)),foot:mkVAO(gFoot()),torso:mkVAO(gLoft(28,TORSO_PROF)),uarm:mkVAO(gLoft(18,[[0,.16],[.05,.4],[.22,.5],[.5,.46],[.8,.38],[.95,.34],[1,.16]],1)),farm:mkVAO(gLoft(18,[[0,.16],[.05,.42],[.22,.5],[.55,.42],[.85,.32],[.96,.3],[1,.14]],1)),thigh:mkVAO(gLoft(18,[[0,.2],[.05,.44],[.2,.5],[.55,.44],[.85,.36],[.96,.34],[1,.16]],1)),shin:mkVAO(gLoft(18,[[0,.18],[.05,.4],[.25,.5],[.5,.42],[.8,.31],[.95,.29],[1,.14]],1)),box:mkVAO(gRBox(.2)),cube:mkVAO(gBox()),sph:mkVAO(gSphere(28,18)),lsph:mkVAO(gSphere(12,8)),cyl:mkVAO(gCyl(24,.5,.5)),lcyl:mkVAO(gCyl(10,.5,.5)),cone:mkVAO(gCyl(24,0,.5)),lcone:mkVAO(gCyl(10,0,.5)),limb:mkVAO(gLimb(20)),llimb:mkVAO(gLimb(8)),wing:mkVAO(gWing()),prism:mkVAO(gPrism()),frus:mkVAO(gCyl(26,.32,.5)),blob:mkVAO(gBlob(22,15,.22,5,1.6))};
+const GEO={hoodM:mkVAO(HEADK.hoodGeo(64,56)),head:mkVAO(HEADK.geo(72,64)),hair:mkVAO(HEADK.hairGeo(72,64,0)),hairL:mkVAO(HEADK.hairGeo(72,64,1)),foot:mkVAO(gFoot()),torso:mkVAO(gLoft(GFX.q==='low'?28:40,TORSO_PROF)),uarm:mkVAO(gLoft(GFX.q==='low'?18:28,[[0,.16],[.05,.4],[.22,.5],[.5,.46],[.8,.38],[.95,.34],[1,.16]],1)),farm:mkVAO(gLoft(GFX.q==='low'?18:28,[[0,.16],[.05,.42],[.22,.5],[.55,.42],[.85,.32],[.96,.3],[1,.14]],1)),thigh:mkVAO(gLoft(GFX.q==='low'?18:28,[[0,.2],[.05,.44],[.2,.5],[.55,.44],[.85,.36],[.96,.34],[1,.16]],1)),shin:mkVAO(gLoft(GFX.q==='low'?18:28,[[0,.18],[.05,.4],[.25,.5],[.5,.42],[.8,.31],[.95,.29],[1,.14]],1)),box:mkVAO(gRBox(.2)),cube:mkVAO(gBox()),sph:mkVAO(GFX.q==='low'?gSphere(28,18):gSphere(44,30)),lsph:mkVAO(gSphere(12,8)),cyl:mkVAO(gCyl(GFX.q==='low'?24:36,.5,.5)),lcyl:mkVAO(gCyl(10,.5,.5)),cone:mkVAO(gCyl(GFX.q==='low'?24:36,0,.5)),lcone:mkVAO(gCyl(10,0,.5)),limb:mkVAO(gLimb(GFX.q==='low'?20:30)),llimb:mkVAO(gLimb(8)),wing:mkVAO(gWing()),prism:mkVAO(gPrism()),frus:mkVAO(gCyl(26,.32,.5)),blob:mkVAO(gBlob(22,15,.22,5,1.6))};
 
 /* =====================================================================
    3D WORLD
@@ -1542,10 +1574,10 @@ function cellType(wx,wy){
     let h; switch(z){ case 'town':h=.55;break; case 'meadow':h=.4+n*2.6;break; case 'forest':h=.6+n*3.2+n2*.7;break; case 'swamp':h=.2+n*.35;break; case 'ruins':h=.7+n*1.7;break; case 'lake':h=.35+n*.9;break; case 'frost':h=1.2+n*3.8+n2*.9;break; case 'crypt':h=2.2;break; case 'vault':h=t===T.VOID?6.5:.3;break; case 'arena':h=t===T.VOID?7.5:t===T.DWALL?.3:.3+n*.18;break; case 'ash':h=3.1+n*1.5+n2*.6;break; default:h=.5; }
     const edge=edgeOf(tx,ty);
     if(t===T.ICE) h=.22; else if(t===T.WATER) h=-1.5; else if(t===T.LAVA) h=1.4; else if(t===T.BRIDGE) h=z==='ash'?3.0:.4;
-    else if(t===T.ROCK && (edge<3||(tx>=109&&tx<=115&&!(ty>=56&&ty<=62)))) h+=4.5+hash2(tx,ty,9)*4+(edge<2?3.5:0)+(edge<1?3:0);
+    else if(t===T.ROCK && (edge<3||ridgeL(tx,ty))) h+=4.5+hash2(tx,ty,9)*4+(edge<2?3.5:0)+(edge<1?3:0);
     else if(t===T.COBBLE||t===T.HOUSE||t===T.FOUNT||t===T.TWALL) h=.55;
     if(Math.hypot(tx-LAIR.x,ty-LAIR.y)<6.5 && t!==T.ROCK) h=3.0;
-    { const gd=Math.hypot(tx-99.5,ty-48); if(gd<7.5) h=lerp(h,1.0,clamp((7.5-gd)/2.5,0,1)); }
+    { const gd=Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1]); if(gd<7.5) h=lerp(h,1.0,clamp((7.5-gd)/2.5,0,1)); }
     TT[i]=h; }
   const B=new Float32Array(TT); for(let ty=1;ty<MH-1;ty++)for(let tx=1;tx<MW-1;tx++){ if(ty>=OWH-1) continue; let s=0; for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++) s+=TT[(ty+dy)*MW+tx+dx]*(dx||dy?1:4); B[ty*MW+tx]=s/12; }
   const LMt=new Float32Array(MW*MH); for(let ty=1;ty<MH-1;ty++)for(let tx=1;tx<MW-1;tx++){ let l=0; for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++) if(map[(ty+dy)*MW+tx+dx]===T.LAVA) l=1; LMt[ty*MW+tx]=l; }
@@ -1557,7 +1589,7 @@ function cellType(wx,wy){
     if(z!=='town'&&z!=='crypt'&&z!=='vault'&&t!==T.WATER&&t!==T.BRIDGE&&t!==T.HOUSE&&t!==T.ICE) h+=(vnoise(X*.9,Z*.9,55)-.5)*.32;
     HG[j*HN+i]=h; HLM[j*HN+i]=LMt[ty*MW+tx]; }
 })();
-function hgt(X,Z){ const fx=clamp(X*HR,0,HN-1.001), fz=clamp(Z*HR,0,HNZ-1.001); const i=Math.floor(fx), j=Math.floor(fz), a=fx-i, b=fz-j;
+function hgt(X,Z){ X+=OFX; Z+=OFY; const fx=clamp(X*HR,0,HN-1.001), fz=clamp(Z*HR,0,HNZ-1.001); const i=Math.floor(fx), j=Math.floor(fz), a=fx-i, b=fz-j;
   return lerp(lerp(HG[j*HN+i],HG[j*HN+i+1],a),lerp(HG[(j+1)*HN+i],HG[(j+1)*HN+i+1],a),b); }
 function groundY(px,py){ const X=px/TS, Z=py/TS; let h=hgt(X,Z); const t=tAt(Math.floor(X),Math.floor(Z)); if(t===T.BRIDGE) h=Math.max(h,zoneAtPx(px,py)==='ash'?3.12:.52); return h; }
 
@@ -1663,7 +1695,7 @@ const STATIC=(function(){ const d=G0(); const R=mulberry32(4242);
     for(let k=0;k<7;k++){ const a=k/7*Math.PI*2; gAdd(d,RBL,x+Math.cos(a)*.55,y0+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); }
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
-  addLandmarks(d); addVault(d); addArena(d);
+  addLandmarks(d); addVault(d); addArena(d); addWilds(d);
   return mkVAO(d); })();
 
 /* ---------- instanced vegetation & rocks ---------- */
@@ -1683,7 +1715,7 @@ const INST=(function(){ const R=mulberry32(9090); const trees=[[],[],[]], rocks=
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const t=map[ty*MW+tx], z=zmap[ty*MW+tx];
     if(t===T.TREE){ const x=tx+.5+(R()-.5)*.5, zz=ty+.5+(R()-.5)*.5, y=hgt(x,zz)-.05; const pine=(z==='forest'&&R()<.55);
       const s=.75+R()*.55; const tint=pine?[.85+R()*.25,.9+R()*.2,.85+R()*.15]:z==='swamp'?[.7,.85,.8]:z==='forest'?[.8+R()*.2,.85+R()*.2,.8]:[.85+R()*.25,.95+R()*.15,.85]; push(trees[z==='frost'?2:pine?1:0],x,y,zz,R()*6.28,s,s*(.9+R()*.3),s,.004,tint); }
-    else if(t===T.ROCK){ const edge=edgeOf(tx,ty), ridge=tx>=109&&tx<=115; if((edge<3||ridge)&&R()>.28) continue; const x=tx+.5, zz=ty+.5, y=hgt(x,zz);
+    else if(t===T.ROCK){ const edge=edgeOf(tx,ty), ridge=ridgeL(tx,ty); if((edge<3||ridge)&&R()>.28) continue; const x=tx+.5, zz=ty+.5, y=hgt(x,zz);
       const s=(edge<3||ridge)?2+R()*2.2:.9+R()*.7; const c=z==='frost'?[.92,.97,1.1]:z==='ash'?[.42,.36,.34]:[.95+R()*.1,.95,.9]; push(rocks,x,y-.15,zz,R()*6.28,s*1.15,s*(.7+R()*.4),s,0,c); } }
   for(let j=0;j<MH*3;j++)for(let i=0;i<MW*3;i++){ const X=(i+R())/3, Z=(j+R())/3; const px=X*TS, py=Z*TS; const t=tAt(Math.floor(X),Math.floor(Z)); if(SOLID.has(t)&&t!==T.TREE) continue;
     const ct=cellType(px,py); const p=(ct===T.GRASS?.55:ct===T.FOREST?.3:ct===T.SWAMP?.32:0)*GFX.grass; if(R()>p) continue; const y=hgt(X,Z); if(y<.05) continue;
@@ -2001,7 +2033,7 @@ function drawOff0(L,o,t){
   if(L.off==='dagger'||L.off==='nightfang'){ drawGearWeapon(L.off,L,o,t); return; }
   if(L.off==='shield'){ P(GEO.box,.5,.62,.07,L.tabard||[.17,.3,.62],0,.08,-.05,-.1); P(GEO.box,.56,.68,.04,L.trim,.1,.08,-.05,-.13); P(GEO.box,.08,.48,.02,L.trim,.3,.08,-.05,-.063); P(GEO.box,.4,.08,.02,L.trim,.3,.08,.04,-.063);
     for(const [a,b] of [[-.19,-.25],[.35,-.25],[-.19,.21],[.35,.21]]) P(GEO.sph,.04,.04,.03,L.trim,.3,a,b,-.06); P(GEO.sph,.13,.13,.07,L.trim,.3,.08,.04,-.05); P(GEO.sph,.06,.06,.04,L.crest||L.gem||[.5,.7,1],1.8,.08,.04,-.02); }
-  else if(L.off==='horn'){ const iv=[.93,.87,.72], gd=L.trim||[.92,.72,.32]; mpush(); mtr(.04,.02,-.06);
+  else if(L.off==='horn'){ const iv=[.93,.87,.72], gd=L.trim||[.92,.72,.32]; mpush(); mtr(.05,.02,-.12); msc(1.3);
     for(let k=0;k<7;k++){ mpush(); mrz(-.22*k); mtr(0,.09*k,0); P(GEO.cyl,.045+k*.012,.1,.045+k*.012,iv.map(v=>v*(1-k*.03)),hitE0(o),0,0,0); if(k%2===0) P(GEO.cyl,.05+k*.013,.02,.05+k*.013,gd,.4,0,.05,0); mpop(); }
     mpush(); mrz(-1.54); mtr(0,.7,0); P(GEO.cyl,.15,.04,.15,gd,.6,.0,.0,0); P(GEO.cyl,.11,.02,.11,[.1,.06,.03],0,0,.02,0); mpop(); mpop(); }
   else if(L.off==='rustshield'){ P(GEO.cyl,.5,.06,.5,[.4,.33,.26],0,.05,0,-.1); }
@@ -2342,7 +2374,7 @@ function drawInst(pr,shadow){ if(pr.u.uSpec) gl.uniform1f(pr.u.uSpec,.08); if(pr
     if(I.chunks){ const D=GFX.gd; if(pr.u.uGrassD) gl.uniform1f(pr.u.uGrassD,D); for(const c of I.chunks){ const dx=c.cx-CAM.tx, dz=c.cz-CAM.tz; if(dx*dx+dz*dz>(D+9)*(D+9)) continue; gl.bindVertexArray(c.vao); gl.drawElementsInstanced(gl.TRIANGLES,c.n,gl.UNSIGNED_INT,0,c.count); } if(pr.u.uGrassD) gl.uniform1f(pr.u.uGrassD,0); continue; }
     gl.bindVertexArray(I.vao); gl.drawElementsInstanced(gl.TRIANGLES,I.n,gl.UNSIGNED_INT,0,I.count); } }
 function updateCamera(dt){
-  if(me){ const gy=standY(me.x,me.y)+(me.jumpH||0)+(me.mounted?.75:0); CAM.tx=lerp(CAM.tx,me.x/TS,.35); CAM.tz=lerp(CAM.tz,me.y/TS,.35); CAM.ty=lerp(CAM.ty,gy+1.55,.25); }
+  if(me){ const gy=standY(me.x,me.y)+(me.jumpH||0)+(me.mounted?.75:0); const kx=1-Math.exp(-(dt||.016)*20), ky=1-Math.exp(-(dt||.016)*12); if(Math.hypot(CAM.tx-me.x/TS,CAM.tz-me.y/TS)>8){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } CAM.tx=lerp(CAM.tx,me.x/TS,kx); CAM.tz=lerp(CAM.tz,me.y/TS,kx); CAM.ty=lerp(CAM.ty,gy+1.55,ky); }
   else { const t=now(); CAM.yaw=-Math.PI/2+Math.sin(t*.05)*.6; CAM.tx=TOWN.x+.5+Math.sin(t*.05)*3; CAM.tz=TOWN.y+5; CAM.ty=2.2; CAM.pitch=.3; CAM.dist=16; }
   const cp=Math.cos(CAM.pitch), sp=Math.sin(CAM.pitch); let d=CAM.dist;
   let ex=CAM.tx-Math.cos(CAM.yaw)*cp*d, ez=CAM.tz-Math.sin(CAM.yaw)*cp*d, ey=CAM.ty+sp*d;
@@ -2377,7 +2409,7 @@ function smoothFace(o,target){ const t=now(), dt=Math.min(.1,Math.max(0,t-(o._rf
 function lookYaw(m){ let d=0; if(m.tgt&&!m.dead){ const tp=m.tgt===MY_U?me:othersByU.get(m.tgt); if(tp){ const tx=tp===me?me.x:tp.rx, ty=tp===me?me.y:tp.ry; d=Math.atan2(ty-m.ry,tx-m.rx)-(m.face||0); d=clamp(Math.atan2(Math.sin(d),Math.cos(d)),-.8,.8); } } m._lk=lerp(m._lk||0,d,.12); return m._lk; }
 function npcLook(n){ let d=0; if(me&&!me.dead&&dist(n.x,n.y,me.x,me.y)<150){ d=Math.atan2(me.y-n.y,me.x-n.x)-(n.face??Math.PI/2); d=clamp(Math.atan2(Math.sin(d),Math.cos(d)),-1,1); } n._lk=lerp(n._lk||0,d,.06); return n._lk; }
 LOOK.keepere=LOOK.keeperw;
-LOOK.bard={torso:[.5,.29,.15],legs:[.28,.2,.14],arms:[.46,.27,.15],boots:[.22,.14,.09],gloves:[.3,.2,.12],cape:[.62,.13,.1],trim:[.92,.72,.32],head:'bardcap',hat:[.55,.12,.1],feather:[1,.86,.42],hair:[.36,.2,.1],weapon:'axe',off:'horn',straps:true,strapC:[.24,.15,.08],pauld:[.42,.26,.14],fur:true};
+LOOK.bard={torso:[.5,.29,.15],legs:[.28,.2,.14],arms:[.46,.27,.15],boots:[.22,.14,.09],gloves:[.3,.2,.12],cape:[.62,.13,.1],trim:[.92,.72,.32],head:'bardcap',hat:[.55,.12,.1],feather:[1,.86,.42],hair:[.36,.2,.1],weapon:'axe',horn:true,straps:true,strapC:[.24,.15,.08]};
 LOOK.assassin={lean:true,torso:[.17,.16,.19],legs:[.12,.11,.13],arms:[.19,.18,.21],boots:[.1,.09,.1],cape:[.09,.08,.11],trim:[.28,.78,.52],head:'rogue',hood:[.11,.1,.13],mask:[.07,.07,.09],weapon:'dagger',off:'dagger',straps:true,strapC:[.2,.13,.08],gloves:[.09,.09,.11],gearX:true,gem:[.3,1,.6]};
 Object.assign(LOOK.mender,{torso:[.95,.94,.9],robe:[.95,.94,.9],arms:[.95,.94,.9],legs:[.82,.84,.92],boots:[.85,.72,.42],cape:[.14,.2,.48],trim:[.98,.82,.4],head:'hood',hood:[.97,.95,.9],halo:true,stars:true,stole:true,stoleC:[.16,.24,.55]});
 LOOK.warden.spikes=true; LOOK.warden.tassets=true; LOOK.warden.det='w'; LOOK.warden.crest=[.15,.3,.75]; LOOK.mender.det='m'; LOOK.arcanist.det='a'; LOOK.arcanist.weapon='crystal'; if(LOOK.frostgiant) LOOK.frostgiant.iceSpikes=true;
@@ -2426,13 +2458,16 @@ function playerLook(cls,u,gv){ const B=LOOK[cls]||LOOK.warden; if(!gv||!(gv[0]||
     if(['greataxe','staff','solace'].includes(L.weapon)&&L.off) L.off=null; else if(L.weapon==='nightfang') L.off='nightfang'; else if(L.weapon==='dagger') L.off='dagger';
     else if(cls==='warden'&&!L.off&&['sword','spellblade','morningstar','dawnwarden'].includes(L.weapon)) L.off='shield';
     if(L.orbs&&L.weapon!=='wand'&&L.weapon!=='cinderheart') L.orbs=L.weapon==='spellblade'; }
-  if(cls==='bard'&&L.weapon!=='greataxe') L.off='horn';
+  if(cls==='bard'){ L.off=null; L.horn=true; }
   if(T) L.trink={k:T.b,c:GEAR_GLOW[T.th]||RAR_GLOW[T.r],r:T.r};
   L.gearX=!!(L.straps||L.chain||L.mantle||L.stole||L.trink);
   return LOOKV[key]=L; }
 /* extra clothing and trinkets, drawn in the torso's frame (x = forward, y = up from the hips) */
 function gearExtras(L,o,t,e){
   if(L.straps){ for(const s of [-1,1]){ mpush(); mtr(.2,.36,0); mrx(s*.6); P(GEO.box,.03,.66,.07,L.strapC,e); mpop(); } P(GEO.sph,.045,.06,.06,L.trim,e+.2,.215,.36,0); for(const s of [-1,1]) P(GEO.box,.14,.12,.06,L.strapC.map(v=>v*1.3),e,.1,.06,s*.22); }
+  if(L.horn){ const iv=[.93,.87,.72], gd=L.trim||[.92,.72,.32]; mpush(); mtr(.0,.02,-.31); mrx(.12); mrz(-1.15);
+    P(GEO.cone,.075,.36,.075,iv,e,0,.02,0); P(GEO.cyl,.085,.025,.085,gd,e+.3,0,-.15,0); P(GEO.cyl,.06,.02,.06,gd,e+.3,0,.05,0); P(GEO.cyl,.082,.05,.082,[.12,.08,.05],e,0,-.17,0); mpop();
+    mpush(); mtr(.02,.1,-.29); mrx(-.2); P(GEO.box,.02,.2,.025,L.strapC||[.24,.15,.08],e); mpop(); }
   if(L.chain){ P(GEO.frus,.6,.36,.64,L.metal,e,0,-.3,0); for(let k=0;k<3;k++) P(GEO.cyl,.6-k*.04,.012,.64-k*.04,L.metal.map(v=>v*.7),e,0,-.24+k*.11,0); }
   if(L.stole) for(const s of [-1,1]){ P(GEO.box,.03,.74,.075,L.stoleC,e,.205,.24,s*.09); P(GEO.box,.032,.05,.08,L.trim,e+.15,.207,-.1,s*.09); }
   if(L.mantle){ P(GEO.sph,.52,.24,.68,L.mantle,e,-.02,.62,0); P(GEO.cyl,.52,.03,.69,L.trim,e+.1,-.02,.55,0); for(const s of [-1,1]) P(GEO.sph,.08,.08,.08,L.trim,e+.25,.18,.62,s*.16); }
@@ -2806,6 +2841,39 @@ Object.assign(QLOOK,{
 });
 /* ---------- static landmarks ---------- */
 /* ---------- v22: Sunken Vault architecture (static) ---------- */
+function addWilds(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e); const R=mulberry32(4242);
+  const wood=[.34,.22,.12], dark=[.2,.13,.08], stoneC=[.55,.53,.5];
+  const okT=(tx,ty)=>{ const t=tAt(tx,ty); return !SOLID.has(t)&&t!==T.WATER&&t!==T.LAVA&&t!==T.PATH&&t!==T.BRIDGE&&ty<OWH-3&&Math.hypot(tx-TOWN.x,ty-TOWN.y)>TOWN.r+5; };
+  const farFromNPC=(x,z,r)=>!NPCS.some(n=>Math.hypot(n.x/TS-x,n.y/TS-z)<r)&&!POIS.some(p=>Math.hypot(p.x-x,p.y-z)<(p.r||4)+3);
+  // roadside: a lantern post every so often, a mile stone now and then, signposts where roads meet
+  let lastL=[], k=0;
+  for(let ty=3;ty<OWH-3;ty++)for(let tx=3;tx<MW-3;tx++){ if(tAt(tx,ty)!==T.PATH||Math.hypot(tx-TOWN.x,ty-TOWN.y)<TOWN.r+4) continue;
+    let nb=0; for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if(tAt(tx+dx,ty+dy)===T.PATH||tAt(tx+dx,ty+dy)===T.BRIDGE) nb++;
+    if(lastL.some(([x,y])=>Math.hypot(x-tx,y-ty)<13)) continue;
+    let sx=0,sy=0; for(const [dx,dy] of [[2,0],[-2,0],[0,2],[0,-2]]) if(okT(tx+dx,ty+dy)&&tAt(tx+dx/2,ty+dy/2)!==T.PATH){ sx=dx; sy=dy; break; } if(!sx&&!sy) continue;
+    const x=tx+.5+sx*.8, z=ty+.5+sy*.8; if(!farFromNPC(x,z,3)) continue; lastL.push([tx,ty]); const y0=hgt(x,z); k++;
+    if(k%3===0){ box(x,y0+.45,z,.45,.9,.3,stoneC.map(v=>v*.9),R()*.4); box(x,y0+.95,z,.38,.12,.26,stoneC); }
+    else { gAdd(d,RC,x,y0,z,0,.12,2.3,.12,dark); box(x+.2,y0+2.2,z,.5,.07,.07,dark); box(x+.38,y0+1.95,z,.2,.28,.2,[1,.78,.4],0,1.8); STAT_LIGHTS.push({x:x+.38,y:y0+1.95,z,r:7,c:[1,.72,.38],night:true,lamp:true}); } }
+  // signposts at junctions (3+ road neighbours)
+  const sp=[]; for(let ty=3;ty<OWH-3;ty++)for(let tx=3;tx<MW-3;tx++){ if(tAt(tx,ty)!==T.PATH||Math.hypot(tx-TOWN.x,ty-TOWN.y)<TOWN.r+6) continue; let nb=0; for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++) if(Math.abs(dx)+Math.abs(dy)===2&&tAt(tx+dx,ty+dy)===T.PATH) nb++;
+    if(nb>=6&&!sp.some(([x,y])=>Math.hypot(x-tx,y-ty)<20)){ sp.push([tx,ty]); for(const [dx,dy] of [[2,2],[-2,2],[2,-2],[-2,-2]]) if(okT(tx+dx,ty+dy)){ const x=tx+dx+.5, z=ty+dy+.5, y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.11,2.4,.11,wood);
+      for(let i=0;i<3;i++) box(x+.35,y0+1.9-i*.32,z,.8,.2,.05,[.5,.36,.2],i*1.1+R()*.4); box(x,y0+2.45,z,.16,.16,.16,dark); break; } } }
+  // scattered sights in the open
+  const place=(n,fn,zones)=>{ let c=0; for(let tries=0;tries<n*60&&c<n;tries++){ const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-10)); if(!okT(tx,ty)) continue; const z=zmap[ty*MW+tx]; if(zones&&!zones.includes(z)) continue;
+      let clear=true; for(let dy=-2;dy<=2&&clear;dy++)for(let dx=-2;dx<=2;dx++) if(!okT(tx+dx,ty+dy)) { clear=false; break; } if(!clear||!farFromNPC(tx,ty,8)) continue; fn(tx+.5,ty+.5,z,R); c++; } };
+  // standing stones
+  place(7,(x,z,zn,R)=>{ const n=5+Math.floor(R()*3); for(let i=0;i<n;i++){ const a=i/n*6.283, px=x+Math.cos(a)*2.4, pz=z+Math.sin(a)*2.4, y0=hgt(px,pz), h=1.2+R()*1.2; box(px,y0+h/2-.1,pz,.55,h,.4,zn==='frost'?[.7,.72,.76]:stoneC,-a+R()*.3); }
+    if(R()<.5){ const y0=hgt(x,z); box(x,y0+.2,z,1.1,.4,.7,stoneC.map(v=>v*.85)); box(x,y0+.45,z,.3,.06,.3,[.4,.8,1],0,1.4); STAT_LIGHTS.push({x,y:y0+.8,z,r:5,c:[.4,.8,1.3]}); } },['meadow','forest','ruins','frost','swamp']);
+  // abandoned carts
+  place(6,(x,z,zn,R)=>{ const y0=hgt(x,z), ry=R()*6.28; box(x,y0+.75,z,2,.12,1.1,[.42,.28,.15],ry); for(const s of [-1,1]) box(x+Math.cos(ry)*0,y0+.95,z+s*.0,2,.4,.06,[.36,.24,.12],ry);
+    for(const s of [-1,1]){ const wx=x-Math.sin(ry)*s*.6, wz=z-Math.cos(ry)*s*.6; gAdd(d,RC,wx,y0+.42,wz,ry,.42,.08,.42,[.3,.2,.1],0,Math.PI/2); } box(x+Math.cos(ry)*1.1,y0+.6,z-Math.sin(ry)*1.1,1.2,.08,.08,wood,ry+.2);
+    for(let i=0;i<3;i++) box(x+(R()-.5),y0+1.0+i*.25,z+(R()-.5)*.6,.5,.35,.4,[.6,.5,.32],R()); },['meadow','forest','ruins','swamp']);
+  // cold campfires and bedrolls
+  place(10,(x,z,zn,R)=>{ const y0=hgt(x,z); for(let i=0;i<7;i++){ const a=i/7*6.283; gAdd(d,RBL,x+Math.cos(a)*.5,y0+.06,z+Math.sin(a)*.5,0,.26,.18,.26,[.42,.4,.37]); } gAdd(d,RC,x,y0+.02,z,0,.4,.05,.4,[.12,.1,.08]);
+    for(let i=0;i<2;i++){ const a=R()*6.28; box(x+Math.cos(a)*1.5,y0+.08,z+Math.sin(a)*1.5,1.6,.12,.6,[.45,.3,.25],a); } },['meadow','forest','frost','ruins','ash']);
+  // boulder fields
+  place(18,(x,z,zn,R)=>{ const n=2+Math.floor(R()*4); for(let i=0;i<n;i++){ const px=x+(R()-.5)*3, pz=z+(R()-.5)*3, y0=hgt(px,pz), s=.5+R()*1.1; gAdd(d,RBL,px,y0+s*.3,pz,R()*6,s*1.2,s*.8,s,zn==='ash'?[.3,.26,.24]:zn==='frost'?[.72,.74,.78]:[.5,.48,.45]); } });
+}
 function addArena(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
   const stone=[.6,.5,.4], dark=[.3,.24,.18], red=[.62,.1,.07], gold=[.92,.72,.32], iron=[.14,.13,.13];
   const brazier=(x,z)=>{ const y=hgt(x,z); gAdd(d,RC,x,y,z,0,.32,.9,.32,iron); gAdd(d,RC,x,y+.9,z,0,.55,.22,.55,iron); box(x,y+1.15,z,.42,.12,.42,[1,.55,.15],0,2.6); STAT_LIGHTS.push({x,y:y+1.6,z,r:9,c:[1.5,.7,.3],fire:true}); };
@@ -2827,7 +2895,7 @@ function addVault(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0
   const brazier=(lx,ly,col)=>{ const [x,z]=Wp(lx,ly), y0=.3; gAdd(d,RC,x,y0,z,0,.22,1.05,.22,iron); gAdd(d,RFR,x,y0+1.05,z,0,.85,.42,.85,iron); box(x,y0+1.05,z,.7,.06,.7,gold);
     gAdd(d,RS,x,y0+1.42,z,0,.62,.36,.62,col||[1,.5,.15],2.6); fire(x,y0+1.9,z,9,col?col.map(v=>v*1.4):null); };
   /* ---- the gate in the Ruins of Vael ---- */
-  { const gx=99.5, gz=47.3, y0=hgt(gx,gz+1.4);
+  { const gx=99.5+VGO[0], gz=47.3+VGO[1], y0=hgt(gx,gz+1.4);
     for(const s of [-1,1]){ const px=gx+s*2.25; box(px,y0+3.1,gz,1.3,6.2,1.5,stone); box(px,y0+.25,gz,1.65,.5,1.85,dark); box(px,y0+6.25,gz,1.5,.3,1.7,dark);
       for(let k=0;k<4;k++) box(px,y0+1.2+k*1.3,gz+.77,.46,.46,.04,trim,0,1.5);
       gAdd(d,RC,px+s*1.1,y0,gz+1.7,0,.18,1.3,.18,iron); gAdd(d,RFR,px+s*1.1,y0+1.3,gz+1.7,0,.72,.36,.72,iron); gAdd(d,RS,px+s*1.1,y0+1.62,gz+1.7,0,.52,.32,.52,[1,.5,.15],2.4); fire(px+s*1.1,y0+2.1,gz+1.7,8); }
@@ -2878,7 +2946,7 @@ function drawVaultDyn(near,t){
     const y0=.3+D.lift*3.25, W=D.y1-D.y0+1, iron=[.17,.17,.19]; mreset(); mtr(cx,y0,cz);
     for(let k=0;k<=W*3;k++){ const z=-W/2+.12+k*(W-.24)/(W*3); P(GEO.cyl,.075,3.3,.075,iron,0,0,0,z); P(GEO.cone,.1,.18,.1,iron,0,0,-.0,z); }
     for(let h=0;h<5;h++) P(GEO.box,.1,.08,W,iron,0,0,.25+h*.72,0); }
-  if(near(VAULT.gate.x,VAULT.gate.y,30)&&Math.random()<.55){ const y=hgt(99.5,48.5); P3(99.5+(Math.random()-.5)*2.6,y+.3+Math.random()*4.6,47.05,(Math.random()-.5)*.15,.22,.35,1.7,.12,Math.random()<.5?'#4affd8':'#bffff2',{glow:true,drag:.97}); }
+  if(near(VAULT.gate.x,VAULT.gate.y,30)&&Math.random()<.55){ const y=hgt(99.5+VGO[0],48.5+VGO[1]); P3(99.5+VGO[0]+(Math.random()-.5)*2.6,y+.3+Math.random()*4.6,47.05+VGO[1],(Math.random()-.5)*.15,.22,.35,1.7,.12,Math.random()<.5?'#4affd8':'#bffff2',{glow:true,drag:.97}); }
 }
 
 function addLandmarks(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
@@ -2927,16 +2995,20 @@ function addLandmarks(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,r
     STAT_LIGHTS.push({x:fx,y:fy+.6,z:fz,r:8,c:[1.4,.6,.2],fire:true}); for(let k=0;k<2;k++) box(fx+(k?-1:1)*1.2,fy+.2,fz+.5,.9,.3,.35,[.35,.22,.12],k); };
   camp('sylas'); camp('marla',-1.4,1.6); camp('ithren',1.6,-1.2); camp('vok',1.8,1.2); camp('bram',-1.2,-1.6);
   camp('hakon',1.8,1.4);
+  OFS(CRO);
   for(const [x,z] of [[132,10],[148,10],[132,22],[148,22],[136,23],[144,23],[140,9]]){ const y0=hgt(x+.5,z+.5); gAdd(d,RC,x+.5,y0,z+.5,0,.22,1.6,.22,[.15,.14,.16]); gAdd(d,RFR,x+.5,y0+1.6,z+.5,0,.7,.3,.7,[.2,.2,.22]); gAdd(d,RS,x+.5,y0+1.9,z+.5,0,.45,.3,.45,[.5,1,.6],2.4); STAT_LIGHTS.push({x:x+.5,y:y0+2.3,z:z+.5,r:9,c:[.4,1.1,.6],fire:true,ghost:true}); }
   { const y0=hgt(140.5,11.5); gAdd(d,RC,140.5,y0,11.5,0,5.4,.3,5.4,[.18,.18,.22]); for(let k=0;k<8;k++){ const a=k/8*Math.PI*2; gAdd(d,RB,140.5+Math.cos(a)*2.3,y0+.32,11.5+Math.sin(a)*2.3,-a,.7,.05,.25,[.4,.8,1],1.8); } STAT_LIGHTS.push({x:140.5,y:y0+.6,z:11.5,r:7,c:[.4,.8,1.3]}); }
+  OFS(WPT(112.5,59.5).map(Math.round));
   { const x=112.5, z=59.5, y0=hgt(x,z); for(const s of [-1,1]) gAdd(d,RB,x,y0+1.6,z+s*2.8,0,.9,3.2,.9,[.5,.48,.46]); gAdd(d,RB,x,y0+3.35,z,0,1.0,.4,6.6,[.45,.43,.4]); gAdd(d,RB,x+.52,y0+2.6,z,0,.06,.9,1.6,[.25,.35,.6]); }
+  OFS(WPT(142,74.5).map(Math.round));
   { const x=142, z=74.5, y0=hgt(x,z); for(let k=0;k<6;k++){ const a=k/6*Math.PI*2; gAdd(d,RCN,x+Math.cos(a)*2,y0-.2,z+Math.sin(a)*2,a,.6,2.2+(k%2),.6,[.7,.9,1],.9); } STAT_LIGHTS.push({x,y:y0+1,z,r:6,c:[.4,.8,1.2]}); }
+  OFS(null);
   { const n=NPCS.find(q=>q.id==='doran'); if(n){ const x=n.x/TS, z=n.y/TS-1.3, y0=.55; box(x,y0+.45,z,.9,.9,.6,[.2,.2,.22]); box(x,y0+.95,z,1.2,.2,.45,[.25,.25,.28]);
     box(x+1.6,y0+.6,z,1.2,1.2,1.2,[.45,.42,.4]); box(x+1.6,y0+.7,z+.61,.6,.45,.05,[1,.5,.1],0,2); STAT_LIGHTS.push({x:x+1.6,y:y0+1,z:z+1,r:6,c:[1.4,.55,.15],fire:true});
     for(const s of [-1,1]) gAdd(d,RC,x+s*1.8+.6,y0,z-.9,0,.12,2.4,.12,wood); box(x+.6,y0+2.4,z-.9,4,.12,.12,wood); } }
   /* ---- the Amberfield Stables, outside the East Gate: a timber barn, a fenced paddock, hay, a trough and lanterns ---- */
   { const wood=[.46,.31,.17], dark=[.27,.18,.1], roofC=[.44,.2,.13], stone=[.52,.5,.47], hay=[.86,.72,.36], twine=[.4,.28,.14];
-    const X0=85,X1=97,Z0=64,Z1=73;
+    OFS(STO); const X0=85,X1=97,Z0=64,Z1=73;
     const post=(x,z)=>{ const y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.17,1.28,.17,dark); box(x,y0+1.3,z,.22,.06,.22,wood); };
     const rail=(x0,z0,x1,z1)=>{ const mx=(x0+x1)/2, mz=(z0+z1)/2, y0=hgt(mx,mz), len=Math.hypot(x1-x0,z1-z0), ry=-Math.atan2(z1-z0,x1-x0); for(const h of [.55,1.02]) box(mx,y0+h,mz,len+.02,.1,.07,wood,ry); };
     for(let x=X0;x<X1;x++){ post(x+.5,Z0+.5); rail(x+.5,Z0+.5,x+1.5,Z0+.5); if(x<86||x>89){ post(x+.5,Z1+.5); rail(x+.5,Z1+.5,x+1.5,Z1+.5); } }
@@ -2958,7 +3030,7 @@ function addLandmarks(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,r
     { const x0=90.2; for(const z of [78.9,80.7]){ const y0=hgt(x0,z); gAdd(d,RC,x0,y0,z,0,.15,1.1,.15,dark); } box(x0,hgt(x0,79.8)+.95,79.8,.09,.09,1.9,wood); }
     for(const [x,z] of [[93.2,79.4],[93.9,79.6]]){ const y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,.6,.85,.6,[.42,.28,.15]); for(const h of [.15,.68]) gAdd(d,RC,x,y0+h,z,0,.62,.06,.62,[.25,.22,.2]); }
     for(const [x,z,r] of [[96.6,79.5,.3],[97.3,79.4,.9]]){ const y0=hgt(x,z); box(x,y0+.3,z,.6,.6,.6,[.5,.36,.2],r); }
-    STABLE.x=91; STABLE.z=68.5; STABLE.y=hgt(91,68.5);
+    STABLE.y=hgt(91,68.5); STABLE.x=91+OFX; STABLE.z=68.5+OFY; STABLE.ox=OFX; STABLE.oz=OFY; OFS(null);
     /* the old stable yard inside Hearthmere becomes a little well square */
     { const x=TOWN.x+10.5, z=TOWN.y-2.6, y0=hgt(x,z); gAdd(d,RC,x,y0,z,0,1.5,.72,1.5,[.56,.53,.49]); gAdd(d,RC,x,y0+.7,z,0,1.62,.1,1.62,[.44,.42,.4]); gAdd(d,RC,x,y0+.45,z,0,1.18,.3,1.18,[.1,.2,.26],.12);
       for(const s of [-1,1]) gAdd(d,RC,x+s*.66,y0+.7,z,0,.1,1.25,.1,dark); box(x,y0+1.95,z,1.5,.08,.1,dark); gAdd(d,RP,x,y0+2.05,z,Math.PI/2,1.1,.55,1.8,roofC); box(x+.25,y0+1.45,z,.18,.2,.18,wood);
@@ -3057,7 +3129,7 @@ function drawExtras(near,t){
     hs.forEach(([dx,dz,f,m,walker],i)=>{ let X=STABLE.x+dx, Z=STABLE.z+dz, face=f+Math.sin(t*.3+dx)*.25, mv=0, walk=0;
       if(walker){ const w=t*.12+i*2.1; X+=Math.cos(w)*1.3; Z+=Math.sin(w)*.9; face=Math.atan2(Math.cos(w)*.9,-Math.sin(w)*1.3); mv=.32; walk=w*4.2; }
       drawHorse({x:X,y:hgt(X,Z),z:Z,face,mv,walk,m,free:1}); });
-    { const X=90.9, Z=79.8; drawHorse({x:X,y:hgt(X,Z),z:Z,face:Math.PI*.5+Math.sin(t*.25)*.12,mv:0,walk:0,m:1,free:1}); } }
+    { const X=95.4+(STABLE.ox||0), Z=77.6+(STABLE.oz||0); drawHorse({x:X,y:hgt(X,Z),z:Z,face:Math.PI+Math.sin(t*.25)*.1,mv:0,walk:0,m:2,free:1}); } }
   if(WINDMILL.x&&near(WINDMILL.x*TS,WINDMILL.z*TS,70)){ mreset(); mtr(WINDMILL.x,WINDMILL.y,WINDMILL.z); P(GEO.sph,.5,.5,.5,[.3,.2,.12]); mrz(t*.7);
     for(let k=0;k<4;k++){ mpush(); mrz(k*Math.PI/2); P(GEO.box,.16,3.4,.12,[.34,.22,.12],0,0,1.7,0); P(GEO.box,.95,2.7,.04,[.86,.8,.66],0,.55,2.0,.03); mpop(); } }
   if(CAULDRON.x&&near(CAULDRON.x*TS,CAULDRON.z*TS,40)&&Math.random()<.3) P3(CAULDRON.x+(Math.random()-.5)*.6,CAULDRON.y,CAULDRON.z+(Math.random()-.5)*.6,0,.6,0,1.2,.18,'#8cff4a',{glow:true});
@@ -3148,7 +3220,7 @@ function updateUI(){ try{ arenaHud(); }catch(e){}
   if(pf.dataset.sig!==sig){ pf.dataset.sig=sig; pf.innerHTML=''; if(me.party){ const h=document.createElement('div'); h.style.cssText='font-family:Cinzel;font-size:12px;color:var(--gold);text-shadow:0 1px 2px #000'; h.textContent='Party: '+me.party; pf.appendChild(h); }
     for(const o of mem){ const d=document.createElement('div'); d.className='pmember panel'; d.dataset.u=o.u; d.innerHTML='<div class="uname"><span></span><span class="lvl"></span></div><div class="bar hp small"><i></i></div>';
       d.querySelector('.uname span').textContent=(o.pl?'♛ ':'')+o.n; d.querySelector('.uname span').style.color=nameCol(o); d.querySelector('.lvl').textContent=CLS[o.c].glyph+' '+o.l; d.onclick=()=>{me.target={kind:'p',id:o.u}}; pf.appendChild(d); } }
-  for(const d of pf.querySelectorAll('.pmember')){ const o=othersByU.get(d.dataset.u); if(!o) continue; d.querySelector('i').style.width=(clamp(o.hp/o.mhp,0,1)*100)+'%'; d.classList.toggle('dead',o.d); d.classList.toggle('far',dist(o.rx,o.ry,me.x,me.y)>1200); }
+  for(const d of pf.querySelectorAll('.pmember')){ const o=othersByU.get(d.dataset.u); if(!o) continue; { let bx=d.querySelector('.pbuffs'); if(!bx){ bx=document.createElement('div'); bx.className='pbuffs'; d.appendChild(bx); } const sl=o.d?[]:songBuffsAt(o.rx,o.ry), h=songIcons(sl); bx._sb=sl; if(bx._h!==h){ bx._h=h; bx.innerHTML=h; } } d.querySelector('i').style.width=(clamp(o.hp/o.mhp,0,1)*100)+'%'; d.classList.toggle('dead',o.d); d.classList.toggle('far',dist(o.rx,o.ry,me.x,me.y)>1200); }
   // zone
   const z=zoneAtPx(me.x,me.y); if(z!==me.zone){ if(me.zone) zoneBanner(z); me.zone=z; } $('zoneName').textContent=ZONES[z].name;
   if(!$('whoWin').classList.contains('hidden')) renderWho();
@@ -3160,7 +3232,10 @@ function renderTracker(){
   el.innerHTML='<h3>Quests <span style="color:var(--dim);font-size:11px">(L)</span></h3>'+(me.c.lvl>=10&&!me.c.mounts.length?`<div style="margin-top:6px;color:#ffd34a;font-size:13px">🐎 You can buy a mount! Visit <b>Hilde the Stable Master</b> outside the East Gate of Hearthmere (look for the golden horseshoe).</div>`:'')+qs.slice(0,6).map(q=>{ const s=me.c.qs[q.id];
     return `<div style="margin-top:6px"><div style="font-weight:700;color:#f3e6c8">${esc(q.title)}</div><div class="${s.st==='done'?'done':'obj'}" style="font-size:13px">${s.st==='done'?'✔ Return to '+esc(npcName(q.giver)):esc(objText(q,s))}</div></div>`; }).join('')+(qs.length>6?`<div class="obj" style="margin-top:4px">+${qs.length-6} more…</div>`:''); }
 function renderBuffs(){ const el=$('buffs'); if(!el||!me) return; let h=''; for(const k in me.c.buffs){ const ms=me.c.buffs[k]-Date.now(); if(ms<=0) continue; h+=`<div class="buff" title="${BUFFNAME[k][0]}">${BUFFNAME[k][1]}<span>${Math.ceil(ms/60000)}m</span></div>`; }
-  if(me.mounted) h+=`<div class="buff" title="Mounted">🐎<span>R</span></div>`; el.innerHTML=h; }
+  if(me.mounted) h+=`<div class="buff" title="Mounted">🐎<span>R</span></div>`; const sl=songBuffsAt(me.x,me.y); h+=songIcons(sl); el._sb=sl; if(el._h!==h){ el._h=h; el.innerHTML=h; } }
+(function(){ const over=e=>{ const b=e.target.closest&&e.target.closest('.sbuff'); if(!b) return; const box=b.parentNode, it=box&&box._sb&&box._sb[+b.dataset.sb]; if(!it) return; showTip({currentTarget:b},songBuffHTML(it)); };
+  addEventListener('mouseover',over); addEventListener('mouseout',e=>{ if(e.target.closest&&e.target.closest('.sbuff')) hideTip(); }); addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('.sbuff')) over(e); }); })();
+setInterval(()=>{ try{ if(me) renderBuffs(); }catch(e){} },500);
 function showTip(e,html){ const tp=$('tip'); tp.innerHTML=html; tp.classList.remove('hidden'); const r=e.currentTarget.getBoundingClientRect();
   tp.style.left=Math.min(innerWidth-270,r.left)+'px'; tp.style.top=Math.max(8,r.top-tp.offsetHeight-8)+'px'; }
 function hideTip(){ $('tip').classList.add('hidden'); }
@@ -3502,7 +3577,7 @@ const gm={god:false,nocd:false,fly:false,speed:1,tOff:null,wx:null,tPh:null,wset
 /* the Game Master's weather and time of day are shared with every player */
 function applyWorldWs(ws){ if(!Array.isArray(ws)||!(+ws[2]>gm.wset)) return; const wx=ws[0]==null?null:clamp(ws[0]|0,0,3), ph=ws[1]==null?null:clamp(+ws[1]||0,0,1);
   const changed=wx!==gm.wx||ph!==gm.tPh; gm.wset=+ws[2]; gm.wx=wx; gm.tPh=ph; gm.tOff=ph==null?null:ph*600-((gm.wset/1000)%600);
-  if(changed&&me) sysMsg('The Game Master changes the '+(wx!==null||ph===null?'weather':'time of day')+'.','c-ann'); }
+  }
 function setWorld(wx,ph){ gm.wset=Date.now(); gm.wx=wx; gm.tPh=ph; gm.tOff=ph==null?null:ph*600-((gm.wset/1000)%600); sendPresence(true); }
 const GMCMDS=new Set(['gift','movegm','boot','ban','unban','aura','invis','makegm','removegm','gmlist','gm','gold','level','levelup','xp','god','nocd','fly','speed','tp','heal','revive','item','mats','mount','kill','time','weather','questdone','announce']);
 let ownerOK=false, ownerSrc='';
@@ -3520,7 +3595,7 @@ function gmRevive(){ if(!me.dead) return; me.dead=false; me.rootU=0; document.ge
 function gmPlaces(){ const out=[{n:'Hearthmere (town)',k:['town','home','hearthmere','spawn'],x:SPAWN.x,y:SPAWN.y},{n:'Sunken Vault (inside)',k:['vaultin','inside','dungeon'],x:VAULT.start.x,y:VAULT.start.y}];
   for(const p of POIS) out.push({n:p.name,k:[p.id,p.name.toLowerCase()],x:p.x*TS+16,y:p.y*TS+16});
   for(const n of NPCS) out.push({n:n.name+' (NPC)',k:[n.id,n.name.toLowerCase()],x:n.x,y:n.y+40});
-  for(const m of MOBT) if(m.pos&&(m.boss||m.elite)) out.push({n:m.name+' (boss)',k:[m.key,m.name.toLowerCase()],x:m.pos[0]*TS+16,y:m.pos[1]*TS+16+180});
+  for(const m of MOBT) if(m.pos&&(m.boss||m.elite)) out.push({n:m.name+' (boss)',k:[m.key,m.name.toLowerCase()],x:posW(m)[0]*TS+16,y:posW(m)[1]*TS+16+180});
   return out; }
 function gmTpTo(x,y,label){ x=clamp(x,24,MW*TS-24); y=clamp(y,24,MH*TS-24);
   if(blockedP(x,y,10)){ let best=null; for(let r=16;r<480&&!best;r+=16) for(let a=0;a<16;a++){ const X=x+Math.cos(a/16*Math.PI*2)*r, Y=y+Math.sin(a/16*Math.PI*2)*r; if(!blockedP(X,Y,10)){ best=[X,Y]; break; } } if(best){ x=best[0]; y=best[1]; } }
@@ -3898,11 +3973,26 @@ function drum(t,vol,low){ const c=AUD.ctx; const s=c.createBufferSource(); s.buf
 /* tracks */
 const PROG={tavern:[[50,[62,66,69]],[55,[62,67,71]],[57,[61,64,69]],[50,[62,66,69]],[47,[62,66,71]],[55,[62,67,71]],[57,[61,64,69]],[50,[62,66,69]]],
   pastoral:[[48,[60,64,67]],[53,[60,65,69]],[45,[60,64,69]],[55,[59,62,67]]], eerie:[[45,[57,60,64]],[41,[57,60,65]],[43,[55,59,62]],[40,[55,59,64]]], frost:[[50,[62,65,69]],[46,[58,62,65]],[48,[60,64,67]],[45,[57,61,64]]],
-  battle:[[45,[57,60,64]],[45,[57,60,64]],[41,[53,57,60]],[43,[55,59,62]]]};
+  battle:[[45,[57,60,64]],[45,[57,60,64]],[41,[53,57,60]],[43,[55,59,62]]],combat:[[50,[62,65,69]],[50,[62,65,69]],[46,[58,62,65]],[48,[60,64,67]]]};
+const JIG={A:[[74,78,81,78,74,78],[79,83,79,78,79,76],[76,73,76,81,76,73],[74,76,78,74,0,0],[71,74,78,74,71,74],[79,78,76,74,76,79],[81,79,76,73,76,79],[78,76,73,74,0,0]],
+  B:[[81,83,86,83,81,78],[79,81,83,86,83,79],[81,85,88,85,81,76],[78,81,86,81,78,74],[83,81,78,83,86,83],[81,79,78,79,81,83],[85,83,81,79,78,76],[74,78,81,74,0,0]]};
+function fiddle(n,t,vol,dur){ const c=AUD.ctx; const o=c.createOscillator(), f=c.createBiquadFilter(), f2=c.createBiquadFilter(), g=c.createGain(), v=c.createOscillator(), vg=c.createGain(); o.type='sawtooth'; o.frequency.value=NOTE(n);
+  v.frequency.value=5.6; vg.gain.setValueAtTime(0,t); vg.gain.linearRampToValueAtTime(NOTE(n)*.007,t+dur*.6); v.connect(vg); vg.connect(o.frequency); f.type='lowpass'; f.frequency.value=2600; f2.type='peaking'; f2.frequency.value=1400; f2.Q.value=1.2; f2.gain.value=6;
+  o.connect(f); f.connect(f2); f2.connect(g); g.connect(AUD.mbus); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.035); g.gain.setValueAtTime(vol*.85,t+dur*.8); g.gain.exponentialRampToValueAtTime(0.0001,t+dur+.08); o.start(t); v.start(t); o.stop(t+dur+.12); v.stop(t+dur+.12); }
+function jingle(t,vol){ const c=AUD.ctx; const s=c.createBufferSource(); s.buffer=AUD.noise; const f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=7800; f.Q.value=1.5; const g=c.createGain(); s.connect(f); f.connect(g); g.connect(AUD.mbus); env(g,t,.002,vol,.18); s.start(t); s.stop(t+.25); }
+function clink(t){ const c=AUD.ctx; for(const fq of [2600,3900]){ const o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.value=fq*(1+Math.random()*.05); o.connect(g); g.connect(AUD.amb); env(g,t,.002,.03,.35); o.start(t); o.stop(t+.4); } }
 const SCALE={tavern:[62,64,66,67,69,71,73,74,76,78,79,81],pastoral:[60,62,64,67,69,72,74,76,79],eerie:[57,59,60,62,64,65,68,69,72],frost:[62,64,65,67,69,70,72,74],battle:[57,60,62,64,65,67,69]};
 let melPrev=69;
-function schedStep(tr,t,step){ const P=PROG[tr]; if(!P) return; const per=tr==='tavern'?6:tr==='battle'?8:8; const bar=Math.floor(step/per)%P.length, s=step%per; const [root,ch]=P[bar];
-  if(tr==='tavern'){ // 6/8 jig
+function schedStep(tr,t,step){ const P=PROG[tr]; if(!P) return; const per=tr==='tavern'?6:8; const bar=Math.floor(step/per)%P.length, s=step%per; const [root,ch]=P[bar];
+  if(tr==='tavern'){ // a proper 6/8 tavern jig: fiddle tune (A part twice, B part twice), strummed lute, bodhran and tambourine
+    const part=Math.floor(step/(per*8))%4<2?'A':'B', mb=JIG[part][bar], n=mb[s];
+    if(n){ let dur=.19; for(let k=s+1;k<6&&mb[k]===0;k++) dur+=.19; fiddle(n,t,.075,dur*.95); }
+    if(s===0||s===3){ ch.forEach((cn,i)=>pluck(cn-12+(s===3&&i===2?12:0),t+i*.016,.11,.6)); pluck(s===0?root-12:root-5,t,.26,.8); }
+    if(s===0) drum(t,.34,true); else if(s===3) drum(t,.22,true); else drum(t,.05,false); if(s===3||(s===5&&Math.random()<.4)) jingle(t,.035);
+    if(Math.random()<.004) clink(t+Math.random()*.2);
+    if(s===per-1) AUD.bar++; return; }
+  if(tr==='combat'){ if(s===0||s===4) drum(t,.34,true); if(s===6&&Math.random()<.5) drum(t,.2,true); if(s%2===1) drum(t,.07,false); if(s===0) pad([root-12,root-5,root],t,.07,1.7,true); pluck(root+[0,3,7,3,0,3,7,10][s]-12,t,.09,.25); if(s===per-1) AUD.bar++; return; }
+  if(false){ // old jig
     if(s===0) { pluck(root-12,t,.32,.9); drum(t,.35,true); } if(s===3){ pluck(root-5,t,.22,.7); drum(t,.18,true); } if(s===2||s===5) drum(t,.08,false);
     pluck(ch[[0,1,2,1,2,1][s]]+(s===4?12:0)-12,t,.12,.5);
     if(AUD.bar%4!==3||s<3){ if(Math.random()<.78){ const sc=SCALE.tavern; let i=sc.indexOf(melPrev); if(i<0) i=4; i=clamp(i+[-2,-1,-1,0,1,1,2][Math.random()*7|0],0,sc.length-1); if(s===0) i=sc.indexOf(ch[Math.random()*3|0]+12)>=0?sc.indexOf(ch[Math.random()*3|0]+12):i; melPrev=sc[i]; (AUD.bar%8<4?pluck:flute)(melPrev,t,AUD.bar%8<4?.18:.12,AUD.bar%8<4?.45:.3); } } }
@@ -3910,13 +4000,14 @@ function schedStep(tr,t,step){ const P=PROG[tr]; if(!P) return; const per=tr==='
   else { if(s===0){ pad(ch,t,tr==='eerie'?.07:.06,5.2,tr==='eerie'); pluck(root,t,.12,2.2); } if(s===4&&Math.random()<.6){ const sc=SCALE[tr]; flute(sc[Math.random()*sc.length|0]+(tr==='frost'?0:0),t,.05,1.6); } }
   if(s===per-1) AUD.bar++; }
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
-  let tr=z==='town'?'tavern':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; if(bossEng&&!bossEng.m.dead) tr='battle';
-  if(tr!==AUD.track){ if(AUD.want!==tr){ AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,.5); AUD.switchAt=t+1.4; } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
-  const spb=AUD.track==='tavern'?60/138/2*2:AUD.track==='battle'?60/150/2*2:60/70/2*2; const stepDur=AUD.track==='tavern'?.2:AUD.track==='battle'?.2:.42;
+  let tr=z==='town'?'tavern':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
+  if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';
+  if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
+  const spb=AUD.track==='tavern'?60/138/2*2:AUD.track==='battle'?60/150/2*2:60/70/2*2; const stepDur=AUD.track==='tavern'?.19:AUD.track==='battle'?.2:AUD.track==='combat'?.21:.42;
   if(AUD.track===AUD.want) while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; }
   // ambience levels per zone
   const T0={wind:0,leaves:0,water:0,rumble:0,insects:0,frost:0,cave:0,town:0}; const set=o=>Object.assign(T0,o);
-  if(z==='town') set({wind:.025}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
+  if(z==='town') set({wind:.025,town:.05}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
   if(z==='ruins') set({wind:.22}); if(z==='ash'||z==='lair') set({rumble:.55,wind:.05}); if(z==='frost') set({frost:.06,wind:.18}); if(z==='crypt'||z==='vault') set({cave:.45});
   if(isWaterAt(me.x,me.y)) T0.water=.4; if(me.inLava) T0.rumble=.8;
   for(const k in T0) AUD.layers[k].g.gain.setTargetAtTime(T0[k],t,1.2);
@@ -4198,7 +4289,7 @@ function renderOptions(){ const w=$('optWin'); if(w.classList.contains('hidden')
   if(optTab==='controls') h+=sl('sens','Mouse / touch look speed',.3,2.5,.1,v=>Math.round(v*100)+'%')+sl('camMax','Max camera zoom out',10,40,1,v=>v)+ck('invertY','Invert camera up/down')+ck('shake','Screen shake')+`<div class="onote">Movement: hold both mouse buttons to run forward, right-drag to steer, left-drag to look around, wheel to zoom. On touch screens use the joystick and drag the screen to look.</div>`;
   if(optTab==='keys'){ h+='<div class="okeys">'+Object.keys(BIND_DEF).map(a=>`<div class="okey"><span>${BIND_LABEL[a]}</span><button data-bind="${a}" class="${capBind===a?'cap':''}">${capBind===a?'Press a key…':(BIND[a]?keyName(BIND[a]):'—')}</button></div>`).join('')+'</div><div class="onote">Arrow keys always move too. Esc cancels. <button id="bindReset">Reset to defaults</button></div>'; }
   if(optTab==='gfx'){ const Q=[['auto','Auto'],['low','Low'],['medium','Medium'],['high','High'],['ultra','Ultra']];
-    h+=`<div class="sndrow"><span>Graphics quality</span><select id="gfxSel">${Q.map(([k,l])=>`<option value="${k}" ${OPT.gfx===k?'selected':''}>${l}</option>`).join('')}</select><b>${GFX.q}</b></div>`+ck('fullscreen','Start in full screen')+ck('borderless','Windowed borderless: let the mouse leave the game (multi-monitor)')+`<div class="onote"><button id="fsNow">${document.fullscreenElement?'Leave full screen':'Go full screen now'}</button> Quality changes apply after you press <button id="gfxReload">Restart the game</button> (your character is saved). Low is best for phones and older laptops; Ultra needs a gaming graphics card.</div>`; }
+    h+=`<div class="sndrow"><span>Graphics quality</span><select id="gfxSel">${Q.map(([k,l])=>`<option value="${k}" ${OPT.gfx===k?'selected':''}>${l}</option>`).join('')}</select><b>${GFX.q}</b></div>`+ck('fullscreen','Start in full screen')+ck('borderless','Windowed borderless: let the mouse leave the game (multi-monitor)')+sl('curSpd','Game cursor speed (full screen)',.4,2.5,.05,v=>Math.round(v*100)+'%')+`<div class="onote"><button id="fsNow">${document.fullscreenElement?'Leave full screen':'Go full screen now'}</button> Quality changes apply after you press <button id="gfxReload">Restart the game</button> (your character is saved). Low is best for phones and older laptops; Ultra needs a gaming graphics card.</div>`; }
   if(optTab==='sound') h+='<div id="optSound"></div>';
   if(optTab==='ui') h+=sl('uiScale','Interface size',.5,1.3,.02,v=>Math.round(v*100)+'%')+ck('questArrow','Show quest direction arrow')+ck('names','Show player and monster names');
   w.querySelector('.obodywrap').innerHTML=h+'</div>';
@@ -4226,12 +4317,12 @@ function cursorWanted(){ return !document.body.classList.contains('touch')&&!OPT
   const hover=tg=>{ const old=GCUR.over; if(old===tg) return; if(old&&old.isConnected){ fire('mouseout',old,null,{relatedTarget:tg}); for(let n=old;n&&n!==document&&!(n.contains&&n.contains(tg));n=n.parentNode) fire('mouseleave',n,null,{relatedTarget:tg}); }
     fire('mouseover',tg,null,{relatedTarget:old}); const path=[]; for(let n=tg;n&&n!==document&&!(old&&n.contains&&n.contains(old));n=n.parentNode) path.unshift(n); for(const n of path) fire('mouseenter',n,null,{relatedTarget:old}); GCUR.over=tg; };
   const setRange=(r)=>{ const b=r.getBoundingClientRect(), f=clamp((GCUR.x-b.left)/b.width,0,1), mn=+r.min||0, mx=+r.max||100, st=+r.step||1; r.value=Math.round((mn+f*(mx-mn))/st)*st; r.dispatchEvent(new Event('input',{bubbles:true})); };
-  const place=()=>{ el.style.transform=`translate(${GCUR.x}px,${GCUR.y}px)`; };
+  let pq=0; const place=()=>{ if(pq) return; pq=requestAnimationFrame(()=>{ pq=0; el.style.transform=`translate3d(${GCUR.x}px,${GCUR.y}px,0)`; }); };
   document.addEventListener('pointerlockchange',()=>{ GCUR.on=document.pointerLockElement===document.documentElement; el.style.display=GCUR.on?'block':'none'; if(GCUR.on) place(); else { GCUR.btns=0; GCUR.rng=null; } });
   const grab=e=>{ if(!e.isTrusted) return false; if(!GCUR.on){ if(e.type==='mousedown'&&cursorWanted()){ GCUR.x=e.clientX; GCUR.y=e.clientY; try{ const p=document.documentElement.requestPointerLock(); if(p&&p.catch) p.catch(()=>{}); }catch(_){} } return false; }
     e.stopImmediatePropagation(); if(!e.type.startsWith('pointer')&&e.cancelable) e.preventDefault(); return true; };
   for(const ty of ['pointermove','pointerdown','pointerup','click','dblclick','auxclick','contextmenu']) addEventListener(ty,e=>{ grab(e); },true);
-  addEventListener('mousemove',e=>{ if(!grab(e)) return; GCUR.x=clamp(GCUR.x+e.movementX,0,innerWidth-1); GCUR.y=clamp(GCUR.y+e.movementY,0,innerHeight-1); place(); const tg=under(); hover(tg); if(GCUR.rng) setRange(GCUR.rng); fire('pointermove',tg,e); fire('mousemove',tg,e); },true);
+  addEventListener('mousemove',e=>{ if(!grab(e)) return; const sc=(OPT.curSpd||1)/(/Chrome/.test(navigator.userAgent)?(devicePixelRatio||1):1); GCUR.x=clamp(GCUR.x+e.movementX*sc,0,innerWidth-1); GCUR.y=clamp(GCUR.y+e.movementY*sc,0,innerHeight-1); place(); const tg=under(); hover(tg); if(GCUR.rng) setRange(GCUR.rng); fire('pointermove',tg,e); fire('mousemove',tg,e); },true);
   addEventListener('mousedown',e=>{ if(!grab(e)) return; GCUR.btns=e.buttons||(1<<e.button); const tg=under(); GCUR.down=tg; fire('pointerdown',tg,e); fire('mousedown',tg,e);
     if(e.button===0){ if(tg.matches&&tg.matches('input[type=range]')){ GCUR.rng=tg; setRange(tg); } else if(tg.matches&&tg.matches('input,textarea,select')){ tg.focus(); if(tg.tagName==='SELECT'&&tg.showPicker) try{ tg.showPicker(); }catch(_){} } else if(document.activeElement&&document.activeElement!==document.body&&!tg.closest('input,textarea')) document.activeElement.blur&&document.activeElement.blur(); } },true);
   addEventListener('mouseup',e=>{ if(!grab(e)) return; GCUR.btns=e.buttons||0; const tg=under(); fire('pointerup',tg,e); fire('mouseup',tg,e);
@@ -4418,8 +4509,12 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 addEventListener('blur',()=>{ for(const k in keys) keys[k]=false; });
 function tabTarget(){
-  const list=mobs.filter(m=>!m.dead&&!m.t.critter&&(m.tgt===MY_U||(m.threat&&m.threat[MY_U]>0)||dist(m.rx,m.ry,me.x,me.y)<=50+(m.t.r||0))).sort((a,b)=>dist(a.rx,a.ry,me.x,me.y)-dist(b.rx,b.ry,me.x,me.y));
-  if(!list.length) return err('No enemies attacking you or within 5 yards'); const cur=me.target&&me.target.kind==='m'?list.findIndex(m=>m.id===me.target.id):-1;
+  const att=mobs.filter(m=>!m.dead&&!m.t.critter&&(m.tgt===MY_U||(m.threat&&m.threat[MY_U]>0)));
+  let list;
+  if(att.length) list=att.sort((a,b)=>dist(a.rx,a.ry,me.x,me.y)-dist(b.rx,b.ry,me.x,me.y));
+  else { const f=me.face||0, fx=Math.cos(f), fy=Math.sin(f); list=mobs.filter(m=>{ if(m.dead||m.t.critter) return false; const dx=m.rx-me.x, dy=m.ry-me.y, d=Math.hypot(dx,dy); if(d>60+(m.t.r||0)) return false; return d<(m.t.r||0)+12||(dx*fx+dy*fy)/d>.42; })
+      .sort((a,b)=>{ const sc=m=>{ const dx=m.rx-me.x, dy=m.ry-me.y, d=Math.hypot(dx,dy)||1; return d*(1.6-(dx*fx+dy*fy)/d); }; return sc(a)-sc(b); }); }
+  if(!list.length) return err(att.length?'No enemies attacking you':'No enemy in front of you within 6 yards'); const cur=me.target&&me.target.kind==='m'?list.findIndex(m=>m.id===me.target.id):-1;
   const m=list[(cur+1)%list.length]; me.target={kind:'m',id:m.id};
 }
 
@@ -4477,8 +4572,9 @@ function update(dt){
     const back=f<0&&!s;
     me.moving=!!(mx||my)&&!rooted;
     if(mx||my){ me.face=back?yaw:Math.atan2(my,mx); }
-    if(me.moving){ const l=Math.hypot(mx,my), swm=isSwimming(), sp=(back?95:155)*(me.mounted?MOUNTS[me.mounted].speed:1)*(swm?.6:1)*(buffOn('swift')?1.2:1)*(gm.speed||1)*(1+TAL('spd'))*(1+songFx().spd)*(me.stealth?.82+TAL('stspd'):1)*dt; movePlayer(me,mx/l*sp,my/l*sp,10); me.stepT-=dt; if(me.stepT<=0){ me.stepT=me.mounted?.15:.3; if(!swm) footDust(me.x,me.y); } }
-    else if(!me.dash){ const te=targetEnt(); if(te&&te.kind!=='n'&&!te.self&&(me.cast||me.auto)) me.face=Math.atan2(te.y-me.y,te.x-me.x); }
+    if(me.moving){ const l=Math.hypot(mx,my), swm=isSwimming(), sp=(back?95:155)*(me.mounted?MOUNTS[me.mounted].speed:1)*(swm?.6:1)*(buffOn('swift')?1.2:1)*(gm.speed||1)*(1+TAL('spd'))*(1+songFx().spd)*(me.stealth?.82+TAL('stspd'):1)*dt; { const k=1-Math.exp(-dt*(me.mounted?7:13)), tx=mx/l*sp/dt, ty=my/l*sp/dt; me.vx=(me.vx||0)+(tx-(me.vx||0))*k; me.vy=(me.vy||0)+(ty-(me.vy||0))*k; movePlayer(me,me.vx*dt,me.vy*dt,10); } me.stepT-=dt; if(me.stepT<=0){ me.stepT=me.mounted?.15:.3; if(!swm) footDust(me.x,me.y); } }
+    else { if(!rooted&&!me.dead&&!me.dash&&Math.hypot(me.vx||0,me.vy||0)>8){ const k=Math.exp(-dt*(me.mounted?6:16)); me.vx*=k; me.vy*=k; movePlayer(me,me.vx*dt,me.vy*dt,10); } else { me.vx=0; me.vy=0; } }
+    if(!me.moving&&!me.dash){ const te=targetEnt(); if(te&&te.kind!=='n'&&!te.self&&(me.cast||me.auto)) me.face=Math.atan2(te.y-me.y,te.x-me.x); }
     if(me.jumpV||me.jumpH>0){ me.jumpV=(me.jumpV||0)-15*dt; me.jumpH=Math.max(0,(me.jumpH||0)+me.jumpV*dt); if(me.jumpH<=0){ me.jumpH=0; me.jumpV=0; footDust(me.x,me.y); } }
     if(me.dash) updateDash(t);
     if(!me.dead){
