@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION = 'v0.56b (tavern music)';
+const SERVER_VERSION = 'v0.56c (tavern music)';
 const MAX_PLAYERS = +(process.env.MAX_PLAYERS || 50);
 // Game Master password. Players type  /gm login <password>  in chat. Leave unset to disable GM logins.
 const GM_PASSWORD = process.env.GM_PASSWORD || '';
@@ -116,11 +116,17 @@ function storeArmory(c, a) {
 function armoryList() { const now = Date.now(); const online = new Set([...clients.values()].map(c => c.armKey)); return Object.entries(armory).map(([k, v]) => ({ ...v, online: online.has(k) })); }
 function json(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
 /* music streams with byte ranges (Safari and iOS will not play audio without them) and may come from another origin (the desktop app) */
-/* if the mp3s were uploaded under their original long names, find the right one by its key words */
-function findMusic(file) { try { if (fs.statSync(file).isFile()) return file; } catch (e) {}
-  const dir = path.dirname(file), want = path.basename(file, '.mp3').toLowerCase().split('-').filter(w => w && w !== 'tavern');
-  let list = []; try { list = fs.readdirSync(dir).filter(f => /\.mp3$/i.test(f)); } catch (e) { return null; }
-  for (const w of want) { const hit = list.find(f => f.toLowerCase().includes(w)); if (hit) return path.join(dir, hit); }
+/* find the tavern music wherever it was uploaded: music/, Music/, play/music/, downloads/, next to server.js (a flattened
+   upload) or any folder up to three levels deep, and under its short name or its original long name */
+let MUSIC_CACHE = null, MUSIC_T = 0;
+function allMusic() { if (MUSIC_CACHE && Date.now() - MUSIC_T < 60000) return MUSIC_CACHE; const out = [];
+  const walk = (dir, depth) => { let ents = []; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+    for (const e of ents) { if (e.name.startsWith('.') || e.name === 'node_modules') continue; const f = path.join(dir, e.name);
+      if (e.isDirectory() && depth < 3) walk(f, depth + 1); else if (e.isFile() && /\.mp3$/i.test(e.name)) out.push(f); } };
+  walk(ROOT, 0); MUSIC_CACHE = out; MUSIC_T = Date.now(); return out; }
+function findMusic(file) { const base = path.basename(file).toLowerCase(), list = allMusic();
+  let hit = list.find(f => path.basename(f).toLowerCase() === base); if (hit) return hit;
+  for (const w of path.basename(base, '.mp3').split('-').filter(w => w && w !== 'tavern')) { hit = list.find(f => path.basename(f).toLowerCase().includes(w)); if (hit) return hit; }
   return null; }
 function sendMusic(req, res, file) { file = findMusic(file); if (!file) { res.writeHead(404); return res.end('Not found'); }
   fs.stat(file, (err, st) => { if (err || !st.isFile()) { res.writeHead(404); return res.end('Not found'); }
@@ -139,7 +145,7 @@ function sendFile(res, file, extra) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
-  if (name === 'api/version') { let music = []; try { music = fs.readdirSync(path.join(ROOT, 'music')).filter(f => f.endsWith('.mp3')); } catch (e) {} return json(res, 200, { server: SERVER_VERSION, music, musicFolderFound: music.length > 0 }); }
+  if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); let top = []; try { top = fs.readdirSync(ROOT).filter(f => !f.startsWith('.')).slice(0, 60); } catch (e) {} return json(res, 200, { server: SERVER_VERSION, music, musicFound: music.length > 0, files: top }); }
   if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
   if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);
     const all = armoryList(); const exact = all.filter(a => a.name.toLowerCase() === q); const part = all.filter(a => a.name.toLowerCase() !== q && a.name.toLowerCase().includes(q));
