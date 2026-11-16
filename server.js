@@ -43,6 +43,32 @@ async function ghLoad() { if (!TK_REPO || !GH_TOKEN) return; const have = new Se
     for (const is of list) { const m = /<!--emberfall ([A-Za-z0-9+/=]+) -->/.exec(is.body || ''); if (!m) continue; try { const t = JSON.parse(Buffer.from(m[1], 'base64').toString('utf8')); if (!t.id || have.has(t.id)) continue; t.gh = is.number; t.st = 'open'; tickets.push(t); have.add(t.id); added++; } catch (e) {} } }
   if (added) { tickets.sort((a, b) => a.id - b.id); saveTickets(); log(`# restored ${added} open ticket(s) from GitHub`); } }
 setTimeout(ghLoad, 1000);
+// ---------- auction house: players list items for gold; buyers pay, sellers are paid (by gift) even when offline ----------
+const AH_FILE = path.join(__dirname, 'auctions.json');
+let auctions = []; try { auctions = JSON.parse(fs.readFileSync(AH_FILE, 'utf8')); if (!Array.isArray(auctions)) auctions = []; } catch (e) {}
+const saveAH = () => fs.writeFile(AH_FILE, JSON.stringify(auctions), () => {});
+let ahNext = auctions.reduce((m, a) => Math.max(m, a.id | 0), 0) + 1;
+function deliver(name, what) { const who = String(name || '').toLowerCase(); let done = false;
+  for (const o of clients.values()) if (o.p && String(o.p.n || '').toLowerCase() === who) { send(o, { t: 'gift', what, from: 'the Auction House' }); done = true; }
+  if (!done) { (pendingGifts[who] = pendingGifts[who] || []).push(what); saveGifts(); } }
+/* The Hearthmere Trading Company keeps basic materials on the Auction House so there is always something to buy.
+   Its lots are pricier than a fair player price, so players who gather can undercut it. */
+const NPC_SELLER = 'Trading Company';
+const NPC_STOCK = [['sunpetal','Sunpetal',2],['thornbloom','Thornbloom',3],['mireroot','Mireroot',4],['ghostcap','Ghostcap',5],['emberlily','Emberlily',7],['frostbloom','Frostbloom',9],
+  ['copper','Copper Ore',2],['iron','Iron Ore',4],['obsidian','Obsidian',7],['mithril','Mithril Ore',9],
+  ['lightleather','Light Leather',2],['thickhide','Thick Hide',4],['scaledhide','Scaled Hide',7],['frostpelt','Frost Pelt',9],
+  ['linencloth','Linen Cloth',2],['woolcloth','Wool Cloth',4],['silkcloth','Silk Cloth',7],['runecloth','Runecloth',9],
+  ['amberperch','Amber Perch',2],['mireeel','Mire Eel',3],['gamemeat','Game Meat',2],['crabmeat','Crab Meat',3],['amberstone','Amberstone',12],['moonstone','Moonstone',20]];
+function ahSeed() { const now = Date.now(); let ch = false;
+  for (const [k, name, base] of NPC_STOCK) { const have = auctions.filter(a => a.seller === NPC_SELLER && a.mat === k).length; if (have >= 2) continue;
+    const n = [5, 10, 20][Math.floor(Math.random() * 3)], each = Math.max(1, Math.round(base * (1.4 + Math.random() * .5))), price = each * n;
+    const item = JSON.stringify({ mat: k, n, name: name + ' ×' + n, rar: 0, slot: 'mat' });
+    auctions.push({ id: ahNext++, seller: NPC_SELLER, item, name: name + ' ×' + n, rar: 0, lv: 0, slot: 'mat', mat: k, price, at: now, exp: now + (12 + Math.random() * 24) * 3600e3, npc: 1 }); ch = true; }
+  if (ch) saveAH(); }
+setTimeout(ahSeed, 3000); setInterval(ahSeed, 10 * 60000);
+function ahExpire() { const now = Date.now(); let ch = false; for (const a of auctions) if (a.exp < now) { if (!a.npc) deliver(a.seller, 'item:' + a.item); a.gone = true; ch = true; }
+  if (ch) { auctions = auctions.filter(a => !a.gone); saveAH(); } }
+setInterval(ahExpire, 60000);
 const nextTicketId = () => tickets.reduce((m, t) => Math.max(m, t.id | 0), 0) + 1;
 const openTickets = () => tickets.filter(t => t.st === 'open').length;
 // Who is the realm owner (master GM)?
@@ -61,7 +87,7 @@ function ownerByIp(req) {
 }
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8', '.webmanifest':'application/manifest+json' };
-const GAME_FILES = new Set(['index.html','game.js','style.css','config.js','icon.png','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png']);
+const GAME_FILES = new Set(['index.html','game.js','style.css','config.js','world.js','editor.html','icon.png','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png']);
 // ---------- armory: character snapshots sent by players' games ----------
 const ARMORY_FILE = path.join(__dirname, 'armory.json');
 let armory = {}; try { armory = JSON.parse(fs.readFileSync(ARMORY_FILE, 'utf8')) || {}; } catch (e) {}
@@ -112,6 +138,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': st.size, 'Content-Disposition': `attachment; filename="${path.basename(f)}"` }); fs.createReadStream(f).pipe(res); }); }
   // ---- the game at /play/ ----
   if (name === 'play') { res.writeHead(302, { Location: '/play/' }); return res.end(); }
+  if (name === 'editor' || name === 'editor.html') { res.writeHead(302, { Location: '/play/editor.html' }); return res.end(); }
   if (name.startsWith('play/')) { let g = name.slice(5) || 'index.html'; if (!GAME_FILES.has(g)) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, path.join(ROOT, g)); }
   if (GAME_FILES.has(name) && name !== 'index.html') return sendFile(res, path.join(ROOT, name));   // older game links
   if (name === 'Play Emberfall.html') return sendFile(res, path.join(ROOT, name), { 'Content-Disposition': 'attachment; filename="Play Emberfall.html"' });
@@ -212,6 +239,26 @@ function onMessage(c, text) {
     fs.appendFile(BUG_FILE, `---- ${new Date().toISOString()} #${t.id} ${t.name}\n${t.text}\n`, () => {}); log(`# ticket #${t.id} from ${t.name}`);
     send(c, { t: 'tkok', id: t.id });
     const n = openTickets(); for (const o of clients.values()) if (o.gm && o !== c) send(o, { t: 'tknew', id: t.id, name: t.name, cat: t.cat, open: n });
+  } else if (d && d.t === 'ah' && c.p && c.p.n) {
+    const me = String(c.p.n), meL = me.toLowerCase();
+    if (d.op === 'post' && typeof d.item === 'string' && d.item.length < 3000) {
+      let it; try { it = JSON.parse(d.item); } catch (e) { return send(c, { t: 'ah', op: 'err', msg: 'That item could not be listed.' }); }
+      const price = Math.max(1, Math.min(1000000, Math.round(+d.price || 0))), hrs = [12, 24, 48].includes(+d.hrs) ? +d.hrs : 24;
+      if (auctions.filter(a => a.seller.toLowerCase() === meL).length >= 20) return send(c, { t: 'ah', op: 'err', msg: 'You can have at most 20 auctions at once.', back: d.item });
+      if (me.toLowerCase() === NPC_SELLER.toLowerCase()) return send(c, { t: 'ah', op: 'err', msg: 'That name is reserved.', back: d.item });
+      const a = { id: ahNext++, seller: cleanStr(me, 20), item: d.item, name: cleanStr(it.name, 40), rar: it.rar | 0, lv: it.lv | 0, slot: cleanStr(it.slot, 10), mat: typeof it.mat === 'string' ? cleanStr(it.mat, 20) : undefined, price, at: Date.now(), exp: Date.now() + hrs * 3600e3 };
+      auctions.push(a); saveAH(); send(c, { t: 'ah', op: 'posted', id: a.id, name: a.name, price }); log(`# auction #${a.id} ${a.name} for ${price}g by ${me}`);
+    } else if (d.op === 'buy') {
+      const a = auctions.find(x => x.id === (d.id | 0)); if (!a) return send(c, { t: 'ah', op: 'err', msg: 'Someone else bought that one first.' });
+      if (a.seller.toLowerCase() === meL) return send(c, { t: 'ah', op: 'err', msg: 'You cannot buy your own auction.' });
+      if ((+d.gold || 0) < a.price) return send(c, { t: 'ah', op: 'err', msg: 'Not enough gold.' });
+      auctions = auctions.filter(x => x !== a); saveAH(); send(c, { t: 'ah', op: 'bought', id: a.id, item: a.item, price: a.price, name: a.name });
+      if (!a.npc) deliver(a.seller, 'gold:' + a.price + ':' + a.name); log(`# auction #${a.id} sold to ${me} for ${a.price}g`);
+    } else if (d.op === 'cancel') {
+      const a = auctions.find(x => x.id === (d.id | 0) && x.seller.toLowerCase() === meL); if (!a) return;
+      auctions = auctions.filter(x => x !== a); saveAH(); send(c, { t: 'ah', op: 'cancelled', id: a.id, item: a.item, name: a.name });
+    }
+    if (d.op !== 'post' || true) send(c, { t: 'ah', op: 'list', list: auctions.slice(-600).map(a => ({ id: a.id, seller: a.seller, item: a.item, price: a.price, exp: a.exp })) });
   } else if (d && d.t === 'tk' && c.gm) {
     // Game Master ticket tools
     const t = tickets.find(x => x.id === (d.id | 0)), by = cleanStr((c.p && c.p.n) || 'GM', 20);

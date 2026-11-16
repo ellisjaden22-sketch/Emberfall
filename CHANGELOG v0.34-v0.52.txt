@@ -1,0 +1,218 @@
+EMBERFALL ONLINE: CHANGES FROM YESTERDAY AND TODAY
+
+v0.52  (16 Nov 2026)  Footprints, wet ground and glowing spells
+Footprints, a hover glow, projectile trails and impact flashes, wet ground after rain, mount dust and class idle animations.
+  - [New] Footprints: heroes leave prints in snow, sand and ash that slowly fade away
+  - [New] The monster under your mouse now glows softly, so you always know what you are about to click
+  - [New] Spell projectiles now leave a sparkling trail, light up the ground as they fly, and flash with light where they hit
+  - [New] Rain leaves the ground wet: darker earth, a shiny sheen and puddles that mirror the sky. It slowly dries after the rain stops (not in the snow, the Caldera or the Vault)
+  - [New] Mounts kick up dust on dirt roads and grass, sand in the dunes, snow in Frostpeak and spray in shallow water
+  - [New] Idle animations by class: Bulwarks roll their shoulders, Barbarians take deep breaths, Assassins crouch and watch, Bards sway to a tune, Hunters scan the horizon and casters drift slightly off the ground
+
+v0.51  (16 Nov 2026)  Polish pass
+Health bars that show what you just lost, a low-health warning, splashing through water, weightier killing blows and more.
+  - [New] Health bars on your portrait and your target now show the chunk you just lost as a pale strip for a moment before it drains away, so you can see how hard each hit was
+  - [New] Low health warning: below a third of your health the screen edges pulse red, and below a fifth you hear your heartbeat in combat
+  - [New] Wading through shallow water now splashes at every step, with ripples and a splashing footstep sound
+  - [Improved] Killing blows land with weight: a short freeze and a camera punch, and a heavy jolt when a boss falls. Bodies give off a last puff of dust as they sink into the ground
+  - [Improved] Damage numbers that arrive at the same time now stack above each other instead of piling on top of each other
+  - [Improved] Heroes standing still now and then shift their weight and glance around
+
+v0.50  (16 Nov 2026)  Every hit tells you what it struck
+Impacts that match the weapon and the creature, creature hit sounds, warning circles under boss swings, and blended walk, run and attack animation.
+  - [New] Hits now spray what the creature is made of: blood from beasts and people, bone chips from skeletons, sparks from armoured sentries, embers from magma and dragons, ichor and shell from crabs and crawlers, goo from slimes, wisps from ghosts and sap from thornlings
+  - [New] The weapon shapes the impact: blades streak, axes and blades spray along the swing, maces and staffs thump a dust ring from the ground, daggers jet straight out. Critical hits burst bigger and brighter
+  - [New] Creature hit sounds: a fleshy thud, a bone clack, a metal clang, a rock crack, a shell crunch, a slime squelch, a ghostly hiss or a wooden knock, layered under your weapon sound
+  - [New] Boss and elite melee swings show a warning circle on the ground while they wind up. Step out of it before it fills and the blow misses. Bosses wind up a little longer so you can react
+  - [Improved] Animation blending: heroes lean into a run and take bigger strides and arm swings the faster they move, and their stride shortens while they attack on the move
+  - [Improved] Monster blows on heroes spray blood and give the camera a small knock
+
+v0.49  (16 Nov 2026)  Fights with weight
+Monsters wind up before they strike, every melee swing leaves a slash, big hits land with impact, and grass parts as you walk through it.
+  - [Improved] Monsters now wind up before a melee attack and the blow lands a moment later, so you can read every swing. Stun a monster mid-swing and the attack is cancelled
+  - [New] Melee swings (Bulwark, Barbarian, Assassin, Bard) leave a bright slash arc that follows the swing: overhead chops, sweeps, rising cuts and dagger thrusts. Rare and better weapons leave arcs in their own colour
+  - [New] Impact: critical hits briefly freeze the swing and the victim (hit-stop) and punch the camera in. Monsters flinch away from where the hit came from, and are knocked back as they die
+  - [New] Grass and flowers bend and part around you, other heroes and monsters as they move through them
+  - [Improved] Walking backwards now plays the stride backwards instead of moonwalking, for you and for other players
+  - [Improved] The camera looks slightly ahead of where you are running
+  - [Improved] Sharper shadows on High graphics
+
+v0.48  (16 Nov 2026)  Tailoring and a market for materials
+Tailoring, materials on the Auction House, longer quests, one material per gather and a forge in Frostwatch.
+  - [New] Tailoring: learn it from Liesl Threadwell in Hearthmere. Sew cloth robes, vestments and mantles, charms and spellthread (+Power for 30 minutes), up to the epic Runeweave Robes at 285+. Liesl also sells linen to practise on
+  - [New] Cloth: Linen, Wool, Silk and Runecloth drop from humanoid monsters (cultists, witches, drowned sailors, skeletons, necromancers and more)
+  - [New] Materials on the Auction House: a new "Sell materials" tab puts any amount of herbs, ore, leather, cloth, fish, meat, gems or consumables up for sale, and "Materials" in the browse filter shows them with a price per piece
+  - [New] The Hearthmere Trading Company keeps basic materials in stock on the Auction House, a little above a fair price, so there is always something to buy and gatherers can undercut it
+  - [New] A real anvil and forge at Jarl Hakon's camp in Frostwatch. Blacksmiths can work there or at Doran's forge in Hearthmere (both marked ⚒ on the minimap)
+  - [Improved] Every herb, ore vein, skinned beast and fish now gives exactly one material. Gathering professions are faster, find rare gems and Starleaf more often, and rich nodes come back sooner
+  - [Improved] Quests are longer: kill quests ask for 50% more and gathering quests for 60% more, and every quest pays 30% more experience and gold
+
+v0.47  (16 Nov 2026)  Professions, and a world that moves like it means it
+Nine professions with trainers, recipes and crafted gear; smoother monsters, heroes and bosses; better light, sky and water.
+  - [New] Professions! Learn two main professions (Mining, Herbalism, Skinning, Blacksmithing, Leatherworking, Alchemy or Jewelcrafting) plus Fishing and Cooking. Skill goes from 1 to 300 across four ranks: Apprentice, Journeyman, Expert and Artisan
+  - [New] Trainers in Hearthmere: Doran (Mining, Blacksmithing, Jewelcrafting), Mira (Herbalism, Alchemy), the new Tamsin Hidewright (Skinning, Leatherworking) and Pell Saltbrook (Cooking, Fishing). Fisher Bram also teaches Fishing
+  - [New] The Professions window (K, or Menu > Professions) lists your recipes by rank with skill-up colours, a search box, a "have materials" filter and a make-all button
+  - [New] Miners and herbalists gather twice as much, faster, find gems and Starleaf, and see rich veins and herb patches nobody else can
+  - [New] Skinning: beasts you kill stay on the ground for 35 seconds. Press F or click them for Light Leather, Thick Hide, Scaled Hide, Frost Pelt and the rare Wyrmscale
+  - [New] Fishing: face open water and press F (or /fish). When the bobber dips, press F or click it. Different waters hold different fish, plus the very rare Golden Koi and the odd treasure chest
+  - [New] Cooking turns fish and meat into food that makes you Well Fed for 30 minutes (Power, Stamina, crit or regeneration)
+  - [New] Over 100 recipes: weapons, plate and leather armour, bows, wands and trinkets that carry the name of the crafter, plus epic Frostforged, Wyrmscale and Frost Diamond gear at 285+. Masterwork crafts sometimes come out one quality better
+  - [New] Consumables: 30-minute flasks, elixirs, whetstones and armour kits. Jewelcrafters cut gems that anyone can socket into a weapon, armour or trinket (click the gem in your bags)
+  - [Improved] Monsters now speed up, slow down and turn along an arc instead of sliding at full speed. Big beasts and bosses turn heavily, and a pack chasing you spreads out around you instead of stacking inside each other
+  - [Improved] Other players and monsters move along a smooth curve through the network updates instead of chasing the latest one, so there is no more jitter or rubber-banding
+  - [Improved] Heroes and monsters turn smoothly instead of snapping round, and monsters follow slopes and steps smoothly
+  - [Improved] Graphics: sun shafts through trees and clouds, fog that glows toward the sun, clouds lit from the sun side with dark bellies and bright edges, softer shading in shadow, and finer ripples and glints on water
+
+v0.46  (15 Nov 2026)  Barbarians, Hunters and a living economy
+Two new classes, trading, an Auction House and a World Editor for Game Masters.
+  - [New] New class: the Barbarian. A plate-armoured warrior with two-handed axes who builds rage and spends it on Brutal Strike, Cleave, Bull Rush, War Shout, Bladestorm, Berserk, Execute and Second Wind
+  - [New] New class: the Hunter. A leather-clad archer with a longbow and a loyal wolf companion that fights at your side. Aimed Shot, Concussive Shot, Volley, Disengage, Rapid Fire, Hunter's Mark and Arrow Storm
+  - [New] Each new class has its own talent tree, a legendary weapon (Gorehowl, Maw of the North and Thornstring, Bow of the Wild Hunt) and new weapons: longbows and recurve bows
+  - [New] Trading: right-click a player (or use the Trade button on their portrait, or /trade name) to swap items and gold safely. Both players must accept, and any change un-ticks both sides
+  - [New] The Auction House: Auctioneer Velma in Hearthmere. Browse, search and buy items from other players, or put your own up for sale for 12, 24 or 48 hours. Sales pay out even while you are offline, and unsold items come back to you
+  - [New] A mailbox at Auctioneer Velma holds anything that arrives while your bags are full
+  - [New] The Emberfall World Editor for the realm owner: paint ground and zones, place trees, houses, campfires and dozens of other props, add NPCs with their own lines, monster camps and new landmarks. Preview it in the game, then publish it as world.js
+
+v0.43  (15 Nov 2026)  Know your strength
+Stats you can read, training dummies with a damage meter, tougher dungeons and a quest chain for Fisher Bram.
+  - [New] Training dummies in the barracks yard. Hit one and a damage meter pops up showing total damage, DPS and every ability's share. Stop for 5 seconds and the dummy resets and you leave combat
+  - [New] New defences: Armour (from your level, armour and shield) reduces physical damage from monsters, Spell resist reduces their spells and ranged attacks, and Resilience reduces damage from other players
+  - [Improved] The character panel shows health and mana/energy/rage regeneration, armour, spell resist, resilience, critical chance and attack speed. Hover any stat to read what it does
+  - [Improved] Doran's Forge shows exactly what each upgrade adds (for example Power 24 → 27, +13%), and comparing items shows the change in percent
+  - [New] Mirrowmere is no longer empty: Murkshell Crabs, Drowned Sailors, Tidecallers and the elite Grimmaw of the Deep
+  - [New] Fisher Bram has a harder four-part quest chain after Old Tusk, ending with Grimmaw of the Deep (bring friends)
+  - [Improved] The Drowned Vault is much harder: its monsters have 70% more health and hit 35% harder, and its bosses have more than double the health and hit 50% harder
+  - [Fixed] Mounts: taking damage, lava and deep water no longer knock you off your mount
+  - [Improved] Only one Bard song helps you at a time (the strongest one near you); songs no longer stack
+  - [Improved] Bard auto attack and Power Chord hit less hard; Discord now leaves enemies stuck in place for 3 seconds
+  - [Fixed] You can no longer attack through walls, pillars, houses or closed doors
+  - [Fixed] In the arena your heals, shields, songs and banners only help your own party
+  - [Improved] Clicking an enemy player shows their mana, energy or rage under their health
+  - [Fixed] Arena pillars no longer pull the camera in; it only moves when you move it
+  - [Fixed] Every lava pool in the (much bigger) Cinder Caldera now glows with lava
+  - [Improved] Jump higher, and hop over fences and rocks
+  - [Improved] Storms: rain falls smoothly and is easier to see, the screen darkens less, and lightning rolls in softly
+  - [Fixed] No more "Invite to party" for people already in your party, in another party, or when you are not the party leader
+  - [Fixed] The browser's own menu no longer opens when you right-click in game
+  - [New] Quit game button in the game menu. Full screen, graphics, keybinds and sound are now only in Options
+
+v0.41  (15 Nov 2026)  Helping hands
+Game Masters can level up other players.
+  - [New] GM command /setlevel <player> <level> sets a player to that level, and /givelevel <player> [levels] gives them extra levels (one if you leave the number out). Players who are offline get it the next time they log in
+
+v0.40  (12 Nov 2026)  Hearthmere grows
+Hearthmere becomes a proper walled town, and combat and movement feel sharper.
+  - [New] Hearthmere is bigger: a wider wall with 16 towers rings a new outer district around the old centre. The old market, fountain and NPCs stay exactly where they were
+  - [New] New landmarks: a stone chapel with stained glass and a tall bell tower, the two-storey Ember & Anvil tavern with tables and a hanging sign, and the Watch barracks with a training yard
+  - [New] A green park in the south-west quarter with old trees, flower beds, benches and a statue
+  - [New] Townsfolk walk the streets, stop for a chat and carry on, and every player sees the same people in the same places
+  - [Improved] Houses come in different plaster colours and slate, brown, terracotta and moss-green roofs, and a ring of lamps lights the new streets at night
+  - [New] Spell queue: press an ability up to half a second before it is ready (during the global cooldown, the end of a cast or the last moment of a cooldown) and it fires the instant it can. The queued button lights up
+  - [Improved] Your hero turns to face the enemy when an attack goes off, even while running, and using an ability on a monster starts your auto attack
+  - [Improved] Monsters flinch back when they are struck, and heavy hits you take shake the camera (you can turn shaking off in Options)
+  - [Improved] Little dust puffs from your feet on dirt roads, sand, ash and bridges; ripples spread around you while swimming, and diving into deep water makes a splash
+
+v0.39  (11 Nov 2026)  Legends and the arena in town
+Legendary weapons glow, Varro recruits for the arena from Hearthmere, and phones get their own install button.
+  - [New] Legendary weapons glow softly in your hand with sparks in their colour, so everyone can see you carry one
+  - [New] A legendary weapon adds a glowing buff icon under your portrait showing its power, for example Cinderheart, Focus of the Wyrm: +10% spell damage. Every class has its own
+  - [Improved] Varro the Bloodsworn now stands in the south square of Hearthmere with war banners, a weapon rack and a training dummy. The big stone gate out in the wilds is gone, and leaving the arena brings you back to him
+  - [New] The start screen has an iPhone · iPad · Android button next to Windows, Mac and Linux, with simple steps to install the game on your home screen (on Android it can install straight away)
+  - [Fixed] Class names on the character screen, such as Shade, are centred
+
+v0.38  (11 Nov 2026)  The Wide World
+Emberfall has grown again: the world is about 1.8 times bigger, and the wilderness is full of new places to find.
+  - [New] The world map is now 336 by 222 tiles (it was 250 by 168). Every zone outside Hearthmere has been pushed out 2.4 times as far from town, so each zone is much bigger and the roads between them are real journeys
+  - [New] Farmsteads: cottages with lit windows and smoking chimneys, crop fields, fences, hay bales and scarecrows
+  - [New] Hunter camps with tents, crackling campfires, drying racks and log seats
+  - [New] Shrines with glowing orbs, iron-fenced graveyards in Gloamfen and the Ruins, stone wells, and crumbling watchtowers with beacon fires
+  - [New] Glowing mushroom rings in the woods and swamps, dead trees, fallen logs, wildflower patches and berry bushes
+  - [New] Ice crystal fields in Frostpeak, obsidian spires and glowing lava vents in the Cinder Caldera, and broken colonnades and arches in the Ruins of Vael
+  - [New] About 25 new named landmarks to discover, such as Oldfield Farm, Hunter's Rest, Moonwell Shrine, Shiverglass Field and the Ashfang Spires. They count towards the Cartographer achievement
+  - [Improved] More monsters in the open world, and almost twice as many herbs and ore veins
+  - [Improved] The ground is now drawn in pieces around you, so the bigger world runs as smoothly as the old one
+  - [Fixed] The world map labels for the Cinder Caldera and Mirrowmere sit over their zones again
+  - [Fixed] The quest tracker on the right sits a little lower, so it no longer covers the "online" line under the minimap
+
+v0.37  (11 Nov 2026)  Click what you see
+Clicking in town no longer grabs monsters hidden behind houses.
+  - [Fixed] Clicks and the sword cursor now respect the real shape of buildings, roofs, walls and towers, so clicking a house in town never selects a monster or boss hidden somewhere behind it
+  - [Fixed] Monsters can only be clicked within the distance their name plates show (bosses a little further), so nothing far away in the fog gets selected by accident
+
+v0.36  (11 Nov 2026)  Tickets, swimming and songs
+A ticket system for bug reports, reflective water, real swimming, a song bar for Bards and a long list of fixes to clicking and the camera.
+  - [New] Report a bug now creates a ticket instead of an email. Game Masters open the ticket list with /tickets (or the Tickets button in the GM tools): claim a ticket, add notes, teleport to where it happened and close it with a reply that reaches the player in game
+  - [New] Bard songs have their own song bar above the action bar (Shift+1, 2 and 3), like stances. The glowing slot is the song you are singing
+  - [New] Three new Bard abilities: Healing Ballad (level 2), Thunder Note (level 5) and Lullaby (level 9)
+  - [Improved] Ability tooltips show your real numbers (damage, healing, shields, song strength, durations and cooldowns) and update as soon as you pick talents
+  - [New] Water reflects the sky, sun and clouds, and the Hearthmere fountain has clear, rippling, reflective water
+  - [Fixed] Small puddles no longer make you swim or float. You wade through them instead, and only real lakes and rivers are deep enough to swim in
+  - [Improved] Swimming is a proper front crawl with a flutter kick, and heroes glide smoothly up and down steps, bridges and riverbanks instead of popping
+  - [Fixed] Clicking no longer picks monsters that are far away or hidden behind houses and walls. Clicking a building or the ground selects nothing
+  - [Fixed] A quick right-click on a monster always starts your auto attack, even if the mouse twitched
+  - [Improved] Holding the left mouse button looks around freely without steering your hero
+  - [Fixed] In full screen (the game option or F11) the mouse is captured once, so the "To exit full screen" notice no longer pops up every time you turn the camera
+  - [Fixed] The browser's right-click menu never opens in game any more
+  - [Improved] Melee attacks reach a little further, and monsters never end up standing inside your hero
+  - [New] NPC conversations highlight an option: F picks it, and the arrow keys or mouse wheel move the highlight
+  - [Improved] Quest ! and ? markers over quest givers are much bigger
+  - [Improved] The minimap has N, E, S and W markers and a slimmer frame. The world map updates live as you move, has a full compass and shows zones like AMBERFIELD (Lvl. 1-2)
+  - [Improved] "Destroy" in your bags is now "Salvage"
+
+v0.35  (11 Nov 2026)  Click through yourself
+Your own hero no longer gets in the way when you click on monsters.
+  - [Fixed] You can no longer click on your own hero in the world, so clicks land on the monster you are fighting instead of on yourself. To target yourself, click your own portrait in the top-left corner
+
+v0.34  (11 Nov 2026)  Sharper fights
+Tougher monsters, a sword cursor over enemies, steady mouse-look and talents you can unlearn.
+  - [Improved] Monsters are tougher: 30% more health and 20% more damage. Critters are unchanged
+  - [New] The cursor turns into a sword when it is over something you can attack (monsters, and enemy players in the Bloodsand Arena), a speech cursor over NPCs and a hand over friendly heroes
+  - [Fixed] Holding the right (or left) mouse button to turn the camera now locks the cursor in place until you let go, so it no longer drifts across the screen and interferes with your movement
+  - [New] Right-click a talent you have learned to unlearn one rank for gold (1 gold per character level). You get the point back. If a higher row still depends on that point, unlearn the higher talent first
+
+v0.9  (5 Nov 2026)  Music & the Celestial Steed
+Every zone now has its own music and ambience.
+  - [New] Procedural music: tavern tunes in town, pastoral, eerie, frost and battle themes
+  - [New] Ambience: birds, wind, crackling lava and more
+  - [New] Celestial Steed: a translucent crystal mount, the most prestigious in the realm
+  - [New] Character panel on C, separate from your bags
+  - [Improved] More detailed and realistic character models
+  - [gm] GM announcements in orange, GM aura toggle
+
+v0.8  (4 Nov 2026)  Loot & legends
+Rarity colours, boss loot tables and three legendary weapons.
+  - [New] Item rarity: common, uncommon, rare, epic and legendary
+  - [New] Boss loot tables that improve as bosses get stronger
+  - [New] One legendary weapon per class
+  - [New] Cast bars for spells and mounting
+  - [New] Bag management: drag, sell and destroy items
+  - [New] Start menu with your own characters and saves
+  - [Improved] Clean new world map with boss icons and respawn timers
+  - [Improved] Parties: invites, leader, party chat and shared credit
+  - [Improved] Lava now burns
+  - [Improved] Bosses respawn within a few minutes
+
+v0.7  (2 Nov 2026)  Spell effects
+Every ability got its own visual effect.
+  - [Improved] New visuals for all 24 abilities
+  - [Improved] More detailed models for heroes and monsters
+
+v0.6  (1 Nov 2026)  Mounts & icons
+Mounts arrive in Hearthmere, and every spell has a painted icon.
+  - [New] Hilde the Stable Master and four mounts
+  - [New] Painted icons for every ability
+  - [Improved] Class colours and better bars
+  - [Improved] Upgraded creature and boss models
+  - [gm] GM tools for the developer
+
+v0.5  (30 Oct 2026)  Gathering & alchemy
+Herbs, ore, potions and a blacksmith.
+  - [New] Gather herbs and ore across the world
+  - [New] Alchemy recipes for potions and elixirs
+  - [New] Blacksmith upgrades up to +7
+
+v0.4  (28 Oct 2026)  Frostpeak & the crypt
+The frozen north and Morvath the Lich.
+  - [New] Frostpeak and Hollowdeep Crypt zones
+  - [New] Hrimgar the Frost Giant and Morvath the Lich
+  - [New] Weather and a day/night cycle

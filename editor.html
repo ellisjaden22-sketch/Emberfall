@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emberfall World Editor</title>
+<link rel="icon" href="icon.png">
+<style>
+:root{--bg:#120c08;--panel:#1d140c;--edge:#5a4020;--gold:#ffd36a;--txt:#f0dfb8;--dim:#a8957a}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px/1.35 "Segoe UI",system-ui,sans-serif;overflow:hidden}
+header{height:48px;display:flex;align-items:center;gap:8px;padding:0 12px;background:linear-gradient(#2a1c10,#1a1109);border-bottom:1px solid var(--edge)}
+header h1{font:700 17px Georgia,serif;color:var(--gold);margin:0 14px 0 0;letter-spacing:.5px;white-space:nowrap}header .sp{flex:1}
+button,select,input,textarea{font:inherit;color:var(--txt);background:#2a1c10;border:1px solid var(--edge);border-radius:5px;padding:5px 10px}
+button{cursor:pointer}button:hover{border-color:#b8862a}button.gold{background:linear-gradient(#ffd56a,#b8761a);color:#2a1604;border-color:#ffd56a;font-weight:700}button.on{background:#5a3a12;border-color:var(--gold);color:#fff}
+button:disabled{opacity:.45;cursor:default}
+#wrap{display:flex;height:calc(100% - 48px)}
+aside{width:270px;background:var(--panel);border-right:1px solid var(--edge);overflow:auto;padding:10px}
+aside h3{font:700 12px sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin:12px 0 6px}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.tools button{padding:7px 4px;font-size:12.5px}
+.pal{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.pal button{text-align:left;padding:4px 6px;font-size:12.5px;display:flex;align-items:center;gap:6px}
+.pal i{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid #0008;flex:none}
+.row{display:flex;align-items:center;gap:6px;margin:5px 0}.row label{min-width:64px;color:var(--dim);font-size:12.5px}.row input[type=range]{flex:1}.row input[type=text],.row textarea,.row select{flex:1;min-width:0}
+main{flex:1;position:relative}canvas{display:block;width:100%;height:100%;cursor:crosshair}
+#status{position:absolute;left:10px;bottom:8px;background:#000a;padding:4px 10px;border-radius:5px;font-size:12.5px;pointer-events:none}
+#msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#120c08ee;text-align:center;padding:20px;z-index:5}
+#msg div{max-width:560px}#msg h2{font-family:Georgia,serif;color:var(--gold)}
+.insp{border:1px solid var(--edge);border-radius:6px;padding:8px;margin-top:6px;background:#140d07}.hint{color:var(--dim);font-size:12.5px;margin:4px 0}
+.layers label{display:flex;gap:6px;align-items:center;font-size:13px;margin:3px 0}
+#help{position:absolute;right:12px;top:12px;width:340px;background:#1d140cf2;border:1px solid var(--edge);border-radius:8px;padding:12px 14px;font-size:13px;z-index:4}#help.hidden{display:none}#help h3{margin:0 0 6px;color:var(--gold);font-family:Georgia,serif}
+kbd{background:#2a1c10;border:1px solid var(--edge);border-radius:3px;padding:0 4px;font-size:12px}
+.count{color:var(--dim);font-size:12px;margin-top:8px}
+</style></head><body>
+<header><h1>⚒ Emberfall World Editor</h1>
+<button id="bUndo" title="Ctrl+Z">↶ Undo</button><button id="bRedo" title="Ctrl+Y">↷ Redo</button>
+<span class="sp"></span>
+<button id="bLoad" title="Load the world.js that is live on your realm">⤓ Load live world</button><button id="bOpen">📂 Open file</button><input type="file" id="fOpen" accept=".js,.json" hidden>
+<button id="bNew" title="Start over with no edits">🗑 Clear</button>
+<button id="bPrev" class="gold">▶ Preview in game</button><button id="bExp" class="gold">💾 Export world.js</button><button id="bHelp">?</button>
+</header>
+<div id="wrap"><aside>
+<h3>Tool</h3><div class="tools" id="tools"></div>
+<div id="opts"></div>
+<h3>Show</h3><div class="layers"><label><input type="checkbox" id="lBase" checked> Existing NPCs, places and monsters</label><label><input type="checkbox" id="lZones"> Zone colours</label><label><input type="checkbox" id="lGrid" checked> Grid when zoomed in</label></div>
+<div class="count" id="count"></div>
+</aside>
+<main><canvas id="cv"></canvas><div id="status">Loading the world…</div>
+<div id="msg"><div><h2>Loading the world of Emberfall…</h2><p>The editor is building the map exactly the way the game does. This takes a few seconds.</p></div></div>
+<div id="help" class="hidden"><h3>How it works</h3>
+<p>1. Paint tiles, place props, NPCs, monster spawns and landmarks on the map.<br>2. Press <b>Preview in game</b> to walk around your changes right away (only you see the preview).<br>3. Press <b>Export world.js</b> and upload that file to your GitHub repository, next to <code>index.html</code>. After Render redeploys, everyone gets your changes.</p>
+<p><b>Mouse:</b> left click / drag uses the tool, right or middle drag moves the map, the wheel zooms.<br><b>Keys:</b> <kbd>R</kbd> rotate the prop, <kbd>[</kbd> <kbd>]</kbd> brush size, <kbd>Del</kbd> delete the selected object, <kbd>Ctrl+Z</kbd> undo, <kbd>Esc</kbd> back to Select.</p>
+<p>Your work is saved in this browser automatically. Export it whenever you are happy with it.</p><button id="hClose">Got it</button></div>
+</main></div>
+<iframe id="game" title="world loader" style="position:absolute;left:-9999px;top:0;width:320px;height:200px;border:0"></iframe>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), cv=$('cv'), g=cv.getContext('2d');
+let W=null; // the base world from the game
+const ED={tiles:{},zones:{},props:[],npcs:[],spawns:[],pois:[]};
+const VIEW={x:0,y:0,z:4}; let tool='select', sel=null, brush=2, curTile='GRASS', curZone='meadow', curProp='tree', curMob='boar', spawnN=3, propRot=0, propScale=1;
+const TCOL={GRASS:'#5f8f3a',FOREST:'#3f6b2a',TREE:'#22421a',SWAMP:'#4d5a34',WATER:'#2f6fa0',LAVA:'#e0561c',ASH:'#4a403c',ROCK:'#7a7470',PATH:'#b49a6a',BRIDGE:'#8a6a48',COBBLE:'#b8ad98',HOUSE:'#a8442e',TWALL:'#7d7468',WALL:'#6d665e',SAND:'#d8c48a',SNOW:'#e8eef2',ICE:'#a8d8f0',RUIN:'#8d8a78',FOUNT:'#4fa0d8',FENCE:'#8a6a3a',PROP:'#c08040',MEADOW:'#6f9a44',FROST:'#cfe0e8'};
+const TDESC={GRASS:'Grass',FOREST:'Forest floor',TREE:'Tree (solid)',SWAMP:'Swamp mud',WATER:'Water (swim)',LAVA:'Lava (burns)',ASH:'Ash',ROCK:'Rock (solid)',PATH:'Dirt road',BRIDGE:'Bridge',COBBLE:'Cobblestone',HOUSE:'House block (solid)',TWALL:'Town wall (solid)',WALL:'Stone wall (solid)',SAND:'Sand',SNOW:'Snow',ICE:'Ice',RUIN:'Ruin floor',FENCE:'Fence (solid, jumpable)'};
+const ZCOL={meadow:'#e8d060',forest:'#40a040',swamp:'#70806a',ruins:'#b0a890',ash:'#e05020',lake:'#4090e0',town:'#ffffff',frost:'#a0e0ff',crypt:'#8060a0',lair:'#ff3000'};
+const PROPS={tree:'🌳 Tree',pine:'🌲 Pine',deadtree:'🪵 Dead tree',bush:'🌿 Bush',flowers:'🌼 Flowers',mushrooms:'🍄 Glowing mushrooms',rock:'🪨 Rock',boulder:'⛰ Boulder',crystal:'💎 Ice crystals',house:'🏠 Cottage',tent:'⛺ Tent',well:'🪣 Well',statue:'🗿 Statue',pillar:'🏛 Pillar',wall:'🧱 Stone wall',tower:'🏰 Watchtower',campfire:'🔥 Campfire',lamp:'🏮 Street lamp',torch:'🕯 Torch',crate:'📦 Crate',barrel:'🛢 Barrel',fence:'🚧 Fence',banner:'🚩 Banner',stall:'🛒 Market stall',cart:'🛞 Cart',bench:'🪑 Bench',sign:'🪧 Signpost',grave:'🪦 Gravestone',hay:'🌾 Hay bale'};
+const TOOLS=[['select','👆 Select'],['tile','🖌 Tiles'],['zone','🗺 Zones'],['prop','🌳 Props'],['npc','🧑 NPC'],['spawn','👹 Monsters'],['poi','⭐ Landmark'],['erase','🧽 Erase'],['pan','✋ Move']];
+let base=null, over=null, undo=[], redo=[];
+
+/* ---------- load the world through the game itself ---------- */
+function start(){ const fr=$('game'); const here=location.pathname.replace(/[^/]*$/,'');
+  if(location.protocol==='file:'){ $('msg').innerHTML='<div><h2>Open the editor from your realm</h2><p>The editor needs the game next to it. Open <b>/play/editor.html</b> on your Emberfall site (for example https://emberfall-sb6p.onrender.com/play/editor.html).</p></div>'; return; }
+  fr.src=here+'index.html?editor=1&t='+Date.now();
+  const poll=setInterval(()=>{ try{ const w=fr.contentWindow.__EF; if(w){ clearInterval(poll); W=w; ready(); } }catch(e){} },300);
+  setTimeout(()=>{ if(!W) $('msg').innerHTML='<div><h2>The world did not load</h2><p>Make sure this page is opened from your realm at <b>/play/editor.html</b>, then reload.</p></div>'; },90000); }
+function ready(){ $('msg').remove(); $('status').textContent='Ready. Pick a tool on the left.'; const T=W.T; W.tname={}; for(const k in T) W.tname[T[k]]=k;
+  base=document.createElement('canvas'); base.width=W.MW; base.height=W.OWH; const bx=base.getContext('2d'), id=bx.createImageData(W.MW,W.OWH);
+  for(let i=0;i<W.MW*W.OWH;i++){ const c=hex(TCOL[W.tname[W.map[i]]]||'#333'); id.data.set([c[0],c[1],c[2],255],i*4); } bx.putImageData(id,0,0);
+  over=document.createElement('canvas'); over.width=W.MW; over.height=W.OWH;
+  VIEW.x=W.town.x; VIEW.y=W.town.y; VIEW.z=Math.max(2,Math.min(8,cv.clientHeight/90));
+  try{ const d=JSON.parse(localStorage.getItem('ef_editor_draft')||'null'); if(d) loadData(d,true); }catch(e){}
+  buildTools(); redrawOver(); draw(); if(!localStorage.getItem('ef_editor_seen')){ $('help').classList.remove('hidden'); localStorage.setItem('ef_editor_seen','1'); } }
+const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+
+/* ---------- data ---------- */
+const snap=()=>JSON.stringify(ED);
+function pushUndo(){ undo.push(snap()); if(undo.length>80) undo.shift(); redo=[]; save(); }
+function save(){ try{ localStorage.setItem('ef_editor_draft',JSON.stringify(exportData())); }catch(e){} count(); }
+function exportData(){ return {v:1,tiles:Object.entries(ED.tiles).map(([k,v])=>{ const [x,y]=k.split(',').map(Number); return [x,y,v]; }),zones:Object.entries(ED.zones).map(([k,v])=>{ const [x,y]=k.split(',').map(Number); return [x,y,v]; }),
+  props:ED.props.map(p=>({k:p.k,x:+p.x.toFixed(2),y:+p.y.toFixed(2),r:+(p.r||0).toFixed(2),s:+(p.s||1).toFixed(2)})),npcs:ED.npcs,spawns:ED.spawns,pois:ED.pois}; }
+function loadData(d,quiet){ ED.tiles={}; ED.zones={}; for(const [x,y,v] of d.tiles||[]) ED.tiles[x+','+y]=v; for(const [x,y,v] of d.zones||[]) ED.zones[x+','+y]=v;
+  ED.props=(d.props||[]).map(p=>({...p})); ED.npcs=(d.npcs||[]).map(n=>({...n})); ED.spawns=(d.spawns||[]).map(n=>({...n})); ED.pois=(d.pois||[]).map(n=>({...n})); sel=null; if(over) redrawOver(); count(); if(!quiet) save(); draw(); }
+function count(){ $('count').textContent=`Your edits: ${Object.keys(ED.tiles).length} tiles · ${Object.keys(ED.zones).length} zone cells · ${ED.props.length} props · ${ED.npcs.length} NPCs · ${ED.spawns.length} spawns · ${ED.pois.length} landmarks`; }
+function redrawOver(){ const ox=over.getContext('2d'); ox.clearRect(0,0,over.width,over.height); for(const k in ED.tiles){ const [x,y]=k.split(',').map(Number); ox.fillStyle=TCOL[ED.tiles[k]]||'#f0f'; ox.fillRect(x,y,1,1); } }
+
+/* ---------- view ---------- */
+function resize(){ cv.width=cv.clientWidth*devicePixelRatio; cv.height=cv.clientHeight*devicePixelRatio; draw(); }
+const toScr=(x,y)=>[(x-VIEW.x)*VIEW.z*devicePixelRatio+cv.width/2,(y-VIEW.y)*VIEW.z*devicePixelRatio+cv.height/2];
+const toW=(sx,sy)=>[(sx*devicePixelRatio-cv.width/2)/(VIEW.z*devicePixelRatio)+VIEW.x,(sy*devicePixelRatio-cv.height/2)/(VIEW.z*devicePixelRatio)+VIEW.y];
+let drawQ=false; function draw(){ if(drawQ) return; drawQ=true; requestAnimationFrame(()=>{ drawQ=false; draw0(); }); }
+function draw0(){ if(!W) return; const Z=VIEW.z*devicePixelRatio; g.setTransform(1,0,0,1,0,0); g.fillStyle='#0b0805'; g.fillRect(0,0,cv.width,cv.height);
+  g.imageSmoothingEnabled=false; const [ox,oy]=toScr(0,0); g.drawImage(base,ox,oy,W.MW*Z,W.OWH*Z); g.drawImage(over,ox,oy,W.MW*Z,W.OWH*Z);
+  if($('lZones').checked){ g.globalAlpha=.28; for(let y=0;y<W.OWH;y+=1)for(let x=0;x<W.MW;x+=1){ const z=ED.zones[x+','+y]||W.zmap[y*W.MW+x]; if(!z) continue; const [sx,sy]=toScr(x,y); if(sx<-Z||sy<-Z||sx>cv.width||sy>cv.height) continue; g.fillStyle=ZCOL[z]||'#888'; g.fillRect(sx,sy,Z+.5,Z+.5); } g.globalAlpha=1; }
+  else { g.globalAlpha=.55; for(const k in ED.zones){ const [x,y]=k.split(',').map(Number); const [sx,sy]=toScr(x,y); g.fillStyle=ZCOL[ED.zones[k]]||'#888'; g.fillRect(sx,sy,Z+.5,Z+.5); } g.globalAlpha=1; }
+  for(const k in ED.tiles){ if(Z<5) break; const [x,y]=k.split(',').map(Number); const [sx,sy]=toScr(x,y); g.strokeStyle='#ffd36a88'; g.lineWidth=1; g.strokeRect(sx+.5,sy+.5,Z-1,Z-1); }
+  if($('lGrid').checked&&Z>=14){ g.strokeStyle='#00000030'; g.lineWidth=1; const [a,b]=toW(0,0), [c,d]=toW(cv.clientWidth,cv.clientHeight); g.beginPath(); for(let x=Math.floor(a);x<=c;x++){ const [sx]=toScr(x,0); g.moveTo(sx,0); g.lineTo(sx,cv.height); } for(let y=Math.floor(b);y<=d;y++){ const [,sy]=toScr(0,y); g.moveTo(0,sy); g.lineTo(cv.width,sy); } g.stroke(); }
+  const dot=(x,y,r,fill,stroke)=>{ const [sx,sy]=toScr(x,y); g.beginPath(); g.arc(sx,sy,r*devicePixelRatio,0,7); g.fillStyle=fill; g.fill(); if(stroke){ g.strokeStyle=stroke; g.lineWidth=1.5*devicePixelRatio; g.stroke(); } return [sx,sy]; };
+  const label=(t,sx,sy,col)=>{ if(Z<4) return; g.font=`${11*devicePixelRatio}px sans-serif`; g.textAlign='center'; g.lineWidth=3*devicePixelRatio; g.strokeStyle='#000'; g.strokeText(t,sx,sy); g.fillStyle=col||'#fff'; g.fillText(t,sx,sy); };
+  if($('lBase').checked){ for(const m of W.mobs){ dot(m[1]+.5,m[2]+.5,1.6,'#ff4a3a'); } for(const p of W.pois){ const [sx,sy]=dot(p.x+.5,p.y+.5,3,'#ffd36a','#000'); label(p.name,sx,sy-8*devicePixelRatio,'#ffe8a0'); } for(const n of W.npcs){ const [sx,sy]=dot(n.x+.5,n.y+.5,3.2,'#ffe066','#000'); label(n.name,sx,sy-8*devicePixelRatio); } }
+  for(const p of ED.props){ const [sx,sy]=toScr(p.x,p.y); const s=Math.max(10,Math.min(32,Z*1.4*(p.s||1))); g.font=`${s}px sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText((PROPS[p.k]||'?').split(' ')[0],sx,sy); g.textBaseline='alphabetic'; if(p===sel){ g.strokeStyle='#ffd36a'; g.lineWidth=2; g.strokeRect(sx-s/2-2,sy-s/2-2,s+4,s+4); }
+    if(Z>=8){ g.strokeStyle='#fff8'; g.beginPath(); g.moveTo(sx,sy); g.lineTo(sx+Math.cos(p.r||0)*s*.7,sy+Math.sin(p.r||0)*s*.7); g.stroke(); } }
+  for(const s of ED.spawns){ const [sx,sy]=dot(s.x+.5,s.y+.5,5,'#c0302a','#fff'); label(`${mobName(s.mob)} ×${s.n}`,sx,sy-9*devicePixelRatio,'#ffb0a0'); if(s===sel){ g.strokeStyle='#ffd36a'; g.lineWidth=2; g.strokeRect(sx-9,sy-9,18,18); } }
+  for(const n of ED.npcs){ const [sx,sy]=dot(n.x+.5,n.y+.5,5,n.col||'#8a7a5a','#ffe066'); label(n.name+(n.title?` <${n.title}>`:''),sx,sy-9*devicePixelRatio,'#ffe8a0'); if(n===sel){ g.strokeStyle='#ffd36a'; g.lineWidth=2; g.strokeRect(sx-9,sy-9,18,18); } }
+  for(const p of ED.pois){ const [sx,sy]=toScr(p.x+.5,p.y+.5); g.strokeStyle='#ffd36a'; g.setLineDash([4,4]); g.beginPath(); g.arc(sx,sy,(p.r||5)*Z,0,7); g.stroke(); g.setLineDash([]); label('⭐ '+p.name,sx,sy,'#ffe8a0'); if(p===sel){ g.lineWidth=2; g.strokeRect(sx-9,sy-9,18,18); } }
+  if(hover&&(tool==='tile'||tool==='zone'||tool==='erase')){ const [hx,hy]=hover.map(Math.floor), r=brush-1; const [sx,sy]=toScr(hx-r,hy-r); g.strokeStyle='#fff'; g.lineWidth=1.5; g.strokeRect(sx,sy,(2*r+1)*Z,(2*r+1)*Z); }
+  if(hover){ const [x,y]=hover.map(Math.floor); const t=ED.tiles[x+','+y]||W.tname[W.map[y*W.MW+x]], z=ED.zones[x+','+y]||W.zmap[y*W.MW+x]; $('status').textContent=`x ${x}, y ${y} · ${TDESC[t]||t||'outside the map'} · ${W.zones[z]||z||''}  |  zoom ${VIEW.z.toFixed(1)}`; } }
+const mobName=k=>{ const m=W&&W.mobTypes.find(q=>q.key===k); return m?m.name:k; };
+
+/* ---------- tools ---------- */
+function buildTools(){ $('tools').innerHTML=TOOLS.map(([k,n])=>`<button data-t="${k}" class="${tool===k?'on':''}">${n}</button>`).join(''); $('tools').querySelectorAll('button').forEach(b=>b.onclick=()=>setTool(b.dataset.t)); opts(); }
+function setTool(t){ tool=t; if(t!=='select') sel=null; buildTools(); draw(); cv.style.cursor=t==='pan'?'grab':'crosshair'; }
+function opts(){ const o=$('opts'); let h='';
+  if(tool==='tile'){ h=`<h3>Tile</h3><div class="pal">${Object.keys(TDESC).filter(k=>W.T[k]!=null).map(k=>`<button data-v="${k}" class="${curTile===k?'on':''}"><i style="background:${TCOL[k]}"></i>${TDESC[k]}</button>`).join('')}</div>${brushUI()}<p class="hint">Water and lava lower the ground; roads, cobbles and grass are walkable. Solid tiles block players and monsters.</p>`; }
+  else if(tool==='zone'){ h=`<h3>Zone</h3><div class="pal">${Object.keys(W.zones).map(k=>`<button data-v="${k}" class="${curZone===k?'on':''}"><i style="background:${ZCOL[k]||'#888'}"></i>${W.zones[k]}</button>`).join('')}</div>${brushUI()}<p class="hint">The zone decides the area name, the music and which monsters roam there. Turn on "Zone colours" below to see zones.</p>`; }
+  else if(tool==='prop'){ h=`<h3>Prop</h3><div class="pal">${Object.keys(PROPS).filter(k=>W.props.includes(k)).map(k=>`<button data-v="${k}" class="${curProp===k?'on':''}">${PROPS[k]}</button>`).join('')}</div>
+    <div class="row"><label>Rotation</label><input type="range" id="oRot" min="0" max="360" step="15" value="${Math.round(propRot*180/Math.PI)}"></div><div class="row"><label>Size</label><input type="range" id="oSc" min="40" max="250" step="10" value="${Math.round(propScale*100)}"></div><p class="hint">Click to place. <kbd>R</kbd> turns the next prop.</p>`; }
+  else if(tool==='spawn'){ h=`<h3>Monster</h3><div class="row"><select id="oMob">${W.mobTypes.map(m=>`<option value="${m.key}" ${curMob===m.key?'selected':''}>${m.name} (Lv ${m.lv[0]}-${m.lv[1]})</option>`).join('')}</select></div><div class="row"><label>How many</label><input type="range" id="oN" min="1" max="12" value="${spawnN}"><b id="oNv">${spawnN}</b></div><p class="hint">Click to place a group. They respawn like normal monsters.</p>`; }
+  else if(tool==='npc') h='<p class="hint">Click on the map to place an NPC, then set its name, title, colour and what it says in the panel.</p>';
+  else if(tool==='poi') h='<p class="hint">Click to add a named landmark. Players discover it when they walk close, it appears on the maps and it counts towards the Cartographer achievement.</p>';
+  else if(tool==='erase') h=`${brushUI()}<p class="hint">Click objects to remove them. Dragging over painted tiles puts the original ground back.</p>`;
+  else if(tool==='select') h='<p class="hint">Click a prop, NPC, monster group or landmark to edit or move it (drag). <kbd>Del</kbd> removes it.</p>';
+  else h='<p class="hint">Drag to move around the map. You can always move the map with the right mouse button.</p>';
+  if(sel) h+=inspector(); o.innerHTML=h;
+  o.querySelectorAll('.pal button').forEach(b=>b.onclick=()=>{ if(tool==='tile') curTile=b.dataset.v; else if(tool==='zone') curZone=b.dataset.v; else curProp=b.dataset.v; opts(); });
+  if($('oRot')) $('oRot').oninput=e=>{ propRot=e.target.value*Math.PI/180; }; if($('oSc')) $('oSc').oninput=e=>{ propScale=e.target.value/100; };
+  if($('oMob')) $('oMob').onchange=e=>{ curMob=e.target.value; }; if($('oN')) $('oN').oninput=e=>{ spawnN=+e.target.value; $('oNv').textContent=spawnN; };
+  if($('oBr')) $('oBr').oninput=e=>{ brush=+e.target.value; $('oBrv').textContent=brush*2-1; };
+  bindInspector(); }
+const brushUI=()=>`<div class="row"><label>Brush</label><input type="range" id="oBr" min="1" max="8" value="${brush}"><b id="oBrv">${brush*2-1}</b></div>`;
+function inspector(){ const s=sel; let h='<h3>Selected</h3><div class="insp">';
+  if(ED.props.includes(s)) h+=`<div><b>${PROPS[s.k]}</b></div><div class="row"><label>Rotation</label><input type="range" id="iR" min="0" max="360" step="5" value="${Math.round((s.r||0)*180/Math.PI)%360}"></div><div class="row"><label>Size</label><input type="range" id="iS" min="40" max="250" step="5" value="${Math.round((s.s||1)*100)}"></div>`;
+  else if(ED.npcs.includes(s)) h+=`<div class="row"><label>Name</label><input type="text" id="iN" maxlength="28" value="${esc(s.name)}"></div><div class="row"><label>Title</label><input type="text" id="iT" maxlength="28" value="${esc(s.title||'')}"></div><div class="row"><label>Colour</label><input type="color" id="iC" value="${s.col||'#8a7a5a'}"></div><div class="row"><label>Says</label><textarea id="iSay" rows="3" maxlength="240">${esc(s.say||'')}</textarea></div>`;
+  else if(ED.spawns.includes(s)) h+=`<div class="row"><select id="iM">${W.mobTypes.map(m=>`<option value="${m.key}" ${s.mob===m.key?'selected':''}>${m.name}</option>`).join('')}</select></div><div class="row"><label>How many</label><input type="range" id="iNn" min="1" max="12" value="${s.n}"></div>`;
+  else if(ED.pois.includes(s)) h+=`<div class="row"><label>Name</label><input type="text" id="iPn" maxlength="30" value="${esc(s.name)}"></div><div class="row"><label>Radius</label><input type="range" id="iPr" min="2" max="20" value="${s.r||5}"></div>`;
+  return h+'<div class="row"><button id="iDel">🗑 Delete</button></div></div>'; }
+function bindInspector(){ const s=sel; if(!s) return; const on=(id,f)=>{ const e=$(id); if(e){ e.onfocus=()=>pushUndo(); e.oninput=()=>{ f(e.value); save(); draw(); }; } };
+  on('iR',v=>s.r=v*Math.PI/180); on('iS',v=>s.s=v/100); on('iN',v=>s.name=v); on('iT',v=>s.title=v); on('iC',v=>s.col=v); on('iSay',v=>s.say=v); on('iM',v=>s.mob=v); on('iNn',v=>s.n=+v); on('iPn',v=>s.name=v); on('iPr',v=>s.r=+v);
+  $('iDel').onclick=()=>delSel(); }
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function delSel(){ if(!sel) return; pushUndo(); for(const k of ['props','npcs','spawns','pois']){ const i=ED[k].indexOf(sel); if(i>=0) ED[k].splice(i,1); } sel=null; save(); opts(); draw(); }
+function pick(x,y){ let best=null,bd=1.2; const ck=(o,ox,oy)=>{ const d=Math.hypot(ox-x,oy-y); if(d<bd){ bd=d; best=o; } };
+  for(const p of ED.props) ck(p,p.x,p.y); for(const n of ED.npcs) ck(n,n.x+.5,n.y+.5); for(const s of ED.spawns) ck(s,s.x+.5,s.y+.5); for(const p of ED.pois) ck(p,p.x+.5,p.y+.5); return best; }
+function paint(x,y){ const r=brush-1; let ch=false; for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){ const tx=Math.floor(x)+dx, ty=Math.floor(y)+dy; if(tx<1||ty<1||tx>=W.MW-1||ty>=W.OWH-1) continue; const k=tx+','+ty;
+    if(tool==='tile'){ if(W.tname[W.map[ty*W.MW+tx]]===curTile) { if(ED.tiles[k]){ delete ED.tiles[k]; ch=true; } } else if(ED.tiles[k]!==curTile){ ED.tiles[k]=curTile; ch=true; } }
+    else if(tool==='zone'){ if(W.zmap[ty*W.MW+tx]===curZone){ if(ED.zones[k]){ delete ED.zones[k]; ch=true; } } else if(ED.zones[k]!==curZone){ ED.zones[k]=curZone; ch=true; } }
+    else if(tool==='erase'){ if(ED.tiles[k]){ delete ED.tiles[k]; ch=true; } if(ED.zones[k]){ delete ED.zones[k]; ch=true; } } }
+  if(ch){ redrawOver(); draw(); } return ch; }
+
+/* ---------- mouse and keys ---------- */
+let hover=null, drag=null;
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('mousedown',e=>{ if(!W) return; const [x,y]=toW(e.offsetX,e.offsetY);
+  if(e.button!==0||tool==='pan'){ drag={k:'pan',sx:e.offsetX,sy:e.offsetY,vx:VIEW.x,vy:VIEW.y}; cv.style.cursor='grabbing'; return; }
+  if(tool==='tile'||tool==='zone'||(tool==='erase')){ const o=tool==='erase'?pick(x,y):null; pushUndo(); if(o){ sel=o; delSel(); return; } paint(x,y); drag={k:'paint'}; return; }
+  if(tool==='select'){ sel=pick(x,y); opts(); draw(); if(sel){ pushUndo(); drag={k:'move',o:sel,ox:x,oy:y,x0:sel.x,y0:sel.y}; } return; }
+  pushUndo();
+  if(tool==='prop'){ const p={k:curProp,x,y,r:propRot,s:propScale}; ED.props.push(p); }
+  else if(tool==='spawn'){ ED.spawns.push({mob:curMob,x:Math.floor(x),y:Math.floor(y),n:spawnN}); }
+  else if(tool==='npc'){ const n={name:'New villager',title:'',x:Math.floor(x),y:Math.floor(y),col:'#8a7a5a',say:''}; ED.npcs.push(n); sel=n; tool='select'; buildTools(); setTimeout(()=>{ const i=$('iN'); if(i){ i.focus(); i.select(); } },0); }
+  else if(tool==='poi'){ const nm=prompt('Name of the landmark:','The Old Mill'); if(!nm){ undo.pop(); return; } ED.pois.push({name:nm.slice(0,30),x:Math.floor(x),y:Math.floor(y),r:5}); }
+  save(); draw(); });
+addEventListener('mousemove',e=>{ if(!W) return; const r=cv.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top; hover=toW(mx,my);
+  if(drag&&drag.k==='pan'){ VIEW.x=drag.vx-(mx-drag.sx)/VIEW.z; VIEW.y=drag.vy-(my-drag.sy)/VIEW.z; }
+  else if(drag&&drag.k==='paint') paint(hover[0],hover[1]);
+  else if(drag&&drag.k==='move'){ const o=drag.o, dx=hover[0]-drag.ox, dy=hover[1]-drag.oy; if(ED.props.includes(o)){ o.x=drag.x0+dx; o.y=drag.y0+dy; } else { o.x=Math.floor(drag.x0+dx); o.y=Math.floor(drag.y0+dy); } }
+  draw(); });
+addEventListener('mouseup',()=>{ if(drag&&(drag.k==='paint'||drag.k==='move')) save(); drag=null; cv.style.cursor=tool==='pan'?'grab':'crosshair'; });
+cv.addEventListener('wheel',e=>{ e.preventDefault(); const [x,y]=toW(e.offsetX,e.offsetY); VIEW.z=Math.max(1,Math.min(48,VIEW.z*(e.deltaY<0?1.15:1/1.15))); const [x2,y2]=toW(e.offsetX,e.offsetY); VIEW.x+=x-x2; VIEW.y+=y-y2; draw(); },{passive:false});
+addEventListener('keydown',e=>{ if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); doUndo(); } else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){ e.preventDefault(); doRedo(); }
+  else if(e.key==='Delete'||e.key==='Backspace') delSel(); else if(e.key==='Escape') setTool('select');
+  else if(e.key.toLowerCase()==='r'){ if(sel&&ED.props.includes(sel)){ pushUndo(); sel.r=((sel.r||0)+Math.PI/4)%(Math.PI*2); save(); opts(); } else { propRot=(propRot+Math.PI/4)%(Math.PI*2); opts(); } draw(); }
+  else if(e.key===']'){ brush=Math.min(8,brush+1); opts(); draw(); } else if(e.key==='['){ brush=Math.max(1,brush-1); opts(); draw(); } });
+function doUndo(){ if(!undo.length) return; redo.push(snap()); loadData(JSON.parse(undo.pop()),true); save(); opts(); }
+function doRedo(){ if(!redo.length) return; undo.push(snap()); loadData(JSON.parse(redo.pop()),true); save(); opts(); }
+
+/* ---------- buttons ---------- */
+$('bUndo').onclick=doUndo; $('bRedo').onclick=doRedo; $('bHelp').onclick=()=>$('help').classList.toggle('hidden'); $('hClose').onclick=()=>$('help').classList.add('hidden');
+for(const id of ['lBase','lZones','lGrid']) $(id).onchange=draw;
+const parseWorld=txt=>{ const i=txt.indexOf('{'), j=txt.lastIndexOf('}'); return JSON.parse(txt.slice(i,j+1)); };
+$('bLoad').onclick=async()=>{ try{ const r=await fetch('world.js?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw 0; pushUndo(); loadData(parseWorld(await r.text())); alert('Loaded the world.js that is live on your realm.'); }catch(e){ alert('There is no world.js on your realm yet. Export one and upload it to GitHub first.'); } };
+$('bOpen').onclick=()=>$('fOpen').click(); $('fOpen').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ pushUndo(); loadData(parseWorld(await f.text())); }catch(err){ alert('That file is not an Emberfall world file.'); } e.target.value=''; };
+$('bNew').onclick=()=>{ if(!confirm('Remove all your edits and start over? (You can undo this.)')) return; pushUndo(); loadData({}); };
+$('bExp').onclick=()=>{ const d=exportData(); const txt=`/* Emberfall world edits, made with the Emberfall World Editor on ${new Date().toISOString().slice(0,10)}.\n   Upload this file to your GitHub repository next to index.html. */\nwindow.WORLD_EDITS=${JSON.stringify(d)};\n`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/javascript'})); a.download='world.js'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); };
+$('bPrev').onclick=()=>{ try{ localStorage.setItem('ef_world_preview',JSON.stringify(exportData())); }catch(e){ return alert('The preview is too big to send to the game.'); } window.open('index.html?preview=1','_blank'); };
+addEventListener('resize',resize); resize(); start();
+</script></body></html>
