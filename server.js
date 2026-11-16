@@ -4,6 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
+const SERVER_VERSION = 'v0.56b (tavern music)';
 const MAX_PLAYERS = +(process.env.MAX_PLAYERS || 50);
 // Game Master password. Players type  /gm login <password>  in chat. Leave unset to disable GM logins.
 const GM_PASSWORD = process.env.GM_PASSWORD || '';
@@ -115,7 +116,13 @@ function storeArmory(c, a) {
 function armoryList() { const now = Date.now(); const online = new Set([...clients.values()].map(c => c.armKey)); return Object.entries(armory).map(([k, v]) => ({ ...v, online: online.has(k) })); }
 function json(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
 /* music streams with byte ranges (Safari and iOS will not play audio without them) and may come from another origin (the desktop app) */
-function sendMusic(req, res, file) {
+/* if the mp3s were uploaded under their original long names, find the right one by its key words */
+function findMusic(file) { try { if (fs.statSync(file).isFile()) return file; } catch (e) {}
+  const dir = path.dirname(file), want = path.basename(file, '.mp3').toLowerCase().split('-').filter(w => w && w !== 'tavern');
+  let list = []; try { list = fs.readdirSync(dir).filter(f => /\.mp3$/i.test(f)); } catch (e) { return null; }
+  for (const w of want) { const hit = list.find(f => f.toLowerCase().includes(w)); if (hit) return path.join(dir, hit); }
+  return null; }
+function sendMusic(req, res, file) { file = findMusic(file); if (!file) { res.writeHead(404); return res.end('Not found'); }
   fs.stat(file, (err, st) => { if (err || !st.isFile()) { res.writeHead(404); return res.end('Not found'); }
     const H = { 'Content-Type': 'audio/mpeg', 'Accept-Ranges': 'bytes', 'Cache-Control': 'public, max-age=604800', 'Access-Control-Allow-Origin': '*' };
     const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
@@ -132,6 +139,7 @@ function sendFile(res, file, extra) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
+  if (name === 'api/version') { let music = []; try { music = fs.readdirSync(path.join(ROOT, 'music')).filter(f => f.endsWith('.mp3')); } catch (e) {} return json(res, 200, { server: SERVER_VERSION, music, musicFolderFound: music.length > 0 }); }
   if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
   if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);
     const all = armoryList(); const exact = all.filter(a => a.name.toLowerCase() === q); const part = all.filter(a => a.name.toLowerCase() !== q && a.name.toLowerCase().includes(q));
@@ -149,7 +157,7 @@ const server = http.createServer((req, res) => {
   // ---- the game at /play/ ----
   if (name === 'play') { res.writeHead(302, { Location: '/play/' }); return res.end(); }
   if (name === 'editor' || name === 'editor.html') { res.writeHead(302, { Location: '/play/editor.html' }); return res.end(); }
-  if (/^(play\/)?music\/[a-z0-9-]+\.mp3$/.test(name)) return sendMusic(req, res, path.join(ROOT, 'music', name.split('/').pop()));
+  if (/^(play\/)?music\/[\w .()-]+\.mp3$/i.test(name)) return sendMusic(req, res, path.join(ROOT, 'music', name.split('/').pop()));
   if (name.startsWith('play/')) { let g = name.slice(5) || 'index.html'; if (!GAME_FILES.has(g)) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, path.join(ROOT, g)); }
   if (GAME_FILES.has(name) && name !== 'index.html') return sendFile(res, path.join(ROOT, name));   // older game links
   if (name === 'Play Emberfall.html') return sendFile(res, path.join(ROOT, name), { 'Content-Disposition': 'attachment; filename="Play Emberfall.html"' });
