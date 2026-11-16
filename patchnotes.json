@@ -1,9 +1,9 @@
 {
- "version": "v0.52",
- "title": "Footprints, wet ground and glowing spells",
+ "version": "v0.55",
+ "title": "Music for the tavern and a new face for the website",
  "date": "16 Nov 2026",
- "text": "Footprints, a hover glow, projectile trails and impact flashes, wet ground after rain, mount dust and class idle animations.\n\n✨ Footprints: heroes leave prints in snow, sand and ash that slowly fade away\n✨ The monster under your mouse now glows softly, so you always know what you are about to click\n✨ Spell projectiles now leave a sparkling trail, light up the ground as they fly, and flash with light where they hit\n✨ Rain leaves the ground wet: darker earth, a shiny sheen and puddles that mirror the sky. It slowly dries after the rain stops (not in the snow, the Caldera or the Vault)\n✨ Mounts kick up dust on dirt roads and grass, sand in the dunes, snow in Frostpeak and spray in shallow water\n✨ Idle animations by class: Bulwarks roll their shoulders, Barbarians take deep breaths, Assassins crouch and watch, Bards sway to a tune, Hunters scan the horizon and casters drift slightly off the ground",
+ "text": "Recorded tavern music on the title screen and in Hearthmere, and a redesigned home page.\n\n✨ Real tavern music: three recorded medieval tavern tracks (By the Rafters' Glow and Embers on the Flagstone by Kaazoom, and Medieval City Tavern by DeusLower) now play in shuffled order on the title, loading and character screens and whenever you are in Hearthmere. They fade in as you walk into town and fade out as you leave\n⬆️ The music starts with your first click or key press on the title screen (browsers do not allow sound before that), and follows your Music and Master volume settings\n✨ A redesigned website home page: new painted artwork of Hearthmere by the lake under the glowing Cinder Caldera, drifting embers, a smoother slow camera drift, and a cleaner, more spacious layout",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-16T02:24:09Z"
+ "time": "2026-11-16T09:50:53Z"
 }

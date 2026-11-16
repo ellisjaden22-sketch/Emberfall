@@ -54,18 +54,18 @@ function deliver(name, what) { const who = String(name || '').toLowerCase(); let
 /* The Hearthmere Trading Company keeps basic materials on the Auction House so there is always something to buy.
    Its lots are pricier than a fair player price, so players who gather can undercut it. */
 const NPC_SELLER = 'Trading Company';
-const NPC_STOCK = [['sunpetal','Sunpetal',2],['thornbloom','Thornbloom',3],['mireroot','Mireroot',4],['ghostcap','Ghostcap',5],['emberlily','Emberlily',7],['frostbloom','Frostbloom',9],
-  ['copper','Copper Ore',2],['iron','Iron Ore',4],['obsidian','Obsidian',7],['mithril','Mithril Ore',9],
-  ['lightleather','Light Leather',2],['thickhide','Thick Hide',4],['scaledhide','Scaled Hide',7],['frostpelt','Frost Pelt',9],
-  ['linencloth','Linen Cloth',2],['woolcloth','Wool Cloth',4],['silkcloth','Silk Cloth',7],['runecloth','Runecloth',9],
-  ['amberperch','Amber Perch',2],['mireeel','Mire Eel',3],['gamemeat','Game Meat',2],['crabmeat','Crab Meat',3],['amberstone','Amberstone',12],['moonstone','Moonstone',20]];
+const NPC_STOCK = [['sunpetal','Sunpetal',1],['thornbloom','Thornbloom',1],['mireroot','Mireroot',2],['ghostcap','Ghostcap',2],['emberlily','Emberlily',3],['frostbloom','Frostbloom',5],
+  ['copper','Copper Ore',1],['iron','Iron Ore',2],['obsidian','Obsidian',3],['mithril','Mithril Ore',5],
+  ['lightleather','Light Leather',1],['thickhide','Thick Hide',2],['scaledhide','Scaled Hide',3],['frostpelt','Frost Pelt',5],
+  ['linencloth','Linen Cloth',1],['woolcloth','Wool Cloth',2],['silkcloth','Silk Cloth',3],['runecloth','Runecloth',5],
+  ['amberperch','Amber Perch',1],['mireeel','Mire Eel',2],['gamemeat','Game Meat',1],['crabmeat','Crab Meat',2],['amberstone','Amberstone',6],['moonstone','Moonstone',10]];
 function ahSeed() { const now = Date.now(); let ch = false;
   for (const [k, name, base] of NPC_STOCK) { const have = auctions.filter(a => a.seller === NPC_SELLER && a.mat === k).length; if (have >= 2) continue;
-    const n = [5, 10, 20][Math.floor(Math.random() * 3)], each = Math.max(1, Math.round(base * (1.4 + Math.random() * .5))), price = each * n;
+    const n = [5, 10, 20][Math.floor(Math.random() * 3)], price = Math.max(n, Math.round(base * n * (1.25 + Math.random() * .35)));
     const item = JSON.stringify({ mat: k, n, name: name + ' ×' + n, rar: 0, slot: 'mat' });
     auctions.push({ id: ahNext++, seller: NPC_SELLER, item, name: name + ' ×' + n, rar: 0, lv: 0, slot: 'mat', mat: k, price, at: now, exp: now + (12 + Math.random() * 24) * 3600e3, npc: 1 }); ch = true; }
   if (ch) saveAH(); }
-setTimeout(ahSeed, 3000); setInterval(ahSeed, 10 * 60000);
+setTimeout(() => { const before = auctions.length; for (const a of auctions) if (a.npc && !a.repriced53) a.gone = true; auctions = auctions.filter(a => !a.gone); if (auctions.length !== before) saveAH(); ahSeed(); }, 3000); setInterval(ahSeed, 10 * 60000);
 function ahExpire() { const now = Date.now(); let ch = false; for (const a of auctions) if (a.exp < now) { if (!a.npc) deliver(a.seller, 'item:' + a.item); a.gone = true; ch = true; }
   if (ch) { auctions = auctions.filter(a => !a.gone); saveAH(); } }
 setInterval(ahExpire, 60000);
@@ -85,7 +85,7 @@ function ownerByIp(req) {
   const real = xff.length ? xff[xff.length - 1] : sockIp.replace('::ffff:', ''); // rightmost = added by your host's proxy
   return OWNER_IPS.includes(real) || OWNER_IPS.includes(sockIp.replace('::ffff:', ''));
 }
-const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
+const MIME = { '.mp3':'audio/mpeg', '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.md':'text/plain; charset=utf-8', '.webmanifest':'application/manifest+json' };
 const GAME_FILES = new Set(['index.html','game.js','style.css','config.js','world.js','editor.html','icon.png','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png']);
 // ---------- armory: character snapshots sent by players' games ----------
@@ -114,6 +114,16 @@ function storeArmory(c, a) {
 }
 function armoryList() { const now = Date.now(); const online = new Set([...clients.values()].map(c => c.armKey)); return Object.entries(armory).map(([k, v]) => ({ ...v, online: online.has(k) })); }
 function json(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
+/* music streams with byte ranges (Safari and iOS will not play audio without them) and may come from another origin (the desktop app) */
+function sendMusic(req, res, file) {
+  fs.stat(file, (err, st) => { if (err || !st.isFile()) { res.writeHead(404); return res.end('Not found'); }
+    const H = { 'Content-Type': 'audio/mpeg', 'Accept-Ranges': 'bytes', 'Cache-Control': 'public, max-age=604800', 'Access-Control-Allow-Origin': '*' };
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m) { let a = m[1] === '' ? Math.max(0, st.size - (+m[2] || 0)) : +m[1], b = m[1] !== '' && m[2] !== '' ? Math.min(+m[2], st.size - 1) : st.size - 1;
+      if (a > b || a >= st.size) { res.writeHead(416, { 'Content-Range': 'bytes */' + st.size }); return res.end(); }
+      res.writeHead(206, Object.assign(H, { 'Content-Range': 'bytes ' + a + '-' + b + '/' + st.size, 'Content-Length': b - a + 1 })); return fs.createReadStream(file, { start: a, end: b }).pipe(res); }
+    res.writeHead(200, Object.assign(H, { 'Content-Length': st.size })); fs.createReadStream(file).pipe(res); });
+}
 function sendFile(res, file, extra) {
   fs.readFile(file, (err, data) => { if (err) { res.writeHead(404); return res.end('Not found'); }
     res.writeHead(200, Object.assign({ 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-cache' }, extra || {})); res.end(data); });
@@ -139,6 +149,7 @@ const server = http.createServer((req, res) => {
   // ---- the game at /play/ ----
   if (name === 'play') { res.writeHead(302, { Location: '/play/' }); return res.end(); }
   if (name === 'editor' || name === 'editor.html') { res.writeHead(302, { Location: '/play/editor.html' }); return res.end(); }
+  if (/^(play\/)?music\/[a-z0-9-]+\.mp3$/.test(name)) return sendMusic(req, res, path.join(ROOT, 'music', name.split('/').pop()));
   if (name.startsWith('play/')) { let g = name.slice(5) || 'index.html'; if (!GAME_FILES.has(g)) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, path.join(ROOT, g)); }
   if (GAME_FILES.has(name) && name !== 'index.html') return sendFile(res, path.join(ROOT, name));   // older game links
   if (name === 'Play Emberfall.html') return sendFile(res, path.join(ROOT, name), { 'Content-Disposition': 'attachment; filename="Play Emberfall.html"' });

@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 52;
+const VERSION = 55;
 const TS = 32, MW = 336, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -185,7 +185,7 @@ function genWorld(){
     TOWN.chapel=put(-Math.PI/2,6,4,'chapel',1); TOWN.tavern=put(Math.PI/2,6,4,'tavern',1); TOWN.barracks=put(-.38,3,5,'barracks',1);
     /* the park: a green in the south-west quarter with a few old trees */
     TOWN.park=new Set(); for(let y=TY-26;y<=TY+26;y++)for(let x=TX-26;x<=TX+26;x++){ const dx=x+.5-TX-.5, dy=y+.5-TY-.5, d=Math.hypot(dx,dy), a=Math.atan2(dy,dx); if(d>=R0-.3&&d<=R1+.3&&a>1.95&&a<2.75&&tAt(x,y)===T.COBBLE){ setT(x,y,T.GRASS); TOWN.park.add(y*MW+x); } }
-    { let k=0; for(const id of TOWN.park){ const x=id%MW, y=(id/MW)|0; if(hash2(x,y,41)<.07&&k<9&&Math.hypot(x-TX,y-TY)>20.3&&Math.hypot(x-TX,y-TY)<23.6){ setT(x,y,T.TREE); k++; } } }
+    { let k=0; for(const id of TOWN.park){ const x=id%MW, y=(id/MW)|0; if(hash2(x,y,41)<.07&&k<9&&Math.hypot(x-TX,y-TY)>19.5&&Math.hypot(x-TX,y-TY)<22.4){ setT(x,y,T.TREE); k++; } } }
     /* homes all around the new ring, sized to the curve of the wall */
     for(let i=0;i<64;i++){ const a=-Math.PI+i/64*Math.PI*2+RR()*.03; const side=Math.abs(Math.cos(a))>Math.abs(Math.sin(a));
       const w=side?2+Math.floor(RR()*2):3+Math.floor(RR()*2), h=side?3+Math.floor(RR()*2):2+Math.floor(RR()*2); put(a,w,h,null,1); }
@@ -331,7 +331,7 @@ if(WE&&Array.isArray(WE.npcs)) for(const n of WE.npcs){ try{ const id='e_'+Strin
 if(WE&&Array.isArray(WE.pois)) for(const p of WE.pois){ const nm=String(p.name||'').slice(0,30); if(!nm) continue; POIS.push({id:'e_'+nm.toLowerCase().replace(/[^a-z0-9]+/g,''),name:nm,x:p.x|0,y:p.y|0,r:clamp(p.r|0||5,2,20)}); }
 { const v=NPCS.find(n=>n.id==='varro'); const [gx,gy]=findOpen(Math.floor(v.x/TS),Math.floor(v.y/TS)+2); AR.gate={x:gx*TS+16,y:gy*TS+16}; }
 addNPC('keeperw','Arena Keeper','Leave the arena',Math.round(AR.shr[0][0])-2,Math.round(AR.shr[0][1]),'#8a6a3a'); addNPC('keepere','Arena Keeper','Leave the arena',Math.round(AR.shr[1][0])+2,Math.round(AR.shr[1][1]),'#8a6a3a'); POIS.push({id:'vault',name:'The Sunken Vault',x:99+VGO[0],y:48+VGO[1],r:4});
-addNPC('bram','Fisher Bram','Mirrowmere',(DOCK.x0||82)-2,91,'#4a7a9a');
+if(DOCK.x0){ const [bx,by]=findOpen(DOCK.x0-2,DOCK.z); NPCS.push({id:'bram',name:'Fisher Bram',title:'Mirrowmere',x:bx*TS+16,y:by*TS+16,col:'#4a7a9a'}); } else addNPC('bram','Fisher Bram','Mirrowmere',82,91,'#4a7a9a');
 const NPCGREET={oriel:'"Hearthmere stands because people like you stand for it. There\'s always work."',mira:'"Herbs in, potions out. Bring me petals and roots and I\'ll brew you something strong."',
   doran:'"Bring me ore and coin, and I\'ll make that blade of yours sing."',hilde:'"Every adventurer needs four good legs under them. Have a look at my beauties."',
   sylas:'"Quiet. The forest is listening. Something has the wolves and the thornlings stirred up."',marla:'"Mind the mud, dearie. The fen gives, and the fen takes."',
@@ -352,7 +352,7 @@ const QUESTS=[
   {id:'drowned',giver:'bram',pre:'crabs',title:'The Drowned Crew',type:'kill',mob:'drowned',n:8,xp:1000,gold:16,lvl:5,text:'A ship sank in the deep part of the lake years ago. Its crew have started walking out of the water at night. Put eight of them back to rest.'},
   {id:'tidecallers',giver:'bram',pre:'drowned',title:'Callers of the Tide',type:'kill',mob:'tidecaller',n:6,xp:1300,gold:20,lvl:6,text:'Someone is raising them: Tidecallers, singing from the reeds and throwing cold water like knives. Silence six of them. They hit hard from range, so close in fast.'},
   {id:'grimmaw',giver:'bram',pre:'tidecallers',title:'Grimmaw of the Deep',type:'kill',mob:'grimmaw',n:1,xp:2200,gold:35,lvl:8,item:3,epic:true,text:'The Tidecallers were singing for something. Grimmaw, the thing in the deep, has come up to feed. I have never been so afraid on my own lake. Take friends. Take all of them.'},
-  {id:'tusk',giver:'bram',pre:'moths',title:'Old Tusk',type:'kill',mob:'oldtusk',n:1,xp:420,gold:8,lvl:3,item:2,text:'That scarred old boar has wrecked my nets three times. He roams Amberfield. Bring a friend, he leaps.'},
+  {id:'tusk',giver:'bram',pre:'moths',title:'Old Tusk',type:'kill',mob:'oldtusk',n:1,xp:420,gold:8,lvl:3,item:2,text:'That scarred old boar has wrecked my nets three times. He roams the fields just west of the lake. Bring a friend, he leaps.'},
   {id:'thorn',giver:'sylas',title:'Thornling Menace',type:'kill',mob:'thornling',n:5,xp:300,gold:5,lvl:2,text:'Walking trees with a grudge. Thornlings root anyone who comes close. Cut them down.'},
   {id:'copper',giver:'sylas',title:'Arrowheads',type:'gather',mat:'copper',n:4,xp:260,gold:4,lvl:2,text:'I\'m low on arrowheads. Copper veins glint orange in the rocks around Thornwood and Amberfield.'},
   {id:'fangmaw',giver:'sylas',pre:'thorn',title:'Hunt the Alpha',type:'kill',mob:'fangmaw',n:1,xp:650,gold:10,lvl:4,item:2,text:'Fangmaw leads the pack. Kill the alpha and the wolves will scatter.'},
@@ -550,7 +550,7 @@ ABIL.barbarian=[
 ABIL.hunter=[
   {id:'aimed',lvl:1,name:'Aimed Shot',icon:'🎯',cost:30,cd:0,cast:1.4,rng:330,hostile:true,dmg:[17,5.6],proj:'arrow',desc:'Take careful aim and loose a heavy arrow.'},
   {id:'pet',lvl:1,name:'Wolf Companion',icon:'🐺',cost:0,cd:3,self:true,petToggle:true,noGcd:true,desc:'Call your wolf to your side (or send it home). It follows you and attacks whatever you fight.'},
-  {id:'concuss',lvl:3,name:'Concussive Shot',icon:'💫',cost:20,cd:12,rng:320,hostile:true,dmg:[6,2],root:3,proj:'arrow',desc:'A blunt arrow that leaves the target stuck in place for 3s.'},
+  {id:'concuss',lvl:3,name:'Concussive Shot',icon:'💫',cost:20,cd:12,rng:320,hostile:true,dmg:[6,2],root:3,proj:'arrow',desc:'A blunt arrow that roots the target in place for 3 seconds (bosses are immune).'},
   {id:'volley',lvl:4,name:'Volley',icon:'🏹',cost:40,cd:10,rng:340,hostile:true,area:110,aoeDmg:[13,4.2],vis:13,desc:'Rain arrows down on the target and everything near it.'},
   {id:'disengage',lvl:5,name:'Disengage',icon:'↩',cost:15,cd:16,self:true,leap:true,noGcd:true,desc:'Leap backwards, out of harm\'s way.'},
   {id:'rapid',lvl:6,name:'Rapid Fire',icon:'⚡',cost:0,cd:40,self:true,rapid:true,noGcd:true,desc:'Your auto attacks fire twice as fast for 10s.'},
@@ -665,6 +665,14 @@ const mobs=[], mobById={};
       if(mt.summon){m.dead=true;m.resp=Infinity} mobs.push(m); mobById[m.id]=m;
     }
   }
+  { const B=NPCS.find(n=>n.id==='bram'); if(B){ const spot=(r0,r1)=>{ for(let k=0;k<600;k++){ const a=Math.PI*(.55+R()*.9), r=r0+R()*(r1-r0), x=B.x+Math.cos(a)*r*TS, y=B.y+Math.sin(a)*r*TS;
+        if(x<2*TS||y<2*TS||x>(MW-2)*TS||y>(OWH-2)*TS) continue; if(blocked(x,y,22)||isWaterAt(x,y)||inTown(x,y)||NPCS.some(n=>dist(n.x,n.y,x,y)<90)) continue; if(mobs.some(o=>dist(o.sx,o.sy,x,y)<(o.t.key==='moth'?60:110))) continue; return [x,y]; } return null; };
+      const put=(m,p)=>{ m.sx=m.x=m.rx=m.wx=p[0]; m.sy=m.y=m.ry=m.wy=p[1]; };
+      /* keep the shore around Bram safe for new players: lake monsters spawn a little further along the shore */
+      for(const m of mobs){ if(m.t.zone!=='lake'||m.t.boss||m.t.pos||m.t.spots||dist(m.sx,m.sy,B.x,B.y)>=16*TS) continue;
+        for(let k=0;k<1500;k++){ const a=R()*6.283, rr=17+R()*23, x=B.x+Math.cos(a)*rr*TS, y=B.y+Math.sin(a)*rr*TS, tx=x/TS|0, ty=y/TS|0; if(tx<3||ty<3||tx>MW-4||ty>OWH-4) continue; const dd=dist(x,y,B.x,B.y)/TS; if(dd<17||dd>40||zmap[ty*MW+tx]!=='lake'||blocked(x,y,22)||isWaterAt(x,y)) continue; if(mobs.some(o=>o!==m&&dist(o.sx,o.sy,x,y)<80)) continue; put(m,[x,y]); break; } }
+      const ot=mobs.find(m=>m.t.key==='oldtusk'); if(ot){ const p=spot(13,20); if(p) put(ot,p); }
+      const ms=mobs.filter(m=>m.t.key==='moth'); for(let i=0;i<Math.min(6,ms.length);i++){ const p=spot(5,14); if(p) put(ms[i],p); } } }
   { const Y=TOWN.yard, DT={key:'dummy',name:'Training Dummy',lv:[1,1],hp:100000,hpL:0,dmg:0,dmgL:0,spd:0,rng:0,as:999,aggro:0,r:14,col:'#c8a868',zone:'town',n:0,dummy:true,resp:5};
     if(WE&&Array.isArray(WE.spawns)) for(const sp of WE.spawns){ const mt=MOBT.find(q=>q.key===sp.mob); if(!mt||mt.boss||mt.summon) continue; const n=clamp(sp.n|0||1,1,12);
       for(let k=0;k<n;k++){ const a=k/n*6.283, rr=n>1?1.5+R()*1.5:0, x=(sp.x+.5+Math.cos(a)*rr)*TS, y=(sp.y+.5+Math.sin(a)*rr)*TS; if(blocked(x,y,8)) continue; const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
@@ -686,7 +694,7 @@ function persist(){ if(!me) return; const c=me.c; const RL=rosterList(); c.id=c.
 /* =====================================================================
    NETWORK (room presence)
    ===================================================================== */
-const MY_U=rid(4);
+const MY_U=rid(4), JOINMS=Date.now();
 let room=null, netState='connecting', joinedAt=0, myPeer=null;
 const others=new Map();  // peer -> other player
 const othersByU=new Map();
@@ -791,9 +799,9 @@ function packMobs(){ const t=now(); const ps=[]; if(me) ps.push([me.x,me.y]); fo
     if(m.hp>=m.mhp && !fl && !m.tgt && !m.tag) out.push([m.id,Math.round(m.x),Math.round(m.y)]);
     else out.push([m.id,Math.round(m.x),Math.round(m.y),Math.max(0,Math.round(m.hp)),fl,m.tgt||'',m.tag||'']); } return out; }
 
-function sendPresence(force){
+function sendPresence(force){ if(KICKED) return;
   if(!room||!me) return; const t=now(); if(!force && t-lastSend<.1) return; lastSend=t;
-  const p={v:VERSION,u:MY_U,n:me.c.name,c:me.c.cls,l:me.c.lvl,x:Math.round(me.x),y:Math.round(me.y),f:+me.face.toFixed(2),
+  const p={v:VERSION,u:MY_U,ci:me.c.id||'',js:JOINMS,n:me.c.name,c:me.c.cls,l:me.c.lvl,x:Math.round(me.x),y:Math.round(me.y),f:+me.face.toFixed(2),
     hp:Math.round(me.hp),mhp:me.mhp,rs:[Math.round(me.res),me.mres],tr:tradePres(),pe:me.pet&&me.petOn&&!me.dead?[Math.round(me.pet.x),Math.round(me.pet.y),+(me.pet.face||0).toFixed(2),me.pet.mv?1:0,me.pet.swingT&&now()-me.pet.swingT<.4?1:0]:null,d:me.dead?1:0,pt:me.party||'',mt:me.mounted||null,em:me.emote?me.emote.k:null,wr:me.c.eq.weapon?me.c.eq.weapon.rar:0,ar:me.c.eq.armor?me.c.eq.armor.rar:0,gv:myGearVis(),nc:me.c.nc||null,ix:inspectData(),sg:me.song&&!me.dead?[me.song,+mySongMult().toFixed(2)]:null,bn:me.banner&&me.banner.until>t?[Math.round(me.banner.x),Math.round(me.banner.y),+(me.banner.until-t).toFixed(1),me.banner.song,+me.banner.mult.toFixed(2)]:null,ws:isGM&&gm.wset?[gm.wx,gm.tPh,gm.wset]:null,sl:me.stealth?1:null,
     b:(me.bulwark>t?1:0)|(me.hots.length?2:0)|(me.cast?4:0)|(me.absorb>0&&me.absorbU>t?8:0)|(me.rootU>t?16:0)|(me.dots.length?32:0)|(me.avatarU>t?64:0),
     z:zoneAtPx(me.x,me.y), gm:isGM?1:null, pid:MY_PID, iv:gm.invis?1:null, cs:cosBits()||null, ti:myTitle()||null, own:isRealmOwner()?1:null, au:gm.aura&&isGM&&!gm.invis?1:null, gl:isRealmOwner()&&(saves.gmGrants||[]).length?saves.gmGrants.map(g=>g.gid||g.pid).slice(0,20):null,
@@ -810,11 +818,24 @@ function sendPresence(force){
   room.presence(p).catch(()=>{});
 }
 
+let KICKED=false;
+/* drop stale peers (a dead connection the server has not cleaned up yet), old copies of the same character,
+   and anything that is really us from an earlier connection */
+function dupFilter(list){ const DROP=new Set(), best=new Map(), N=Date.now();
+  for(const p of list){ if(p.sameTab||p.kind!=='viewer'||!p.presence) continue; const pr=p.presence;
+    if(p.updatedAt>0&&N-p.updatedAt>9000){ DROP.add(p.peer); continue; }
+    if(pr.u===MY_U){ DROP.add(p.peer); continue; }
+    if(me&&pr.ci&&me.c.id&&pr.ci===me.c.id){ if((pr.js||0)>JOINMS&&!(p.updatedAt>0&&N-p.updatedAt>4000)) kickedOut(); DROP.add(p.peer); continue; }
+    const key=pr.ci||((pr.n||'')+'|'+(pr.c||'')).toLowerCase(); const o=best.get(key);
+    if(!o) best.set(key,p); else { const newer=(pr.js||0)>((o.presence.js)||0)||((pr.js||0)===((o.presence.js)||0)&&(p.updatedAt||0)>(o.updatedAt||0)); if(newer){ DROP.add(o.peer); best.set(key,p); } else DROP.add(p.peer); } }
+  return DROP; }
+function kickedOut(){ if(KICKED) return; KICKED=true; try{ persist(); }catch(e){} try{ room&&room.leave&&room.leave(); }catch(e){}
+  try{ dlg('<h2>Playing somewhere else</h2><p>This character was just opened in another window or on another device, so this window has been disconnected to stop a copy of you walking around the realm.</p><div class="btns"><button id="kickR" class="gold">Reload here</button></div>'); $('kickR').onclick=()=>location.reload(); }catch(e){} }
 function syncPeers(){
-  const t=now(); const list=peerList(); const seen=new Set(); const cand=[];
+  const t=now(); const list=peerList(); const seen=new Set(); const cand=[]; const DROP=dupFilter(list);
   for(const p of list){ if(p.sameTab){myPeer=p.peer;continue}
     if(p.presence&&p.presence.v>VERSION&&!window.__newVer){ window.__newVer=1; setTimeout(()=>{ sysMsg('A newer version of Emberfall is available. Refresh the page to update.','c-err'); toast('New version available — refresh to update','small'); },500); }
-    if(p.kind!=='viewer'||!p.presence||p.presence.v!==VERSION||!p.presence.u) continue; cand.push(p.peer); }
+    if(p.kind!=='viewer'||!p.presence||p.presence.v!==VERSION||!p.presence.u||DROP.has(p.peer)) continue; cand.push(p.peer); }
   const mine=myPeer||'~';
   const fresh=p=>!(p.updatedAt>0)||Date.now()-p.updatedAt<4000;
   const claim=[]; for(const p of list){ if(!p.sameTab && cand.includes(p.peer) && p.presence.hs && fresh(p)) claim.push(p.peer); }
@@ -828,7 +849,7 @@ function syncPeers(){
   wasHost=amHost;
 
   for(const p of list){
-    if(p.sameTab||p.kind!=='viewer') continue; const pr=p.presence; if(!pr||pr.v!==VERSION||!pr.u) continue;
+    if(p.sameTab||p.kind!=='viewer'||DROP.has(p.peer)) continue; const pr=p.presence; if(!pr||pr.v!==VERSION||!pr.u) continue;
     seen.add(p.peer);
     let o=others.get(p.peer);
     if(!o){ o={peer:p.peer,u:pr.u,rx:pr.x,ry:pr.y,last:null,aSeq:null,mSeq:null,gSeq:null,cSeq:null,bubble:'',bubbleT:0,isNew:true,swingT:0,spinT:0}; others.set(p.peer,o); }
@@ -863,7 +884,7 @@ function syncPeers(){
       if(party && (!me||!me.party||o.pt!==me.party)) continue;
       chatLine(txt, party?'c-party':'c-say', party?'[Party] ':'', {n:o.n,col:nameCol(o),gm:o.gm&&isGM}); o.bubble=txt; o.bubbleT=t+6; }
   }
-  for(const [peer,o] of others) if(!seen.has(peer)){ others.delete(peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); if(me&&seenO(o)) sysMsg(`${o.n} has left the realm.`);
+  for(const [peer,o] of others) if(!seen.has(peer)){ others.delete(peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); if(amHost) for(const m of mobs){ if(m.threat&&m.threat[o.u]) delete m.threat[o.u]; if(m.tgt===o.u) m.tgt=''; if(m.tag===o.u) m.tag=''; } if(me&&seenO(o)) sysMsg(`${o.n} has left the realm.`);
     if(me&&me.target&&me.target.kind==='p'&&me.target.id===o.u) me.target=null; }
 }
 function handleRemoteAct(o,a){
@@ -875,14 +896,14 @@ function handleRemoteAct(o,a){
     toast(`You defeated ${o.n}!`); sysMsg(`⚔ You defeated ${o.n}! Kill streak: ${P.st}.`,'c-xp'); if(P.st>=3) banner(P.st>=5?'UNSTOPPABLE':'KILLING SPREE',`${P.st} kills in a row`,'win'); }
   if(me && !me.dead && tgt===MY_U && (kind===12||kind===13) && pvpOn(me.x,me.y) && pvpOn(o.rx,o.ry) && !(me.party&&o.pt===me.party)){
     if(kind===12&&amt>0){ me.pvpBy={u:o.u,n:o.n,t:now()}; takeDamage(Math.min(amt,5000)*PVP_MUL*(1-(me.resil||0)),null,vis); }
-    if(kind===13){ me.rootU=Math.max(me.rootU||0,now()+Math.min(amt,4000)/1000*.6); } }
+    if(kind===13){ me.rootU=Math.max(me.rootU||0,now()+Math.min(amt,5000)/1000*.6); } }
   if(me && !me.dead && tgt===MY_U){
     if(kind===1 && amt>0) healMe(amt,o.n);
     if(kind===4){ me.hots=me.hots.filter(h=>h.src!==o.u); me.hots.push({src:o.u,amt,left:5,next:now()+2}); }
     if(kind===7){ me.absorb=amt; me.absorbU=now()+12; sysMsg(`${o.n} shields you.`,'c-party'); }
   }
   if(kind===0 && vis===0) o.swingT=now();
-  if(kind===6 && vis===10) o.spinT=now();
+  if(kind===6 && vis===10) o.swingT=now();
   visualAct({x:o.rx,y:o.ry,u:o.u},a,false);
 }
 /* remote motion: every network update is kept in a short timeline and the entity is drawn a little in the past,
@@ -1078,7 +1099,7 @@ function enterWorld(name,cls,existing,fresh){ TALC=null;
   try{ audInit(); }catch(e){}
   const RL=rosterList(); let c=existing||(!fresh&&RL.find(x=>x.name===name&&x.cls===cls)); if(!c){ c=newChar(name,cls); c.id=rid(6); c.created=Date.now(); RL.push(c); } migrateChar(c); fixClassGear(c);
   me={c,x:SPAWN.x,y:SPAWN.y,face:-Math.PI/2,hp:null,res:null,dead:false,target:null,cast:null,gcd:0,cds:{},auto:false,autoT:0,
-    bulwark:0,hots:[],mounted:0,emote:null,jumpH:0,jumpV:0,absorb:0,absorbU:0,rootU:0,dots:[],dash:null,swingT:0,spinT:0,stepT:0,lastCombat:-99,lastSpend:-99,potCd:0,party:saves.party||'',moving:false,zone:'',tabIdx:0,cp:0,stealth:false,evasionU:0,stepU:0};
+    bulwark:0,hots:[],mounted:0,emote:null,jumpH:0,jumpV:0,absorb:0,absorbU:0,rootU:0,dots:[],dash:null,swingT:0,spinT:0,stepT:0,lastCombat:-99,lastSpend:-99,potCd:0,party:'',moving:false,zone:'',tabIdx:0,cp:0,stealth:false,evasionU:0,stepU:0};
   recalc(); me.hp=me.mhp; me.res=CLS[cls].res==='rage'?0:me.mres;
   persist();
   document.getElementById('login').classList.add('hidden');
@@ -1269,6 +1290,7 @@ function execAbility(ab,tgt){
     if(ab.melee) FXP({k:'wave',x:tgt.x,y:tgt.y,r:26,col:'#ffd0a0',dur:.25,h:.9}); else if(ab.proj) FXP({k:'streak',sx:me.x,sy:me.y,ex:tgt.x,ey:tgt.y,col:{holy:'#fff3a0',fire:'#ff8a2a',arcane:'#d6b3ff',wand:'#bfe8ff'}[ab.proj]||'#fff',dur:.3}); }
   if(ab.charge && tgt){ FXP({k:'streak',sx:me.x,sy:me.y,ex:tgt.x,ey:tgt.y,dur:.5}); me.dash={sx:me.x,sy:me.y,m:tgt.e,t0:t,dur:.28}; pushAct(6,0,0,16,me.x,me.y); areaFx(16,me.x,me.y,0); me.res=Math.min(100,me.res+20); me.auto=true; }
   else if(ab.stun && tgt && tgt.kind==='p'){ pushAct(13,tgt.u,ab.stun*1000,0); spark(tgt.x,tgt.y,'#fff3a0'); }
+  if(ab.root && !ab.aoeDmg && tgt){ if(tgt.kind==='m'&&!tgt.e.dead){ pushAct(5,tgt.e.id,ab.root*1000,0); if(amHost&&!tgt.e.t.boss) tgt.e.rootU=now()+ab.root; fct(tgt.x,tgt.y-40,'Rooted','#c8e0ff'); } else if(tgt.kind==='p'&&tgt.hostile) pushAct(13,tgt.u,ab.root*1000/.6,0); }
   else if(ab.stun && tgt && tgt.kind==='m'){ pushAct(2,tgt.e.id,ab.stun*1000,0); spark(tgt.x,tgt.y,'#fff3a0'); shake(3); pushAct(6,0,60,22,tgt.x,tgt.y); areaFx(22,tgt.x,tgt.y,60); }
   if(ab.taunt && tgt && tgt.kind==='m'){ pushAct(3,tgt.e.id,0,7); fct(tgt.x,tgt.y-40,'!','#ff4a3a',true); ring(tgt.x,tgt.y,'#ff4a3a',40); pushAct(6,0,110,23,me.x,me.y); areaFx(23,me.x,me.y,110); FXP({k:'wave',x:tgt.x,y:tgt.y,r:45,col:'#ff4a3a',dur:.4,h:1}); }
   if(ab.buff==='bulwark'){ me.bulwark=t+ab.dur; ring(me.x,me.y,'#7fb2ff',60); burst(me.x,me.y,'#9fc4ff',16,90,{glow:true}); pushAct(6,0,60,24,me.x,me.y); areaFx(24,me.x,me.y,60); }
@@ -1283,7 +1305,7 @@ function execAbility(ab,tgt){
   if(ab.aoeHeal){ const h=Math.round(scaleV(ab.aoeHeal)); healMe(h); pushAct(6,0,ab.radius,8,me.x,me.y); areaFx(8,me.x,me.y,ab.radius);
     for(const o of others.values()) if(!o.d&&canHelp(o)&& dist(o.x,o.y,me.x,me.y)<ab.radius){ pushAct(1,o.u,h,0); fct(o.rx,o.ry-30,'+'+h,'#6dff7a'); } }
   if(ab.aoeDmg){ const atT=!!ab.area&&tgt; const cx=atT?tgt.x:me.x, cy=atT?tgt.y:me.y, R=ab.area||ab.radius, v=ab.vis||9;
-    if(ab.id==='whirl'){ me.spinT=t; me.swingT=0; }
+    if(ab.vis===10){ me.swingT=t; }
     pushAct(6,0,R,v,cx,cy); areaFx(v,cx,cy,R);
     const d0=scaleV(ab.aoeDmg);
     const apply=()=>{ if(!me||me.dead) return;
@@ -1371,7 +1393,8 @@ function renderMeter(){ let w=document.getElementById('meterWin'); if(!METER.on)
   w.querySelector('.mx').onclick=()=>{ METER.on=false; renderMeter(); }; }
 setInterval(()=>{ if(METER.on&&!METER.done&&now()-METER.last>5){ METER.done=true; if(me){ me.lastCombat=-99; me.auto=false; if(me.target&&me.target.kind==='m'){ const m=mobById[me.target.id]; if(m&&m.t.dummy){ m.hp=m.mhp; me.target=null; } } } renderMeter(); } },500);
 function updateAuto(dt){
-  const te=targetEnt(); if(!me.auto||!te||!te.hostile||me.dead){ if(!te||!te.hostile) me.auto=false; return; }
+  const te=targetEnt(); if(!me.auto&&te&&te.hostile&&te.kind==='m'&&!me.dead&&!me.stealth&&!me.mounted&&te.e.tgt===MY_U&&te.e.atkT&&now()-te.e.atkT<1) me.auto=true;
+  if(!me.auto||!te||!te.hostile||me.dead){ if(!te||!te.hostile) me.auto=false; return; }
   const a=CLS[me.c.cls].auto; me.autoT-=dt; if(me.cast||me.dash||me.stealth) return;
   if(me.autoT<=0 && dist(me.x,me.y,te.x,te.y)<=a.rng+(te.e.t?te.e.t.r:12)+(a.proj?0:MELEE_SLACK)&&!losBlocked(me.x,me.y,te.x,te.y)){ me.autoT=a.spd*(1-songFx().as)*(me.rapidU>now()?.5:1);
     const c=Math.random()<.08+(CLS[me.c.cls].crit||0)+TAL('crit'); const d=Math.round((a.dmg+a.dmgL*(me.c.lvl-1)+me.pow*.45)*(1+TAL('dmg'))*(1+songFx().dmg)*(.9+Math.random()*.2)*(c?1.7+TAL('critd'):1)*shoutMul()*(me.markU>now()&&te.kind==='m'&&me.markId===te.e.id?1.15:1)*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?1.1:1));
@@ -1988,13 +2011,17 @@ function treeGeo(kind){ const d=G0(); const R=mulberry32(kind*77+1);
 function chunkInst(geo,arr,cs){ const by=new Map(); for(let i=0;i<arr.length;i+=11){ const k=Math.floor(arr[i]/cs)*1000+Math.floor(arr[i+2]/cs); let a=by.get(k); if(!a){ a=[]; by.set(k,a); } for(let j=0;j<11;j++) a.push(arr[i+j]); }
   const chunks=[]; for(const [k,a] of by){ const v=mkVAO(geo,a); chunks.push({cx:(Math.floor(k/1000)+.5)*cs,cz:(k%1000+.5)*cs,vao:v.vao,n:v.n,count:v.count}); } return {chunks,count:arr.length/11,n:0}; }
 const ROCKG=gBlob(18,12,.6,11,1.1);
+/* distance (in tiles) from a tile to the nearest wall, house, fence or column, up to 3 */
+var WALLISH=null;
+function wallDist(tx,ty){ if(!WALLISH) WALLISH=new Set([T.WALL,T.HOUSE,T.TWALL,T.DWALL,T.COLUMN,T.DGATE,T.FENCE,T.FOUNT,T.PROP,T.DOOR]); let b=9; for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){ if(!dx&&!dy) continue; if(WALLISH.has(tAt(tx+dx,ty+dy))){ const d=Math.hypot(dx,dy); if(d<b) b=d; } } return b; }
+function hMin(x,z,r){ return Math.min(hgt(x,z),hgt(x+r,z),hgt(x-r,z),hgt(x,z+r),hgt(x,z-r)); }
 const INST=(function(){ const R=mulberry32(9090); const trees=[[],[],[]], rocks=[], grass=[], flowers=[];
   const push=(arr,x,y,z,ry,sx,sy,sz,sw,c)=>arr.push(x,y,z,ry,sx,sy,sz,sw,c[0],c[1],c[2]);
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const t=map[ty*MW+tx], z=zmap[ty*MW+tx];
-    if(t===T.TREE){ const x=tx+.5+(R()-.5)*.5, zz=ty+.5+(R()-.5)*.5, y=hgt(x,zz)-.05; const pine=(z==='forest'&&R()<.55);
-      const s=.75+R()*.55; const tint=pine?[.85+R()*.25,.9+R()*.2,.85+R()*.15]:z==='swamp'?[.7,.85,.8]:z==='forest'?[.8+R()*.2,.85+R()*.2,.8]:[.85+R()*.25,.95+R()*.15,.85]; push(trees[z==='frost'?2:pine?1:0],x,y,zz,R()*6.28,s,s*(.9+R()*.3),s,.004,tint); }
-    else if(t===T.ROCK){ const edge=edgeOf(tx,ty), ridge=ridgeL(tx,ty); if((edge<3||ridge)&&R()>.28) continue; const x=tx+.5, zz=ty+.5, y=hgt(x,zz);
-      const s=(edge<3||ridge)?2+R()*2.2:.9+R()*.7; const c=z==='frost'?[.92,.97,1.1]:z==='ash'?[.42,.36,.34]:[.95+R()*.1,.95,.9]; push(rocks,x,y-.15,zz,R()*6.28,s*1.15,s*(.7+R()*.4),s,0,c); } }
+    if(t===T.TREE){ const wd=wallDist(tx,ty); if(wd<1.9){ map[ty*MW+tx]=z==='frost'?T.SNOW:groundT(T.TREE,tx,ty); R(); R(); R(); continue; } const jx=wd<3.5?0:(R()-.5)*.5, jz=wd<3.5?0:(R()-.5)*.5; const x=tx+.5+jx, zz=ty+.5+jz, y=hMin(x,zz,.35)-.05; const pine=(z==='forest'&&R()<.55);
+      const s=Math.min(.75+R()*.55,wd<9?(wd-.9)/2.1:9); const tint=pine?[.85+R()*.25,.9+R()*.2,.85+R()*.15]:z==='swamp'?[.7,.85,.8]:z==='forest'?[.8+R()*.2,.85+R()*.2,.8]:[.85+R()*.25,.95+R()*.15,.85]; push(trees[z==='frost'?2:pine?1:0],x,y,zz,R()*6.28,s,s*(.9+R()*.3),s,.004,tint); }
+    else if(t===T.ROCK){ const edge=edgeOf(tx,ty), ridge=ridgeL(tx,ty); if((edge<3||ridge)&&R()>.28) continue; const wd=wallDist(tx,ty); if(wd<1.5&&!(edge<3||ridge)){ map[ty*MW+tx]=z==='frost'?T.SNOW:groundT(T.ROCK,tx,ty); continue; } const x=tx+.5, zz=ty+.5, y=hMin(x,zz,.45);
+      const s=Math.min((edge<3||ridge)?2+R()*2.2:.9+R()*.7,(edge<3||ridge)?9:Math.max(.6,(wd-.5)*.9)); const c=z==='frost'?[.92,.97,1.1]:z==='ash'?[.42,.36,.34]:[.95+R()*.1,.95,.9]; push(rocks,x,y-.15,zz,R()*6.28,s*1.15,s*(.7+R()*.4),s,0,c); } }
   for(let j=0;j<MH*3;j++)for(let i=0;i<MW*3;i++){ const X=(i+R())/3, Z=(j+R())/3; const px=X*TS, py=Z*TS; const t=tAt(Math.floor(X),Math.floor(Z)); if(SOLID.has(t)&&t!==T.TREE) continue;
     const ct=cellType(px,py); const p=(ct===T.GRASS?.55:ct===T.FOREST?.3:ct===T.SWAMP?.32:0)*GFX.grass; if(R()>p) continue; const y=hgt(X,Z); if(y<.05) continue;
     const s=.35+R()*.4; const dry=fbm(X*.12,Z*.12,41); const c=ct===T.SWAMP?[.42,.5,.25]:ct===T.FOREST?[.22,.42,.16]:[.36+dry*.25,.6+dry*.1,.2];
@@ -2597,7 +2624,7 @@ function visualAct(src,a,mine){
   const kind=a[1],tgt=a[2],amt=a[3]|0,vis=a[4]|0;
   if(kind===0){
     if(vis===11){ if(!mine){ const from=a[5]?mobById[a[5]]:{rx:src.x,ry:src.y}; const m=mobById[tgt]; if(m&&from) lightningFx(from,m); } }
-    else if(vis>=1&&vis<=4) proj(src,()=>entPos('m',tgt),vis);
+    else if((vis>=1&&vis<=4)||vis===40) proj(src,()=>entPos('m',tgt),vis);
     else { const m0=mobById[tgt]; if(m0&&!mine){ const o=othersByU.get(src.u); const wk=weapKind(o?LOOK[o.c]:null); try{ impactFX(m0,Math.atan2(m0.ry-src.y,m0.rx-src.x),wk==='magic'?'blade':wk,false,.8); impSnd(m0,.6); }catch(e){} m0.kbA=Math.atan2(m0.ry-src.y,m0.rx-src.x); m0.kbK=.5; } else { const p=entPos('m',tgt); if(p) spark(p.x,p.y,'#fff4d0'); } }
     if(!mine){ const m=mobById[tgt]; if(m) m.hit=now(); } }
   if(kind===1 && vis===5){ const p=entPos('p',tgt); if(p) sparkle(p.x,p.y,'#9dffb0'); }
@@ -2908,7 +2935,7 @@ function buildScene(dt){
     if(!dead&&MELEE_CLS[cls]&&st.swingT&&t-st.swingT>=.18&&t-st.swingT<.5&&st._arcT!==st.swingT&&!(isMe?me.mounted:o.mt)&&Math.hypot(x/TS-CAM.tx,y/TS-CAM.tz)<40){ st._arcT=st.swingT; const wr=isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0); const L0=LOOK[cls]||{}; slashArc(x,y,smoothFace(st,isMe?me.face:o.f),(st.swingN||0)%3,wr>=2?RARCOL[wr]:'#f4f0e6',isMe&&HSU>t,cls==='assassin'); }
     if(isMe&&HSU>t&&me.swingT&&t-me.swingT<.5){ me.swingT+=dt; st._swT0=me.swingT; }
     if(st.swingT!==st._swT0){ st._swT0=st.swingT; st.swingN=(st.swingN||0)+1; } const castF=isMe?!!me.cast:!!(o.b&4); if(castF) st._wasCast=1; else if(st._wasCast){ st._wasCast=0; st.relT=t; }
-    const sw=(t-(st.swingT||0))/.5; const spin=st.spinT&&t-st.spinT<.5; const castCol=C3(CLS[cls].col);
+    const sw=(t-(st.swingT||0))/.5; const spin=false; const castCol=C3(CLS[cls].col);
     const mt=dead?0:((isMe?me.mounted:o.mt)||0); const swim=!mt&&!onDock(x,y)&&deepWaterAt(x,y);
     const Y0=smoothY(st,standY(x,y),dt)+(isMe?(me.jumpH||0):0), face=smoothFace(st,isMe?me.face:o.f), emo=isMe?me.emote:o.emote;
     const SMv=mt?steedMotion(st.walkP||0,st.mvS||0,!!(MOUNTS[mt]&&MOUNTS[mt].celestial)):null;
@@ -3259,6 +3286,8 @@ Object.assign(QLOOK,{
 });
 /* ---------- static landmarks ---------- */
 /* ---------- v22: Sunken Vault architecture (static) ---------- */
+/* a spot is level when the ground across the footprint varies by less than a third of a tile */
+function levelAt(x,z,r){ let lo=1e9,hi=-1e9; for(let dz=-r;dz<=r;dz+=r/2)for(let dx=-r;dx<=r;dx+=r/2){ const h=hgt(x+dx,z+dz); if(h<lo) lo=h; if(h>hi) hi=h; } return hi-lo<.34; }
 function addWilds(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e); const R=mulberry32(4242);
   const wood=[.34,.22,.12], dark=[.2,.13,.08], stoneC=[.55,.53,.5];
   const okT=(tx,ty)=>{ const t=tAt(tx,ty); return !SOLID.has(t)&&t!==T.WATER&&t!==T.LAVA&&t!==T.PATH&&t!==T.BRIDGE&&ty<OWH-3&&Math.hypot(tx-TOWN.x,ty-TOWN.y)>TOWN.r+5; };
@@ -3278,7 +3307,7 @@ function addWilds(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0
       for(let i=0;i<3;i++) box(x+.35,y0+1.9-i*.32,z,.8,.2,.05,[.5,.36,.2],i*1.1+R()*.4); box(x,y0+2.45,z,.16,.16,.16,dark); break; } } }
   // scattered sights in the open
   const place=(n,fn,zones)=>{ let c=0; for(let tries=0;tries<n*60&&c<n;tries++){ const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-10)); if(!okT(tx,ty)) continue; const z=zmap[ty*MW+tx]; if(zones&&!zones.includes(z)) continue;
-      let clear=true; for(let dy=-2;dy<=2&&clear;dy++)for(let dx=-2;dx<=2;dx++) if(!okT(tx+dx,ty+dy)) { clear=false; break; } if(!clear||!farFromNPC(tx,ty,8)) continue; fn(tx+.5,ty+.5,z,R); c++; } };
+      let clear=true; for(let dy=-2;dy<=2&&clear;dy++)for(let dx=-2;dx<=2;dx++) if(!okT(tx+dx,ty+dy)) { clear=false; break; } if(!clear||!farFromNPC(tx,ty,8)||!levelAt(tx+.5,ty+.5,2)||wallDist(tx,ty)<4) continue; fn(tx+.5,ty+.5,z,R); c++; } };
   // standing stones
   place(13,(x,z,zn,R)=>{ const n=5+Math.floor(R()*3); for(let i=0;i<n;i++){ const a=i/n*6.283, px=x+Math.cos(a)*2.4, pz=z+Math.sin(a)*2.4, y0=hgt(px,pz), h=1.2+R()*1.2; box(px,y0+h/2-.1,pz,.55,h,.4,zn==='frost'?[.7,.72,.76]:stoneC,-a+R()*.3); }
     if(R()<.5){ const y0=hgt(x,z); box(x,y0+.2,z,1.1,.4,.7,stoneC.map(v=>v*.85)); box(x,y0+.45,z,.3,.06,.3,[.4,.8,1],0,1.4); STAT_LIGHTS.push({x,y:y0+.8,z,r:5,c:[.4,.8,1.3]}); } },['meadow','forest','ruins','frost','swamp']);
@@ -3330,7 +3359,7 @@ function addWilds2(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||
   const okT=(tx,ty)=>{ const t=tAt(tx,ty); return !SOLID.has(t)&&t!==T.WATER&&t!==T.LAVA&&t!==T.PATH&&t!==T.BRIDGE&&t!==T.ICE&&ty>3&&ty<OWH-4&&tx>3&&tx<MW-4&&Math.hypot(tx-TOWN.x,ty-TOWN.y)>TOWN.r+6; };
   const farFrom=(x,z,r)=>!NPCS.some(n=>Math.hypot(n.x/TS-x,n.y/TS-z)<r)&&!POIS.some(p=>Math.hypot(p.x-x,p.y-z)<(p.r||4)+r*.6)&&!NODES.some(n=>Math.hypot(n.tx-x,n.ty-z)<2)&&Math.hypot(x-LAIR.x,z-LAIR.y)>12;
   const place=(n,fn,zones,cr,sep)=>{ cr=cr||2; let c=0; for(let tries=0;tries<n*90&&c<n;tries++){ const tx=5+Math.floor(R()*(MW-10)), ty=5+Math.floor(R()*(OWH-10)); if(!okT(tx,ty)) continue; const z=zmap[ty*MW+tx]; if(zones&&!zones.includes(z)) continue;
-      let clear=true; for(let dy=-cr;dy<=cr&&clear;dy++)for(let dx=-cr;dx<=cr;dx++) if(!okT(tx+dx,ty+dy)){ clear=false; break; } if(!clear||!farFrom(tx,ty,sep||8)) continue; fn(tx+.5,ty+.5,z,R); c++; } return c; };
+      let clear=true; for(let dy=-cr;dy<=cr&&clear;dy++)for(let dx=-cr;dx<=cr;dx++) if(!okT(tx+dx,ty+dy)){ clear=false; break; } if(!clear||!farFrom(tx,ty,sep||8)||!levelAt(tx+.5,ty+.5,cr)||wallDist(tx,ty)<Math.min(3,cr+1)) continue; fn(tx+.5,ty+.5,z,R); c++; } return c; };
   const NAMES={farm:['Oldfield Farm','Barrow Croft','Hollin Farmstead','Wheatwhistle Farm','Greywater Croft','Sunnybrook Farm'],hunt:["Hunter's Rest",'Stag Hollow Camp','Fernwatch Camp','Bramble Lodge','Wolfsbane Camp'],
     shrine:['Shrine of the Dawn','Wayfarer Shrine','Moonwell Shrine','Shrine of Embers','Frostlight Shrine','Shrine of Tides'],grave:['Gloamfen Barrows','The Forgotten Graves','Hollow Yard'],tower:['Old Watch','Broken Beacon','The Lonely Spire','Raven Tower'],
     ice:['Shiverglass Field','The Frozen Teeth','Rimeheart Hollow'],ash:['Ashfang Spires','The Ember Vents','Cindermaw'],well:['Wishing Well',"Shepherd's Well"],ruin:['Fallen Colonnade','Gate of Kings','Sunken Plaza']};
@@ -3676,9 +3705,9 @@ function drawExtras(near,t){
 const RAINP=[]; let rainT=0;
 function drawWeatherOverlay(t){ const WX=weatherNow(); const wet=WX.kind>=2?WX.k:0; if(me&&zoneAtPx(me.x,me.y)==='ash') return; const dtR=Math.min(.05,Math.max(0,t-(rainT||t))); rainT=t;
   const snowy=me&&zoneAtPx(me.x,me.y)==='frost';
-  if(wet>0){ g.fillStyle=`rgba(30,42,60,${.09*wet})`; g.fillRect(0,0,W,H); const n=Math.floor((WX.kind===3?520:340)*wet), wind=WX.kind===3?.28:.12;
+  if(wet>0){ const tch=('ontouchstart' in window)||navigator.maxTouchPoints>0, area=clamp(W*H/(1600*900),.25,1.2), lite=tch?.4:1; g.fillStyle=`rgba(30,42,60,${(tch?.035:.07)*wet})`; g.fillRect(0,0,W,H); const n=Math.floor((WX.kind===3?420:260)*wet*area*lite), wind=WX.kind===3?.28:.12;
     while(RAINP.length<n) RAINP.push({x:Math.random()*(W+200)-100,y:Math.random()*H,z:.4+Math.random()*.6,ph:Math.random()*6.28}); if(RAINP.length>n) RAINP.length=n;
-    g.lineCap='round'; for(const layer of [0,1]){ g.beginPath(); g.strokeStyle=snowy?`rgba(250,252,255,${(layer?.85:.5)*wet})`:`rgba(215,228,245,${(layer?.55:.28)*wet})`; g.lineWidth=snowy?(layer?3.2:2):(layer?1.8:1.1);
+    g.lineCap='round'; for(const layer of [0,1]){ g.beginPath(); const tchA=(('ontouchstart' in window)||navigator.maxTouchPoints>0)?.6:1; g.strokeStyle=snowy?`rgba(250,252,255,${(layer?.75:.45)*wet*tchA})`:`rgba(215,228,245,${(layer?.42:.2)*wet*tchA})`; g.lineWidth=snowy?(layer?2.8:1.8):(layer?1.4:.9);
       for(const d of RAINP){ if((d.z>.7)!==!!layer) continue; const sp=snowy?(60+90*d.z):(900+700*d.z); d.y+=sp*dtR; d.x-=(snowy?Math.sin(t*1.3+d.ph)*30:wind*sp)*dtR; if(d.y>H+30){ d.y=-30-Math.random()*60; d.x=Math.random()*(W+200)-100; } if(d.x<-100) d.x+=W+200;
         const l=snowy?1.5:(14+22*d.z); g.moveTo(d.x,d.y); g.lineTo(d.x+(snowy?0:wind*l),d.y-l); } g.stroke(); } }
   if(flash>0){ g.fillStyle=`rgba(220,230,255,${flash*.18})`; g.fillRect(0,0,W,H); } }
@@ -4009,7 +4038,7 @@ var PROF={
   cooking:{name:'Cooking',icon:'🍲',kind:'second',desc:'Cook fish and meat into food that makes you Well Fed for 30 minutes.'},
   tailoring:{name:'Tailoring',icon:'🪡',kind:'craft',desc:'Sew cloth robes, vestments and mantles, and spellthread that adds Power. Cloth drops from humanoid monsters.'},
 };
-var PRANK=[{n:'Apprentice',max:75,lvl:1,gold:1},{n:'Journeyman',max:150,lvl:5,gold:8},{n:'Expert',max:225,lvl:9,gold:25},{n:'Artisan',max:300,lvl:13,gold:60}];
+var PRANK=[{n:'Apprentice',max:75,lvl:1,gold:1},{n:'Journeyman',max:150,lvl:5,gold:5},{n:'Expert',max:225,lvl:9,gold:18},{n:'Artisan',max:300,lvl:13,gold:40}];
 var PTRAIN={liesl:['tailoring'],doran:['mining','blacksmithing','jewelcrafting'],mira:['herbalism','alchemy'],tamsin:['skinning','leatherworking'],pell:['cooking','fishing'],bram:['fishing']};
 var PMAXPRIMARY=2;
 var BUFFTIP={};
@@ -4269,10 +4298,10 @@ function openTrainer(n){ const c=me.c, L=PTRAIN[n.id]||[];
     const nx=PRANK[P.r+1]; if(!nx) return `<div class="shoprow"><span><b>${D.icon} ${D.name}</b> · ${PRANK[P.r].n} ${P.s}/${PRANK[P.r].max}<br><span style="font-size:13px;color:var(--dim)">You have mastered everything I can teach.</span></span></div>`;
     const need=PRANK[P.r].max-25, ok=P.s>=need&&c.lvl>=nx.lvl&&c.gold>=nx.gold;
     return `<div class="shoprow"><span><b>${D.icon} ${D.name}</b> · ${PRANK[P.r].n} ${P.s}/${PRANK[P.r].max}<br><span style="font-size:13px">Train <b>${nx.n}</b> (up to ${nx.max}) · needs skill ${need}, level ${nx.lvl}</span></span><button data-pt="${pk}" ${ok?'':'disabled'}>Train · ${nx.gold}g</button></div>`; }).join('');
-  const shop=n.id==='liesl'?`<div class="shoprow"><span><b>⬜ Bolt of Linen</b> ×5<br><span style="font-size:13px;color:var(--dim)">Plain linen to practise on.</span></span><button data-lin="1" ${c.gold<4?'disabled':''}>Buy · 4g</button></div>`:'';
+  const shop=n.id==='liesl'?`<div class="shoprow"><span><b>⬜ Bolt of Linen</b> ×5<br><span style="font-size:13px;color:var(--dim)">Plain linen to practise on.</span></span><button data-lin="1" ${c.gold<3?'disabled':''}>Buy · 3g</button></div>`:'';
   dlg(`<h2>Profession training</h2><p style="color:var(--dim)">You can learn two main professions (gathering or crafting). Fishing and Cooking are extra and anyone can learn them. Press <kbd>K</kbd> to open your professions.</p>${rows}${shop}<div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   $('bk').onclick=()=>talk(n);
-  document.querySelectorAll('#dlg [data-lin]').forEach(b=>b.onclick=()=>{ if(c.gold<4) return err('Not enough gold'); c.gold-=4; c.mats.linencloth=(c.mats.linencloth||0)+5; chatLine('You buy 5 Linen Cloth.','c-loot'); persist(); renderInv(); openTrainer(n); });
+  document.querySelectorAll('#dlg [data-lin]').forEach(b=>b.onclick=()=>{ if(c.gold<3) return err('Not enough gold'); c.gold-=3; c.mats.linencloth=(c.mats.linencloth||0)+5; chatLine('You buy 5 Linen Cloth.','c-loot'); persist(); renderInv(); openTrainer(n); });
   document.querySelectorAll('#dlg [data-pl]').forEach(b=>b.onclick=()=>{ const pk=b.dataset.pl; if(c.prof[pk]) return; if(PROF[pk].kind!=='second'&&primaryCount()>=PMAXPRIMARY) return; if(c.gold<PRANK[0].gold) return err('Not enough gold');
     c.gold-=PRANK[0].gold; c.prof[pk]={s:1,r:0}; chatLine(`You have learned ${PROF[pk].name}. Press K to see your recipes.`,'c-prof'); sparkle(me.x,me.y,'#8fd0ff'); try{ sfx('level'); }catch(e){} persist(); renderInv(); openTrainer(n); });
   document.querySelectorAll('#dlg [data-pt]').forEach(b=>b.onclick=()=>{ const pk=b.dataset.pt, P=c.prof[pk], nx=PRANK[P.r+1]; if(!nx) return; c.gold-=nx.gold; P.r++; P.capN=0; chatLine(`You are now a ${nx.n} ${PROF[pk].name.toLowerCase()==='fishing'?'angler':PROF[pk].name}! Your skill can reach ${nx.max}.`,'c-prof'); sparkle(me.x,me.y,'#ffd34a'); persist(); renderInv(); openTrainer(n); }); }
@@ -4949,12 +4978,73 @@ function schedStep(tr,t,step){ const P=PROG[tr]; if(!P) return; const per=tr==='
   else if(tr==='battle'){ if(s===0||s===3||s===6) drum(t,.45,true); if(s===2||s===4||s===7) drum(t,.12,false); if(s===0) pad([root-12,root-5],t,.12,2.2,true); if(s%2===0) pluck(root+(s===4?3:0),t,.12,.3); }
   else { if(s===0){ pad(ch,t,tr==='eerie'?.07:.06,5.2,tr==='eerie'); pluck(root,t,.12,2.2); } if(s===4&&Math.random()<.6){ const sc=SCALE[tr]; flute(sc[Math.random()*sc.length|0]+(tr==='frost'?0:0),t,.05,1.6); } }
   if(s===per-1) AUD.bar++; }
+/* soft harp: a gentle plucked string with a long ring */
+function harpN(n,t,vol,dec){ const c=AUD.ctx; const o=c.createOscillator(), o2=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain(); o.type='triangle'; o2.type='sine'; o.frequency.value=NOTE(n); o2.frequency.value=NOTE(n)*2.001;
+  const g2=c.createGain(); g2.gain.value=.18; f.type='lowpass'; f.frequency.setValueAtTime(2400,t); f.frequency.exponentialRampToValueAtTime(900,t+.6); o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(AUD.mbus); env(g,t,.006,vol,dec||1.6); o.start(t); o2.start(t); o.stop(t+(dec||1.6)+.1); o2.stop(t+(dec||1.6)+.1); }
+const NNAME={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const midiOf=s=>{ const m=/^([A-G])(#|b)?(\d)$/.exec(s); return 12*(+m[3]+1)+NNAME[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0); };
+function chordOf(name){ const m=/^([A-G])(#|b)?(m)?(7)?$/.exec(name); const pc=(NNAME[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0)+12)%12; const third=m[3]?3:4;
+  const tones=[0,third,7].concat(m[4]?[10]:[]).map(i=>(pc+i)%12); const voice=tones.map(p=>{ let n=57+((p-57%12+12)%12); return n; }).sort((a,b)=>a-b); return {bass:40+((pc-4+12)%12),tones:voice}; }
+/* each tune: a melody (note:beats), one chord per bar, a lead instrument for each pass and an accompaniment style */
+const INN_ALBUM=[
+ {name:'Greensleeves',trad:1,bpm:78,bar:3,lead:['flute','fiddle'],acc:'waltz',
+  chords:'Am Am C G Em Am E E Am Am C G Em Am E Am C C G Em Am E E E C C G Em Am E Am',
+  mel:'r:2 A4:1 C5:2 D5:1 E5:1.5 F5:.5 E5:1 D5:2 B4:1 G4:1.5 A4:.5 B4:1 C5:2 A4:1 A4:1.5 G#4:.5 A4:1 B4:2 G#4:1 E4:2 A4:1 C5:2 D5:1 E5:1.5 F5:.5 E5:1 D5:2 B4:1 G4:1.5 A4:.5 B4:1 C5:1.5 B4:.5 A4:1 G#4:1.5 F#4:.5 G#4:1 A4:3 G5:3 G5:1.5 F#5:.5 E5:1 D5:2 B4:1 G4:1.5 A4:.5 B4:1 C5:2 A4:1 A4:1.5 G#4:.5 A4:1 B4:2 G#4:1 E4:3 G5:3 G5:1.5 F#5:.5 E5:1 D5:2 B4:1 G4:1.5 A4:.5 B4:1 C5:1.5 B4:.5 A4:1 G#4:1.5 F#4:.5 G#4:1 A4:3'},
+ {name:'The Hearthside Waltz',bpm:84,bar:3,lead:['harp','flute'],acc:'waltz',
+  chords:'D G A D Bm G A D G D Em A D G A D',
+  mel:'F#4:1 A4:1 D5:1 D5:2 B4:1 C#5:1.5 B4:.5 A4:1 A4:3 B4:1 D5:1 F#5:1 E5:2 D5:1 B4:1 C#5:1 E5:1 D5:3 G5:1.5 F#5:.5 E5:1 F#5:2 D5:1 E5:1 G5:1 B4:1 C#5:2 A4:1 D5:1 F#5:1 A5:1 G5:1.5 E5:.5 B4:1 A4:1 C#5:1 E5:1 D5:3'},
+ {name:'Ale and Embers',bpm:66,bar:4,lead:['fiddle','flute'],acc:'ballad',
+  chords:'G C G D Em C D G C G Am D G Em D G',
+  mel:'B4:1 D5:1 G5:1.5 F#5:.5 E5:2 C5:2 D5:1 B4:1 G4:1 B4:1 A4:4 G4:1 B4:1 E5:1.5 D5:.5 C5:1 E5:1 G5:2 F#5:1.5 E5:.5 D5:1 A4:1 G4:4 E5:1 G5:1 E5:1 C5:1 D5:2 B4:2 C5:1 E5:1 A5:1.5 G5:.5 F#5:2 D5:2 B4:1 D5:1 G5:2 E5:1 D5:1 B4:2 C5:1 E5:1 D5:1 F#5:1 G5:4'},
+ {name:'Rain on the Thatch',bpm:60,bar:4,lead:['flute','harp'],acc:'harp',
+  chords:'Em C G D Em Am B7 Em C G Am Em C D B7 Em',
+  mel:'E5:2 G5:1 F#5:1 E5:3 D5:1 D5:2 B4:2 A4:2 F#4:1 A4:1 B4:2 E5:1 G5:1 A5:2 G5:1 E5:1 F#5:2 D#5:2 E5:4 G5:2 E5:1 G5:1 D5:2 B4:2 C5:1 E5:1 A5:2 G5:2 E5:2 E5:1.5 F#5:.5 G5:2 F#5:1 E5:1 D5:2 D#5:2 B4:1 F#5:1 E5:4'},
+ {name:'The Sleeping Lantern',bpm:72,bar:3,lead:['harp','harp'],acc:'harp',
+  chords:'F C Dm Bb F C C F Dm Am Bb F Gm C C F',
+  mel:'A4:2 C5:1 G4:2 E4:1 F4:1 A4:1 D5:1 D5:2 C5:1 A4:2 F4:1 G4:1 C5:1 E5:1 D5:1.5 C5:.5 Bb4:1 A4:3 F5:2 D5:1 E5:2 C5:1 D5:1 C5:1 Bb4:1 A4:2 C5:1 Bb4:2 G4:1 C5:1 E5:1 G5:1 E4:1 G4:1 C5:1 F4:3'},
+ {name:"Bram's Lament",bpm:76,bar:3,lead:['fiddle','flute'],acc:'waltz',
+  chords:'Am G Am Em F C E Am C G Am Em F G E Am',
+  mel:'E5:2 A5:1 G5:1.5 E5:.5 D5:1 E5:2 C5:1 B4:3 A4:1 C5:1 F5:1 E5:2 G5:1 D5:1 C5:1 B4:1 A4:3 C5:1 E5:1 G5:1 G5:2 D5:1 E5:1.5 D5:.5 C5:1 B4:2 E5:1 F5:2 E5:1 D5:1 B4:1 G4:1 G#4:2 B4:1 A4:3'}];
+function innBuild(song,t0){ const spb=60/song.bpm, ev=[], chords=song.chords.split(' ').map(chordOf), bars=chords.length, N=song.bar;
+  const mel=song.mel.split(' ').map(x=>{ const [n,d]=x.split(':'); return [n==='r'?0:midiOf(n),+d]; });
+  let t=t0; const barT=[]; for(let pass=0;pass<2;pass++) for(let b=0;b<bars;b++){ const rub=1+(Math.random()-.5)*.03+(b===bars-1?.08:0); barT.push([t,spb*rub,b,pass]); t+=N*spb*rub; }
+  for(const [bt,sb,b,pass] of barT){ const C=chords[b], last=pass===1&&b===bars-1;
+    if(song.acc==='waltz'){ ev.push([bt,'pl',C.bass,.11,1.8]); if(!last){ for(const k of [1,2]) ev.push([bt+k*sb+(Math.random()*.02),'pl2',C.tones.slice(1),.045,.7]); } else ev.push([bt+.02,'pl2',C.tones,.05,2.6]); }
+    else if(song.acc==='ballad'){ ev.push([bt,'pl',C.bass,.11,2.2]); const ar=[C.tones[0],C.tones[1],C.tones[2],C.tones[0]+12]; if(!last) for(let k=1;k<N;k++) ev.push([bt+k*sb,'pl',ar[(k-1)%ar.length],.055,1.1]); else ev.push([bt+.02,'pl2',C.tones,.05,3]); }
+    else { ev.push([bt,'hp',C.bass+12,.09,2.4]); const ar=[C.tones[0],C.tones[1],C.tones[2],C.tones[0]+12,C.tones[2],C.tones[1]]; const steps=last?1:N*2; for(let k=(last?0:1);k<steps;k++) ev.push([bt+k*sb/2,'hp',ar[k%ar.length]+(k>=N?0:0),.04,1.8]); } }
+  for(let pass=0;pass<2;pass++){ let beat=0; const inst=song.lead[pass]; for(const [n,d] of mel){ const bi=Math.floor(beat/N), within=beat-bi*N; const B=barT[pass*bars+Math.min(bi,bars-1)]; const tt=B[0]+within*B[1]+(Math.random()-.5)*.02;
+      if(n) ev.push([tt,'ld',n,inst,d*B[1]]); beat+=d; } }
+  ev.sort((a,b)=>a[0]-b[0]); return {ev,i:0,end:t,name:song.name}; }
+function innPlay(e){ const [t,k,a,b,c]=e; if(k==='pl') pluck(a,t,b,c); else if(k==='pl2'){ for(const [j,n] of a.entries()) pluck(n,t+j*.025,b,c); } else if(k==='hp') harpN(a,t,b,c);
+  else if(k==='ld'){ const dur=Math.max(.25,c*.95); if(b==='flute') flute(a,t,.05,dur); else if(b==='fiddle') fiddle(a,t,.032,dur); else harpN(a,t,.11,Math.max(1.2,dur*1.6)); } }
+function innTick(t){ let S=AUD.inn; if(!S||(S.i>=S.ev.length&&t>S.end+3.5)){ let k; do{ k=Math.random()*INN_ALBUM.length|0; } while(INN_ALBUM.length>1&&k===AUD.innLast); AUD.innLast=k; S=AUD.inn=innBuild(INN_ALBUM[k],t+.4);
+    try{ chatLine(`♪ ${INN_ALBUM[k].name}${INN_ALBUM[k].trad?' (traditional)':''} — The Hearthmere Inn`,'c-sys'); }catch(e){} }
+  while(S.i<S.ev.length&&S.ev[S.i][0]<t+.6){ try{ innPlay(S.ev[S.i]); }catch(e){} S.i++; } }
+/* ---- recorded tavern music ---- */
+const FMUS={list:[{f:'tavern-rafters-glow.mp3',n:"By the Rafters' Glow",a:'Kaazoom'},{f:'tavern-embers-flagstone.mp3',n:'Embers on the Flagstone',a:'Kaazoom'},{f:'tavern-city-ambient.mp3',n:'Medieval City Tavern',a:'DeusLower'}],
+  el:null,order:[],i:-1,vol:0,want:false,blocked:false,cur:null,announced:''};
+function fmusBase(){ if(FMUS.useRealm||!/^https?:$/.test(location.protocol)){ try{ const u=new URL(((window.EMBERFALL_CONFIG||{}).serverUrl||'').replace(/^ws/,'http')); return u.origin+'/play/music/'; }catch(e){} } return 'music/'; }
+function fmusNext(){ const F=FMUS; if(!F.order.length||F.i>=F.order.length-1){ const last=F.order[F.i]; const o=F.list.map((_,k)=>k); for(let k=o.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; [o[k],o[j]]=[o[j],o[k]]; } if(o.length>1&&o[0]===last) o.push(o.shift()); F.order=o; F.i=0; } else F.i++;
+  const T=F.list[F.order[F.i]]; F.cur=T; F.el.src=fmusBase()+T.f; F.announced=''; }
+function fmusEl(){ if(FMUS.el) return FMUS.el; const a=new Audio(); a.preload='auto'; a.loop=false; a.volume=0; a.addEventListener('ended',()=>{ fmusNext(); fmusPlay(); }); a.addEventListener('error',()=>{ if(!FMUS.useRealm&&FMUS.cur){ FMUS.useRealm=true; a.src=fmusBase()+FMUS.cur.f; fmusPlay(); return; } FMUS.errN=(FMUS.errN||0)+1; if(FMUS.errN<6) setTimeout(()=>{ fmusNext(); fmusPlay(); },1500); }); FMUS.el=a; return a; }
+function fmusPlay(){ const a=fmusEl(); if(!a.src) fmusNext(); const p=a.play(); if(p&&p.catch) p.then(()=>{ FMUS.blocked=false; if(me&&FMUS.cur&&FMUS.announced!==FMUS.cur.f){ FMUS.announced=FMUS.cur.f; try{ chatLine(`♪ ${FMUS.cur.n} — ${FMUS.cur.a}`,'c-sys'); }catch(e){} } }).catch(()=>{ FMUS.blocked=true; }); }
+function fmusLevel(){ const v=(typeof AUD!=='undefined'&&AUD.vol)||{master:.8,music:.6}; return v.mute?0:clamp((v.master??.8)*(v.music??.6)*.9,0,1); }
+function fmusTick(){ const F=FMUS; let want=false;
+  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=z==='town'&&!fight; }
+  F.want=want; const target=want?fmusLevel():0;
+  if(want&&(!F.el||F.el.paused)&&!F.blocked) fmusPlay();
+  if(!F.el) return; F.vol+=clamp(target-F.vol,-.05,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
+  try{ F.el.volume=clamp(F.vol,0,1); }catch(e){}
+  if(want&&me&&!F.el.paused&&F.cur&&F.announced!==F.cur.f){ F.announced=F.cur.f; try{ chatLine(`♪ ${F.cur.n} — ${F.cur.a}`,'c-sys'); }catch(e){} } }
+setInterval(fmusTick,100);
+/* browsers only allow sound after the first click or key press: start the music on the very first one */
+for(const ev of ['pointerdown','keydown','touchstart']) addEventListener(ev,()=>{ if(FMUS.want&&(!FMUS.el||FMUS.el.paused)){ FMUS.blocked=false; fmusPlay(); } },{passive:true,capture:true});
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
   let tr=z==='town'?'tavern':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
   if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';
-  if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
+  if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.inn=null; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
   const spb=AUD.track==='tavern'?60/138/2*2:AUD.track==='battle'?60/150/2*2:60/70/2*2; const stepDur=AUD.track==='tavern'?.19:AUD.track==='battle'?.2:AUD.track==='combat'?.21:.42;
-  if(AUD.track===AUD.want) while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; }
+  if(AUD.track===AUD.want){ if(AUD.track==='tavern'){ if(!FMUS.want) innTick(t); } else while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; } }
   // ambience levels per zone
   const T0={wind:0,leaves:0,water:0,rumble:0,insects:0,frost:0,cave:0,town:0}; const set=o=>Object.assign(T0,o);
   if(z==='town') set({wind:.025,town:.05}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
@@ -5282,6 +5372,8 @@ function windowIsFull(){ return innerWidth>=screen.width-2&&innerHeight>=screen.
 /* In full screen the real mouse is locked to the game and a game cursor is drawn instead, so it can never wander onto a second monitor.
    Every click, hover, wheel and right-click is passed on to whatever is under the game cursor. Esc frees the mouse; click to capture it again. */
 const GCUR={on:false,x:0,y:0,over:null,down:null,btns:0,el:null,rng:null};
+/* synthetic wheel events never scroll, so scroll the nearest scrollable box ourselves */
+function scrollUnder(tg,dy){ for(let n=tg;n&&n!==document.body&&n!==document.documentElement;n=n.parentElement){ const cs=getComputedStyle(n); if(/(auto|scroll)/.test(cs.overflowY)&&n.scrollHeight>n.clientHeight+1){ n.scrollTop+=dy; return true; } } return false; }
 function cursorWanted(){ return !document.body.classList.contains('touch')&&!OPT.borderless&&!!(document.fullscreenElement||windowIsFull())&&!!document.documentElement.requestPointerLock; }
 addEventListener('resize',()=>{ setTimeout(()=>{ if(!document.fullscreenElement&&!windowIsFull()&&document.pointerLockElement===document.documentElement) document.exitPointerLock(); },120); });
 (function(){ const el=document.createElement('div'); el.id='gcur'; el.innerHTML='<svg class="gc-arrow" width="22" height="28" viewBox="0 0 22 28"><path d="M2 2 L2 22 L7.5 17 L11 26 L15 24.5 L11.5 16 L19 16Z" fill="#f4e6c4" stroke="#1a1006" stroke-width="1.8" stroke-linejoin="round"/></svg>'; document.body.appendChild(el); GCUR.el=el;
@@ -5303,7 +5395,8 @@ addEventListener('resize',()=>{ setTimeout(()=>{ if(!document.fullscreenElement&
   addEventListener('mouseup',e=>{ if(!grab(e)) return; GCUR.btns=e.buttons||0; const tg=under(); fire('pointerup',tg,e); fire('mouseup',tg,e);
     if(GCUR.rng){ GCUR.rng.dispatchEvent(new Event('change',{bubbles:true})); GCUR.rng=null; }
     const same=GCUR.down&&(GCUR.down===tg||GCUR.down.contains(tg)||tg.contains(GCUR.down)); if(same){ if(e.button===0) fire('click',tg,e); else if(e.button===2) fire('contextmenu',tg,e); else fire('auxclick',tg,e); } GCUR.down=null; },true);
-  addEventListener('wheel',e=>{ if(!GCUR.on||!e.isTrusted) return; e.stopImmediatePropagation(); e.preventDefault(); const tg=under(); fire('wheel',tg,e,{deltaX:e.deltaX,deltaY:e.deltaY,deltaZ:e.deltaZ,deltaMode:e.deltaMode}); },{capture:true,passive:false});
+  addEventListener('wheel',e=>{ if(!GCUR.on||!e.isTrusted) return; e.stopImmediatePropagation(); e.preventDefault(); const tg=under(); const ok=fire('wheel',tg,e,{deltaX:e.deltaX,deltaY:e.deltaY,deltaZ:e.deltaZ,deltaMode:e.deltaMode});
+    if(ok!==false&&tg!==cv) scrollUnder(tg,e.deltaY*(e.deltaMode===1?32:e.deltaMode===2?innerHeight*.8:1)); },{capture:true,passive:false});
   addEventListener('resize',()=>{ GCUR.x=Math.min(GCUR.x,innerWidth-1); GCUR.y=Math.min(GCUR.y,innerHeight-1); });
   document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement&&document.pointerLockElement) document.exitPointerLock(); });
 })();
