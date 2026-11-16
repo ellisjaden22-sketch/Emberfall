@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 55;
+const VERSION = 56;
 const TS = 32, MW = 336, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -648,7 +648,7 @@ const mobs=[], mobById={};
 (function genSpawns(){
   const R=mulberry32(1337); let id=1;
   for(let ti=0;ti<MOBT.length;ti++){const mt=MOBT[ti];
-    const NN=(!mt.pos&&!mt.spots&&!mt.boss&&!mt.elite&&!mt.vault&&!mt.summon)?mt.n*3:mt.n;
+    const NN=(!mt.pos&&!mt.spots&&!mt.boss&&!mt.elite&&!mt.vault&&!mt.summon)?mt.n*2:mt.n;
     for(let k=0;k<NN;k++){
       let x,y,tries=0;
       if(mt.pos){ const pp=posW(mt); x=pp[0]*TS+16+(mt.summon?(k-1)*60:0); y=pp[1]*TS+16+(mt.summon?70:0); }
@@ -670,7 +670,7 @@ const mobs=[], mobById={};
       const put=(m,p)=>{ m.sx=m.x=m.rx=m.wx=p[0]; m.sy=m.y=m.ry=m.wy=p[1]; };
       /* keep the shore around Bram safe for new players: lake monsters spawn a little further along the shore */
       for(const m of mobs){ if(m.t.zone!=='lake'||m.t.boss||m.t.pos||m.t.spots||dist(m.sx,m.sy,B.x,B.y)>=16*TS) continue;
-        for(let k=0;k<1500;k++){ const a=R()*6.283, rr=17+R()*23, x=B.x+Math.cos(a)*rr*TS, y=B.y+Math.sin(a)*rr*TS, tx=x/TS|0, ty=y/TS|0; if(tx<3||ty<3||tx>MW-4||ty>OWH-4) continue; const dd=dist(x,y,B.x,B.y)/TS; if(dd<17||dd>40||zmap[ty*MW+tx]!=='lake'||blocked(x,y,22)||isWaterAt(x,y)) continue; if(mobs.some(o=>o!==m&&dist(o.sx,o.sy,x,y)<80)) continue; put(m,[x,y]); break; } }
+        for(let k=0;k<4000;k++){ const a=R()*6.283, rr=17+R()*70, x=B.x+Math.cos(a)*rr*TS, y=B.y+Math.sin(a)*rr*TS, tx=x/TS|0, ty=y/TS|0; if(tx<3||ty<3||tx>MW-4||ty>OWH-4) continue; const dd=dist(x,y,B.x,B.y)/TS; if(dd<17||zmap[ty*MW+tx]!=='lake'||blocked(x,y,22)||isWaterAt(x,y)) continue; if(mobs.some(o=>o!==m&&dist(o.sx,o.sy,x,y)<110)) continue; put(m,[x,y]); break; } }
       const ot=mobs.find(m=>m.t.key==='oldtusk'); if(ot){ const p=spot(13,20); if(p) put(ot,p); }
       const ms=mobs.filter(m=>m.t.key==='moth'); for(let i=0;i<Math.min(6,ms.length);i++){ const p=spot(5,14); if(p) put(ms[i],p); } } }
   { const Y=TOWN.yard, DT={key:'dummy',name:'Training Dummy',lv:[1,1],hp:100000,hpL:0,dmg:0,dmgL:0,spd:0,rng:0,as:999,aggro:0,r:14,col:'#c8a868',zone:'town',n:0,dummy:true,resp:5};
@@ -5025,20 +5025,26 @@ const FMUS={list:[{f:'tavern-rafters-glow.mp3',n:"By the Rafters' Glow",a:'Kaazo
   el:null,order:[],i:-1,vol:0,want:false,blocked:false,cur:null,announced:''};
 function fmusBase(){ if(FMUS.useRealm||!/^https?:$/.test(location.protocol)){ try{ const u=new URL(((window.EMBERFALL_CONFIG||{}).serverUrl||'').replace(/^ws/,'http')); return u.origin+'/play/music/'; }catch(e){} } return 'music/'; }
 function fmusNext(){ const F=FMUS; if(!F.order.length||F.i>=F.order.length-1){ const last=F.order[F.i]; const o=F.list.map((_,k)=>k); for(let k=o.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; [o[k],o[j]]=[o[j],o[k]]; } if(o.length>1&&o[0]===last) o.push(o.shift()); F.order=o; F.i=0; } else F.i++;
-  const T=F.list[F.order[F.i]]; F.cur=T; F.el.src=fmusBase()+T.f; F.announced=''; }
-function fmusEl(){ if(FMUS.el) return FMUS.el; const a=new Audio(); a.preload='auto'; a.loop=false; a.volume=0; a.addEventListener('ended',()=>{ fmusNext(); fmusPlay(); }); a.addEventListener('error',()=>{ if(!FMUS.useRealm&&FMUS.cur){ FMUS.useRealm=true; a.src=fmusBase()+FMUS.cur.f; fmusPlay(); return; } FMUS.errN=(FMUS.errN||0)+1; if(FMUS.errN<6) setTimeout(()=>{ fmusNext(); fmusPlay(); },1500); }); FMUS.el=a; return a; }
-function fmusPlay(){ const a=fmusEl(); if(!a.src) fmusNext(); const p=a.play(); if(p&&p.catch) p.then(()=>{ FMUS.blocked=false; if(me&&FMUS.cur&&FMUS.announced!==FMUS.cur.f){ FMUS.announced=FMUS.cur.f; try{ chatLine(`♪ ${FMUS.cur.n} — ${FMUS.cur.a}`,'c-sys'); }catch(e){} } }).catch(()=>{ FMUS.blocked=true; }); }
+  const T=F.list[F.order[F.i]]; F.cur=T; F.el.src=fmusBase()+T.f; F.announced=''; F.srcT=performance.now(); }
+function fmusEl(){ if(FMUS.el) return FMUS.el; const a=new Audio(); a.preload='auto'; a.loop=false; a.volume=0; a.addEventListener('ended',()=>{ FMUS.pending=false; fmusNext(); fmusPlay(); }); a.addEventListener('error',()=>{ if(!FMUS.useRealm&&FMUS.cur&&/^https?:$/.test(location.protocol)&&!FMUS.triedRealm){ FMUS.triedRealm=true; FMUS.useRealm=true; a.src=fmusBase()+FMUS.cur.f; fmusPlay(); return; } FMUS.dead=true; FMUS.want=false; try{ a.pause(); a.removeAttribute('src'); a.load(); }catch(e){} });
+  a.addEventListener('playing',()=>{ FMUS.ok=true; FMUS.playF=FMUS.cur&&FMUS.cur.f; if(me&&FMUS.cur&&FMUS.announced!==FMUS.cur.f){ FMUS.announced=FMUS.cur.f; try{ chatLine(`♪ ${FMUS.cur.n} — ${FMUS.cur.a}`,'c-sys'); }catch(e){} } }); FMUS.el=a; return a; }
+function fmusPlay(){ if(FMUS.dead||FMUS.pending) return; const a=fmusEl(); if(!a.getAttribute('src')) fmusNext(); FMUS.pending=true; const p=a.play(); if(p&&p.then) p.then(()=>{ FMUS.pending=false; FMUS.blocked=false; }).catch(e=>{ FMUS.pending=false; if(e&&e.name==='NotAllowedError') FMUS.blocked=true; }); else FMUS.pending=false; }
 function fmusLevel(){ const v=(typeof AUD!=='undefined'&&AUD.vol)||{master:.8,music:.6}; return v.mute?0:clamp((v.master??.8)*(v.music??.6)*.9,0,1); }
-function fmusTick(){ const F=FMUS; let want=false;
+function fmusTick(){ const F=FMUS; let want=false; if(F.dead){ F.want=false; return; }
+  if(F.el&&!F.ok&&!F.blocked&&F.srcT&&performance.now()-F.srcT>30000&&F.el.readyState===0){ if(!F.triedRealm&&/^https?:$/.test(location.protocol)&&F.cur){ F.triedRealm=true; F.useRealm=true; F.el.src=fmusBase()+F.cur.f; F.srcT=performance.now(); F.pending=false; fmusPlay(); } else { F.dead=true; F.want=false; try{ F.el.pause(); }catch(e){} return; } }
   if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=z==='town'&&!fight; }
   F.want=want; const target=want?fmusLevel():0;
   if(want&&(!F.el||F.el.paused)&&!F.blocked) fmusPlay();
   if(!F.el) return; F.vol+=clamp(target-F.vol,-.05,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
   try{ F.el.volume=clamp(F.vol,0,1); }catch(e){}
-  if(want&&me&&!F.el.paused&&F.cur&&F.announced!==F.cur.f){ F.announced=F.cur.f; try{ chatLine(`♪ ${F.cur.n} — ${F.cur.a}`,'c-sys'); }catch(e){} } }
+  if(want&&me&&!F.el.paused&&F.cur&&F.playF===F.cur.f&&F.announced!==F.cur.f){ F.announced=F.cur.f; try{ chatLine(`♪ ${F.cur.n} — ${F.cur.a}`,'c-sys'); }catch(e){} } }
 setInterval(fmusTick,100);
 /* browsers only allow sound after the first click or key press: start the music on the very first one */
-for(const ev of ['pointerdown','keydown','touchstart']) addEventListener(ev,()=>{ if(FMUS.want&&(!FMUS.el||FMUS.el.paused)){ FMUS.blocked=false; fmusPlay(); } },{passive:true,capture:true});
+for(const ev of ['pointerdown','keydown','touchstart']) addEventListener(ev,()=>{ if(!FMUS.dead&&FMUS.want&&(!FMUS.el||FMUS.el.paused)){ FMUS.blocked=false; FMUS.pending=false; fmusPlay(); } },{passive:true,capture:true});
+/* shrink the character screen to fit short windows instead of scrolling it */
+function fitLogin(){ const w=document.querySelector('.lg-wrap'); if(!w) return; w.style.setProperty('--lgz','1'); const L=$('login'); if(!L||L.classList.contains('hidden')) return; const need=w.scrollHeight, have=innerHeight-6; const z=need>have?Math.max(.6,have/need):1; w.style.setProperty('--lgz',z.toFixed(3)); }
+addEventListener('resize',()=>setTimeout(fitLogin,50)); setTimeout(fitLogin,60); setTimeout(fitLogin,600); setTimeout(fitLogin,2000);
+new MutationObserver(()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitLogin,40); }).observe(document.getElementById('login')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
   let tr=z==='town'?'tavern':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
   if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';

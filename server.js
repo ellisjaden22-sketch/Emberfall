@@ -4,7 +4,6 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION = 'v0.56 (tavern music)';
 const MAX_PLAYERS = +(process.env.MAX_PLAYERS || 50);
 // Game Master password. Players type  /gm login <password>  in chat. Leave unset to disable GM logins.
 const GM_PASSWORD = process.env.GM_PASSWORD || '';
@@ -133,7 +132,6 @@ function sendFile(res, file, extra) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
-  if (name === 'api/version') { let music = []; try { music = fs.readdirSync(path.join(ROOT, 'music')).filter(f => f.endsWith('.mp3')); } catch (e) {} return json(res, 200, { server: SERVER_VERSION, music, musicFolderFound: music.length > 0 }); }
   if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
   if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);
     const all = armoryList(); const exact = all.filter(a => a.name.toLowerCase() === q); const part = all.filter(a => a.name.toLowerCase() !== q && a.name.toLowerCase().includes(q));

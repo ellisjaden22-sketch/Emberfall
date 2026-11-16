@@ -1,9 +1,9 @@
 {
- "version": "v0.55",
- "title": "Music for the tavern and a new face for the website",
+ "version": "v0.56",
+ "title": "Fewer monsters, steadier music",
  "date": "16 Nov 2026",
- "text": "Recorded tavern music on the title screen and in Hearthmere, and a redesigned home page.\n\n✨ Real tavern music: three recorded medieval tavern tracks (By the Rafters' Glow and Embers on the Flagstone by Kaazoom, and Medieval City Tavern by DeusLower) now play in shuffled order on the title, loading and character screens and whenever you are in Hearthmere. They fade in as you walk into town and fade out as you leave\n⬆️ The music starts with your first click or key press on the title screen (browsers do not allow sound before that), and follows your Music and Master volume settings\n✨ A redesigned website home page: new painted artwork of Hearthmere by the lake under the glowing Cinder Caldera, drifting embers, a smoother slow camera drift, and a cleaner, more spacious layout",
+ "text": "Fewer monsters in the open world, a fix for the tavern music, a character screen without a scroll bar and website updates.\n\n• Fewer monsters: the open world now has a third fewer monsters, and the crabs, drowned sailors and Tidecallers of Mirrowmere are spread along the whole shore instead of crowding one beach\n🔧 Tavern music: a track is only named in chat once it is really playing, the music no longer races through the whole list when a file cannot load, and if the music cannot be reached the built-in inn tunes play instead\n🔧 The character screen no longer shows a scroll bar: it shrinks a little to fit shorter windows instead\n✨ Website: Barbarian and Hunter class icons and guides, Dungeons, Ten professions and Trade cards, a full Professions & crafting guide, a Trading & Auction House guide, and six new screenshots",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-16T09:50:53Z"
+ "time": "2026-11-16T11:30:56Z"
 }

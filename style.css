@@ -231,7 +231,7 @@ body.bardui #castbar{bottom:calc(150px*var(--uis,1))!important}
 .embers{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .embers i{position:absolute;bottom:-10px;border-radius:50%;background:radial-gradient(#fff3c0,#ff8a2a 45%,rgba(255,80,10,0) 70%);animation:ember linear infinite;opacity:0}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:.95}80%{opacity:.6}100%{transform:translate(var(--dx),-105vh);opacity:0}}
-.lg-wrap{position:relative;width:min(1060px,96vw);max-height:100vh;overflow:auto;padding:18px 10px 14px;text-align:center}
+.lg-wrap{position:relative;width:min(1060px,96vw);max-height:100vh;overflow:auto;padding:18px 10px 14px;text-align:center;scrollbar-width:none;-ms-overflow-style:none;zoom:var(--lgz,1)}.lg-wrap::-webkit-scrollbar{display:none;width:0;height:0}
 .lg-logo h1{font-size:clamp(46px,8vw,92px);font-weight:900;letter-spacing:.08em;background:linear-gradient(#fff2c4,#ffc65a 45%,#c0661a 80%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(255,120,30,.5)) drop-shadow(0 4px 0 #2a1204);line-height:1}
 .lg-tag{font-family:Cinzel,serif;color:#e8c27a;letter-spacing:.5em;font-size:14px;margin-top:4px}
 .lg-rule{display:flex;align-items:center;gap:12px;justify-content:center;color:#ffb84a;margin-bottom:6px}.lg-rule span{width:120px;height:1px;background:linear-gradient(90deg,transparent,#c08a3a,transparent)}
