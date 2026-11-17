@@ -4,7 +4,11 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION = 'v0.56d';
+const SERVER_VERSION = 'v0.57';
+const STARTED = Date.now();
+// never let one bad message or a library hiccup take the whole realm down on test night
+process.on('uncaughtException', e => { try { console.error(new Date().toISOString().slice(11, 19), '! uncaught', e && e.stack || e); } catch (_) {} });
+process.on('unhandledRejection', e => { try { console.error(new Date().toISOString().slice(11, 19), '! unhandled', e && e.stack || e); } catch (_) {} });
 const MAX_PLAYERS = +(process.env.MAX_PLAYERS || 50);
 // Game Master password. Players type  /gm login <password>  in chat. Leave unset to disable GM logins.
 const GM_PASSWORD = process.env.GM_PASSWORD || '';
@@ -13,6 +17,9 @@ const sha = s => crypto.createHash('sha256').update(String(s)).digest();
 const GMS_FILE = path.join(__dirname, 'gms.json');
 let grants = []; try { grants = JSON.parse(fs.readFileSync(GMS_FILE, 'utf8')); if (!Array.isArray(grants)) grants = []; } catch (e) {}
 const saveGrants = () => { try { fs.writeFileSync(GMS_FILE, JSON.stringify(grants)); } catch (e) {} };
+// The Cinderhold raid stays sealed until the realm owner unveils it in game with /raid unveil (or start with RAID_OPEN=1).
+const RAID_FILE = path.join(__dirname, 'raid.json');
+let raidOpen = process.env.RAID_OPEN === '1'; try { raidOpen = raidOpen || !!JSON.parse(fs.readFileSync(RAID_FILE, 'utf8')).open; } catch (e) {}
 // Banned players (by player id and IP address), managed in game with /ban and /unban by the owner.
 const BANS_FILE = path.join(__dirname, 'bans.json');
 let bans = []; try { bans = JSON.parse(fs.readFileSync(BANS_FILE, 'utf8')); if (!Array.isArray(bans)) bans = []; } catch (e) {}
@@ -145,7 +152,7 @@ function sendFile(res, file, extra) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
-  if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); return json(res, 200, { server: SERVER_VERSION, music, musicFound: music.length > 0 }); }
+  if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); return json(res, 200, { server: SERVER_VERSION, music, musicFound: music.length > 0, online: [...clients.values()].filter(c => c.p && c.p.v).length, connections: clients.size, uptimeMin: Math.round((Date.now() - STARTED) / 60000), memoryMB: Math.round(process.memoryUsage().rss / 1048576), slowClients: [...clients.values()].filter(c => c.slow).length, raidOpen }); }
   if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
   if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);
     const all = armoryList(); const exact = all.filter(a => a.name.toLowerCase() === q); const part = all.filter(a => a.name.toLowerCase() !== q && a.name.toLowerCase().includes(q));
@@ -183,7 +190,10 @@ function frame(str) {
   h[0] = 0x81; return Buffer.concat([h, p]);
 }
 function send(c, obj) { if (!c.dead) try { c.sock.write(frame(JSON.stringify(obj))); } catch (e) { drop(c); } }
-function broadcast(from, obj) { const f = frame(JSON.stringify(obj)); for (const c of clients.values()) if (c !== from && !c.dead) try { c.sock.write(f); } catch (e) { drop(c); } }
+function broadcast(from, obj, skippable) { const f = frame(JSON.stringify(obj)); for (const c of clients.values()) { if (c === from || c.dead) continue; const q = c.sock.writableLength || 0;
+    if (q > 8 << 20) { log(`! ${c.id} could not keep up (${Math.round(q / 1048576)} MB queued) - reconnecting it`); drop(c); continue; }
+    if (skippable && q > 256 << 10) { c.slow = (c.slow || 0) + 1; continue; } if (c.slow && q < 64 << 10) c.slow = 0;
+    try { c.sock.write(f); } catch (e) { drop(c); } } }
 function drop(c) { if (c.dead) return; c.dead = true; clients.delete(c.id); try { c.sock.destroy(); } catch (e) {} broadcast(null, { t: 'leave', peer: c.id }); log(`- ${c.id} left (${clients.size} online)`); }
 let worldWs = null;
 const pmsg = c => ({ t: 'p', peer: c.id, p: c.p, gm: c.gm ? 1 : 0 });
@@ -196,13 +206,13 @@ server.on('upgrade', (req, sock) => {
   const key = req.headers['sec-websocket-key']; if (!key) return sock.destroy();
   const accept = crypto.createHash('sha1').update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
   sock.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ' + accept + '\r\n\r\n');
-  sock.setNoDelay(true);
+  sock.setNoDelay(true); try { sock.setKeepAlive(true, 15000); } catch (e) {}
   const c = { id: 'p' + String(++seq).padStart(9, '0'), sock, buf: Buffer.alloc(0), p: {}, alive: true, dead: false, gm: false, master: false, gmTries: 0, ip, rate: 0, rateT: Date.now(), ownerIp: ownerByIp(req) };
   clients.set(c.id, c);
-  send(c, { t: 'hello', you: c.id, ws: worldWs, peers: [...clients.values()].filter(o => o !== c && o.p.v).map(o => ({ peer: o.id, p: o.p, gm: o.gm ? 1 : 0 })) });
+  send(c, { t: 'hello', you: c.id, ws: worldWs, ro: raidOpen ? 1 : 0, peers: [...clients.values()].filter(o => o !== c && o.p.v).map(o => ({ peer: o.id, p: o.p, gm: o.gm ? 1 : 0 })) });
   if (c.ownerIp) { c.gm = true; c.master = true; send(c, { t: 'gm', ok: true, master: 1, token: OWNER_TOKEN || undefined }); log(`* ${c.id} recognised as the realm owner (owner IP)`); }
   log(`+ ${c.id} joined (${clients.size} online)`);
-  sock.on('data', d => onData(c, d)); sock.on('close', () => drop(c)); sock.on('error', () => drop(c));
+  sock.on('data', d => { try { onData(c, d); } catch (e) { log(`! bad data from ${c.id}: ${e.message}`); } }); sock.on('close', () => drop(c)); sock.on('error', () => drop(c));
 });
 
 function onData(c, chunk) {
@@ -225,7 +235,7 @@ function onData(c, chunk) {
 function onMessage(c, text) {
   if (text.length > 16000) return;            // messages must stay small
   const nowMs = Date.now(); if (nowMs - c.rateT > 1000) { c.rateT = nowMs; c.rate = 0; }
-  if (++c.rate > 40) { if (c.rate > 200) drop(c); return; }   // flood protection
+  if (++c.rate > 60) { if (c.rate > 300) drop(c); return; }   // flood protection
   let d; try { d = JSON.parse(text); } catch (e) { return; }
   if (d && d.t === 'p' && d.p && typeof d.p === 'object' && !Array.isArray(d.p)) {
     const pid = typeof d.p.pid === 'string' ? d.p.pid : '';
@@ -233,7 +243,7 @@ function onMessage(c, text) {
     const gid = pid + ':' + String(d.p.n || '').toLowerCase();   // GM rights belong to one character, not the whole device
     if (pid && !c.master) { const should = grants.includes(gid); if (should && !c.gm) { c.gm = true; send(c, { t: 'gm', ok: true, granted: 1 }); log(`* ${d.p.n} is a Game Master (appointed)`); } else if (!should && c.gm) { c.gm = false; send(c, { t: 'gm', ok: false, revoked: 1 }); } }
     if (c.gm && Array.isArray(d.p.ws) && d.p.ws.length === 3 && (!worldWs || +d.p.ws[2] > +worldWs[2])) worldWs = d.p.ws.slice(0, 3);   // GM weather/time is shared with everyone, also players who join later
-    c.p = d.p; broadcast(c, pmsg(c));
+    c.p = d.p; broadcast(c, pmsg(c), true);
     const who = String(d.p.n || '').toLowerCase(); if (who && pendingGifts[who] && pendingGifts[who].length && d.p.u) { for (const what of pendingGifts[who]) send(c, { t: 'gift', what, from: 'the Realm' }); delete pendingGifts[who]; saveGifts(); }
     if (who && d.p.u && pendingMsgs[who] && pendingMsgs[who].length) { for (const msg of pendingMsgs[who]) send(c, { t: 'tkreply', msg }); delete pendingMsgs[who]; saveMsgs(); }
     if (c.gm && d.p.u && !c.tkTold) { c.tkTold = true; const n = openTickets(); if (n) send(c, { t: 'tknew', open: n }); }
@@ -243,6 +253,9 @@ function onMessage(c, text) {
     const ok = crypto.timingSafeEqual(sha(d.pw || ''), sha(GM_PASSWORD));
     if (!ok) { c.gmTries++; log(`! ${c.id} failed GM login`); return send(c, { t: 'gm', ok: false }); }
     c.gm = true; c.master = true; log(`* ${c.id} is now the realm owner (master GM)`); send(c, { t: 'gm', ok: true, master: 1, token: OWNER_TOKEN }); if (c.p.v) broadcast(c, pmsg(c));
+  } else if (d && d.t === 'ro' && c.master) {
+    const was = raidOpen; raidOpen = !!d.open; try { fs.writeFileSync(RAID_FILE, JSON.stringify({ open: raidOpen })); } catch (e) {}
+    if (was !== raidOpen) { broadcast(null, { t: 'ro', open: raidOpen ? 1 : 0 }); log(`* Cinderhold ${raidOpen ? 'UNVEILED' : 'sealed'} by the realm owner`); }
   } else if (d && d.t === 'arm' && d.c) {
     storeArmory(c, d.c);
   } else if (d && d.t === 'gift' && c.gm && typeof d.name === 'string' && typeof d.what === 'string') {

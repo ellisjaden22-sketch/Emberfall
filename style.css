@@ -69,6 +69,7 @@ kbd{font-family:inherit;background:#2a1e12;border:1px solid #5c4422;border-botto
 #tframe.friendly .portrait{border-color:#3fbf4f}
 #tframe .ttag{font-size:11px;color:var(--dim)}
 #party{position:absolute;left:12px;top:132px;display:flex;flex-direction:column;gap:6px}
+#party.raid{gap:3px}#party.raid .pmember{width:176px;padding:3px 7px}#party.raid .pmember .uname{font-size:11px}#party.raid .bar.small{height:7px}
 .pmember{width:200px;padding:5px 8px;cursor:pointer}
 .pmember .uname{font-size:12px}
 .pmember.dead{opacity:.5}

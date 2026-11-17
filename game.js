@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 56;
+const VERSION = 57;
 const TS = 32, MW = 336, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -50,9 +50,11 @@ const ZONES={
   ash:{name:'Cinder Caldera',sub:'Level 7–10'},
   lake:{name:'Mirrowmere',sub:'Tranquil waters'},
   vault:{name:'The Sunken Vault',sub:'Dungeon · Level 10'},
+  raid:{name:'Cinderhold',sub:'Raid · Level 20 · 5–8 heroes'},
   arena:{name:'Bloodsand Arena',sub:'Free-for-all PvP · Level 5+'},
 };
 function zoneOf(tx,ty){
+  if(ty>=OWH&&tx>=RX0) return 'raid';
   if(ty>=AR.y0-3) return 'arena';
   if(ty>=OWH) return 'vault';
   if(Math.hypot(tx-TOWN.x,ty-TOWN.y)<TOWN.r) return 'town';
@@ -75,6 +77,33 @@ const tAt=(tx,ty)=>{ tx+=OFX|0; ty+=OFY|0; return (tx<0||ty<0||tx>=MW||ty>=MH)?T
 const setT=(tx,ty,v)=>{ tx+=OFX|0; ty+=OFY|0; if(tx>=0&&ty>=0&&tx<MW&&ty<MH) map[ty*MW+tx]=v; };
 /* ---------- v22: the Sunken Vault, a level 10 dungeon carved below the overworld (rows OWH..MH) ---------- */
 const VAULT={OX:8,OY:OWH+3,range:60,gate:{x:(99.5+(VGO[0]|0))*TS,y:(48.75+(VGO[1]|0))*TS},start:{x:0,y:0},exit:{x:(99.5+(VGO[0]|0))*TS,y:(50.7+(VGO[1]|0))*TS},doors:[],boss:{},emptySince:0,hint:false};
+/* ---------- v57: Cinderhold raid, columns RX0..MW of the underground rows ---------- */
+const RX0=158;
+const RAID={gate:{x:170.5*TS,y:23.2*TS},range:140,start:{x:(RX0+8.5)*TS,y:(OWH+13.5)*TS},exit:{x:170.5*TS,y:26.4*TS},doors:[],boss:{},emptySince:0,hint:false};
+const inRaid=(px,py)=>py>=OWH*TS&&px>=RX0*TS;
+function carveRaid(){ const O=(x,y,t)=>setT(RX0+x,OWH+y,t);
+  const rect=(x0,y0,x1,y1,t)=>{ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) O(x,y,t??T.DFLOOR); };
+  const circ=(cx,cy,r,t)=>{ for(let y=Math.floor(cy-r);y<=Math.ceil(cy+r);y++)for(let x=Math.floor(cx-r);x<=Math.ceil(cx+r);x++) if(Math.hypot(x-cx,y-cy)<=r) O(x,y,t??T.DFLOOR); };
+  const ell=(cx,cy,rx,ry,t)=>{ for(let y=Math.floor(cy-ry);y<=Math.ceil(cy+ry);y++)for(let x=Math.floor(cx-rx);x<=Math.ceil(cx+rx);x++) if(((x-cx)/rx)**2+((y-cy)/ry)**2<=1) O(x,y,t??T.DFLOOR); };
+  rect(3,6,15,20); for(const [x,y] of [[6,8],[12,8],[6,18],[12,18]]) O(x,y,T.COLUMN); rect(16,12,27,14);                         // the Ember Threshold
+  circ(37,13,10.5); for(const [x,y] of [[30,6],[44,6],[30,20],[44,20]]) circ(x,y,1.3,T.LAVA); rect(47,12,56,14);                 // the Great Forge
+  rect(57,4,83,22); rect(64,4,76,5,T.LAVA); rect(64,21,76,22,T.LAVA); for(const [x,y] of [[61,8],[61,18],[79,8],[79,18],[70,8],[70,18]]) O(x,y,T.COLUMN); rect(84,12,95,14);  // Hall of Twin Flames
+  circ(105,13,10); circ(98,5.5,3.6); circ(112,20.5,3.6); circ(97,20,2.6); for(const [x,y] of [[100,7],[111,8],[101,19]]) O(x,y,T.COLUMN); rect(115,12,123,14);  // Ashmaw's Den
+  rect(124,3,158,25); rect(133,3,135,25,T.LAVA); rect(133,7,135,9,T.BRIDGE); rect(133,17,135,19,T.BRIDGE); rect(147,3,149,25,T.LAVA); rect(147,12,149,14,T.BRIDGE);  // the Magma Falls
+  rect(152,26,155,44);                                                                                                            // the long stair down
+  circ(153.5,55,11.5); for(let k=0;k<8;k++){ const a=k/8*6.283+.39; O(Math.round(153.5+Math.cos(a)*8.6),Math.round(55+Math.sin(a)*8.6),T.COLUMN); } rect(121,54,142,56);  // the Pyromancer's Sanctum and the Gauntlet
+  circ(108,55,12.5); rect(66,54,95,56);                                                                                           // the Obsidian Crucible
+  ell(44,66,26,23); for(const [x,y] of [[30,52],[58,52],[30,80],[58,80]]) circ(x,y,2.2,T.LAVA); for(const [x,y] of [[24,60],[24,72],[64,60],[64,72],[36,46],[52,46],[36,86],[52,86]]) O(x,y,T.COLUMN);  // the Heart of Cinderhold
+  RAID.doors=[[48,48,12,14,['kragmor']],[84,84,12,14,['ignara','pyrrus']],[115,115,12,14,['ashmaw']],[152,155,26,26,['magmaroth']],[141,141,54,56,['selvara']],[95,95,54,56,['gravoth']]].map(([x0,x1,y0,y1,need])=>({x0:RX0+x0,x1:RX0+x1,y0:OWH+y0,y1:OWH+y1,need,lift:0}));
+}
+/* the Cinderhold Gate in the Cinder Caldera (physical tiles) and a road down to the Wyrm's Lair road */
+function carveRaidGate(){ const gx=170, gy=22;
+  for(let y=gy-7;y<=gy+8;y++)for(let x=gx-9;x<=gx+9;x++){ if(Math.hypot(x-gx,(y-gy)*1.1)>8) continue; const t=tAt(x,y); setT(x,y,t===T.LAVA||t===T.WATER?T.BRIDGE:T.PATH); }
+  for(let x=gx-3;x<=gx+3;x++){ setT(x,gy-2,T.DGATE); setT(x,gy-1,T.DGATE); }
+  const P=[[gx,gy+7],[152,33],[132,39],[113,42]];
+  for(let i=0;i<P.length-1;i++){ const [x0,y0]=P[i],[x1,y1]=P[i+1], L=Math.hypot(x1-x0,y1-y0);
+    for(let k=0;k<=L*2;k++){ const f=k/(L*2), cx=x0+(x1-x0)*f, cy=y0+(y1-y0)*f+Math.sin(f*Math.PI)*2;
+      for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){ const tx=Math.round(cx+ox), ty=Math.round(cy+oy); if(tx<3||ty<3||tx>=MW-3||ty>=OWH-3) continue; const cur=tAt(tx,ty); if(cur===T.PATH||cur===T.BRIDGE||cur===T.DGATE||cur===T.COBBLE) continue; setT(tx,ty,cur===T.LAVA||cur===T.WATER?T.BRIDGE:T.PATH); } } } }
 function carveVault(){ const V=VAULT, F=(x,y,t)=>setT(V.OX+x,V.OY+y,t);
   const rect=(x0,y0,x1,y1,t)=>{ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) F(x,y,t??T.DFLOOR); };
   const circ=(cx,cy,r,t)=>{ for(let y=Math.floor(cy-r);y<=Math.ceil(cy+r);y++)for(let x=Math.floor(cx-r);x<=Math.ceil(cx+r);x++) if(Math.hypot(x-cx,y-cy)<=r) F(x,y,t??T.DFLOOR); };
@@ -90,7 +119,7 @@ function carveVault(){ const V=VAULT, F=(x,y,t)=>setT(V.OX+x,V.OY+y,t);
   rect(122,22,140,40); for(const [cx,cy] of [[122,22],[140,22],[122,40],[140,40]]) for(let dy=0;dy<3;dy++)for(let dx=0;dx<3-dy;dx++) F(cx+(cx>130?-dx:dx),cy+(cy>30?-dy:dy),T.VOID);  // Throne of the Drowned King
   rect(124,25,126,27,T.WATER); rect(136,25,138,27,T.WATER); rect(124,35,126,37,T.WATER); rect(136,35,138,37,T.WATER);
   for(const [x,y] of [[128,26],[128,36],[133,26],[133,36]]) F(x,y,T.COLUMN);
-  carveArena();
+  carveRaid(); carveArena();
   for(let y=OWH;y<MH;y++)for(let x=0;x<MW;x++){ if(tAt(x,y)!==T.VOID) continue; let open=false;
     for(let dy=-1;dy<=1&&!open;dy++)for(let dx=-1;dx<=1;dx++){ if(y+dy<OWH) continue; const n=tAt(x+dx,y+dy); if(n!==T.VOID&&n!==T.DWALL&&n!==T.ROCK){ open=true; break; } }
     if(open) setT(x,y,T.DWALL); }
@@ -108,9 +137,9 @@ function carveArena(){ const {x0,y0,w,h,cx,cy}=AR;
 }
 function edgeOf(tx,ty){ if(ty>=OWH) return Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); const L=WI(tx,ty); return Math.min(tx,ty,MW-1-tx,OWH-1-ty,Math.max(0,Math.min(L[0],L[1],159-L[0],111-L[1]))*WS); }
 function ridgeL(tx,ty){ const L=WI(tx,ty); return L[0]>=109.5&&L[0]<=114.5&&!(L[1]>=56&&L[1]<=62); }
-const inVault=(px,py)=>py>=OWH*TS&&py<(AR.y0-3)*TS;
-const inArena=(px,py)=>py>=(AR.y0-3)*TS, arenaSafe=(px,py)=>AR.shr.some(([sx,sy])=>Math.hypot(px/TS-sx,py/TS-sy)<5.2), pvpOn=(px,py)=>inArena(px,py)&&!arenaSafe(px,py);
-function doorClosedAt(tx,ty){ for(const d of VAULT.doors) if(tx===d.x&&ty>=d.y0&&ty<=d.y1){ const b=VAULT.boss[d.boss]; return !(b&&b.dead); } return false; }
+const inVault=(px,py)=>py>=OWH*TS&&py<(AR.y0-3)*TS&&px<RX0*TS;
+const inArena=(px,py)=>py>=(AR.y0-3)*TS&&px<RX0*TS, arenaSafe=(px,py)=>AR.shr.some(([sx,sy])=>Math.hypot(px/TS-sx,py/TS-sy)<5.2), pvpOn=(px,py)=>inArena(px,py)&&!arenaSafe(px,py);
+function doorClosedAt(tx,ty){ if(tx>=RX0&&ty>=OWH){ for(const d of RAID.doors) if(tx>=d.x0&&tx<=d.x1&&ty>=d.y0&&ty<=d.y1) return !d.need.every(k=>RAID.boss[k]&&RAID.boss[k].dead); return false; } for(const d of VAULT.doors) if(tx===d.x&&ty>=d.y0&&ty<=d.y1){ const b=VAULT.boss[d.boss]; return !(b&&b.dead); } return false; }
 /* the gate in the Ruins of Vael: a flattened forecourt, a path down to the road, and the gatehouse itself (solid) */
 function carveStable(){ const X0=85,X1=97,Z0=64,Z1=73;
   for(let y=62;y<=81;y++)for(let x=84;x<=99;x++){ const t=tAt(x,y); if(t===T.TREE||t===T.ROCK||t===T.WALL) setT(x,y,T.GRASS); }
@@ -140,7 +169,7 @@ function genWorld(){
       case 'lake': { const d=Math.hypot(lx-90,ly-93)*WS+(fbm(x*.2,y*.2,11)-.5)*6; t=d<8.5*WS?T.WATER:d<10*WS?T.SAND:T.GRASS; break; }
       case 'frost': { t=T.SNOW; const d=Math.hypot(lx-142,ly-84)*WS+(fbm(x*.2,y*.2,12)-.5)*5; if(d<8*WS) t=T.ICE; else if(h<.13&&n>.42) t=T.TREE; else if(h>.985) t=T.ROCK; break; }
       case 'crypt': t=T.RUIN; break;
-      case 'vault': t=T.VOID; break;
+      case 'vault': case 'raid': t=T.VOID; break;
       case 'arena': t=T.VOID; break;
     }
     if(y<OWH){ const eg=edgeOf(x,y); if(eg<2||eg<3&&h<.6) t=T.ROCK;
@@ -196,7 +225,7 @@ function genWorld(){
     const inGate=a=>TOWN.gates.some(g=>Math.abs(Math.atan2(Math.sin(a-g.c),Math.cos(a-g.c)))<half);
     for(let y=TOWN.y-29;y<=TOWN.y+29;y++)for(let x=TOWN.x-29;x<=TOWN.x+29;x++){ const d=Math.hypot(x-TOWN.x,y-TOWN.y); if(d<R-.75||d>=R+.8) continue;
       if(Math.abs(y-TOWN.y)<=1&&inGate(Math.atan2(y-TOWN.y,x-TOWN.x))) continue; setT(x,y,T.TWALL); } }
-  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null);
+  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate();
 }
 /* the kinds of props the World Editor can place (solid ones block movement) */
 const PROPK={tree:{solid:1},pine:{solid:1},deadtree:{solid:1},rock:{solid:1},boulder:{solid:1},house:{solid:1},tent:{solid:1},well:{solid:1},statue:{solid:1},pillar:{solid:1},wall:{solid:1},tower:{solid:1},
@@ -640,6 +669,29 @@ const SLOTICON={weapon:'🗡',armor:'🥋',trinket:'💍'};
   {key:'vaelith',name:'Vaelith, the Drowned King',lv:[10,10],hp:7600,hpL:0,dmg:30,dmgL:0,spd:66,rng:66,as:2.4,aggro:260,r:30,col:'#4affd8',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[140,146],light:'#4affd8',sp:{k:'vaelith'},xp:3000},
   {key:'drownedshade',name:'Drowned Shade',lv:[10,10],hp:260,hpL:0,dmg:16,dmgL:0,spd:88,rng:40,as:1.8,aggro:520,r:14,col:'#4ad8c8',zone:'vault',vault:1,n:3,summon:true,owner:'vaelith',pos:[140,146],fly:true});
   for(const mt of MOBT) if(mt.spots) mt.n=mt.spots.length; }
+/* ---------- v57: Cinderhold (world tiles = local + (RX0, OWH)) ---------- */
+{ const W=a=>a.map(([x,y])=>[x+RX0,y+OWH]), R={zone:'raid',raid:1,resp:1e8,hpL:0,dmgL:0}, S=(x,y,n)=>W(Array.from({length:n},()=>[x,y]));
+  MOBT.push(
+  {...R,key:'cinderguard',name:'Cinderhold Guardian',lv:[20,20],hp:9000,dmg:62,spd:70,rng:48,as:2.2,aggro:170,r:17,col:'#7a3a22',light:'#ff7a1a',sp:{k:'slam',cd:10,r:95,delay:1.4,mul:1.4},spots:W([[20,12],[20,14],[86,12],[86,14],[152,37],[155,37],[90,54],[90,56]])},
+  {...R,key:'emberpriest',name:'Ember Priest',lv:[20,20],hp:5600,dmg:48,spd:62,rng:230,as:2.4,aggro:190,r:14,col:'#a8281a',ranged:true,proj:2,light:'#ff6a1a',sp:{k:'poison',cd:9},spots:W([[23,13],[89,13],[127,12],[127,14],[137,54],[137,56],[78,54],[78,56]])},
+  {...R,key:'forgehound',name:'Forge Hound',lv:[20,20],hp:4600,dmg:40,spd:108,rng:34,as:1.4,aggro:160,r:15,col:'#2a1a14',light:'#ff8a2a',sp:{k:'leap',cd:11,r:70,delay:1.0,mul:1.1},spots:W([[51,12],[52,14],[54,13],[92,12],[92,14],[124,54],[124,56]])},
+  {...R,key:'magmaspawn',name:'Magma Spawn',lv:[20,20],hp:7200,dmg:56,spd:58,rng:44,as:2.3,aggro:150,r:18,col:'#3a2620',light:'#ff6a1a',sp:{k:'slam',cd:9,r:100,delay:1.3,mul:1.3},spots:W([[119,13],[126,7],[126,19]])},
+  {...R,key:'obsidianbrute',name:'Obsidian Brute',lv:[20,20],hp:14000,dmg:95,spd:60,rng:56,as:2.8,aggro:160,r:24,col:'#1a1420',light:'#b45cff',sp:{k:'slam',cd:9,r:120,delay:1.6,mul:1.5},spots:W([[153,32],[133,55],[127,55],[85,55]])},
+  {...R,key:'kragmor',name:'Kragmor the Forgewarden',lv:[21,21],hp:52000,dmg:150,spd:70,rng:72,as:2.4,aggro:260,r:30,col:'#5a4a40',light:'#ff7a1a',boss:true,spots:W([[37,13]]),sp:{k:'r_krag'},xp:5000,bers:360},
+  {...R,key:'ignara',name:'Ignara the Searing',lv:[21,21],hp:30000,dmg:120,spd:84,rng:56,as:2.0,aggro:240,r:22,col:'#ff5a1a',light:'#ff6a1a',boss:true,spots:W([[66,13]]),sp:{k:'r_ign'},xp:3000,bers:360,leash:720},
+  {...R,key:'pyrrus',name:'Pyrrus the Azure Flame',lv:[21,21],hp:27000,dmg:95,spd:62,rng:240,as:2.6,aggro:240,r:22,col:'#3a8aff',light:'#4ab0ff',boss:true,ranged:true,proj:15,spots:W([[75,13]]),sp:{k:'r_pyr'},xp:3000,bers:360,leash:720},
+  {...R,key:'ashmaw',name:'Ashmaw, Mother of Hounds',lv:[22,22],hp:64000,dmg:140,spd:100,rng:66,as:1.9,aggro:260,r:32,col:'#1a1210',light:'#ff8a2a',boss:true,spots:W([[106,13]]),sp:{k:'r_ash'},xp:5500,bers:420},
+  {...R,key:'cinderpup',name:'Cinder Pup',lv:[20,20],hp:3400,dmg:34,spd:118,rng:30,as:1.3,aggro:600,r:12,col:'#3a2418',light:'#ff8a2a',summon:true,owner:'ashmaw',spots:S(106,13,4)},
+  {...R,key:'magmaroth',name:'Magmaroth, the Living Flow',lv:[22,22],hp:74000,dmg:165,spd:52,rng:80,as:2.6,aggro:260,r:38,col:'#3a2620',light:'#ff6a1a',boss:true,spots:W([[141,13]]),sp:{k:'r_mag'},xp:6000,bers:420,leash:720},
+  {...R,key:'magmaling',name:'Magmaling',lv:[20,20],hp:4200,dmg:42,spd:76,rng:36,as:1.8,aggro:600,r:14,col:'#ff6a1a',light:'#ff8a2a',summon:true,owner:'magmaroth',spots:S(141,13,4)},
+  {...R,key:'selvara',name:"High Pyromancer Sel'vara",lv:[23,23],hp:70000,dmg:118,spd:60,rng:250,as:2.5,aggro:260,r:24,col:'#c42a1a',light:'#ff5a2a',boss:true,ranged:true,proj:2,spots:W([[156,55]]),sp:{k:'r_sel'},xp:6500,bers:480},
+  {...R,key:'flameacolyte',name:'Flame Acolyte',lv:[20,20],hp:4800,dmg:44,spd:64,rng:220,as:2.2,aggro:600,r:14,col:'#a8281a',ranged:true,proj:2,light:'#ff6a1a',summon:true,owner:'selvara',spots:S(156,55,3)},
+  {...R,key:'gravoth',name:'Gravoth the Obsidian Colossus',lv:[23,23],hp:92000,dmg:200,spd:50,rng:84,as:2.8,aggro:260,r:40,col:'#1a1420',light:'#b45cff',boss:true,spots:W([[108,55]]),sp:{k:'r_grav'},xp:7000,bers:480},
+  {...R,key:'obsidianshard',name:'Obsidian Shard',lv:[20,20],hp:5500,dmg:0,spd:0,rng:0,as:999,aggro:0,r:16,col:'#b45cff',light:'#c07aff',fly:true,summon:true,owner:'gravoth',spots:S(108,55,3)},
+  {...R,key:'vyrathos',name:'Vyrathos, the Ember Tyrant',lv:[24,24],hp:150000,dmg:210,spd:78,rng:90,as:2.5,aggro:280,r:46,col:'#ff4a1a',light:'#ff6a1a',boss:true,spots:W([[44,70]]),sp:{k:'r_vyr'},xp:12000,bers:720,leash:1100},
+  {...R,key:'emberspawn',name:'Emberspawn',lv:[20,20],hp:3800,dmg:38,spd:110,rng:30,as:1.4,aggro:600,r:12,col:'#ff9a2a',light:'#ffb03a',fly:true,summon:true,owner:'vyrathos',spots:S(44,70,5)});
+  for(const mt of MOBT) if(mt.raid) mt.n=mt.spots.length; }
+MOUNTS[6]={name:'Ashborn Nightmare',col:[.07,.06,.06],mane:[1,.42,.06],cost:0,speed:2.35,lvl:20,ashborn:true,drop:'Vyrathos, the Ember Tyrant (Cinderhold raid)'};
 
 /* where a fixed-position monster stands on the bigger map */
 function posW(mt){ const [x,y]=mt.pos; if(y>=112) return [x,y+OWH-112]; const k=mt.key; if(k==='lich'||/^lich|crypt/.test(k)||(x>=130&&x<=150&&y>=8&&y<=24)) return [x+CRO[0],y+CRO[1]]; if(k==='hking') return [x+RUO[0],y+RUO[1]]; if(x===56&&y===9) return [LAIR.x,LAIR.y]; return WP(x,y); }
@@ -655,12 +707,12 @@ const mobs=[], mobById={};
       else if(mt.spots){x=mt.spots[k][0]*TS+16;y=mt.spots[k][1]*TS+16}
       else do{ x=(3+R()*(MW-6))*TS; y=(3+R()*(OWH-6))*TS; tries++;
         const tx=Math.floor(x/TS),ty=Math.floor(y/TS);
-        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>8 && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
+        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>8 && Math.hypot(tx-170,ty-24)>13 && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
         if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
         if(ok){ const gap=tries<1500?112:tries<3000?96:70; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
       const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
-      const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1));
+      const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1));
       const m={id:id++,ti,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:0,flags:0,hit:0};
       if(mt.summon){m.dead=true;m.resp=Infinity} mobs.push(m); mobById[m.id]=m;
     }
@@ -676,7 +728,7 @@ const mobs=[], mobById={};
   { const Y=TOWN.yard, DT={key:'dummy',name:'Training Dummy',lv:[1,1],hp:100000,hpL:0,dmg:0,dmgL:0,spd:0,rng:0,as:999,aggro:0,r:14,col:'#c8a868',zone:'town',n:0,dummy:true,resp:5};
     if(WE&&Array.isArray(WE.spawns)) for(const sp of WE.spawns){ const mt=MOBT.find(q=>q.key===sp.mob); if(!mt||mt.boss||mt.summon) continue; const n=clamp(sp.n|0||1,1,12);
       for(let k=0;k<n;k++){ const a=k/n*6.283, rr=n>1?1.5+R()*1.5:0, x=(sp.x+.5+Math.cos(a)*rr)*TS, y=(sp.y+.5+Math.sin(a)*rr)*TS; if(blocked(x,y,8)) continue; const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
-        const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)); const m={id:id++,ti:-1,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:R()*6.28,flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
+        const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)); const m={id:id++,ti:-1,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:R()*6.28,flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
     if(Y) for(let k=0;k<3;k++){ const x=(Y.x+Y.tx*(k-1)*2)*TS, y=(Y.y+Y.ty*(k-1)*2)*TS; const m={id:id++,ti:-1,t:DT,lv:1,sx:x,sy:y,x,y,rx:x,ry:y,hp:100000,mhp:100000,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:Math.atan2(TOWN.y-Y.y,TOWN.x-Y.x),flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
 })();
 
@@ -730,18 +782,19 @@ function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_
   const mk=(peer,p,gm)=>Object.freeze({peer,by:null,isMe:false,sameTab:false,kind:'viewer',guest:false,gm:!!gm,presence:Object.freeze(p||{}),updatedAt:Date.now()});
   const rebuild=()=>{ const arr=[]; if(myId) arr.push(Object.freeze({peer:myId,by:null,isMe:true,sameTab:true,kind:'viewer',guest:false,presence:Object.freeze({...mine}),updatedAt:Date.now()})); for(const v of peers.values()) arr.push(v); snap=Object.freeze(arr); };
   const finish=r=>{ if(!done){ done=true; resolve(r); } };
-  const api={ maxP:15000, presence(patch){ for(const k in patch){ if(patch[k]===null) delete mine[k]; else mine[k]=patch[k]; } rebuild(); if(conn&&ws.readyState===1) ws.send(JSON.stringify({t:'p',p:mine})); return Promise.resolve(); },
+  const api={ maxP:15000, presence(patch){ for(const k in patch){ if(patch[k]===null) delete mine[k]; else mine[k]=patch[k]; } rebuild(); if(conn&&ws.readyState===1&&ws.bufferedAmount<262144) ws.send(JSON.stringify({t:'p',p:mine})); return Promise.resolve(); },
     peers:()=>snap, onPeers:()=>()=>{}, onConnection(fn){ connCbs.push(fn); setTimeout(()=>fn(conn),0); return ()=>{}; }, connected:()=>conn,
     armory(data){ if(conn) ws.send(JSON.stringify({t:'arm',c:data})); }, gift(name,what){ if(conn) ws.send(JSON.stringify({t:'gift',name,what})); },
     bug(text){ if(conn) ws.send(JSON.stringify({t:'bug',text:String(text).slice(0,2000)})); }, ticket(o){ if(!conn||ws.readyState!==1) return false; ws.send(JSON.stringify({...o,t:'bug'})); return true; }, tk(op,o){ if(conn&&ws.readyState===1) ws.send(JSON.stringify({...(o||{}),t:'tk',op})); }, ah(op,o){ if(!conn||ws.readyState!==1) return false; ws.send(JSON.stringify({...(o||{}),t:'ah',op})); return true; }, admin(cmd,pid,name){ if(conn) ws.send(JSON.stringify({t:'admin',cmd,pid,name})); },
-    master:false, gmGrant(pid,on){ if(conn) ws.send(JSON.stringify({t:'mkgm',pid,on:!!on})); },
+    master:false, gmGrant(pid,on){ if(conn) ws.send(JSON.stringify({t:'mkgm',pid,on:!!on})); }, raidOpen(on){ if(conn&&ws.readyState===1) ws.send(JSON.stringify({t:'ro',open:!!on})); },
     gmLogin(pw){ return new Promise(res=>{ if(!conn) return res(false); gmWait=res; ws.send(JSON.stringify({t:'gm',pw:String(pw).slice(0,200)})); setTimeout(()=>{ if(gmWait===res){ gmWait=null; res(false); } },5000); }); } };
   function open(){ try{ ws=new WebSocket(url); }catch(e){ return finish(null); }
-    const to=setTimeout(()=>{ if(!conn){ try{ws.close()}catch(e){} finish(null); } },15000);
+    const to=setTimeout(()=>{ if(!conn){ try{ws.close()}catch(e){} finish(null); } },30000);
     ws.onmessage=e=>{ let d; try{ d=JSON.parse(e.data); }catch(_){ return; }
-      if(d.t==='hello'){ if(d.ws) setTimeout(()=>{ try{ applyWorldWs(d.ws); }catch(e){} },0); myId=d.you; peers.clear(); for(const q of d.peers||[]) peers.set(q.peer,mk(q.peer,q.p,q.gm)); conn=true; clearTimeout(to); rebuild(); finish(api); connCbs.forEach(f=>f(true)); if(saves.gmToken) ws.send(JSON.stringify({t:'gmtok',token:saves.gmToken})); if(Object.keys(mine).length) ws.send(JSON.stringify({t:'p',p:mine})); }
+      if(d.t==='hello'){ window.__raidOpen=!!d.ro; if(d.ws) setTimeout(()=>{ try{ applyWorldWs(d.ws); }catch(e){} },0); myId=d.you; peers.clear(); for(const q of d.peers||[]) peers.set(q.peer,mk(q.peer,q.p,q.gm)); conn=true; clearTimeout(to); rebuild(); finish(api); connCbs.forEach(f=>f(true)); if(saves.gmToken) ws.send(JSON.stringify({t:'gmtok',token:saves.gmToken})); if(Object.keys(mine).length) ws.send(JSON.stringify({t:'p',p:mine})); }
       else if(d.t==='p'){ peers.set(d.peer,mk(d.peer,d.p,d.gm)); rebuild(); }
       else if(d.t==='leave'){ peers.delete(d.peer); rebuild(); }
+      else if(d.t==='ro'){ const was=!!window.__raidOpen; window.__raidOpen=!!d.open; if(d.open&&!was) setTimeout(()=>{ try{ raidUnveiled(); }catch(_){} },0); }
       else if(d.t==='gm'){ if(d.master) api.master=true; if(d.token){ saves.gmToken=d.token; saveAll(saves); } if(d.forget){ delete saves.gmToken; saveAll(saves); } if(gmWait){ const r=gmWait; gmWait=null; r(!!d.ok); }
         else if(d.ok&&d.master&&!isGM){ setGM(true,'master'); if(me) sysMsg('Welcome back, realm owner. Your Game Master tools are ready (/gm).','c-gm'); }
         else if(d.granted&&!isGM){ setGM(true,'server'); sysMsg('The realm owner made you a Game Master. Type /gm for your tools.','c-gm'); }
@@ -786,16 +839,16 @@ setInterval(updateRealm,2000);
 
 function pushAct(kind,tgt,amt,vis,x,y){ if((kind===1||kind===4||kind===7)&&tgt!==MY_U&&typeof tgt==='string'){ const o=othersByU.get(tgt); if(o&&!canHelp(o)) return; } // kinds: 0 dmg mob,1 heal,2 stun,3 taunt,4 hot,5 root,6 visual,7 absorb
   const a=[++actSeq,kind,tgt,Math.round(amt||0),vis||0]; if(x!==undefined){ a.push(Math.round(x),Math.round(y||0)); }
-  myActs.push(a); if(myActs.length>18) myActs.shift();
+  myActs.push(a); if(myActs.length>28) myActs.shift();
   if(amHost && kind!==6 && kind!==7 && kind<12) hostApplyAct(MY_U,me.c.cls,a);
   return a;
 }
-function pushMd(u,amt,mobId,vis){ const a=[++mdSeq,u,Math.round(amt),mobId,vis||0]; myMd.push(a); if(myMd.length>16) myMd.shift();
+function pushMd(u,amt,mobId,vis){ const a=[++mdSeq,u,Math.round(amt),mobId,vis||0]; myMd.push(a); if(myMd.length>32) myMd.shift();
   if(u===MY_U) mobHitsMe(a); else visualMobHit(mobById[mobId],u,vis); }
-function pushTg(x,y,r,dur,kind){ const a=[++tgSeq,Math.round(x),Math.round(y),Math.round(r),Math.round(dur*1000),kind]; myTg.push(a); if(myTg.length>8) myTg.shift(); addTel(a); return a; }
+function pushTg(x,y,r,dur,kind){ const a=[++tgSeq,Math.round(x),Math.round(y),Math.round(r),Math.round(dur*1000),kind]; myTg.push(a); if(myTg.length>16) myTg.shift(); addTel(a); return a; }
 function packMobs(){ const t=now(); const ps=[]; if(me) ps.push([me.x,me.y]); for(const o of others.values()) ps.push([o.x,o.y]);
-  const out=[], vin=ps.some(p=>p[1]>=(OWH-6)*TS&&p[1]<(AR.y0-3)*TS); for(const m of mobs){ if(!m.tgt&&!(m.t.vault&&vin)&&!ps.some(p=>Math.abs(p[0]-m.x)<1700&&Math.abs(p[1]-m.y)<1700)) continue;
-    if(m.dead){ out.push([m.id]); continue; } const fl=(m.stunU>t?2:0)|(m.rootU>t?4:0)|(m.evade?8:0)|(m.enr?16:0)|(m.pend&&m.pend.at>t?32:0);
+  const out=[], vin=ps.some(p=>p[1]>=(OWH-6)*TS&&p[1]<(AR.y0-3)*TS&&p[0]<RX0*TS), rin=ps.some(p=>p[1]>=OWH*TS&&p[0]>=RX0*TS); for(const m of mobs){ if(!m.tgt&&!(m.t.vault&&vin)&&!(m.t.raid&&rin)&&!ps.some(p=>Math.abs(p[0]-m.x)<1700&&Math.abs(p[1]-m.y)<1700)) continue;
+    if(m.dead){ out.push([m.id]); continue; } const fl=(m.stunU>t?2:0)|(m.rootU>t?4:0)|(m.evade?8:0)|(m.enr?16:0)|(m.pend&&m.pend.at>t?32:0)|(m.air?64:0);
     if(m.hp>=m.mhp && !fl && !m.tgt && !m.tag) out.push([m.id,Math.round(m.x),Math.round(m.y)]);
     else out.push([m.id,Math.round(m.x),Math.round(m.y),Math.max(0,Math.round(m.hp)),fl,m.tgt||'',m.tag||'']); } return out; }
 
@@ -805,8 +858,8 @@ function sendPresence(force){ if(KICKED) return;
     hp:Math.round(me.hp),mhp:me.mhp,rs:[Math.round(me.res),me.mres],tr:tradePres(),pe:me.pet&&me.petOn&&!me.dead?[Math.round(me.pet.x),Math.round(me.pet.y),+(me.pet.face||0).toFixed(2),me.pet.mv?1:0,me.pet.swingT&&now()-me.pet.swingT<.4?1:0]:null,d:me.dead?1:0,pt:me.party||'',mt:me.mounted||null,em:me.emote?me.emote.k:null,wr:me.c.eq.weapon?me.c.eq.weapon.rar:0,ar:me.c.eq.armor?me.c.eq.armor.rar:0,gv:myGearVis(),nc:me.c.nc||null,ix:inspectData(),sg:me.song&&!me.dead?[me.song,+mySongMult().toFixed(2)]:null,bn:me.banner&&me.banner.until>t?[Math.round(me.banner.x),Math.round(me.banner.y),+(me.banner.until-t).toFixed(1),me.banner.song,+me.banner.mult.toFixed(2)]:null,ws:isGM&&gm.wset?[gm.wx,gm.tPh,gm.wset]:null,sl:me.stealth?1:null,
     b:(me.bulwark>t?1:0)|(me.hots.length?2:0)|(me.cast?4:0)|(me.absorb>0&&me.absorbU>t?8:0)|(me.rootU>t?16:0)|(me.dots.length?32:0)|(me.avatarU>t?64:0),
     z:zoneAtPx(me.x,me.y), gm:isGM?1:null, pid:MY_PID, iv:gm.invis?1:null, cs:cosBits()||null, ti:myTitle()||null, own:isRealmOwner()?1:null, au:gm.aura&&isGM&&!gm.invis?1:null, gl:isRealmOwner()&&(saves.gmGrants||[]).length?saves.gmGrants.map(g=>g.gid||g.pid).slice(0,20):null,
-    inv:myInv, ir:myIr, kk:myKick, pl:me.party&&amLeader()?1:null, cn:me.cast&&!me.cast.node&&!me.cast.fin?[String(me.cast.ab.name||'').slice(0,24),Math.round(clamp((t-me.cast.t0)/me.cast.dur,0,1)*100),Math.round(me.cast.dur*1000)]:null, a:myActs.slice(-18), ch:myChat.slice(-3),
-    w: amHost? packMobs(): null, md: amHost? myMd.slice(-16): null, tg: amHost? myTg.slice(-8): null, hs: amHost?1:null };
+    inv:myInv, ir:myIr, kk:myKick, pl:me.party&&amLeader()?1:null, cn:me.cast&&!me.cast.node&&!me.cast.fin?[String(me.cast.ab.name||'').slice(0,24),Math.round(clamp((t-me.cast.t0)/me.cast.dur,0,1)*100),Math.round(me.cast.dur*1000)]:null, a:myActs.slice(-28), ch:myChat.slice(-3),
+    w: amHost? packMobs(): null, md: amHost? myMd.slice(-32): null, tg: amHost? myTg.slice(-16): null, hs: amHost?1:null, ny: MYNY?1:null, rd: isGM&&RAIDD.stamp?[RAIDD.k,RAIDD.stamp]:null, rr: isGM&&RAIDD.rr&&Date.now()-RAIDD.rr<10000?RAIDD.rr:null };
   const LIM=(room&&room.maxP)||3900; const ixs=JSON.stringify(p.ix); if(ixs===sendPresence.ixs&&t-(sendPresence.ixT||0)<4) delete p.ix; else { sendPresence.ixs=ixs; sendPresence.ixT=t; }
   let s=JSON.stringify(p);
   while(s.length>LIM && p.ch.length){p.ch.shift();s=JSON.stringify(p)}
@@ -814,6 +867,9 @@ function sendPresence(force){ if(KICKED) return;
   if(s.length>LIM && p.ix){ delete p.ix; sendPresence.ixs=''; s=JSON.stringify(p); }
   if(s.length>LIM && p.w){ const me0=me; p.w=p.w.map(e=>{ const m=mobById[e[0]]; return [e,m?Math.hypot(m.x-me0.x,m.y-me0.y)-(m.tgt?1e5:0):0]; }).sort((a,b)=>a[1]-b[1]).map(e=>e[0]);
     while(s.length>LIM && p.w.length>8){ p.w.length=Math.floor(p.w.length*.85); s=JSON.stringify(p); } }
+  if(s.length>LIM&&p.md&&p.md.length>12){ p.md=p.md.slice(-12); s=JSON.stringify(p); }
+  while(s.length>LIM&&p.w&&p.w.length>0){ p.w.length=Math.floor(p.w.length*.7); s=JSON.stringify(p); }
+  if(s.length>LIM){ delete p.ix; delete p.tr; p.a=(p.a||[]).slice(-4); p.ch=(p.ch||[]).slice(-1); s=JSON.stringify(p); }
   if(s.length>LIM+100) return;
   room.presence(p).catch(()=>{});
 }
@@ -841,9 +897,12 @@ function syncPeers(){
   const claim=[]; for(const p of list){ if(!p.sameTab && cand.includes(p.peer) && p.presence.hs && fresh(p)) claim.push(p.peer); }
   const graceOver=!room||t-joinedAt>1.6; const lowest=a=>a.reduce((x,y)=>y<x?y:x);
   if(!room){ amHost=true; hostPeer=null; }
-  else if(!me){ amHost=cand.length===0; hostPeer=claim.length?lowest(claim):cand.length?lowest(cand):null; }
-  else { let pool=claim.slice(); if(amHost) pool.push(mine); if(!pool.length){ pool=cand.slice(); pool.push(mine); }
+  const byPeer=new Map(list.map(q=>[q.peer,q])), candF=cand.filter(pe=>fresh(byPeer.get(pe))), good=candF.filter(pe=>!(byPeer.get(pe).presence||{}).ny);
+  if(!room){}
+  else if(!me){ amHost=cand.length===0; hostPeer=claim.length?lowest(claim):good.length?lowest(good):candF.length?lowest(candF):cand.length?lowest(cand):null; }
+  else { const yieldH=MYNY&&good.length>0&&!(amHost&&hostBusy()); let pool=claim.slice(); if(amHost&&!yieldH) pool.push(mine); if(!pool.length){ const ga=MYNY?good.slice():[...good,mine]; pool=ga.length?ga:[...candF,mine]; }
     if(HOSTPAUSE&&claim.length){ pool=claim.slice(); } else HOSTPAUSE=false;
+    if(!pool.length) pool=[mine];
     const low=lowest(pool); amHost=low===mine&&(graceOver||amHost); hostPeer=low===mine?null:low; }
   if(amHost && !wasHost){ for(const m of mobs){ m.threat={}; if(m.tgt) m.threat[m.tgt]=10; } }
   wasHost=amHost;
@@ -858,7 +917,7 @@ function syncPeers(){
     if(o.last===pr) continue; o.last=pr;
     o.n=clean(pr.n).slice(0,14)||'Stranger'; o.c=CLS[pr.c]?pr.c:'warden'; o.l=clamp(pr.l|0,1,MAXLVL);
     { const nx=+pr.x||0, ny=+pr.y||0, tn=now(), dtp=tn-(o.tr||0); if(o.tr&&dtp>.03&&dtp<1){ o.vx=clamp((nx-o.x)/dtp,-700,700); o.vy=clamp((ny-o.y)/dtp,-700,700); } else { o.vx=0; o.vy=0; } o.tr=tn; o.x=nx; o.y=ny; netSnap(o,nx,ny); }o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);o.d=!!pr.d;
-    o.sl=!!pr.sl; o.pe=Array.isArray(pr.pe)&&pr.pe.length>=4?pr.pe.map(Number):null; if(o.pe&&pr.pe[4]) o.peSw=now(); o.tr=pr.tr&&typeof pr.tr==='object'?pr.tr:null; if(Array.isArray(pr.ws)&&pr.gm&&p.gm!==false) applyWorldWs(pr.ws); o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,4); o.gv=parseGV(pr.gv); o.nc=clamp(pr.nc|0,0,12); o.sg=Array.isArray(pr.sg)?[clamp(pr.sg[0]|0,0,3),clamp(+pr.sg[1]||1,0,3)]:null; o.bn=Array.isArray(pr.bn)?{x:+pr.bn[0]||0,y:+pr.bn[1]||0,until:now()+clamp(+pr.bn[2]||0,0,25),song:clamp(pr.bn[3]|0,0,3),mult:clamp(+pr.bn[4]||1,0,3)}:null; if(Array.isArray(pr.ix)) o.ix=pr.ix.slice(0,3); o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.seenAt=t;
+    o.sl=!!pr.sl; o.pe=Array.isArray(pr.pe)&&pr.pe.length>=4?pr.pe.map(Number):null; if(o.pe&&pr.pe[4]) o.peSw=now(); o.tr=pr.tr&&typeof pr.tr==='object'?pr.tr:null; if(Array.isArray(pr.ws)&&pr.gm&&p.gm!==false) applyWorldWs(pr.ws); o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,4); o.gv=parseGV(pr.gv); o.nc=clamp(pr.nc|0,0,12); o.sg=Array.isArray(pr.sg)?[clamp(pr.sg[0]|0,0,3),clamp(+pr.sg[1]||1,0,3)]:null; o.bn=Array.isArray(pr.bn)?{x:+pr.bn[0]||0,y:+pr.bn[1]||0,until:now()+clamp(+pr.bn[2]||0,0,25),song:clamp(pr.bn[3]|0,0,3),mult:clamp(+pr.bn[4]||1,0,3)}:null; if(Array.isArray(pr.ix)) o.ix=pr.ix.slice(0,3); o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.seenAt=t; if(o.gm) try{ raidNetIn(pr); }catch(e){}
     if(o.isNew){ o.isNew=false; o.rx=o.x; o.ry=o.y; if(me&&seenO(o)) sysMsg(`${o.n} the ${CLS[o.c].name} has entered Emberfall.`); }
     else if(o.wasVis!==undefined&&o.wasVis!==seenO(o)&&me) sysMsg(seenO(o)?`${o.n} the ${CLS[o.c].name} has entered Emberfall.`:`${o.n} has left the realm.`); o.wasVis=seenO(o);
     partyNet(o,pr);
@@ -880,6 +939,7 @@ function syncPeers(){
     if(o.cSeq===null){ let mx=-1; for(const c of ch) mx=Math.max(mx,c[0]|0); o.cSeq=mx; }
     else for(const c of ch){ if(!Array.isArray(c)||(c[0]|0)<=o.cSeq) continue; o.cSeq=c[0]|0;
       const party=c[1]===1, txt=clean(c[2]).slice(0,120); if(!txt) continue; if(c[1]===3){ if(me&&me.party&&o.pt===me.party) vaultEvent(o,txt); continue; }
+      if(c[1]===4){ if(me&&inRaid(me.x,me.y)) raidWarnShow(txt); continue; }
       if(c[1]===2&&o.gm){ const art=room&&typeof room.emit==='function'; if(!art||(lastGrant&&lastGrant.pids.includes(o.pid+':'+o.n.toLowerCase()))) gmAnnounceShow(o.n,txt,art?'gm':(o.own?'owner':'gm')); continue; }
       if(party && (!me||!me.party||o.pt!==me.party)) continue;
       chatLine(txt, party?'c-party':'c-say', party?'[Party] ':'', {n:o.n,col:nameCol(o),gm:o.gm&&isGM}); o.bubble=txt; o.bubbleT=t+6; }
@@ -932,7 +992,7 @@ function applySnapshot(w){
     let hp=m.mhp,fl=0,tg='',tag='';
     if(s.length>=7){ hp=+s[3]; fl=s[4]|0; tg=String(s[5]||''); tag=String(s[6]||''); }
     if(hp<m.hp && !wasDead) m.hit=t;
-    m.hp=hp; m.dead=false; if((fl&32)&&!m._wd) m.swingT=t; m._wd=!!(fl&32); m.flags=fl; m.evade=!!(fl&8); m.enr=!!(fl&16);
+    m.hp=hp; m.dead=false; if((fl&32)&&!m._wd) m.swingT=t; m._wd=!!(fl&32); m.flags=fl; m.evade=!!(fl&8); m.enr=!!(fl&16); m.air=!!(fl&64);
     m.stunU=fl&2?t+.2:0; m.rootU=fl&4?t+.2:0; m.tgt=tg; m.tag=tag;
     if(wasDead){ m.rx=m.x; m.ry=m.y; m.spawnT=t; m.kbA=null; m._puff=0; }
   }
@@ -942,8 +1002,8 @@ function applySnapshot(w){
    HOST: monster simulation
    ===================================================================== */
 function alivePlayers(){
-  const arr=[]; if(me&&!me.dead&&!gm.invis) arr.push({u:MY_U,x:me.x,y:me.y,l:me.c.lvl,sl:me.stealth});
-  for(const o of others.values()) if(!o.d&&!o.iv) arr.push({u:o.u,x:o.x,y:o.y,l:o.l,sl:o.sl});
+  const arr=[]; if(me&&!me.dead&&!gm.invis) arr.push({u:MY_U,x:me.x,y:me.y,l:me.c.lvl,sl:me.stealth,c:me.c.cls});
+  for(const o of others.values()) if(!o.d&&!o.iv) arr.push({u:o.u,x:o.x,y:o.y,l:o.l,sl:o.sl,c:o.c});
   return arr;
 }
 function hostApplyAct(u,cls,a){
@@ -952,7 +1012,7 @@ function hostApplyAct(u,cls,a){
   if(kind===0||kind===2||kind===3||kind===5){
     const m=mobById[tgt]; if(!m||m.dead||m.evade) return;
     if(!m.tag) m.tag=u;
-    if(kind===0){ m.hp-=amt; if(m.t.dummy) m.hp=Math.max(1,m.hp); m.hit=t; m.threat[u]=(m.threat[u]||0)+amt*(cls==='warden'?2.4:1)+1; if(m.hp<=0){ m.hp=0; killMob(m); } }
+    if(kind===0){ m.hp-=m.t.raid?amt*RAIDD.take:amt; if(m.t.dummy) m.hp=Math.max(1,m.hp); m.hit=t; m.threat[u]=(m.threat[u]||0)+amt*(cls==='warden'?2.4:1)+1; if(m.hp<=0){ m.hp=0; killMob(m); } }
     else if(kind===2){ m.stunU=t+amt/1000/(m.t.boss?3:1); m.threat[u]=(m.threat[u]||0)+20; }
     else if(kind===3){ let mx=0; for(const k in m.threat) mx=Math.max(mx,m.threat[k]); m.threat[u]=mx+60; m.tgt=u; }
     else if(kind===5){ if(!m.t.boss) m.rootU=t+amt/1000; m.threat[u]=(m.threat[u]||0)+10; }
@@ -963,18 +1023,19 @@ function hostApplyAct(u,cls,a){
 function killMob(m){ m.dead=true; m.resp=m.t.summon?Infinity:now()+(m.t.resp||(38+Math.random()*17)); m.tgt=''; m.threat={};
   if(m.t.boss) despawnAdds(m.t.key); onMobDeath(m); }
 function despawnAdds(key){ for(const a of mobs) if(a.t.summon && !a.dead && (!key||a.t.owner===key)){ a.dead=true; a.resp=Infinity; a.tgt=''; a.threat={}; a.deathT=now(); a.dx=a.rx; a.dy=a.ry; } }
-function respawnMob(m){ m.kbA=null; m._puff=0; m.dead=false; m.x=m.sx; m.y=m.sy; m.rx=m.x; m.ry=m.y; m.hp=m.mhp; m.tag=''; m.threat={}; m.tgt=''; m.evade=false; m.enr=false; m.summoned=false; m.summoned2=false; m.spT=null; m.chanU=0; m.spawnT=now(); }
+function respawnMob(m){ m.kbA=null; m._puff=0; m.rs=null; m.air=false; m.bers=false; m.emp=false; m.dead=false; m.x=m.sx; m.y=m.sy; m.rx=m.x; m.ry=m.y; m.hp=m.mhp; m.tag=''; m.threat={}; m.tgt=''; m.evade=false; m.enr=false; m.summoned=false; m.summoned2=false; m.spT=null; m.chanU=0; m.spawnT=now(); }
 function summonAdds(boss){ let i=0; for(const a of mobs) if(a.t.summon&&a.t.owner===boss.t.key){ const an=i++*2.1; respawnMob(a);
   a.x=a.rx=a.sx=boss.x+Math.cos(an)*80; a.y=a.ry=a.sy=boss.y+Math.sin(an)*80; a.threat={...boss.threat}; a.tag=boss.tag; }
   pushTg(boss.x,boss.y,110,.6,5); }
 const hostTels=[];
-const mobDmg=m=>(m.t.dmg+m.t.dmgL*(m.lv-1))*(m.t.critter?1:1.2)*(m.t.vault?(m.t.boss?1.5:1.35):1);
+const mobDmg=m=>(m.t.dmg+m.t.dmgL*(m.lv-1))*(m.t.critter?1:1.2)*(m.t.vault?(m.t.boss?1.5:1.35):1)*(m.t.raid?RAIDD.deal*(m.bers?1.75:1)*(m.emp?1.3:1):1);
 function hostTel(m,x,y,r,delay,mul,kind,after){ pushTg(x,y,r,delay,kind); hostTels.push({m,x,y,r,at:now()+delay,dmg:mobDmg(m)*mul,after}); }
 function mobSpecial(m,p,players,dt,t){
   const sp=m.t.sp; if(!sp) return;
   if(m.spT==null) m.spT=(sp.cd||7)*.5;
   m.spT-=dt; if(m.spT>0) return;
   const d=dist(m.x,m.y,p.x,p.y);
+  if(sp.k.charCodeAt(0)===114&&sp.k[1]==='_'){ raidSpecial(m,p,players,dt,t); return; }
   switch(sp.k){
     case 'leap': if(d>45&&d<320){ m.spT=sp.cd; const tx=p.x,ty=p.y; m.chanU=t+sp.delay;
       hostTel(m,tx,ty,sp.r,sp.delay,sp.mul,1,()=>{ if(!m.dead&&!m.evade&&!blocked(tx,ty,m.t.r*.7)){ m.x=tx; m.y=ty; } }); } else m.spT=1; break;
@@ -1028,9 +1089,10 @@ function mobSeparate(dt){ const C=[]; for(const m of mobs) if(!m.dead&&!m.evade&
       const push=Math.min(md-dd,70*dt)*.5, nx=dx/dd*push, ny=dy/dd*push;
       if(!a.t.boss) moveEnt(a,-nx*(b.t.boss?2:1),-ny*(b.t.boss?2:1),a.t.r*.7); if(!b.t.boss) moveEnt(b,nx*(a.t.boss?2:1),ny*(a.t.boss?2:1),b.t.r*.7); } } }
 function hostSim(dt){
-  const t=now(); const players=alivePlayers(); const pmap={}; for(const p of players) pmap[p.u]=p; vaultHostTick(players,t);
+  const t=now(); const players=alivePlayers(); const pmap={}; for(const p of players) pmap[p.u]=p; vaultHostTick(players,t); try{ raidHostTick(players,t,dt); }catch(e){ console.error(e); }
   for(let i=hostTels.length-1;i>=0;i--){ const h=hostTels[i]; if(t<h.at) continue; hostTels.splice(i,1);
     if(h.m.dead||h.m.evade) continue;
+    if(h.custom){ try{ h.custom(players,h); }catch(e){} if(h.after) h.after(); continue; }
     for(const p of players) if(dist(p.x,p.y,h.x,h.y)<h.r+6) pushMd(p.u,h.dmg*(.9+Math.random()*.2),h.m.id,7);
     if(h.after) h.after(); }
   for(const m of mobs){
@@ -1054,7 +1116,7 @@ function hostSim(dt){
     if(best){
       const p=pmap[best];
       if(mt.boss&&!m.zn) m.zn=zoneAtPx(m.sx,m.sy);
-      if(dist(m.x,m.y,m.sx,m.sy)>(mt.boss?560:700) || inTown(p.x,p.y) || (mt.boss&&zoneAtPx(p.x,p.y)!==m.zn&&dist(p.x,p.y,m.sx,m.sy)>260)){ m.evade=true; m.threat={}; m.tgt=''; if(mt.boss) despawnAdds(mt.key); continue; }
+      if(dist(m.x,m.y,m.sx,m.sy)>(mt.leash||(mt.boss?560:700)) || inTown(p.x,p.y) || (mt.boss&&zoneAtPx(p.x,p.y)!==m.zn&&dist(p.x,p.y,m.sx,m.sy)>260)){ m.evade=true; m.threat={}; m.tgt=''; if(mt.boss) despawnAdds(mt.key); continue; }
       const d=dist(m.x,m.y,p.x,p.y);
       const stunned=m.stunU>t, rooted=m.rootU>t, chan=m.chanU>t;
       const stO=mt.ranged?mt.rng-6:mt.rng+3;
@@ -1065,7 +1127,7 @@ function hostSim(dt){
         if(mt.ranged) { pushMd(best,dmg,m.id,mt.proj||2); m.swingT=t; }
         else { const wd=mt.boss?.62:(mt.r||14)>22?.36:.28; m.pend={at:t+wd,u:best,dmg,vis:mt.boss?3:1}; m.swingT=t; if(mt.boss||mt.elite) pushTg(m.x,m.y,mt.rng+34,wd,2); }
       }
-      if(!stunned && !chan) mobSpecial(m,p,players,dt,t);
+      if(!stunned && !chan){ try{ mobSpecial(m,p,players,dt,t); }catch(e){ m.spT=3; console.error(e); } }
       if(mt.key==='wyrm'){ if(!m.summoned && m.hp<m.mhp*.5){ m.summoned=true; summonAdds(m); } if(!m.enr && m.hp<m.mhp*.25) m.enr=true; }
       if(mt.key==='ossric'&&!m.enr&&m.hp<m.mhp*.2) m.enr=true;
       if(mt.key==='siltmother'){ if(!m.summoned&&m.hp<m.mhp*.7){ m.summoned=true; summonAdds(m); } if(!m.summoned2&&m.hp<m.mhp*.35){ m.summoned2=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.15) m.enr=true; }
@@ -1093,7 +1155,7 @@ function recalc(){ const c=me.c, cl=CLS[c.cls]; const g=gearStats(c);
 }
 const costOf=ab=> Math.round((CLS[me.c.cls].res!=='mana'? ab.cost : ab.cost*(1+.22*(me.c.lvl-1)))*(1-TAL('cost')));
 let SV_MUL=1;
-const scaleV=v=>SV_MUL*(v[0]+v[1]*(me.c.lvl-1)+me.pow*.8)*(buffOn('might')?1.2:1)*(1+PFX('dmg'))*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?1.1:1)*(me.avatarU>now()?1.4:1);
+const scaleV=v=>SV_MUL*(v[0]+v[1]*(me.c.lvl-1)+me.pow*.8)*(buffOn('might')?1.2:1)*(1+PFX('dmg'))*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?(me.c.eq.weapon.t2?1.16:1.1):1)*(me.avatarU>now()?1.4:1);
 function fixClassGear(c){ for(const sl of ['weapon','armor']){ const it=c.eq[sl]; if(it&&!canUse(it,c.cls)){ c.eq[sl]=null; c.inv.push(it); setTimeout(()=>sysMsg(`[${it.name}] cannot be used by a ${CLS[c.cls].name} and was moved to your bags.`,'c-err'),2500); } } }
 function enterWorld(name,cls,existing,fresh){ TALC=null;
   try{ audInit(); }catch(e){}
@@ -1134,7 +1196,7 @@ function takeDamage(amt,mob,vis){ try{ if(me&&amt>me.mhp*.08) shake(Math.min(6,a
 function healMe(amt,from){ if(me.dead) return; const before=me.hp; me.hp=Math.min(me.mhp,me.hp+amt); const h=Math.round(me.hp-before);
   if(h>0) fct(me.x,me.y-30,'+'+h,'#6dff7a'); sparkle(me.x,me.y,'#9dffb0'); }
 function die(){ try{ snd('die'); }catch(e){} if(me&&me.pvpBy&&now()-me.pvpBy.t<10&&inArena(me.x,me.y)){ const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.d++; P.st=0; pushAct(14,me.pvpBy.u,0,0); sysMsg(`⚔ ${me.pvpBy.n} defeated you. Release to return to a shrine.`,'c-err'); } if(me) me.pvpBy=null; if(me){ me.song=0; me.banner=null; me.encoreU=0; } stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
-function release(){ me.dead=false; if(inArena(me.x,me.y)){ const [sx,sy]=AR.shr[Math.random()*2|0]; me.x=(sx+(Math.random()-.5)*2)*TS; me.y=(sy+(Math.random()-.5)*2)*TS; me.hp=me.mhp; } else if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { me.x=SPAWN.x; me.y=SPAWN.y; } me.rootU=0; me.hp=inArena(me.x,me.y)?me.mhp:Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
+function release(){ me.dead=false; if(inArena(me.x,me.y)){ const [sx,sy]=AR.shr[Math.random()*2|0]; me.x=(sx+(Math.random()-.5)*2)*TS; me.y=(sy+(Math.random()-.5)*2)*TS; me.hp=me.mhp; } else if(inRaid(me.x,me.y)){ const q=raidCheckpoint(); me.x=q[0]; me.y=q[1]; } else if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { me.x=SPAWN.x; me.y=SPAWN.y; } me.rootU=0; me.hp=inArena(me.x,me.y)?me.mhp:Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
 function gainXp(n){
   const c=me.c; if(c.lvl>=MAXLVL){ return; }
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
@@ -1168,7 +1230,7 @@ function legendaryFor(cls){ const L=LEGEND[cls]||LEGEND.warden; return {id:rid(6
 // drop chances in % per rarity [common, uncommon, rare, epic, legendary]; the legendary is always for the looter's class
 const BOSSLOOT={oldtusk:{n:1,p:[55,40,5,0,0]},fangmaw:{n:1,p:[0,55,40,5,0]},hking:{n:1,p:[0,20,65,15,0]},wyrm:{n:2,p:[0,0,61,38.5,.5]},frostgiant:{n:2,p:[0,0,46,53.3,.7]},lich:{n:2,p:[0,0,0,98,2]}};
 function rollRar(p){ let r=Math.random()*100; for(let i=0;i<p.length;i++){ r-=p[i]; if(r<0) return i; } return p.findIndex(v=>v>0); }
-function dropText(key){ const B=BOSSLOOT[key]; if(!B) return ''; return B.p.map((v,i)=>v?`${RAR[i]} ${v}%`:'').filter(Boolean).join(' · '); }
+function dropText(key){ const B=BOSSLOOT[key]; if(!B) return ''; return B.p.map((v,i)=>v?`${RAR[i]} ${v}%`:'').filter(Boolean).join(' · ')+(key==='vyrathos'?' · ✦ Tyrant legendary 2.5% · ✦ Ashborn Nightmare 1.5%':''); }
 function genItem(lv,rar,cls){ cls=cls||(me?me.c.cls:'warden'); if(rar>=4) return legendaryFor(cls);
   const R=Math.random, slot=SLOTS[R()*3|0];
   const budget=(2.2+lv*1.7)*[1,1.45,2,2.8,3.8][rar];
@@ -1189,6 +1251,7 @@ function lootFor(m){
   else if(mt.boss){ items.push(genItem(m.lv,Math.random()<.3?3:2)); }
   else if(mt.elite){ items.push(genItem(m.lv,Math.random()<.5?2:1)); }
   else if(!mt.summon && Math.random()<.24){ const r=Math.random(); items.push(genItem(m.lv, r<.06?2:r<.36?1:0)); }
+  if(mt.raid) try{ raidLoot(m,items); }catch(e){ console.error(e); }
   for(const it of items) if(it.rar>=2) fx.push({k:'lootbeam',x:m.rx,y:m.ry,col:RARCOL[it.rar],t:now(),dur:it.rar===4?12:4});
   if(Math.random()<.08 && !mt.boss) pots=1;
   dropLoot(m,g0,items,pots); if(g0||items.length||pots){ const L=LOOTS[LOOTS.length-1]; if(L&&dist(me.x,me.y,L.x,L.y)<100&&!lootOpen) openLoot(L); }
@@ -1824,9 +1887,9 @@ function cellType(wx,wy){
 (function buildHeights(){
   const TT=new Float32Array(MW*MH);
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const i=ty*MW+tx, t=map[i], z=zmap[i]; const n=fbm(tx*.08,ty*.08,301), n2=fbm(tx*.22,ty*.22,302);
-    let h; switch(z){ case 'town':h=.55;break; case 'meadow':h=.4+n*2.6;break; case 'forest':h=.6+n*3.2+n2*.7;break; case 'swamp':h=.2+n*.35;break; case 'ruins':h=.7+n*1.7;break; case 'lake':h=.35+n*.9;break; case 'frost':h=1.2+n*3.8+n2*.9;break; case 'crypt':h=2.2;break; case 'vault':h=t===T.VOID?6.5:.3;break; case 'arena':h=t===T.VOID?7.5:t===T.DWALL?.3:.3+n*.18;break; case 'ash':h=3.1+n*1.5+n2*.6;break; default:h=.5; }
+    let h; switch(z){ case 'town':h=.55;break; case 'meadow':h=.4+n*2.6;break; case 'forest':h=.6+n*3.2+n2*.7;break; case 'swamp':h=.2+n*.35;break; case 'ruins':h=.7+n*1.7;break; case 'lake':h=.35+n*.9;break; case 'frost':h=1.2+n*3.8+n2*.9;break; case 'crypt':h=2.2;break; case 'vault': case 'raid':h=t===T.VOID?6.5:.3;break; case 'arena':h=t===T.VOID?7.5:t===T.DWALL?.3:.3+n*.18;break; case 'ash':h=3.1+n*1.5+n2*.6;break; default:h=.5; }
     const edge=edgeOf(tx,ty);
-    if(t===T.ICE) h=.22; else if(t===T.WATER) h=-1.5; else if(t===T.LAVA) h=1.4; else if(t===T.BRIDGE) h=z==='ash'?3.0:.4;
+    if(t===T.ICE) h=.22; else if(t===T.WATER) h=-1.5; else if(t===T.LAVA) h=z==='raid'?-1.1:1.4; else if(t===T.BRIDGE) h=z==='ash'?3.0:.4;
     else if(t===T.ROCK && (edge<3||ridgeL(tx,ty))) h+=4.5+hash2(tx,ty,9)*4+(edge<2?3.5:0)+(edge<1?3:0);
     else if(t===T.COBBLE||t===T.HOUSE||t===T.FOUNT||t===T.TWALL) h=.55;
     if(Math.hypot(tx-LAIR.x,ty-LAIR.y)<6.5 && t!==T.ROCK) h=3.0;
@@ -1839,7 +1902,7 @@ function cellType(wx,wy){
     let h=lerp(lerp(tt(x0,z0),tt(x0+1,z0),ax),lerp(tt(x0,z0+1),tt(x0+1,z0+1),ax),az);
     const tx=clamp(Math.floor(X),0,MW-1), ty=clamp(Math.floor(Z),0,MH-1), t=map[ty*MW+tx], z=zmap[ty*MW+tx];
     if(i%2===1&&j%2===1){ if(t===T.WATER) h=Math.min(h,-.7); else if(t===T.LAVA) h=Math.min(h,LAVA_Y-.7); else if(z==='ash'&&t!==T.BRIDGE) h=Math.max(h,LAVA_Y+.15); else h=Math.max(h,.12); }
-    if(z!=='town'&&z!=='crypt'&&z!=='vault'&&t!==T.WATER&&t!==T.BRIDGE&&t!==T.HOUSE&&t!==T.ICE) h+=(vnoise(X*.9,Z*.9,55)-.5)*.32;
+    if(z!=='town'&&z!=='crypt'&&z!=='vault'&&z!=='raid'&&t!==T.WATER&&t!==T.BRIDGE&&t!==T.HOUSE&&t!==T.ICE) h+=(vnoise(X*.9,Z*.9,55)-.5)*.32;
     HG[j*HN+i]=h; HLM[j*HN+i]=LMt[ty*MW+tx]; }
 })();
 function hgt(X,Z){ X+=OFX; Z+=OFY; const fx=clamp(X*HR,0,HN-1.001), fz=clamp(Z*HR,0,HNZ-1.001); const i=Math.floor(fx), j=Math.floor(fz), a=fx-i, b=fz-j;
@@ -1867,6 +1930,7 @@ const HTEX=(function(){ const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RG16F,HN,HNZ,0,gl.RG,gl.FLOAT,data); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); return tex; })();
 const PLANE=(function(){ const d=G0(); const S=MW+40; for(const [x,z] of [[-20,-20],[S,-20],[S,S],[-20,S]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
+const RLPLANE=(function(){ const d=G0(); for(const [x,z] of [[RX0,OWH],[MW,OWH],[MW,MH],[RX0,MH]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
 const LPLANE=(function(){ const d=G0(); for(const [x,z] of [[0,0],[MW,0],[MW,OWH],[0,OWH]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
 
 /* ---------- static scenery ---------- */
@@ -1991,11 +2055,11 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     for(let k=0;k<7;k++){ const a=k/7*Math.PI*2; gAdd(d,RBL,x+Math.cos(a)*.55,y0+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); }
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
-  addLandmarks(d); addVault(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
+  addLandmarks(d); addVault(d); addRaid(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
   const V=mkVAO(d); V.chunks=[...SCH.values()].filter(c=>c.d.i.length).map(c=>{ const v=mkVAO(c.d); v.cx=c.cx; v.cz=c.cz; return v; }); SCH.clear(); STATIC_D=null; return V; })();
 if(EDITOR_MODE){ window.__EF={MW,MH,OWH,TS,T:{...T},map:Array.from(map.subarray(0,MW*OWH)),zmap:zmap.slice(0,MW*OWH),zones:Object.fromEntries(Object.entries(ZONES).map(([k,v])=>[k,v.name])),
     npcs:NPCS.filter(n=>n.y<OWH*TS).map(n=>({id:n.id,name:n.name,title:n.title,x:Math.floor(n.x/TS),y:Math.floor(n.y/TS)})),pois:POIS.filter(p=>p.y<OWH).map(p=>({name:p.name,x:p.x,y:p.y,r:p.r})),
-    mobs:mobs.filter(m=>m.sy<OWH*TS).map(m=>[m.t.key,Math.floor(m.sx/TS),Math.floor(m.sy/TS)]),mobTypes:MOBT.filter(m=>!m.boss&&!m.summon&&!m.vault).map(m=>({key:m.key,name:m.name,lv:m.lv,zone:m.zone})),props:Object.keys(PROPK),town:{x:TOWN.x,y:TOWN.y,r:TOWN.r}};
+    mobs:mobs.filter(m=>m.sy<OWH*TS).map(m=>[m.t.key,Math.floor(m.sx/TS),Math.floor(m.sy/TS)]),mobTypes:MOBT.filter(m=>!m.boss&&!m.summon&&!m.vault&&!m.raid).map(m=>({key:m.key,name:m.name,lv:m.lv,zone:m.zone})),props:Object.keys(PROPK),town:{x:TOWN.x,y:TOWN.y,r:TOWN.r}};
   try{ window.parent&&window.parent.postMessage({ef:'ready'},'*'); }catch(e){} throw new Error('Emberfall editor mode: world data ready'); }
 function drawStaticChunks(){ const VD=(GFX.q==='low'?90:GFX.q==='ultra'?140:112)+23, R2=VD*VD; for(const c of STATIC.chunks){ const dx=c.cx-CAM.tx, dz=c.cz-CAM.tz; if(dx*dx+dz*dz>R2) continue; gl.bindVertexArray(c.vao); gl.drawElements(gl.TRIANGLES,c.n,gl.UNSIGNED_INT,0); } }
 
@@ -2510,20 +2574,21 @@ function drawMob3_(m,dead){
       for(const s of [-1,1]){ P(GEO.sph,.05,.05,.05,tide?[.5,1,.9]:ice?[.7,.95,1]:[.9,.85,1],3,.16,1.86,s*.06); mpush(); mtr(0,1.55,s*.28); mrz(1.0+Math.sin(t*3+s)*.3+(swing>=0?Math.sin(swing*Math.PI)*.9:0)+mv*.3); mrx(-s*.15); P(GEO.limb,.09,.5,.09,c1,.5,0,0,0,al); mtr(0,-.5,0); mrz(.4); P(GEO.limb,.06,.3,.06,c2,.6,0,0,0,al); mtr(0,-.3,0); for(let k=-1;k<=1;k++){ mpush(); mrx(k*.35); mrz(.3); P(GEO.cone,.03,.16,.03,ice?[.85,.95,1]:[.85,.8,1],1.5,0,0,0,.9); mpop(); } mpop(); }
       addLight(X,gy+1.8,Z,4,tide?[.3,1,.85]:ice?[.5,.8,1.2]:[.6,.4,1]); if(Math.random()<.2) burst3(X,gy+.8,Z,tide?'#6affe0':ice?'#bfe8ff':'#a98aff',1,.2,{glow:true}); break; }
     case 'lich': drawLich(m,X,gy,Z,swing,dd,hit,sc); break;
-    case 'emberling': { const f=1+Math.sin(t*20+m.id)*.12; const y=gy+.9+Math.sin(t*3+m.id)*.15; mreset(); mtr(X,y,Z); msc(sc*(dead?Math.max(.05,1-dd*1.5):1));
+    case 'emberling': case 'emberspawn': case 'magmaling': { const f=1+Math.sin(t*20+m.id)*.12; const y=gy+.9+Math.sin(t*3+m.id)*.15; mreset(); mtr(X,y,Z); msc(sc*(dead?Math.max(.05,1-dd*1.5):1));
       mrz(-.3*mv); for(let k=0;k<6;k++){ const a=k/6*6.283+t*1.5; P(GEO.cone,.16,.35+Math.sin(t*14+k*2)*.15,.16,k%2?[1,.55,.1]:[1,.8,.3],3,Math.cos(a)*.18,.15,Math.sin(a)*.18); }
       for(let k=0;k<3;k++){ const a=t*3+k*2.09; P(GEO.sph,.08,.08,.08,[1,.7,.25],3.4,Math.cos(a)*.6,.1+Math.sin(t*4+k)*.2,Math.sin(a)*.6); }
       P(GEO.sph,.7*f,.8*f,.7*f,[1,.35,.05],2.4,0,0,0); P(GEO.sph,.5,.6,.5,[1,.65,.15],3,0,.08,0); P(GEO.cone,.4,.6,.4,[1,.8,.3],3,0,.25,0);
       for(const s of [-1,1]) P(GEO.sph,.08,.1,.08,[.15,.03,0],0,.28,.1,s*.12); P(GEO.box,.04,.05+(swing>=0?Math.sin(swing*Math.PI)*.1:0),.16,[.2,.04,0],0,.3,-.06,0);
       addLight(X,y,Z,6,[1.4,.6,.15]); if(Math.random()<.5) burst3(X,y+.3,Z,'#ffb03a',1,.4,{glow:true,up:1.5}); break; }
-    case 'wyrm': drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
+    case 'obsidianshard': drawShard(m,X,gy,Z,dd,hit,sc,dead); break;
+    case 'wyrm': case 'vyrathos': drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
   }
 }
 function drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const md=MATD; MATD=2; try{ return drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc); } finally{ MATD=md; } }
 function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
-  const t=now(), e=hit?.9:0, col=m.enr?[.85,.22,.1]:[.75,.3,.12], dark=[.3,.1,.05], belly=[1,.6,.2];
+  const t=now(), e=hit?.9:0, VY=m.t.key==='vyrathos', col=VY?(m.enr?[.5,.1,.05]:[.32,.1,.08]):m.enr?[.85,.22,.1]:[.75,.3,.12], dark=VY?[.12,.05,.04]:[.3,.1,.05], belly=VY?[1,.42,.08]:[1,.6,.2], WYL=m.air?3.8+Math.sin(t*2)*.35:0, WYS=VY?1.35:1.05;
   const WB=1+Math.sin(t*1.4)*.025, trk=dd>=0?0:lookYaw(m);
-  mreset(); mtr(X,gy,Z); mry(-(m.rf??m.face??0)); msc(sc*1.05); if(dd>=0){ mrx(Math.min(1,dd/.8)*1.3); mtr(0,-Math.min(1.2,dd*.5),0); }
+  mreset(); mtr(X,gy+WYL,Z); mry(-(m.rf??m.face??0)); msc(sc*WYS); if(dd>=0){ mrx(Math.min(1,dd/.8)*1.3); mtr(0,-Math.min(1.2,dd*.5),0); }
   else { mtr(0,Math.abs(Math.sin(ph*.8))*.12*mv+Math.sin(t*1.4)*.03,0); mrx(Math.sin(ph*.8)*.04*mv); }
   for(const [lx,lz,off] of [[1.1,.8,0],[1.1,-.8,Math.PI],[-1.0,.85,Math.PI],[-1.0,-.85,0]]){ mpush(); mtr(lx,1.6,lz); mrz(Math.sin(ph*.8+off)*.55*mv); P(GEO.limb,.45,.8,.45,col,e); mtr(0,-.8,0); mrz(-.4-Math.max(0,Math.cos(ph*.8+off))*.6*mv); P(GEO.limb,.36,.75,.36,dark,e); mtr(0,-.78,0); P(GEO.box,.5,.16,.42,dark,e,.15,0,0); for(let k=-1;k<=1;k++){ mpush(); mtr(.38,-.02,k*.14); mrz(-Math.PI/2+.3); P(GEO.cone,.07,.22,.07,[.92,.88,.78],0); mpop(); } mpop(); }
   P(GEO.sph,3.4,1.75*WB,2.0*WB,col,e,0,2.15,0);
@@ -2532,8 +2597,8 @@ function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
   // tail
   mpush(); mtr(-1.6,2.0,0); for(let k=0;k<16;k++){ mry(Math.sin(t*(2.2+mv*1.5)-k*.4)*(.1+mv*.05)); mrz(-.065+Math.sin(t*1.7-k*.5)*.02); const r=.76-k*.042; P(GEO.sph,.62,r,r,col,e,-.2,0,0); P(GEO.sph,.5,r*.55,r*.8,[.55,.2,.08],e,-.2,-r*.32,0); if(k%2===0) P(GEO.cone,.1,.3-k*.012,.08,dark,e,-.2,r*.42,0); mtr(-.24,0,0); } mpush(); mrz(Math.PI/2); P(GEO.cone,.5,1.1,.1,[.9,.45,.12],1.4,0,0,0); mpop(); for(const s of [-1,1]){ mpush(); mrx(s*1.1); mrz(Math.PI/2+.4); P(GEO.cone,.25,.6,.06,dark,e,0,0,0); mpop(); } mpop();
   // wings
-  const flap=(mv>.3?Math.sin(t*4.5)*.5:Math.sin(t*1.5)*.16-.12)+(swing>=0?-Math.sin(swing*Math.PI)*.45:0)+(m.chanT&&t-m.chanT<1.6?-.35:0);
-  for(const s of [-1,1]){ mpush(); mtr(.2,2.9,s*.7); mrx(-s*(.12+flap*.55)); P(GEO.wing,2.3,1,2.3*s,[.42,.1,.05],.35,0,0,0); P(GEO.wing,2.0,1,2.0*s,[.75,.25,.08],.6,.1,.02,0); for(const [px,pz,ln] of [[.95,1.15,1.1],[.7,2.1,1.25],[.25,3,1.35],[-.55,1.6,1.1]]){ mpush(); const a=Math.atan2(pz*2.3*s,px*2.3); mry(-a); mrz(Math.PI/2); P(GEO.limb,.07,Math.hypot(px,pz)*2.3*.75,.07,dark,e); mpop(); } mpush(); mtr(.9,0,0); mrx(-s*Math.PI/2); P(GEO.limb,.16,2.6,.16,dark,e); mpop(); mpush(); mrx(-s*Math.PI/2); mry(.5); P(GEO.limb,.1,2.4,.1,dark,e); mpop(); mpop(); }
+  const flap=((mv>.3||m.air)?Math.sin(t*(m.air?5.5:4.5))*.5:Math.sin(t*1.5)*.16-.12)+(swing>=0?-Math.sin(swing*Math.PI)*.45:0)+(m.chanT&&t-m.chanT<1.6?-.35:0);
+  for(const s of [-1,1]){ mpush(); mtr(.2,2.9,s*.7); mrx(-s*(.12+flap*.55)); P(GEO.wing,2.3,1,2.3*s,VY?[.1,.06,.06]:[.42,.1,.05],.35,0,0,0); P(GEO.wing,2.0,1,2.0*s,VY?[.62,.14,.04]:[.75,.25,.08],VY?1.2:.6,.1,.02,0); for(const [px,pz,ln] of [[.95,1.15,1.1],[.7,2.1,1.25],[.25,3,1.35],[-.55,1.6,1.1]]){ mpush(); const a=Math.atan2(pz*2.3*s,px*2.3); mry(-a); mrz(Math.PI/2); P(GEO.limb,.07,Math.hypot(px,pz)*2.3*.75,.07,dark,e); mpop(); } mpush(); mtr(.9,0,0); mrx(-s*Math.PI/2); P(GEO.limb,.16,2.6,.16,dark,e); mpop(); mpush(); mrx(-s*Math.PI/2); mry(.5); P(GEO.limb,.1,2.4,.1,dark,e); mpop(); mpop(); }
   // neck & head
   const breath=m.chanT&&now()-m.chanT<1.6; const jaw=swing>=0?Math.sin(swing*Math.PI)*.5:breath?.6:.08;
   mpush(); mtr(1.5,2.5,0); for(let k=0;k<5;k++){ mry(-trk/5+Math.sin(t*1.1-k*.6)*.04); mrz(.22-(swing>=0?Math.sin(Math.PI*swing)*.09:0)+(swing>=0?-Math.sin(swing*Math.PI)*.12:0)); P(GEO.sph,.8,.75-k*.06,.75-k*.06,k%2?col:dark,e,.3,0,0); mtr(.35,0,0); }
@@ -2542,9 +2607,9 @@ function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
   for(const s of [-1,1]){ mpush(); mtr(.05,.3,s*.25); mrz(2.3); mrx(-s*.3); P(GEO.cone,.14,.7,.14,[.2,.08,.04],e); mtr(0,.55,0); mrz(-.6); P(GEO.cone,.08,.45,.08,[.16,.06,.03],e); mpop(); P(GEO.sph,.18,.12,.14,dark,e,.5,.22,s*.2); P(GEO.cone,.05,.16,.05,[.2,.08,.04],e,.7,.2,s*.12); for(let k=0;k<3;k++){ mpush(); mtr(-.1-k*.18,.28-k*.03,s*(.2+k*.06)); mrz(2.5); mrx(-s*.7); P(GEO.cone,.07,.34-k*.06,.07,[.25,.1,.05],e); mpop(); } P(GEO.sph,.12,.08,.1,[1,.95,.5],3,.62,.18,s*.25); }
   if(breath||m.enr){ P(GEO.sph,.25,.2,.25,[1,.6,.1],3,1.25,-.05,0); }
   mpop();
-  addLight(X,gy+2,Z,14,m.enr?[1.6,.4,.1]:[1.4,.6,.2]);
+  addLight(X,gy+2+WYL,Z,VY?18:14,m.enr?[1.6,.4,.1]:VY?[1.8,.6,.2]:[1.4,.6,.2]); if(VY) addLight(X,gy+5.5+WYL,Z,10,[1.2,.4,.12]);
   if(Math.random()<.4) burst3(X+(Math.random()-.5)*3,gy+2.5,Z+(Math.random()-.5)*2,'#ff8a2a',1,.3,{glow:true,up:1.2});
-  mreset(); mtr(X,gy,Z); mry(-(m.rf??m.face??0)); msc(sc*1.05); for(let k=0;k<10;k++){ const a=k*1.3; P(GEO.box,.5,.05,.07,[1,.45,.1],2+Math.sin(t*3+k)*.8,-1.4+k*.3,2.98+Math.sin(a)*.05,Math.sin(a*2.3)*.5); }
+  mreset(); mtr(X,gy+WYL,Z); mry(-(m.rf??m.face??0)); msc(sc*WYS); for(let k=0;k<10;k++){ const a=k*1.3; P(GEO.box,.5,.05,.07,[1,.45,.1],2+Math.sin(t*3+k)*.8,-1.4+k*.3,2.98+Math.sin(a)*.05,Math.sin(a*2.3)*.5); }
   if(Math.random()<.25) P3(X+Math.cos(m.face||0)*4.4,gy+3.7,Z+Math.sin(m.face||0)*4.4,0,.7,0,1.4,.35,'#4a3e3a',{big:true});
 }
 
@@ -2683,6 +2748,7 @@ function ambient(dt){
   if(z==='ash'){ if(rate(45)){ const [X,Y,Z]=rp(20); P3(X,Y,Z,(Math.random()-.5)*.6,1.5+Math.random()*1.5,(Math.random()-.5)*.6,3.5,.06,Math.random()<.5?'#ff7a1a':'#ffb03a',{glow:true,drag:1}); }
     if(rate(25)){ const [X,Y,Z]=rp(20); P3(X,Y+8,Z,.3,-.6,.2,9,.05,'#9a908a',{drag:1,shrink:false}); } }
   if((z==='frost')&&rate(46)){ const [X,Y,Z]=rp(20); P3(X,Y+7,Z,.25+Math.sin(t*.3)*.25,-.9,.12,9,.05,'#ffffff',{drag:1,shrink:false}); }
+  if(z==='raid'){ if(rate(34)){ const [X,Y,Z]=rp(18); P3(X,Y+.2,Z,(Math.random()-.5)*.4,.8+Math.random()*1.2,(Math.random()-.5)*.4,4,.05,Math.random()<.5?'#ff7a1a':'#ffc04a',{glow:true,drag:1}); } if(rate(4)){ const [X,Y,Z]=rp(14); P3(X,Y+.2,Z,.1,.03,.1,6,1.3,'#3a2a26',{big:true,drag:1,shrink:false}); } }
   if((z==='crypt'||z==='vault')&&rate(6)){ const [X,Y,Z]=rp(14); P3(X,Y+.2,Z,.1,.03,.1,6,1.3,'#5a6a8a',{big:true,drag:1,shrink:false}); }
   if(z==='swamp'&&rate(9)){ const [X,Y,Z]=rp(20); P3(X,Y+.3,Z,.2,.02,.1,7,1.4+Math.random(),'#a6b89a',{big:true,drag:1,shrink:false}); }
   if(z==='ruins'&&rate(5)){ const [X,Y,Z]=rp(18); P3(X,Y+.3,Z,.1,.02,.1,7,1.2,'#9a9ab8',{big:true,drag:1,shrink:false}); }
@@ -2721,14 +2787,15 @@ function computeSky(dt){ dt=dt||.016;
   SKY.fog=hor.map((v,i)=>lerp(v,SKY.zf.c[i]*brightness,k*.85)); SKY.hor=SKY.fog; SKY.fogD=lerp(.017,SKY.zf.d,k);
   if(zn==='ash'){ const q=k; SKY.sky=SKY.sky.map((v,i)=>lerp(v,[.42,.2,.13][i]*brightness+.04,.55*q)); SKY.zen=SKY.zen.map((v,i)=>lerp(v,[.16,.07,.05][i],.8*q)); SKY.sunCol=SKY.sunCol.map((v,i)=>v*lerp(1,[1,.78,.62][i],q)); }
   const WX=weatherNow(); const wet=WX.kind>=2?WX.k:0, cl=WX.kind>=1?WX.k:0;
-  { const T=performance.now()/1000, dtw=Math.min(1,T-(SKY._wt||T)); SKY._wt=T; const zz=me?zoneAtPx(me.x,me.y):''; const tgt=(zz==='frost'||zz==='ash'||zz==='vault')?0:wet; SKY.wetG=tgt>(SKY.wetG||0)?Math.min(tgt,(SKY.wetG||0)+dtw/18):Math.max(0,(SKY.wetG||0)-dtw/120); } SKY.cloud=.45+.22*cl+.3*wet; SKY.storm=WX.kind===3?WX.k:wet*.45;
+  { const T=performance.now()/1000, dtw=Math.min(1,T-(SKY._wt||T)); SKY._wt=T; const zz=me?zoneAtPx(me.x,me.y):''; const tgt=(zz==='frost'||zz==='ash'||zz==='vault'||zz==='raid')?0:wet; SKY.wetG=tgt>(SKY.wetG||0)?Math.min(tgt,(SKY.wetG||0)+dtw/18):Math.max(0,(SKY.wetG||0)-dtw/120); } SKY.cloud=.45+.22*cl+.3*wet; SKY.storm=WX.kind===3?WX.k:wet*.45;
   const dm=1-.45*wet-.12*cl; SKY.sunCol=SKY.sunCol.map(v=>v*dm); SKY.sky=SKY.sky.map(v=>v*(1-.2*wet)); SKY.zen=SKY.zen.map(v=>v*(1-.5*wet));
   SKY.fog=SKY.fog.map((v,i)=>lerp(v,[.42,.45,.5][i]*(.3+.7*dayK),wet*.6)); SKY.hor=SKY.fog; SKY.fogD+=.012*wet;
   if(flash>0){ SKY.sky=SKY.sky.map(v=>v+flash*.55); SKY.fog=SKY.fog.map(v=>v+flash*.16); SKY.hor=SKY.fog; }
   if(zn==='crypt'){ SKY.sunCol=SKY.sunCol.map(v=>v*.3); SKY.sky=SKY.sky.map(v=>v*.42); SKY.gnd=SKY.gnd.map(v=>v*.45); }
+  if(zn==='raid'){ SKY.sunCol=[.24,.13,.08]; SKY.sky=[.13,.05,.03]; SKY.gnd=[.08,.04,.03]; SKY.zen=[.012,.004,.002]; SKY.fog=[.07,.026,.014]; SKY.hor=SKY.fog; SKY.fogD=.034; SKY.cloud=0; SKY.storm=0; SKY.night=0; }
   if(zn==='vault'){ SKY.sunCol=[.15,.18,.2]; SKY.sky=[.07,.09,.1]; SKY.gnd=[.05,.055,.06]; SKY.zen=[.004,.008,.012]; SKY.fog=[.018,.03,.034]; SKY.hor=SKY.fog; SKY.fogD=.042; SKY.cloud=0; SKY.storm=0; SKY.night=0; }
-  SKY.aurora=(zn==='frost'||zn==='crypt')?(1-dayK):0; SKY.hfog=({swamp:.7,lake:.4,forest:.28,frost:.18,crypt:.5,vault:.3}[zn]||.15)+duskK*.25+wet*.3;
-  curDark=zn==='vault'?1:1-dayK;
+  SKY.aurora=(zn==='frost'||zn==='crypt')?(1-dayK):0; SKY.hfog=({swamp:.7,lake:.4,forest:.28,frost:.18,crypt:.5,vault:.3,raid:.38}[zn]||.15)+duskK*.25+wet*.3;
+  curDark=(zn==='vault'||zn==='raid')?1:1-dayK;
 }
 
 /* =====================================================================
@@ -3109,7 +3176,7 @@ function postProcess(){ const w=POST.w,h=POST.h; gl.disable(gl.DEPTH_TEST); gl.d
   gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,w,h); gl.useProgram(PCO.p);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,POST.rt); gl.uniform1i(PCO.u.uScene,0);
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,POST.at); gl.uniform1i(PCO.u.uBloom,1);
-  const z=me?zoneAtPx(me.x,me.y):'town'; const tint=z==='frost'?[.96,1,1.06]:z==='ash'?[1.06,.98,.92]:z==='vault'?[.92,1,1.04]:z==='crypt'?[.94,.97,1.08]:z==='swamp'?[.97,1.02,.96]:[1.02,1,.97];
+  const z=me?zoneAtPx(me.x,me.y):'town'; const tint=z==='frost'?[.96,1,1.06]:z==='ash'?[1.06,.98,.92]:z==='vault'?[.92,1,1.04]:z==='raid'?[1.07,.97,.9]:z==='crypt'?[.94,.97,1.08]:z==='swamp'?[.97,1.02,.96]:[1.02,1,.97];
   gl.uniform2f(PCO.u.uPx,1/w,1/h); gl.uniform1f(PCO.u.uSharp,RSCALE<.99?.35:.12); gl.uniform1f(PCO.u.uBK,.42+curDark*.45); gl.uniform1f(PCO.u.uSat,1.12); gl.uniform1f(PCO.u.uCon,1.06); gl.uniform3fv(PCO.u.uTint,tint); { let st=0, sx=.5, sy=.5; try{ const S=SKY.realSun; if(S&&S[1]>-.02&&(SKY.night||0)<.6){ const k=900, q=toScreen(CAM.ex+S[0]*k,CAM.ey+S[1]*k,CAM.ez+S[2]*k); if(q){ sx=q[0]/W; sy=1-q[1]/H; const off=Math.max(0,Math.max(Math.abs(sx-.5),Math.abs(sy-.5))-.5); st=.55*clamp(1-off*2.2,0,1)*clamp((S[1]+.02)*5,0,1)*(1-(SKY.night||0))*(1-(SKY.storm||0)*.8)*(GFX.q==='low'?0:1); } } }catch(e){} if(PCO.u.uSunS) gl.uniform3f(PCO.u.uSunS,sx,sy,st); if(PCO.u.uSunT) gl.uniform3fv(PCO.u.uSunT,SKY.sunCol||[1,.9,.7]); } fsTri();
   gl.activeTexture(gl.TEXTURE0); gl.enable(gl.DEPTH_TEST); }
 
@@ -3145,6 +3212,7 @@ function render(dt){
     gl.uniform4f(q.uFC,FOUNTAIN.x,FOUNTAIN.z,1.27,.3); gl.uniform1f(q.uLevel,1.118); gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_INT,0);
     gl.uniform4f(q.uFC,FOUNTAIN.x,FOUNTAIN.z,.46,0); gl.uniform1f(q.uLevel,2.19); gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_INT,0); }
   gl.uniform1f(q.uMode,1); gl.uniform1f(q.uLevel,LAVA_Y); gl.bindVertexArray(LPLANE.vao); gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_INT,0);
+  if(CAM.tz>=OWH-4&&CAM.tx>=RX0-40){ gl.uniform1f(q.uLevel,.12); gl.bindVertexArray(RLPLANE.vao); gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_INT,0); }
   gl.activeTexture(gl.TEXTURE0);
   // transparent
   if(tcmds.length){ setFrameUniforms(PL,false); for(const c of tcmds){ if(c.e>=1) gl.blendFunc(gl.SRC_ALPHA,gl.ONE); else gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); drawCmd(PL,c); } }
@@ -3460,7 +3528,8 @@ function addVault(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0
     STAT_LIGHTS.push({x:gx,y:y0+2.4,z:gz+.9,r:7,c:[.3,1,.85]}); }
   /* ---- walls, pillars, water kerbs and flagstones ---- */
   let tc=0;
-  for(let ty=OWH;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const t=map[ty*MW+tx]; const x=tx+.5, z=ty+.5, y0=.3;
+  const VPAL=[stone,dark,trim,cloth], RPAL=[[.22,.19,.18],[.09,.075,.07],[.95,.3,.06],[.36,.06,.03]];
+  for(let ty=OWH;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const t=map[ty*MW+tx]; const x=tx+.5, z=ty+.5, y0=.3; const RZ=tx>=RX0, [stone,dark,trim,cloth]=RZ?RPAL:VPAL;
     if(t===T.DWALL){ let face=null, diag=false; for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if(isOpen(tAt(tx+dx,ty+dy))){ face=[dx,dy]; break; }
       if(!face) for(const [dx,dy] of [[1,1],[1,-1],[-1,1],[-1,-1]]) if(isOpen(tAt(tx+dx,ty+dy))) diag=true; if(!face&&!diag) continue;
       const sh=.88+hash2(tx,ty,21)*.2; box(x,y0+2.45,z,1.02,4.9,1.02,stone.map(v=>v*sh)); box(x,y0+.22,z,1.08,.44,1.08,dark); box(x,y0+4.95,z,1.08,.18,1.08,dark);
@@ -3473,7 +3542,8 @@ function addVault(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0
     else if(t===T.COLUMN){ box(x,y0+.2,z,1,.4,1,dark); gAdd(d,RC,x,y0+.4,z,0,.68,4.05,.68,stone); box(x,y0+4.55,z,.98,.3,.98,dark); box(x,y0+4.82,z,1.08,.22,1.08,stone);
       for(let k=0;k<3;k++) gAdd(d,RC,x,y0+1.1+k*1.25,z,0,.72,.06,.72,trim,.7); }
     else if(t===T.WATER&&ty>=OWH){ for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if(tAt(tx+dx,ty+dy)===T.DFLOOR) box(x+dx*.5,.36,z+dy*.5,dx?.18:1.02,.3,dy?.18:1.02,dark); }
-    else if(t===T.DFLOOR||t===T.DOOR){ const v=.86+hash2(tx,ty,7)*.22; box(x,y0+.01,z,.96,.04,.96,[.36*v,.38*v,.4*v]); } }
+    else if(t===T.LAVA&&RZ){ for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const n=tAt(tx+dx,ty+dy); if(n===T.DFLOOR||n===T.DOOR) box(x+dx*.5,.34,z+dy*.5,dx?.2:1.02,.32,dy?.2:1.02,dark); } }
+    else if(t===T.DFLOOR||t===T.DOOR){ const v=.86+hash2(tx,ty,7)*.22; box(x,y0+.01,z,.96,.04,.96,RZ?[.25*v,.2*v,.18*v]:[.36*v,.38*v,.4*v]); if(RZ&&hash2(tx,ty,9)>.93) box(x+(hash2(tx,ty,4)-.5)*.6,y0+.035,z+(hash2(tx,ty,5)-.5)*.6,.5,.012,.05,[.9,.2,.03],hash2(tx,ty,6)*3,.7); } }
   /* ---- rooms ---- */
   { const [x,z]=Wp(2,10); for(let k=0;k<5;k++) box(x+1.2-k*.5,.3+(k+1)*.15,z,.5,(k+1)*.3,3,dark); box(x-.45,2.6,z,.06,2.4,2.4,[.1,.5,.45],0,1.4); STAT_LIGHTS.push({x:x+.4,y:2.4,z,r:8,c:[.3,1,.85]}); }
   for(const [lx,ly] of [[18,4],[32,4],[18,16],[32,16]]) brazier(lx,ly);
@@ -3600,10 +3670,10 @@ function drawHorse(o){ const md=MATD; MATD=6; const M0=MOUNTS[o.m]||MOUNTS[1]; i
 function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial, t=now(), mv=o.mv||0, idle=1-mv, free=!!o.free;
   const SM=steedMotion(o.walk||0,mv,cel), ph=SM.ph, A=cel?.5:1, E=cel?.35:0; if(o.an===me&&mv>.3&&!cel){ const hb=Math.floor(ph/1.5708); if(me._hb!==hb){ me._hb=hb; try{ snd('hoof',null,null,.55); }catch(e){} } }
   const col=cel?[.42,.68,1]:M.col, deep=cel?[.3,.38,.9]:M.col.map(v=>v*.8), lt=cel?[.62,.82,1]:M.col.map(v=>Math.min(1,v*1.16+.03));
-  const mane=cel?[.85,.93,1]:M.mane, hoof=cel?[.8,.95,1]:[.09,.07,.06], hoofE=cel?1.6:0;
+  const ash=!!M.ashborn, mane=cel?[.85,.93,1]:M.mane, hoof=cel?[.8,.95,1]:ash?[1,.28,.04]:[.09,.07,.06], hoofE=cel?1.6:ash?1.3:0;
   const sock=cel?[.36,.5,.95]:M.armor?[.8,.8,.84]:M.elk?M.col.map(v=>v*.55):M.col.map(v=>v*.5);
   const leather=STEED_LEATHER, metal=STEED_METAL, trimC=M.armor?[.86,.7,.32]:M.elk?[.8,.5,.2]:cel?[.98,.86,.45]:[.78,.62,.3];
-  const blanket=M.armor?[.5,.07,.09]:M.elk?[.62,.42,.18]:cel?[.25,.3,.62]:[.2,.3,.55];
+  const blanket=M.armor?[.5,.07,.09]:M.elk?[.62,.42,.18]:cel?[.25,.3,.62]:M.ashborn?[.28,.04,.03]:[.2,.3,.55];
   const graze=free?Math.pow(Math.max(0,Math.sin(t*.22+o.x*1.3)),3):0, br=1+Math.sin(t*(1.6+mv*3))*.014, bank=(o.an&&o.an.bankS)||0;
   mreset(); mtr(o.x,o.y+SM.y,o.z); mry(-o.face); mtr(0,1.3,0); mrz(SM.p); mrx(bank*.6); mtr(0,-1.3,0);
   /* legs: transverse gallop (hind-left, hind-right, fore-left, fore-right); at rest one hind hoof is cocked */
@@ -3628,21 +3698,21 @@ function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial,
   /* tail: streams out behind at the gallop, swishes at rest */
   mpush(); mtr(-1.02,1.64,0); mrz(-1.05+mv*.6+Math.sin(ph*2)*.08*mv); mry(Math.sin(t*1.3+o.x)*.3*idle);
   const tn=M.elk?2:7; for(let k=0;k<tn;k++){ mrx(Math.sin(t*(1.8+mv*3)+k*.7)*(.05+idle*.06+mv*.04)); const w=M.elk?.17:(.12+Math.sin(k/(tn-1)*Math.PI)*.11);
-    P(GEO.limb,w,.21,w*.8,cel?(k%2?[.9,.95,1]:[.6,.8,1]):(k%2?mane:mane.map(v=>v*.86)),cel?1:0,0,0,0,cel?.75:1); mtr(0,-.2,0); mrz(.12-mv*.1); }
+    P(GEO.limb,w,.21,w*.8,cel?(k%2?[.9,.95,1]:[.6,.8,1]):(k%2?mane:mane.map(v=>v*.86)),cel?1:ash?2:0,0,0,0,cel?.75:1); mtr(0,-.2,0); mrz(.12-mv*.1); }
   mpop();
   /* neck, mane and head */
   const nod=Math.sin(ph*2+.5)*.06*mv+Math.sin(t*1.1+o.x)*.03*idle, na=Math.PI-.62+nod*.6-graze*1.35, hA=-.78+nod*.5-graze*.55;
   mpush(); mtr(.74,1.48,0); mrz(na);
   P(GEO.limb,.44,.9,.36,col,E,0,0,0,A); P(GEO.sph,.52,.62,.42,col,E,-.02,-.12,0,A); P(GEO.sph,.3,.56,.27,lt,E,-.11,-.44,0,A);
   for(let k=0;k<8;k++){ const yy=-.06-k*.1; if(cel){ mpush(); mtr(.17,yy,0); mrz(-na+.4-mv*.4); P(GEO.cone,.1,.3+(k%2)*.12,.05,k%2?[.9,.95,1]:[.7,.86,1],.9,0,0,0,.75); mpop(); continue; }
-    P(GEO.box,.07,.12,.07,mane,0,.18,yy,0); mpush(); mtr(.17,yy,.03); mrz(-na-mv*.7); mrx(.45+Math.sin(t*(2+mv*5)+k*.8)*(.08+mv*.16)); P(GEO.limb,.065,.25+(k%3)*.06,.035,k%2?mane.map(v=>v*.85):mane,0); mpop(); }
+    P(GEO.box,.07,.12,.07,mane,0,.18,yy,0); mpush(); mtr(.17,yy,.03); mrz(-na-mv*.7); mrx(.45+Math.sin(t*(2+mv*5)+k*.8)*(.08+mv*.16)); P(GEO.limb,.065,.25+(k%3)*.06,.035,k%2?mane.map(v=>v*.85):mane,ash?1.9:0); mpop(); }
   if(M.elk) for(let k=0;k<6;k++) P(GEO.blob,.27,.25,.27,[.88,.82,.7],0,-.14,-.15-k*.11,0);
   if(M.armor) for(let k=0;k<4;k++){ P(GEO.box,.12,.2,.43,metal,.15,.13,-.12-k*.19,0); P(GEO.box,.13,.03,.44,trimC,.3,.13,-.03-k*.19,0); }
   mtr(0,-.88,0); mrz(-na+hA);
   P(GEO.sph,.42,.4,.36,col,E,.04,.02,0,A); P(GEO.box,.52,.25,.25,col,E,.32,-.01,0,A); P(GEO.sph,.3,.27,.27,deep,E,.56,-.04,0,A);
   for(const s of [-1,1]){ P(GEO.sph,.3,.28,.12,col,E,.03,-.04,s*.12,A);
     P(GEO.sph,.07,.06,.05,[.04,.03,.03],0,.69,0,s*.07);
-    P(GEO.sph,.085,.09,.06,cel?[.6,.95,1]:[.05,.03,.02],cel?4:.1,.14,.08,s*.165); if(!cel) P(GEO.sph,.026,.026,.02,[1,1,1],1,.165,.1,s*.19);
+    P(GEO.sph,.085,.09,.06,cel?[.6,.95,1]:ash?[1,.55,.1]:[.05,.03,.02],cel||ash?4:.1,.14,.08,s*.165); if(!cel) P(GEO.sph,.026,.026,.02,[1,1,1],1,.165,.1,s*.19);
     mpush(); mtr(-.08,.18,s*.09); mrz(.25+Math.sin(t*2.3+s*1.7+o.x)*.1*idle-mv*.35); mrx(-s*(.18+Math.max(0,Math.sin(t*.9+s))*.15*idle)); P(GEO.cone,.09,.24,.06,col,E,0,0,0,A); P(GEO.cone,.05,.16,.02,cel?[.8,.9,1]:[.25,.15,.12],cel?.8:0,.012,.02,0); mpop(); }
   P(GEO.box,.4,.025,.18,[.06,.04,.04],0,.48,-.13,0);
   if(!cel) P(GEO.blob,.2,.12,.18,mane,0,-.02,.2,0);
@@ -3673,12 +3743,13 @@ function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial,
     for(const s of [-1,1]){ mpush(); mtr(.15,1.66,s*.3); mrx(-s*(.45+fl)); P(GEO.wing,1.25,.8,1.25*s,[.6,.8,1],.5,0,0,0,.35); P(GEO.wing,.85,.8,.85*s,[.85,.92,1],.8,.05,.02,0,.3); mpop(); }
     addLight(o.x,o.y+1.5,o.z,4.5,[.4,.6,1.1]); if(Math.random()<.6) P3(o.x+(Math.random()-.5)*1.4,o.y+.2+Math.random()*1.4,o.z+(Math.random()-.5)*1.4,0,.3,0,1.3,.08,Math.random()<.5?'#bfe8ff':'#fff3c0',{glow:true,drag:.98});
     if(mv>.2&&Math.random()<.8) P3(o.x,o.y+.1,o.z,(Math.random()-.5)*.5,.4,(Math.random()-.5)*.5,1.6,.14,'#9fd8ff',{glow:true,drag:.95}); }
+  else if(ash) ashbornFx(o,mv);
   else if(M.elk){ addLight(o.x,o.y+2.2,o.z,4,[1,.6,.3]); if(Math.random()<.2) burst3(o.x+(Math.random()-.5),o.y+.3,o.z+(Math.random()-.5),'#ffb03a',1,.4,{glow:true,up:1}); }
   if(!cel&&mv>.6&&Math.random()<.35&&GFX.q!=='low'){ const fx=Math.cos(o.face), fz=Math.sin(o.face); P3(o.x-fx*(.6+Math.random()*.6)+(Math.random()-.5)*.5,o.y+.08,o.z-fz*(.6+Math.random()*.6)+(Math.random()-.5)*.5,-fx*.4,.35+Math.random()*.3,-fz*.4,.9,.32,'#a89a7c',{big:true,drag:.94}); }
 }
 /* ---------- dynamic world pieces ---------- */
 function drawExtras(near,t){
-  drawLootBags(near,t); drawVaultDyn(near,t);
+  drawLootBags(near,t); drawVaultDyn(near,t); try{ drawRaidDyn(near,t); }catch(e){}
   if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,70)){ const hs=[[-3.6,-2.2,.3,1,0],[2.4,-1.6,2.6,2,0],[3.6,2,4,3,1],[-1.6,2.1,1,1,1],[.4,-.2,5.4,2,0]];
     hs.forEach(([dx,dz,f,m,walker],i)=>{ let X=STABLE.x+dx, Z=STABLE.z+dz, face=f+Math.sin(t*.3+dx)*.25, mv=0, walk=0;
       if(walker){ const w=t*.12+i*2.1; X+=Math.cos(w)*1.3; Z+=Math.sin(w)*.9; face=Math.atan2(Math.cos(w)*.9,-Math.sin(w)*1.3); mv=.32; walk=w*4.2; }
@@ -3808,7 +3879,7 @@ function updateUI(){ try{ arenaHud(); }catch(e){}
   // party frames
   const pf=$('party'); const mem=partyMembers();
   const sig=mem.map(o=>o.u+o.n+o.l+(o.pl?1:0)+'c'+(o.nc|0)).join('|')+me.party;
-  if(pf.dataset.sig!==sig){ pf.dataset.sig=sig; pf.innerHTML=''; if(me.party){ const h=document.createElement('div'); h.style.cssText='font-family:Cinzel;font-size:12px;color:var(--gold);text-shadow:0 1px 2px #000'; h.textContent='Party: '+me.party; pf.appendChild(h); }
+  if(pf.dataset.sig!==sig){ pf.dataset.sig=sig; pf.innerHTML=''; pf.classList.toggle('raid',mem.length>3); if(me.party){ const h=document.createElement('div'); h.style.cssText='font-family:Cinzel;font-size:12px;color:var(--gold);text-shadow:0 1px 2px #000'; h.textContent='Party: '+me.party; pf.appendChild(h); }
     for(const o of mem){ const d=document.createElement('div'); d.className='pmember panel'; d.dataset.u=o.u; d.innerHTML='<div class="uname"><span></span><span class="lvl"></span></div><div class="bar hp small"><i></i></div>';
       d.querySelector('.uname span').textContent=(o.pl?'♛ ':'')+o.n; d.querySelector('.uname span').style.color=nameCol(o); d.querySelector('.lvl').textContent=CLS[o.c].glyph+' '+o.l; d.onclick=()=>{me.target={kind:'p',id:o.u}}; pf.appendChild(d); } }
   for(const d of pf.querySelectorAll('.pmember')){ const o=othersByU.get(d.dataset.u); if(!o) continue; { let bx=d.querySelector('.pbuffs'); if(!bx){ bx=document.createElement('div'); bx.className='pbuffs'; d.appendChild(bx); } const sl=o.d?[]:songBuffsAt(o.rx,o.ry), h=songIcons(sl); bx._sb=sl; if(bx._h!==h){ bx._h=h; bx.innerHTML=h; } } d.querySelector('i').style.width=(clamp(o.hp/o.mhp,0,1)*100)+'%'; d.classList.toggle('dead',o.d); d.classList.toggle('far',dist(o.rx,o.ry,me.x,me.y)>1200); }
@@ -3907,13 +3978,13 @@ function talk(n){
     if(s&&s.st==='done') lines.push(['?',q]); else if(qAvail(q)) lines.push(['!',q]); else if(s&&s.st==='active') lines.push(['…',q]); }
   let h=`<div class="nhead">${npcPortrait(n)}<div><h2>${esc(n.name)}</h2><small>&lt;${esc(n.title)}&gt;</small></div></div><p id="npcTxt"></p>`; n.emote={k:'wave',t0:now()}; n.emoteU=now()+2;
   h+=lines.map((l,i)=>`<div class="qline" data-i="${i}"><span class="qm ${l[0]==='…'?'dim':''}">${l[0]}</span> ${esc(l[1].title)} <span style="color:var(--dim);font-size:12px">(Lv ${l[1].lvl||1})</span></div>`).join('');
-  const svc0={varro:[['arena','⚔ Enter the Bloodsand Arena']],keeperw:[['arenaout','Return to the surface']],keepere:[['arenaout','Return to the surface']],mira:[['shop','Browse goods'],['alch','Alchemy']],doran:[['smith','Upgrade gear']],velma:[['ah','⚖ Auction House'],...((me.c.mail||[]).length?[['mail',`✉ Collect mail (${me.c.mail.length})`]]:[])],hilde:me.c.lvl>=10?[['stable','Mounts']]:[]}[n.id]||[]; const svc=[...svc0]; if(PTRAIN[n.id]) svc.push(['ptrain','📜 Profession training']);
+  const svc0={varro:[['arena','⚔ Enter the Bloodsand Arena']],keeperw:[['arenaout','Return to the surface']],keepere:[['arenaout','Return to the surface']],mira:[['shop','Browse goods'],['alch','Alchemy']],doran:[['smith','Upgrade gear']],velma:[['ah','⚖ Auction House'],...((me.c.mail||[]).length?[['mail',`✉ Collect mail (${me.c.mail.length})`]]:[])],hilde:me.c.lvl>=10?[['stable','Mounts']]:[]}[n.id]||[]; const svc=[...svc0]; if(RSVC[n.id]) svc.push(...RSVC[n.id]); if(PTRAIN[n.id]) svc.push(['ptrain','📜 Profession training']);
   if(n.id==='hilde'&&me.c.lvl<10) h+='<p style="color:var(--dim)">"You\'re a bit green to handle one of my horses. Come back when you reach <b>level 10</b> and I\'ll find you a steed."</p>';
   if(!lines.length&&!svc.length&&n.id!=='hilde') h+='<p style="color:var(--dim)">"Nothing for you right now. Come back when you\'ve grown stronger."</p>';
   h+=`<div class="btns" style="margin-top:12px">${svc.map(s=>`<button data-s="${s[0]}">${s[1]}</button>`).join('')}<button id="byeB">Goodbye</button></div>`;
   dlg(h); typeText($('npcTxt'),(NPCGREET[n.id]||'"Well met, traveller."').replace(/<[^>]*>/g,'')); $('byeB').onclick=closeDlg;
   document.querySelectorAll('#dlg .qline').forEach(el=>el.onclick=()=>questDlg(n,lines[+el.dataset.i][1]));
-  document.querySelectorAll('#dlg [data-s]').forEach(b=>b.onclick=()=>({shop:openShop,alch:()=>openAlchemy(n),smith:()=>openSmith(n),ah:()=>{ closeDlg(); openAH(); },mail:()=>{ const c=me.c, L=c.mail||[]; let k=0; while(L.length&&c.inv.length<18){ c.inv.push(L.shift()); k++; } renderInv(); persist(); closeDlg(); chatLine(k?`You collect ${k} item${k>1?'s':''} from your mailbox.${L.length?' Your bags are full again; '+L.length+' still waiting.':''}`:'Your bags are full.','c-loot'); },stable:()=>openStable(n),ptrain:()=>openTrainer(n),arena:()=>{ closeDlg(); arenaEnter(); },arenaout:()=>{ closeDlg(); arenaLeave(); }})[b.dataset.s]());
+  document.querySelectorAll('#dlg [data-s]').forEach(b=>b.onclick=()=>({shop:openShop,alch:()=>openAlchemy(n),smith:()=>openSmith(n),ah:()=>{ closeDlg(); openAH(); },mail:()=>{ const c=me.c, L=c.mail||[]; let k=0; while(L.length&&c.inv.length<18){ c.inv.push(L.shift()); k++; } renderInv(); persist(); closeDlg(); chatLine(k?`You collect ${k} item${k>1?'s':''} from your mailbox.${L.length?' Your bags are full again; '+L.length+' still waiting.':''}`:'Your bags are full.','c-loot'); },stable:()=>openStable(n),ptrain:()=>openTrainer(n),arena:()=>{ closeDlg(); arenaEnter(); },arenaout:()=>{ closeDlg(); arenaLeave(); },...raidActs(n)})[b.dataset.s]());
 }
 function questDlg(n,q){ const s=me.c.qs[q.id]; const rw=`${q.xp} xp · ${q.gold} gold${q.epic?' · an epic item':q.item?' · a '+RAR[q.item].toLowerCase()+' item':''}`;
   let h=`<h2>${esc(q.title)}</h2><p>${esc(q.text)}</p><div class="reward"><b>Objective:</b> ${esc(objText(q,s))}<br><b>Rewards:</b> <span class="rw-xp">${q.xp} XP</span> · <span class="rw-g">${q.gold} gold</span>${q.epic?' · <span class="t3">Epic item</span>':q.item?` · <span class="t${q.item}">${RAR[q.item]} item</span>`:''}</div><div class="btns" style="margin-top:12px"><button id="qBack">Back</button>`;
@@ -3949,7 +4020,7 @@ function openSmith(n){ const c=me.c;
   document.querySelectorAll('#dlg [data-u]').forEach(b=>b.onclick=()=>{ const it=c.eq[b.dataset.u]; const cost=upCost(it); c.gold-=cost.gold; c.mats[cost.mat]-=cost.n; it.up=(it.up||0)+1;
     chatLine(`Doran hammers your ${it.name} to +${it.up}.`,'c-loot'); const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',30,3,{glow:true}); recalc(); persist(); renderInv(); openSmith(n); }); }
 function openStable(n){ const c=me.c;
-  dlg(`<h2>Hilde's Stable</h2><p>"Press R to call your mount, and R again to hop off. They don't like fighting or deep water."</p>${MOUNTS.slice(1).map((m,i)=>{ const id=i+1, own=c.mounts.includes(id);
+  dlg(`<h2>Hilde's Stable</h2><p>"Press R to call your mount, and R again to hop off. They don't like fighting or deep water."</p>${MOUNTS.slice(1).map((m,i)=>{ const id=i+1, own=c.mounts.includes(id); if(m.ashborn&&!own&&!raidIsOpen()) return '';
     return `<div class="shoprow"><span><b>${m.name}</b><br><span style="font-size:13px;color:var(--dim)">+${Math.round((m.speed-1)*100)}% speed · requires level ${m.lvl}</span></span>${own?`<button data-sel="${id}" ${c.mount===id?'disabled':''}>${c.mount===id?'Riding':'Choose'}</button>`:(m.drop?`<span style="font-size:12px;color:var(--gold);max-width:150px;text-align:right">Rare drop from ${m.drop}</span>`:`<button data-buy="${id}" ${c.gold>=m.cost&&c.lvl>=m.lvl?'':'disabled'}>Buy · ${m.cost} gold</button>`)}</div>`; }).join('')}
     <div style="margin-top:10px;color:var(--gold)">Your gold: ${c.gold}</div><div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   $('bk').onclick=()=>talk(n);
@@ -4607,6 +4678,7 @@ function gmCmd(cmd,arg){
       if(me.c.name.toLowerCase()===who.toLowerCase()) return applyGift(what,'a Game Master');
       if(room&&typeof room.gift==='function'){ room.gift(who,what); return gmOk(cmd==='setlevel'?`${who} is being set to level ${Math.min(MAXLVL,v)}. If they are offline it happens the next time they log in.`:`${who} gets ${v} level${v>1?'s':''}. If they are offline it happens the next time they log in.`); }
       return chatLine('Levelling other players works on your online realm server.','c-err'); }
+    case 'raid': return raidGM(arg);
     case 'tp': return gmTeleport(arg);
     case 'heal': gmRevive(); me.hp=me.mhp; me.res=me.mres; me.dots=[]; me.rootU=0; healMe(0); return gmOk('Fully healed.');
     case 'revive': if(!me.dead) return gmOk('You are not dead.'); gmRevive(); return gmOk('Revived where you stand.');
@@ -4647,6 +4719,7 @@ function renderGMWin(){ const w=$('gmWin'); if(!w||w.classList.contains('hidden'
   w.querySelector('.gmbody').innerHTML=`
   <div class="gmsec"><button id="gmTk" class="gold">🎫 Tickets${TK.open?` (${TK.open} open)`:''}</button> <small style="color:var(--dim)">Bug reports and problems from players. Also <code>/tickets</code>.</small> <button onclick="window.open('editor.html','_blank')">🗺 World editor</button></div>
   <div class="gmsec"><h4>Character</h4>${B('gold 1000','+1,000 gold')}${B('gold 10000','+10,000 gold')}${B('levelup 1','Level up')}${B('level '+MAXLVL,'Max level ('+MAXLVL+')')}${B('level 1','Reset to level 1')}${B('xp 5000','+5,000 XP')}${B('heal','Full heal')}${B('revive','Revive')}</div>
+  <div class="gmsec"><h4>Cinderhold raid · ${RAIDD.k}</h4>${B('raid tp 0','Raid entrance')}${B('raid tp 7','Ember Tyrant')}${B('raid reset','Reset raid')}${B('raid diff easy','Easy')}${B('raid diff normal','Normal')}${B('raid diff hard','Hard')}${B('raid loot','Tyrant loot')}</div>
   <div class="gmsec"><h4>Cheats</h4>${B('aura','✦ Aura',on(gm.aura))}${B('invis','Invisible',on(gm.invis))}${B('god','God mode',on(gm.god))}${B('nocd','No cooldowns',on(gm.nocd))}${B('fly','Noclip',on(gm.fly))}<span class="gmspd">Speed <input type="range" id="gmSpeed" min="1" max="6" step=".5" value="${gm.speed}"> x<b>${gm.speed}</b></span></div>
   <div class="gmsec"><h4>Items</h4>${B('item 3','<span class="t3">Epic item</span>')}${B('item 2','<span class="t2">Rare item</span>')}${B('mats 10','+10 all herbs & ore')}${B('mount','Unlock all mounts')}</div>
   <div class="gmsec"><h4>World <small>(time and weather change for everyone)</small></h4>${B('kill','Kill target')}${B('kill all','Kill everything nearby')}${B('questdone','Finish quest objectives')}${B('time day','☀ Day')}${B('time dusk','Dusk')}${B('time night','☾ Night')}${B('time auto','Clock')}${B('weather clear','Clear')}${B('weather rain','Rain')}${B('weather storm','Storm')}${B('weather auto','Realm weather')}</div>
@@ -4735,7 +4808,7 @@ function updateBoss(t){ const bf=$('bossFrame'); let b=null,bd=1e9;
   $('bfName').textContent=(m.t.boss?'☠ ':'★ ')+m.t.name; $('bfTag').textContent=`Level ${m.lv}${m.t.boss?' Boss':' Elite'}${m.enr?' · ENRAGED':''}`; $('bfDrop').textContent=dropText(m.t.key)?'Drops: '+dropText(m.t.key):'';
   $('bfHp').style.width=(clamp(f,0,1)*100)+'%'; $('bfHpT').textContent=`${Math.ceil(m.hp).toLocaleString()} / ${m.mhp.toLocaleString()}  (${Math.ceil(f*100)}%)`;
   let tel=null; for(const e of tels){ if(dist(e.x,e.y,m.rx,m.ry)<900&&(!tel||e.t0>tel.t0)) tel=e; }
-  const cb=$('bfCast'); if(tel){ const p=clamp((t-tel.t0)/tel.dur,0,1); cb.classList.remove('hidden'); cb.firstElementChild.style.width=(p*100)+'%'; cb.lastElementChild.textContent=(TELNAME[tel.kind]||'Charging')+' — move out!'; } else cb.classList.add('hidden'); }
+  const cb=$('bfCast'); if(tel){ const p=clamp((t-tel.t0)/tel.dur,0,1); cb.classList.remove('hidden'); cb.firstElementChild.style.width=(p*100)+'%'; cb.lastElementChild.textContent=(TELNAME[tel.kind]||'Charging')+(tel.kind===8?' — stack inside to share it!':tel.kind===9?' — heal through it (or interrupt)!':' — move out!'); } else cb.classList.add('hidden'); }
 function bossDied(m){ if(!bossEng||bossEng.m!==m) return; const Y=BOSSY[m.t.key]; if(Y) bossYell(m,Y.die); if(m.t.boss) banner('Victory!',m.t.name+' has been defeated','win'); bossEng=null; $('bossFrame').classList.add('hidden'); }
 /* ---------- NPC life ---------- */
 const NPCBARK={oriel:['Keep your blade sharp out there.','The wolves grow bolder every night.','Hearthmere stands because people like you fight for it.'],mira:['Potions! Fresh potions!','Got loot to sell? I pay fair.','Mind the step, traveller.'],doran:['*clang* *clang*','Good steel never lies.','Bring me ore and I\'ll make you a legend.'],hilde:['Easy there, girl... easy.','A good horse is worth ten swords.','Need a ride? I\'ve the finest steeds in the realm.'],hakon:['The cold bites deep here.','Keep moving or freeze.']};
@@ -4747,7 +4820,7 @@ function updateNPCs(dt,t){ if(!me) return; for(const n of NPCS){ const d=dist(me
 function typeText(el,full){ if(!el) return; el.textContent=''; let i=0; const step=()=>{ if(!el.isConnected) return; i=Math.min(full.length,i+3); el.textContent=full.slice(0,i); if(i<full.length) setTimeout(step,16); }; step(); }
 function npcPortrait(n){ const L=LOOK[n.id]; const c=n.col||'#a07a4a'; return `<div class="nport" style="background:radial-gradient(circle at 35% 30%,${shade(c,.25)},${shade(c,-.6)})">${esc(n.name[0])}</div>`; }
 /* ---------- parties ---------- */
-let invSeq=0, myInv=null, myIr=null, myKick=null, pendInv=null; const PARTY_MAX=5;
+let invSeq=0, myInv=null, myIr=null, myKick=null, pendInv=null; const PARTY_MAX=8;
 function partyMembers(){ return me.party?[...others.values()].filter(o=>o.pt===me.party&&seenO(o)):[]; }
 function amLeader(){ if(!me.party) return false; if(me.lead) return true; return !partyMembers().some(o=>o.pl); }
 function inviteTo(o){ if(!o) return err('Player not found'); if(o.pt&&o.pt===me.party) return err(o.n+' is already in your party');
@@ -4802,7 +4875,7 @@ setInterval(()=>{ if(me) gmGrantCheck(); },2000);
 
 /* ---------- lava ---------- */
 let lavaT=0;
-function inLava(x,y){ const tx=Math.floor(x/TS), ty=Math.floor(y/TS); if(tAt(tx,ty)===T.LAVA) return true; let nearL=false; for(let dy=-1;dy<=1&&!nearL;dy++) for(let dx=-1;dx<=1;dx++) if(tAt(tx+dx,ty+dy)===T.LAVA){ nearL=true; break; }
+function inLava(x,y){ const tx=Math.floor(x/TS), ty=Math.floor(y/TS); if(ty>=OWH) return false; if(tAt(tx,ty)===T.LAVA) return true; let nearL=false; for(let dy=-1;dy<=1&&!nearL;dy++) for(let dx=-1;dx<=1;dx++) if(tAt(tx+dx,ty+dy)===T.LAVA){ nearL=true; break; }
   return nearL&&groundY(x,y)<LAVA_Y+.05; }
 function lavaCheck(t){ if(!me||me.dead||gm.fly) return; if(!inLava(me.x,me.y)){ me.inLava=false; return; }
   if(!me.inLava){ me.inLava=true; err('You are burning in the lava!'); lavaT=0; }
@@ -4847,7 +4920,7 @@ function mapIcon(x,kind,px,py,col,s){ s=s||1; x.save(); x.translate(px,py); x.sc
   else if(kind==='poi'){ x.rotate(Math.PI/4); x.fillStyle=col; x.strokeStyle='#3a2408'; x.lineWidth=1.5; x.fillRect(-4,-4,8,8); x.strokeRect(-4,-4,8,8); }
   x.restore(); }
 const MAPZ={z:1,cx:0,cy:0,init:false};
-function mapRegion(){ return me&&inArena(me.x,me.y)?{y0:AR.y0-3,h:MH-AR.y0+3}:me&&me.y>=OWH*TS?{y0:OWH,h:AR.y0-3-OWH}:{y0:0,h:OWH}; }
+function mapRegion(){ if(me&&inRaid(me.x,me.y)) return {y0:OWH,h:MH-OWH}; return me&&inArena(me.x,me.y)?{y0:AR.y0-3,h:MH-AR.y0+3}:me&&me.y>=OWH*TS?{y0:OWH,h:AR.y0-3-OWH}:{y0:0,h:OWH}; }
 function mapView(){ const cv2=$('mapC'); const R=mapRegion(); const S=cv2.width/MW*MAPZ.z; let ox=cv2.width/2-MAPZ.cx*S, oy=cv2.height/2-MAPZ.cy*S; ox=Math.min(0,Math.max(cv2.width-MW*S,ox));
   const top=-R.y0*S, bot=cv2.height-(R.y0+R.h)*S; oy=bot>top?(top+bot)/2:Math.min(top,Math.max(bot,oy)); MAPZ.cx=(cv2.width/2-ox)/S; MAPZ.cy=(cv2.height/2-oy)/S; return {S,ox,oy,R}; }
 function mapZoomBy(f,px,py){ const cv2=$('mapC'); const v=mapView(); const wx=px==null?MAPZ.cx:(px-v.ox)/v.S, wy=py==null?MAPZ.cy:(py-v.oy)/v.S; const z=Math.max(1,Math.min(6,MAPZ.z*f)); if(z===MAPZ.z) return;
@@ -5054,7 +5127,7 @@ function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; c
   // ambience levels per zone
   const T0={wind:0,leaves:0,water:0,rumble:0,insects:0,frost:0,cave:0,town:0}; const set=o=>Object.assign(T0,o);
   if(z==='town') set({wind:.025,town:.05}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
-  if(z==='ruins') set({wind:.22}); if(z==='ash'||z==='lair') set({rumble:.55,wind:.05}); if(z==='frost') set({frost:.06,wind:.18}); if(z==='crypt'||z==='vault') set({cave:.45});
+  if(z==='ruins') set({wind:.22}); if(z==='ash'||z==='lair') set({rumble:.55,wind:.05}); if(z==='frost') set({frost:.06,wind:.18}); if(z==='crypt'||z==='vault') set({cave:.45}); if(z==='raid') set({cave:.3,rumble:.45});
   if(isWaterAt(me.x,me.y)) T0.water=.4; if(me.inLava) T0.rumble=.8;
   for(const k in T0) AUD.layers[k].g.gain.setTargetAtTime(T0[k],t,1.2);
   // random events
@@ -5179,7 +5252,7 @@ function footSnd(){ if(!me||me.mounted||!cdOk('step',.18)) return; if(isWaterAt(
 /* wildlife and distant life, mixed into the ambience bus */
 function wildTick(){ if(!AUD.on||!me||me.dead) return; const z=zoneAtPx(me.x,me.y), night=curDark>.55, R=Math.random, amb=AUD.vol.amb/.45;
   const at=(k,v)=>{ const a=R()*6.283, d=180+R()*420; snd(k,me.x+Math.cos(a)*d,me.y+Math.sin(a)*d,v*Math.min(1.6,amb)); };
-  if(z==='vault'||z==='crypt') return;
+  if(z==='vault'||z==='crypt'||z==='raid') return;
   if(!night&&(z==='meadow'||z==='forest'||z==='town'||z==='lake')&&R()<.35) at('bird',z==='forest'?.9:.7);
   if(night&&(z==='forest'||z==='meadow')&&R()<.05) at('owl',.8);
   if(night&&(z==='forest'||z==='frost')&&R()<.015) at('howl',.7);
@@ -5241,7 +5314,7 @@ Object.assign(BOSSY,{
 Object.assign(BOSSLOOT,{ossric:{n:1,p:[0,0,70,30,0]},siltmother:{n:1,p:[0,0,60,40,0]},vaelith:{n:2,p:[0,0,38,61,1]}});
 for(const m of mobs) if(m.t.vault&&m.t.boss) VAULT.boss[m.t.key]=m;
 function vaultNear(x,y){ return Math.hypot(x-VAULT.gate.x,y-VAULT.gate.y)<=VAULT.range; }
-function vaultCmd(k){ if(!me) return; if(me.dead) return sysMsg('You cannot do that while dead.','c-err');
+function vaultCmd(k){ if(!me) return; if(raidCmd(k)) return; if(me.dead) return sysMsg('You cannot do that while dead.','c-err');
   if(k==='e'){
     if(inVault(me.x,me.y)) return sysMsg('You are already inside the Sunken Vault. Type -o to leave early, or -d once the Drowned King has fallen.','c-err');
     if(!vaultNear(me.x,me.y)) return sysMsg(`Stand within 6 yards of the Sunken Vault gate to enter. You are ${Math.round(Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)/10)} yards away.`,'c-err');
@@ -5261,7 +5334,7 @@ function vaultEnter(msg){ if(me.mounted) dismount(); const S=VAULT.start; me.x=S
   if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; CAM.yaw=0; } sendPresence(true); sysMsg(msg); sysMsg('Type -o to leave early. When the Drowned King falls, type -d to finish and return together.'); if(!me.c.disc.includes('vault')) me.c.disc.push('vault'); }
 function vaultLeave(msg){ if(me.mounted) dismount(); const S=VAULT.exit; me.x=S.x+(Math.random()-.5)*40; me.y=S.y+Math.random()*20; me.face=Math.PI/2; me.target=null; me.auto=false; me.cast=null;
   if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } sendPresence(true); sysMsg(msg); }
-function vaultEvent(o,txt){ if(!me||me.dead) return;
+function vaultEvent(o,txt){ if(!me||me.dead) return; if(raidEvent(o,txt)) return;
   if(txt==='E'){ if(!inVault(me.x,me.y)&&vaultNear(me.x,me.y)) vaultEnter(`${o.n} leads your party into the Sunken Vault.`); else if(!inVault(me.x,me.y)) sysMsg(`${o.n} entered the Sunken Vault. You were too far from the gate to follow; come to the gate in the Ruins of Vael and type -e.`,'c-party'); }
   else if(txt==='D'){ if(inVault(me.x,me.y)) vaultLeave(`${o.n} completes the dungeon. You return to the surface together.`); } }
 /* host: an empty vault resets itself after 20 seconds, so the next group finds it whole */
@@ -5274,6 +5347,389 @@ function vaultHostTick(players,t){ const inside=(me&&inVault(me.x,me.y))||[...ot
 /* a gentle hint at the gate */
 function vaultHint(){ if(!me||me.dead||inVault(me.x,me.y)) return; const n=vaultNear(me.x,me.y); if(n&&!VAULT.hint){ VAULT.hint=true; sysMsg('The Sunken Vault · Level 10 dungeon. Gather your party within 6 yards of the gate and type -e to descend together.'); } else if(!n&&Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)>200) VAULT.hint=false; }
 setInterval(vaultHint,1000);
+/* =====================================================================
+   v57: CINDERHOLD — raid runtime
+   ===================================================================== */
+for(const m of mobs) if(m.t.raid&&m.t.boss) RAID.boss[m.t.key]=m;
+const RAIDORDER=['kragmor','ignara','pyrrus','ashmaw','magmaroth','selvara','gravoth','vyrathos'];
+const RDIFF={story:{take:2,deal:.6},easy:{take:1.45,deal:.8},normal:{take:1,deal:1},hard:{take:.82,deal:1.2},mythic:{take:.68,deal:1.4}};
+const RAIDD={k:'normal',take:1,deal:1,stamp:0,rr:0,rrSeen:0};
+const RLEG_CH=.025, RMOUNT_CH=.015, EMBER_COST=6;
+let MYNY=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches&&!matchMedia('(any-pointer:fine)').matches);
+/* a steady machine should run the world: phones, tablets and machines that struggle (under ~22 fps for a while) step aside */
+{ let slow=0, fast=0; const TOUCHY=MYNY; setInterval(()=>{ if(TOUCHY||document.hidden) return; const fps=1/Math.max(.001,emaDt); if(fps<22){ slow++; fast=0; } else if(fps>38){ fast++; slow=0; } if(slow>=10) MYNY=true; if(fast>=20) MYNY=false; },1000); }
+function hostBusy(){ return mobs.some(m=>m.t.boss&&!m.dead&&m.tgt); }
+function raidName(u){ return u===MY_U?(me?me.c.name:'You'):((othersByU.get(u)||{}).n||'Someone'); }
+
+/* ---------- warnings every raider sees (sent by the world host) ---------- */
+let RWLAST={};
+function rWarn(txt){ const T0=now(); if(RWLAST[txt]&&T0-RWLAST[txt]<3) return; RWLAST[txt]=T0; myChat.push([++chSeq,4,txt]); if(myChat.length>3) myChat.shift(); if(me&&inRaid(me.x,me.y)) raidWarnShow(txt); }
+function raidWarnShow(txt){ let el=$('raidWarn'); if(!el){ el=document.createElement('div'); el.id='raidWarn'; document.body.appendChild(el); }
+  el.textContent=txt; el.classList.remove('rw-on'); void el.offsetWidth; el.classList.add('rw-on'); clearTimeout(raidWarnShow.t); raidWarnShow.t=setTimeout(()=>el.classList.remove('rw-on'),4200);
+  chatLine('⚠ '+txt,'c-yell'); try{ if(performance.now()-(raidWarnShow.h||0)>6000){ raidWarnShow.h=performance.now(); snd('horn'); } }catch(e){} }
+{ const st=document.createElement('style'); st.textContent=`#raidWarn{position:fixed;left:50%;top:21%;transform:translateX(-50%);z-index:30;pointer-events:none;font-family:Cinzel,serif;font-weight:700;font-size:clamp(16px,2.4vw,26px);color:#ffd27a;text-align:center;max-width:80vw;
+  text-shadow:0 0 12px #ff5a10,0 2px 3px #000,0 0 2px #000;opacity:0;transition:opacity .35s}#raidWarn.rw-on{opacity:1;animation:rwPulse .9s ease-in-out 2}@keyframes rwPulse{50%{transform:translateX(-50%) scale(1.06)}}`; document.head.appendChild(st); }
+TELCOL[8]='#ffd84a'; TELCOL[9]='#ff2a10'; TELNAME[8]='Molten Impact'; TELNAME[9]='Inferno';
+
+/* ---------- host helpers ---------- */
+function rTel(m,x,y,r,delay,mul,kind,o){ pushTg(x,y,r,delay,kind); const h={m,x,y,r,t0:now(),at:now()+delay,dmg:mobDmg(m)*mul,...(o||{})}; hostTels.push(h); return h; }
+/* hits everyone in the boss's chamber; an interruptible one fizzles if the boss was stunned while channelling */
+function rWide(m,delay,mul,o){ return rTel(m,m.x,m.y,340,delay,mul,9,{...(o||{}),custom:(ps,h)=>{ if(h.int&&h.m.stunU>h.t0+.05){ rWarn(`${h.m.t.name}'s spell is INTERRUPTED!`); h.m.stunU=Math.max(h.m.stunU,now()+2.5); return; }
+  for(const p of ps) if(inRaid(p.x,p.y)&&dist(p.x,p.y,h.m.x,h.m.y)<1150) pushMd(p.u,h.dmg*(.92+Math.random()*.16),h.m.id,7); }}); }
+/* a shared impact: split between everyone standing inside; nobody inside and the whole chamber burns */
+function rSoak(m,ps,need,mul){ const L=ps.filter(p=>p.u!==m.tgt), q=(L.length?L:ps)[Math.random()*(L.length?L:ps).length|0]; if(!q) return;
+  const a=Math.random()*6.283, x=q.x+Math.cos(a)*40, y=q.y+Math.sin(a)*40;
+  rTel(m,x,y,118,4.6,mul,8,{custom:(P,h)=>{ const inn=P.filter(p=>dist(p.x,p.y,h.x,h.y)<h.r+8);
+    if(!inn.length){ rWarn('Nobody caught the impact! Molten fire washes over the chamber.'); for(const p of P) if(inRaid(p.x,p.y)&&dist(p.x,p.y,h.m.x,h.m.y)<1150) pushMd(p.u,h.dmg*1.1,h.m.id,7); return; }
+    const each=h.dmg*need/inn.length; for(const p of inn) pushMd(p.u,Math.min(h.dmg*need,each),h.m.id,7); }});
+  rWarn(`Molten impact on ${raidName(q.u)}: stack in the golden circle (${need}+ heroes) to share it!`); }
+function rShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function rAdds(B,P){ summonAdds(B); const nt=P.filter(q=>q.u!==B.tgt); for(const a of mobs){ if(!a.t.summon||a.t.owner!==B.t.key||a.dead) continue; const q=nt.length?nt[Math.random()*nt.length|0]:P[0]; if(!q) continue; a.threat={}; for(const k in B.threat) a.threat[k]=1; a.threat[q.u]=60; a.tgt=q.u; } }
+function rLeap(m,q,r,delay,mul){ const tx=q.x, ty=q.y; m.chanU=now()+delay; rTel(m,tx,ty,r,delay,mul,1,{after:()=>{ if(!m.dead&&!m.evade&&!blocked(tx,ty,m.t.r*.7)){ m.x=tx; m.y=ty; } }}); }
+
+/* ---------- boss abilities (rotations) ---------- */
+function raidSpecial(m,p,players,dt,t){ const P=players.filter(q=>inRaid(q.x,q.y)&&dist(q.x,q.y,m.x,m.y)<1000); if(!P.length){ m.spT=1; return; }
+  const rs=m.rs||(m.rs={}); rs.ph=(rs.ph||0)+1; const k=rs.ph, face=Math.atan2(p.y-m.y,p.x-m.x), nt=P.filter(q=>q.u!==m.tgt), NT=nt.length?nt:P;
+  const far=()=>{ let b=null,bd=-1; for(const q of P){ const d=dist(q.x,q.y,m.x,m.y); if(d>bd&&d<720){ bd=d; b=q; } } return b||p; };
+  const ahead=(d0,step,n,r,delay,dd,mul,kind)=>{ m.face=face; m.chanU=t+delay; for(let i=0;i<n;i++) rTel(m,m.x+Math.cos(face)*(d0+i*step),m.y+Math.sin(face)*(d0+i*step),r,delay+i*dd,mul,kind); };
+  switch(m.t.sp.k){
+    case 'r_krag': m.spT=m.enr?4.8:6.5;
+      if(k%3===1) ahead(110,0,1,125,1.4,0,1.6,3);                                         // Molten Cleave
+      else if(k%3===2){ m.chanU=t+1.8; rTel(m,m.x,m.y,175,1.8,1.3,2); }                    // Forge Stomp
+      else for(const q of rShuffle(NT).slice(0,2)) rTel(m,q.x,q.y,88,2.4,1.1,4);          // Searing Brand
+      break;
+    case 'r_ign': m.spT=m.emp?4.2:6;
+      if(k%2){ m.chanU=t+1.6; rTel(m,m.x,m.y,150,1.6,1.2,3); } else rLeap(m,far(),92,1.3,1.3); break;
+    case 'r_pyr': m.spT=m.emp?4.2:6;
+      if(k%2){ for(const q of P) rTel(m,q.x,q.y,72,1.8,.8,6); } else { const q=rShuffle(P)[0]; pushMd(q.u,mobDmg(m)*1.4,m.id,7); } break;
+    case 'r_ash': m.spT=m.enr?4.6:6;
+      if(k%3===1) ahead(95,100,3,92,1.3,.4,1.2,3);                                         // Cinder Breath
+      else if(k%3===2) rLeap(m,far(),98,1.2,1.4);                                          // Pounce
+      else pushMd(p.u,mobDmg(m)*.8,m.id,6);                                               // Rend (bleeds)
+      break;
+    case 'r_mag': m.spT=m.enr?5:7;
+      if(k%3===1){ m.chanU=t+1.6; rTel(m,p.x,p.y,132,1.6,1.5,2); }                         // Magma Slam
+      else if(k%3===2){ for(let i=0;i<6;i++){ const a=Math.random()*6.283, r=80+Math.random()*290; rTel(m,m.x+Math.cos(a)*r,m.y+Math.sin(a)*r,76,2.0,1.1,4); } }   // Eruption
+      else { const a=Math.random()*6.283; for(let i=0;i<5;i++) rTel(m,m.x+Math.cos(a)*(90+i*86),m.y+Math.sin(a)*(90+i*86),82,1.2+i*.35,1.2,3); }                 // Lava Wave
+      break;
+    case 'r_sel': m.spT=m.enr?4.6:6;
+      if(k%3===1){ for(const q of rShuffle(P).slice(0,3)) rTel(m,q.x,q.y,92,2.0,1.2,4); }   // Flamestrike
+      else if(k%3===2){ const q=rShuffle(NT)[0]; rTel(m,q.x,q.y,125,3.6,1.0,5); rWarn(`${raidName(q.u)} is a LIVING BOMB — get away from the raid!`); }
+      else pushMd(p.u,mobDmg(m)*1.6,m.id,7);                                              // Pyroclasm Bolt on the tank
+      break;
+    case 'r_grav': m.spT=m.enr?5:7;
+      if(k%3===1){ pushMd(p.u,mobDmg(m)*1.5,m.id,7); rTel(m,p.x,p.y,100,.9,.9,2); }        // Shatter
+      else if(k%3===2){ if(rs.ring){ for(let i=0;i<8;i++){ const a=i/8*6.283+Math.random()*.25; rTel(m,m.x+Math.cos(a)*215,m.y+Math.sin(a)*215,88,1.9,1.2,5); } rWarn('Obsidian spikes erupt around Gravoth: get CLOSE to him!'); }
+        else { m.chanU=t+2.4; rTel(m,m.x,m.y,235,2.4,1.5,2); rWarn('Gravoth raises his fists: RUN from the Shockwave!'); } rs.ring=!rs.ring; }
+      else { const q=rShuffle(NT)[0]; pushMd(q.u,mobDmg(m)*.4,m.id,5); rTel(m,q.x,q.y,82,2.7,1.2,5); }   // Crushing Gaze (root, then a blow)
+      break;
+    case 'r_vyr': if(m.air){ m.spT=1; break; } m.spT=m.enr?4.4:6;
+      if(k%4===1) ahead(115,110,3,108,1.4,.4,1.4,3);                                      // Flame Breath
+      else if(k%4===2){ m.chanU=t+1.3; rTel(m,m.x-Math.cos(face)*135,m.y-Math.sin(face)*135,145,1.3,1.3,2); }   // Tail Sweep
+      else if(k%4===3){ for(const q of rShuffle(NT).slice(0,2)) rTel(m,q.x,q.y,88,2.4,1.2,4); }                // Searing Brand
+      else { m.chanU=t+1.7; rTel(m,m.x,m.y,190,1.7,1.0,1); }                              // Wing Buffet
+      break;
+  } }
+
+/* ---------- host: timers, phases, adds, resets ---------- */
+let RTRASH=null;
+function raidReset(force){ for(const m of mobs){ if(!m.t.raid) continue; if(m.t.summon){ if(!m.dead){ m.dead=true; m.resp=Infinity; m.tgt=''; m.threat={}; } continue; }
+    if(force||m.dead||m.hp<m.mhp||m.evade) respawnMob(m); m.rs=null; m.air=false; m.bers=false; m.emp=false; m.enr=false; m.chanU=0; }
+  for(let i=hostTels.length-1;i>=0;i--) if(hostTels[i].m&&hostTels[i].m.t.raid) hostTels.splice(i,1); RAID.emptySince=0; }
+function raidHostTick(players,t,dt){
+  const inside=(me&&inRaid(me.x,me.y))||[...others.values()].some(o=>inRaid(o.x,o.y));
+  if(!inside){ if(!RAID.emptySince) RAID.emptySince=t; else if(t-RAID.emptySince>30){ if(mobs.some(m=>m.t.raid&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade))) raidReset(false); RAID.emptySince=t; } return; }
+  RAID.emptySince=0;
+  /* packs fight together */
+  if(!RTRASH) RTRASH=mobs.filter(m=>m.t.raid&&!m.t.boss&&!m.t.summon);
+  for(const m of RTRASH){ if(m.dead||!m.tgt) continue; for(const o of RTRASH) if(o!==m&&!o.dead&&!o.tgt&&!o.evade&&dist(o.x,o.y,m.x,m.y)<165){ o.threat={}; for(const k in m.threat) o.threat[k]=1; } }
+  const Bs=RAID.boss, I=Bs.ignara, Py=Bs.pyrrus;
+  if(I&&Py) for(const [a,b] of [[I,Py],[Py,I]]){ if(!a.dead&&a.tgt&&!b.dead&&!b.tgt&&!b.evade){ b.threat={}; for(const k in a.threat) b.threat[k]=1; }
+    if(a.dead&&!b.dead&&b.tgt&&!b.emp){ b.emp=true; b.enr=true; b.hp=Math.min(b.mhp,b.hp+b.mhp*.15); rWarn(`${b.t.name} is consumed by grief and burns hotter!`); } }
+  for(const key of RAIDORDER){ const B=Bs[key]; if(!B||B.dead) continue;
+    if(!B.tgt){ if(B.rs&&B.rs.eng){ B.rs=null; B.air=false; B.emp=false; B.bers=false; B.chanU=0; despawnAdds(key); } continue; }
+    const rs=B.rs||(B.rs={}); if(!rs.eng){ rs.eng=1; rs.clk=0; rs.next={}; rWarn(`${B.t.name} engages! ${Math.round(B.t.bers/60)} minutes until berserk.`); }
+    rs.clk+=dt; const f=B.hp/B.mhp, P=players.filter(q=>inRaid(q.x,q.y)&&dist(q.x,q.y,B.x,B.y)<1150); if(!P.length) continue;
+    const every=(k,per,first)=>{ if(rs.next[k]==null) rs.next[k]=first??per; if(rs.clk>=rs.next[k]){ rs.next[k]=rs.clk+per; return true; } return false; }, once=k=>rs[k]?false:(rs[k]=1,true);
+    if(!B.bers&&rs.clk>B.t.bers){ B.bers=true; B.enr=true; rWarn(`${B.t.name} goes BERSERK!`); }
+    switch(key){
+      case 'kragmor':
+        if(every('ingot',30,14)) rSoak(B,P,3,1.4);
+        if(f<.3&&once('over')){ B.enr=true; rWarn('Kragmor OVERHEATS! Searing heat fills the forge every few seconds.'); }
+        if(rs.over&&every('heat',8,2)) rWide(B,1.2,.42); break;
+      case 'ignara': case 'pyrrus':
+        if(key==='ignara'&&!Py.dead&&Py.tgt&&every('conj',20,12)){ if(dist(B.x,B.y,Py.x,Py.y)<230){ for(const T2 of [B,Py]) T2.hp=Math.min(T2.mhp,T2.hp+T2.mhp*.08); pushTg(B.x,B.y,120,.6,6); pushTg(Py.x,Py.y,120,.6,6); rWarn('Twin Flame Conjunction! The twins heal each other: keep them apart!'); } }
+        break;
+      case 'ashmaw':
+        for(const [th,k] of [[.8,'h1'],[.55,'h2'],[.3,'h3']]) if(f<th&&once(k)){ rAdds(B,P); rWarn('Ashmaw howls! Cinder Pups pour out of the den: protect your healers!'); }
+        if(f<.15&&!B.enr){ B.enr=true; rWarn('Ashmaw is ENRAGED!'); } break;
+      case 'magmaroth':
+        if(every('core',35,18)) rSoak(B,P,3,1.5);
+        for(const [th,k] of [[.66,'s1'],[.33,'s2']]) if(f<th&&once(k)){ rAdds(B,P); rWarn('Magmaroth splits! Kill the Magmalings AWAY from the group: they erupt when they die.'); }
+        for(const a of mobs){ if(a.t.key!=='magmaling') continue; if(!a.dead) a._alive=true; else if(a._alive){ a._alive=false; rTel(B,a.x,a.y,96,1.0,.75,4); } }
+        if(f<.15&&!B.enr){ B.enr=true; rWarn('Magmaroth is ENRAGED!'); } break;
+      case 'selvara':
+        if(every('inferno',40,20)){ B.chanU=t+4.5; rWide(B,4.5,2.4,{int:true}); rWarn("Sel'vara channels INFERNO: STUN her to interrupt (Shield Bash, Lullaby)!"); }
+        for(const [th,k] of [[.65,'a1'],[.3,'a2']]) if(f<th&&once(k)){ rAdds(B,P); rWarn('Flame Acolytes answer the call: burn them down!'); }
+        if(f<.15&&!B.enr){ B.enr=true; rWarn("Sel'vara is ENRAGED!"); } break;
+      case 'gravoth': {
+        for(const [th,k] of [[.75,'sh1'],[.5,'sh2'],[.25,'sh3']]) if(f<th&&once(k)){ rAdds(B,P); let i=0; for(const a of mobs){ if(a.t.key!=='obsidianshard'||a.dead) continue; const an=i++*2.094+Math.random()*.4; a.x=a.rx=a.sx=B.sx+Math.cos(an)*300; a.y=a.ry=a.sy=B.sy+Math.sin(an)*300; } rWarn('Obsidian Shards rise and feed Gravoth: DESTROY them!'); }
+        const n=mobs.reduce((c,a)=>c+(a.t.key==='obsidianshard'&&!a.dead?1:0),0); if(n) B.hp=Math.min(B.mhp,B.hp+B.mhp*.002*n*dt);
+        if(f<.1&&!B.enr){ B.enr=true; rWarn('Gravoth is ENRAGED!'); } break; }
+      case 'vyrathos':
+        if(f<.7&&once('p2')){ rs.airT=rs.clk; B.air=true; B.chanU=t+22; rAdds(B,P); rWarn('Vyrathos takes to the skies! RAIN OF FIRE: keep moving and destroy the Emberspawn!'); }
+        if(B.air){ B.chanU=Math.max(B.chanU,t+.5); if(rs.clk-rs.airT>21){ B.air=false; B.chanU=t+1; rTel(B,B.x,B.y,210,.9,1.2,2); rWarn('Vyrathos crashes back down!'); }
+          else if(every('rain',2.6,1)){ for(let i=0;i<6;i++){ const q=P[Math.random()*P.length|0], a=Math.random()*6.283, r=Math.random()*520; const near=Math.random()<.55; rTel(B,near?q.x+(Math.random()-.5)*50:B.sx+Math.cos(a)*r,near?q.y+(Math.random()-.5)*50:B.sy+Math.sin(a)*r,80,1.6,1.0,4); } } }
+        else if(every('meteor',30,16)) rSoak(B,P,3,1.6);
+        if(f<.4&&once('p3')) rWarn("THE TYRANT'S WRATH! The whole cavern burns: healers, keep everyone up!");
+        if(rs.p3&&every('wrath',10,3)) rWide(B,1.4,.55);
+        if(f<.25&&once('adds2')){ rAdds(B,P); rWarn('More Emberspawn crawl out of the lava!'); }
+        if(f<.15&&!B.enr){ B.enr=true; rWarn('Vyrathos is ENRAGED!'); } break;
+    } } }
+
+/* ---------- entering and leaving ---------- */
+function raidNear(x,y){ return Math.hypot(x-RAID.gate.x,y-RAID.gate.y)<=RAID.range; }
+function raidReqs(all){ const out=[], n=all.length;
+  if(n<5) out.push(`Cinderhold is a raid for 5 to ${PARTY_MAX} heroes. Your group has ${n}: form a bigger party first.`);
+  const low=all.filter(a=>a.l<20); if(low.length) out.push(`Every hero must be level 20. Not yet: ${low.map(a=>a.n+' ('+a.l+')').join(', ')}.`);
+  const has=r=>all.some(a=>CLS[a.c]&&CLS[a.c].role===r), miss=[];
+  if(!has('Tank')) miss.push('a Tank (Bulwark)'); if(!has('Healer')) miss.push('a Healer (Mender)'); if(!has('Support')) miss.push('a Support (Bard)'); if(!has('Damage')) miss.push('Damage (Arcanist, Assassin, Barbarian or Hunter)');
+  if(miss.length) out.push('Your raid still needs '+miss.join(', ')+'.'); return out; }
+function raidCmd(k){ if(!me) return false; const inside=inRaid(me.x,me.y);
+  if(k==='e'){ if(inside){ sysMsg('You are already inside Cinderhold. Type -o to leave, or -d once the Ember Tyrant has fallen.','c-err'); return true; }
+    if(!raidNear(me.x,me.y)) return false; if(me.dead){ sysMsg('You cannot do that while dead.','c-err'); return true; }
+    if(!raidIsOpen()&&!isGM){ sysMsg('The great gate will not move. Its seals are hot to the touch, and from somewhere far below comes the slow breathing of something vast...','c-err'); return true; }
+    if(!raidIsOpen()) sysMsg('GM: Cinderhold is still SEALED for players. Type /raid unveil when you want to reveal it.','c-gm');
+    const mem=partyMembers().filter(o=>!o.d), all=[{n:me.c.name,l:me.c.lvl,c:me.c.cls},...mem.map(o=>({n:o.n,l:o.l,c:o.c}))], probs=raidReqs(all);
+    if(probs.length&&!isGM){ sysMsg('🔥 The Cinderhold Gate will not open:','c-err'); for(const p of probs) sysMsg('• '+p,'c-err'); return true; }
+    if(probs.length) sysMsg(`GM override: entering without the full raid requirements (${probs.length} unmet).`,'c-gm');
+    const far=mem.filter(o=>!raidNear(o.rx,o.ry)); if(far.length&&!isGM){ sysMsg(`Waiting for ${far.map(o=>o.n).join(', ')}: everyone must stand at the Cinderhold Gate.`,'c-err'); return true; }
+    const busy=[...others.values()].filter(o=>seenO(o)&&inRaid(o.rx,o.ry)&&!(me.party&&o.pt===me.party)); if(busy.length&&!isGM){ sysMsg(`Another group is inside Cinderhold (${busy.slice(0,3).map(o=>o.n).join(', ')}). Wait for them to finish.`,'c-err'); return true; }
+    raidEnter(me.party?'You lead your raid through the Cinderhold Gate.':'You step through the Cinderhold Gate.'); if(me.party){ myChat.push([++chSeq,3,'RE']); if(myChat.length>3) myChat.shift(); } return true; }
+  if(k==='o'){ if(!inside) return false; raidLeave('You climb back out of Cinderhold.'); return true; }
+  if(k==='d'){ if(!inside) return false; const V=RAID.boss.vyrathos; if(!(V&&V.dead)){ sysMsg('The Ember Tyrant still lives. Type -o to leave early.','c-err'); return true; }
+    if(me.party){ myChat.push([++chSeq,3,'RD']); if(myChat.length>3) myChat.shift(); } raidLeave('Cinderhold is conquered! You and your raid return to the surface.'); return true; }
+  return false; }
+function raidEnter(msg){ if(me.mounted) dismount(); if(me.dead) return; const S=RAID.start; me.x=S.x+(Math.random()-.5)*60; me.y=S.y+(Math.random()-.5)*60; me.face=0; me.target=null; me.auto=false; me.cast=null;
+  if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; CAM.yaw=0; } sendPresence(true); sysMsg(msg);
+  banner('CINDERHOLD','Raid · The Ember Tyrant awaits','boss'); try{ snd('horn'); }catch(e){}
+  sysMsg('Seven fights stand between you and Vyrathos. Tank, healer, support and damage all matter here. Read the warnings in the middle of your screen. Type -o to leave; if you fall, you rise again at the last cleared chamber.','c-xp');
+  if(!me.c.disc.includes('cinderhold')){ me.c.disc.push('cinderhold'); persist(); } }
+function raidLeave(msg){ if(me.mounted) dismount(); if(me.dead) release(); const S=RAID.exit; me.x=S.x+(Math.random()-.5)*50; me.y=S.y+Math.random()*24; me.face=Math.PI/2; me.target=null; me.auto=false; me.cast=null;
+  if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } sendPresence(true); sysMsg(msg); }
+function raidEvent(o,txt){ if(txt==='RE'){ if(!inRaid(me.x,me.y)&&raidNear(me.x,me.y)) raidEnter(`${o.n} leads your raid through the Cinderhold Gate.`); else if(!inRaid(me.x,me.y)) sysMsg(`${o.n} entered Cinderhold. Go to the Cinderhold Gate in the Cinder Caldera and type -e to follow.`,'c-party'); return true; }
+  if(txt==='RD'){ if(inRaid(me.x,me.y)) raidLeave(`${o.n} completes the raid. You return to the surface together.`); return true; } return false; }
+function raidCheckpoint(){ const B=RAID.boss, dead=k=>B[k]&&B[k].dead, W=(x,y)=>[(RX0+x+.5)*TS,(OWH+y+.5)*TS];
+  if(dead('gravoth')) return W(108,58); if(dead('selvara')) return W(150,55); if(dead('magmaroth')) return W(141,16); if(dead('ashmaw')) return W(105,16);
+  if(dead('ignara')&&dead('pyrrus')) return W(70,13); if(dead('kragmor')) return W(37,16); return [RAID.start.x,RAID.start.y]; }
+function raidHint(){ if(!me||me.dead||inRaid(me.x,me.y)) return; const n=raidNear(me.x,me.y);
+  if(n&&!RAID.hint&&!raidIsOpen()){ RAID.hint=true; sysMsg('A colossal gate of black glass, sealed shut. The air shimmers with heat, and the stone hums faintly beneath your feet.','c-sys'); }
+  else if(n&&!RAID.hint){ RAID.hint=true; sysMsg('🔥 The Cinderhold Gate · Raid for 5 to 8 heroes, all level 20, with a Tank, a Healer, a Support and Damage. Gather your party here and type -e.','c-xp'); }
+  else if(!n&&Math.hypot(me.x-RAID.gate.x,me.y-RAID.gate.y)>260) RAID.hint=false; }
+setInterval(raidHint,1000);
+/* portcullises: tell the raid when one opens */
+{ const was={}; setInterval(()=>{ if(!me) return; RAID.doors.forEach((d,i)=>{ const open=d.need.every(k=>RAID.boss[k]&&RAID.boss[k].dead); if(was[i]===false&&open&&inRaid(me.x,me.y)){ sysMsg('🔓 A great portcullis grinds open deeper in Cinderhold.','c-xp'); try{ snd('horn'); }catch(e){} } was[i]=open; }); },1000); }
+
+/* ---------- GM: difficulty, reset, teleports (shared with the host through presence) ---------- */
+function raidNetIn(pr){ if(Array.isArray(pr.rd)&&RDIFF[pr.rd[0]]&&+pr.rd[1]>RAIDD.stamp){ RAIDD.k=pr.rd[0]; RAIDD.stamp=+pr.rd[1]; Object.assign(RAIDD,RDIFF[RAIDD.k]); if(me&&inRaid(me.x,me.y)) sysMsg(`Cinderhold difficulty is now ${RAIDD.k.toUpperCase()}.`,'c-gm'); }
+  if(+pr.rr>RAIDD.rrSeen){ RAIDD.rrSeen=+pr.rr; if(amHost) raidReset(true); } }
+function raidGM(arg){ const a=String(arg||'').trim().toLowerCase().split(/\s+/);
+  if(a[0]==='diff'||a[0]==='difficulty'){ const k=a[1]; if(!RDIFF[k]) return gmOk('Raid difficulty: story, easy, normal, hard or mythic. Now: '+RAIDD.k+'.'); RAIDD.k=k; RAIDD.stamp=Date.now(); Object.assign(RAIDD,RDIFF[k]); sendPresence(true);
+    return gmOk(`Cinderhold difficulty: ${k.toUpperCase()}. Bosses take ${Math.round(RAIDD.take*100)}% damage and deal ${Math.round(RAIDD.deal*100)}%.`); }
+  if(a[0]==='reset'){ RAIDD.rr=Date.now(); RAIDD.rrSeen=RAIDD.rr; sendPresence(true); if(amHost) raidReset(true); return gmOk('Cinderhold resets: every boss and monster returns.'); }
+  if(a[0]==='tp'){ const i=clamp(parseInt(a[1])||0,0,7), L=[[8,13],[37,18],[70,16],[105,18],[141,18],[152,62],[108,62],[44,80]], [lx,ly]=L[i]; if(me.mounted) dismount(); me.x=(RX0+lx+.5)*TS; me.y=(OWH+ly+.5)*TS; if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } sendPresence(true); return gmOk('Teleported to '+['the Ember Threshold','the Great Forge','the Hall of Twin Flames',"Ashmaw's Den",'the Magma Falls',"the Pyromancer's Sanctum",'the Obsidian Crucible','the Heart of Cinderhold'][i]+'.'); }
+  if(a[0]==='loot'){ const c=me.c; if(c.inv.length>=18) return chatLine('Your bags are full.','c-err'); c.inv.push(tyrantWeapon(c.cls)); if(!c.mounts.includes(6)) c.mounts.push(6); renderInv(); persist(); return gmOk('A Tyrant legendary is in your bags and the Ashborn Nightmare is in your stable.'); }
+  if(a[0]==='unveil'||a[0]==='open'||a[0]==='seal'||a[0]==='close'){ const on=a[0]==='unveil'||a[0]==='open'; if(!isRealmOwner()) return chatLine('Only the realm owner can unveil or seal Cinderhold.','c-err');
+    if(!(room&&typeof room.raidOpen==='function')) return gmOk('Unveiling needs the realm server (the online game), not solo play.'); saves.raidOpen=on?1:0; if(!on) saves.raidSeen=0; saveAll(saves); RASSERT=true; room.raidOpen(on);
+    return gmOk(on?'Cinderhold is UNVEILED: every player hears the gate open and Emberwarden Thalia appears at the Cinderhold Gate.':'Cinderhold is sealed again for players who have not seen it yet.'); }
+  return gmOk('Raid tools: /raid unveil · /raid seal · /raid diff <story|easy|normal|hard|mythic> · /raid reset · /raid tp <0-7> · /raid loot · sealed now: '+(raidIsOpen()?'no':'yes')); }
+
+/* ---------- loot: Cinderhold gear, Tyrant's Embers, the Tyrant legendaries and the Ashborn Nightmare ---------- */
+Object.assign(BOSSLOOT,{kragmor:{n:1,p:[0,0,45,55,0]},ignara:{n:1,p:[0,0,40,60,0]},pyrrus:{n:1,p:[0,0,40,60,0]},ashmaw:{n:1,p:[0,0,30,70,0]},magmaroth:{n:1,p:[0,0,20,80,0]},selvara:{n:1,p:[0,0,10,90,0]},gravoth:{n:2,p:[0,0,0,100,0]},vyrathos:{n:2,p:[0,0,0,100,0]}});
+const TYRANT={
+  warden:{name:"Emberwall, Oathblade of the Tyrant's Bane",desc:'Quenched in the heart of the Ember Tyrant. +16% damage, and it never stops smouldering.',pow:96,sta:86},
+  mender:{name:'Cinderbloom, Staff of the Second Dawn',desc:'A staff grown from the Tyrant\'s ashes into a living sunrise. +16% healing and damage.',pow:92,sta:88},
+  arcanist:{name:'Embereye, Heart-Focus of Vyrathos',desc:'The Ember Tyrant\'s own eye, still burning in a cage of mithril. +16% spell damage.',pow:104,sta:72},
+  assassin:{name:'Ashfang and Embersting',desc:'Twin fangs pried from the Tyrant\'s jaw. +16% damage and +6% critical strike.',pow:102,sta:74},
+  bard:{name:'Embersong, Warhorn-Axe of Cinderhold',desc:'Its horn still echoes with the Tyrant\'s roar. +16% damage; your songs are 25% stronger and Power Chord hits 15% harder.',pow:98,sta:84},
+  barbarian:{name:'Cindermaw, Reaver of the Ember Tyrant',desc:'A greataxe that drinks fire. +16% damage, and Execute works on enemies below 35% health.',pow:104,sta:80},
+  hunter:{name:"Emberwing, Longbow of the Tyrant's Flight",desc:'Strung with a sinew of the Tyrant\'s wing. +16% damage, and your wolf deals 30% more damage.',pow:98,sta:76}};
+function tyrantWeapon(cls){ const L=TYRANT[cls]||TYRANT.warden; return {id:rid(6),slot:'weapon',name:L.name,rar:4,pow:L.pow,sta:L.sta,lv:20,val:900,leg:cls,t2:1,desc:L.desc}; }
+function tyrantGear(slot,cls){ let it=null; for(let i=0;i<60&&(!it||it.slot!==slot);i++) it=genItem(24,3,cls); it.slot=slot; it.pow=Math.round(it.pow*1.18); it.sta=Math.round(it.sta*1.18); it.raid=1; it.val=Math.round(it.val*1.6);
+  it.name='Tyrant-forged '+(slot==='armor'?ARMT[CLS_ARMOR[cls]][0]:slot==='weapon'?CLS_WEAP[cls][0]:'Emberheart Idol')+' of Cinderhold'; if(slot==='armor') it.at=CLS_ARMOR[cls]; return it; }
+function raidLoot(m,items){ const c=me.c, mt=m.t;
+  for(const it of items){ if(it.rar>=4||it.leg) continue; it.pow=Math.round(it.pow*1.12); it.sta=Math.round(it.sta*1.12); it.raid=1; it.val=Math.round((it.val||1)*1.5); if(it.rar>=2) it.name=it.name.replace(/ of (the )?[A-Z][a-z]+$/,'')+' of Cinderhold'; }
+  const em=mt.boss?(mt.key==='vyrathos'?3:1):(!mt.summon&&Math.random()<.12?1:0);
+  if(em){ c.embers=(c.embers||0)+em; chatLine(`+${em} Tyrant's Ember${em>1?'s':''} (you have ${c.embers}). Quartermaster Brannoc at the Ember Threshold trades them for Cinderhold gear.`,'c-loot t3'); }
+  if(mt.key!=='vyrathos') return;
+  if(Math.random()<RLEG_CH){ const it=tyrantWeapon(c.cls); items.push(it); banner('LEGENDARY!',it.name,'win'); sfx('legend'); stat('legendary',1); chatLine(`The Ember Tyrant's hoard yields a legendary weapon: [${it.name}]!`,'c-loot t4'); try{ sayChat('★ found '+it.name+' in the Tyrant\'s hoard! ★',0); }catch(e){} }
+  if(!c.mounts.includes(6)&&Math.random()<RMOUNT_CH){ c.mounts.push(6); c.mount=6; setTimeout(()=>{ banner('RARE MOUNT!','Ashborn Nightmare','win'); sfx('legend'); },1500); chatLine('From the ashes of the Ember Tyrant rises a steed of living flame: the Ashborn Nightmare! Press R to ride.','c-loot t4'); try{ sayChat('★ tamed the Ashborn Nightmare! ★',0); }catch(e){} persist(); }
+  const C=cos(); if(!(C.titles||[]).includes('Tyrantslayer')){ C.titles=[...new Set([...(C.titles||[]),'Tyrantslayer'])]; setTimeout(()=>chatLine('New title unlocked: Tyrantslayer. Choose it in your character window.','c-loot t3'),2500); } }
+const RACH=[
+  {id:'raid1',n:'Into the Forge',d:'Defeat Kragmor the Forgewarden in Cinderhold',ic:'🔨',f:(c,S)=>((S.bosses||{}).kragmor||0)>=1},
+  {id:'raidtwins',n:'Twin Extinguisher',d:'Defeat Ignara and Pyrrus',ic:'🔥',f:(c,S)=>((S.bosses||{}).ignara||0)>=1&&((S.bosses||{}).pyrrus||0)>=1},
+  {id:'raidgrav',n:'Shatterer',d:'Shatter Gravoth the Obsidian Colossus',ic:'💎',f:(c,S)=>((S.bosses||{}).gravoth||0)>=1},
+  {id:'raidall',n:'Tyrantslayer',d:'Defeat Vyrathos, the Ember Tyrant',ic:'🐉',f:(c,S)=>((S.bosses||{}).vyrathos||0)>=1},
+  {id:'raidleg',n:'Ember Heart',d:'Obtain a Tyrant legendary weapon',ic:'⚜️',f:c=>[c.eq&&c.eq.weapon,...(c.inv||[])].some(it=>it&&it.t2)},
+  {id:'ashborn',n:'Rider of Ash',d:'Own the Ashborn Nightmare',ic:'🐎',f:c=>(c.mounts||[]).includes(6)}];
+
+/* ---------- people of Cinderhold ---------- */
+const THALIA=(()=>{ const [tx,ty]=findOpen(165,26); return {id:'thalia',name:'Emberwarden Thalia',title:'Cinderhold Gate',x:tx*TS+16,y:ty*TS+16,col:'#d4541c'}; })();
+NPCS.push({id:'brannoc',name:'Quartermaster Brannoc',title:"Tyrant's Ember trader",x:(RX0+6)*TS+16,y:(OWH+10)*TS+16,col:'#a87a3a'});
+NPCS.push({id:'herald',name:'Ashen Herald',title:'Leave Cinderhold',x:(RX0+21)*TS+16,y:(OWH+66)*TS+16,col:'#8a8a8a'});
+const RPOI={id:'cinderhold',name:'The Cinderhold Gate',x:170,y:24,r:5};
+NPCGREET.thalia='"Beneath the caldera lies Cinderhold, the forge-citadel of Vyrathos, the Ember Tyrant. Seven terrors stand between you and him. Bring at least five heroes, all level 20: a Bulwark to hold the line, a Mender to keep you breathing, a Bard to lift your arms, and blades to finish the work. Gather at the gate and type -e."';
+NPCGREET.brannoc='"Embers! Every Tyrant\'s Ember you bring me is a shard of his fire. Six of them and I\'ll forge you something worthy of this place."';
+NPCGREET.herald='"The fire remembers those who walk out alive. Shall I lead you back to the sky?"';
+const RSVC={thalia:[['rinfo','📜 About Cinderhold']],brannoc:[['rembers',"🔥 Trade Tyrant's Embers"],['rout','Return to the surface']],herald:[['rout','Return to the surface']]};
+function raidActs(n){ return {rout:()=>{ closeDlg(); if(inRaid(me.x,me.y)) raidLeave('The fire lets you go. You climb back to the surface.'); },rembers:()=>openEmbers(n),rinfo:()=>raidInfo(n)}; }
+function raidInfo(n){ dlg(`<h2>Cinderhold</h2><p>A raid for <b>5 to ${PARTY_MAX} heroes</b>, all <b>level 20</b>, with a <b>Tank</b> (Bulwark), a <b>Healer</b> (Mender), a <b>Support</b> (Bard) and <b>Damage</b>. Gather at the gate and any of you types <b>-e</b>.</p>
+  <p style="font-size:14px;color:#d9c9a6">1. Kragmor the Forgewarden · 2. Ignara and Pyrrus, the Twin Flames · 3. Ashmaw, Mother of Hounds · 4. Magmaroth, the Living Flow · 5. High Pyromancer Sel'vara · 6. Gravoth the Obsidian Colossus · 7. Vyrathos, the Ember Tyrant</p>
+  <p style="font-size:14px;color:var(--dim)">The deeper you go, the better the loot. Every boss gives Tyrant's Embers for Brannoc's forge. The Ember Tyrant guards a legendary weapon for your class (2.5%) and the Ashborn Nightmare (1.5%). Watch for golden circles: stack in them together. Fallen heroes rise at the last chamber you cleared.</p>
+  <div class="btns" style="margin-top:12px"><button id="bk">Back</button></div>`); $('bk').onclick=()=>talk(n); }
+function openEmbers(n){ const c=me.c, e=c.embers||0;
+  dlg(`<h2>Tyrant's Embers</h2><p>"${EMBER_COST} embers, and I'll forge it to fit you. No two alike."</p>${['weapon','armor','trinket'].map(sl=>`<div class="shoprow"><span><b>Tyrant-forged ${sl==='weapon'?'weapon':sl==='armor'?'armour':'trinket'}</b><br><span style="font-size:13px;color:var(--dim)">Epic · item level 24 · made for your class</span></span><button data-em="${sl}" ${e>=EMBER_COST?'':'disabled'}>${EMBER_COST} embers</button></div>`).join('')}
+  <div style="margin-top:10px;color:var(--gold)">Your Tyrant's Embers: ${e}</div><div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
+  $('bk').onclick=()=>talk(n);
+  document.querySelectorAll('#dlg [data-em]').forEach(b=>b.onclick=()=>{ if((c.embers||0)<EMBER_COST) return; if(c.inv.length>=18) return err('Bags are full'); const it=tyrantGear(b.dataset.em,c.cls); c.embers-=EMBER_COST; c.inv.push(it); renderInv(); persist();
+    chatLine(`Brannoc forges you [${it.name}].`,'c-loot t3'); try{ const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',40,3,{glow:true}); sfx('quest'); }catch(e){} openEmbers(n); }); }
+QUESTS.push({id:'cinder1',giver:'thalia',title:'The Forgewarden',type:'kill',mob:'kragmor',n:1,xp:6000,gold:150,lvl:20,item:3,text:'Lead a raid into Cinderhold and silence Kragmor the Forgewarden, who keeps the Tyrant\'s great forge burning. You will need at least five heroes: a tank, a healer, a support and damage.'},
+  {id:'cinder2',giver:'thalia',title:'Heart of the Tyrant',type:'kill',mob:'vyrathos',n:1,xp:20000,gold:500,lvl:20,pre:'cinder1',epic:true,text:'Fight through the twins, the hounds, the living flow, the pyromancer and the colossus, down to the Heart of Cinderhold. End Vyrathos, the Ember Tyrant, before his fire swallows Emberfall.'});
+Object.assign(BOSSY,{
+  kragmor:{title:'Forgewarden of Cinderhold',pull:'The forge hungers. Feed it your bones!',p50:'Hotter! HOTTER!',p20:'The forge... overflows!',die:'The fires... go... cold...'},
+  ignara:{title:'The Searing Twin',pull:'Brother, guests! Let us warm them.',p50:'You will burn for every wound!',p20:'Pyrrus, to me!',die:'Brother... the flame... dims...'},
+  pyrrus:{title:'The Azure Twin',pull:'Blue fire burns hotter than red, little mortals.',p50:'Sister, they are stronger than they look!',p20:'Ignara! Hold them!',die:'Cold... at last...'},
+  ashmaw:{title:'Mother of the Forge Hounds',pull:'*a deafening, smoke-choked howl*',p50:'*the den trembles as Ashmaw snarls*',p20:'*Ashmaw\'s eyes burn white-hot*',die:'*a last, whimpering growl*'},
+  magmaroth:{title:'The Living Flow',pull:'YOU... WALK... ON... MY... BLOOD.',p50:'I... AM... THE... MOUNTAIN\'S... HEART.',p20:'THE FLOW... TAKES... ALL.',die:'cooling... hardening... still...'},
+  selvara:{title:'High Pyromancer of the Tyrant',pull:'The Tyrant sees you, worms. And so do I.',p50:'Inferno answers to ME!',p20:'My lord! Grant me your fire!',die:'He... will... avenge me...'},
+  gravoth:{title:'The Obsidian Colossus',pull:'*the floor cracks as Gravoth rises from the crucible*',p50:'*obsidian splinters shriek across the chamber*',p20:'*Gravoth\'s core flares violet*',die:'*the colossus shatters into a thousand black shards*'},
+  vyrathos:{title:'The Ember Tyrant',pull:'So. The little lights of Emberfall come to snuff out the sun. KNEEL, AND BURN.',p50:'I was ancient when your gods were embers! I WILL NOT FALL!',p20:'Then let the whole world burn with me!',die:'The fire... that made... this land... goes... dark...'}});
+
+/* ---------- looks ---------- */
+Object.assign(LOOK,{
+  kragmor:{scale:2.5,metal:[.26,.23,.22],pauld:[.32,.28,.26],trim:[1,.45,.12],torso:[.16,.14,.14],legs:[.14,.12,.12],arms:[.18,.16,.15],boots:[.12,.1,.1],gloves:[.3,.27,.26],head:'helm',crest:[1,.5,.1],tabard:[.36,.08,.04],cape:[.26,.06,.03],weapon:'hammer',spikes:true,tassets:true,rune:[1,.5,.12],aura:'#ff7a1a',eyes:[1,.6,.1]},
+  ignara:{...LOOK.cultist,scale:1.75,robe:[.62,.16,.06],torso:[.62,.16,.06],arms:[.55,.14,.05],legs:[.3,.08,.04],hood:[.4,.08,.03],trim:[1,.75,.3],weapon:'flames',eyes:[1,.7,.2],aura:'#ff6a1a',rune:[1,.5,.1]},
+  pyrrus:{...LOOK.cultist,scale:1.75,robe:[.1,.24,.6],torso:[.1,.24,.6],arms:[.09,.2,.52],legs:[.06,.12,.3],hood:[.05,.12,.36],skin:[.3,.4,.6],trim:[.6,.85,1],weapon:'staff',orb:[.4,.75,1],eyes:[.5,.85,1],aura:'#4ab0ff',rune:[.4,.75,1]},
+  selvara:{robe:[.42,.06,.05],torso:[.46,.07,.05],arms:[.4,.06,.05],legs:[.22,.04,.03],boots:[.12,.05,.04],trim:[1,.72,.3],head:'hat',hat:[.2,.03,.02],skin:[.72,.56,.48],cape:[.3,.04,.03],weapon:'staff',orb:[1,.55,.12],eyes:[1,.6,.2],aura:'#ff5a2a',rune:[1,.5,.1],scale:1.85},
+  cinderguard:{torso:[.2,.17,.16],legs:[.16,.13,.12],arms:[.24,.2,.18],boots:[.12,.1,.1],gloves:[.3,.26,.24],metal:[.3,.27,.26],pauld:[.34,.3,.28],trim:[1,.45,.1],head:'helm',crest:[1,.5,.1],weapon:'sword',off:'shield',tabard:[.4,.08,.04],cape:[.3,.06,.03],spikes:true,tassets:true,scale:1.15,eyes:[1,.5,.1]},
+  emberpriest:{...LOOK.cultist,robe:[.5,.1,.06],torso:[.5,.1,.06],arms:[.45,.09,.05],hood:[.28,.05,.03],skin:[.2,.14,.12],trim:[1,.6,.2]},
+  flameacolyte:{...LOOK.cultist,scale:.95,robe:[.6,.2,.08],torso:[.6,.2,.08],trim:[1,.7,.3]},
+  magmaroth:{...LOOK.magma,scale:3.1,torso:[.26,.12,.08],arms:[.3,.14,.09],legs:[.24,.11,.08],skin:[.3,.13,.08],core:[1,.6,.12],eyes:[1,.8,.3]},
+  magmaspawn:{...LOOK.magma,scale:1.5},
+  obsidianbrute:{...LOOK.magma,scale:1.95,torso:[.08,.06,.1],arms:[.1,.08,.12],legs:[.08,.06,.1],boots:[.06,.05,.08],skin:[.09,.07,.11],core:[.75,.4,1],eyes:[.85,.55,1]},
+  gravoth:{...LOOK.magma,scale:3.5,torso:[.07,.055,.09],arms:[.09,.07,.11],legs:[.07,.055,.09],boots:[.05,.04,.07],skin:[.08,.06,.1],core:[.8,.45,1],eyes:[.9,.6,1],hunch:.35},
+  thalia:{torso:[.5,.16,.08],legs:[.24,.14,.1],arms:[.48,.16,.08],boots:[.2,.12,.08],cape:[.6,.12,.04],trim:[1,.6,.2],tabard:[.62,.14,.05],head:'plume',metal:[.32,.27,.25],pauld:[.36,.3,.27],weapon:'spear',crest:[1,.5,.1]},
+  brannoc:{torso:[.36,.24,.16],legs:[.26,.2,.16],arms:[.4,.3,.22],boots:[.2,.15,.1],trim:[.9,.5,.15],head:'horned',metal:[.4,.38,.36],pauld:[.45,.4,.36],beard:[.55,.25,.1],weapon:'hammer',fur:true},
+  herald:{...LOOK.cultist,robe:[.3,.28,.27],torso:[.3,.28,.27],arms:[.28,.26,.25],legs:[.2,.19,.18],hood:[.2,.19,.18],skin:[.5,.46,.44],trim:[1,.55,.2],weapon:'lantern',eyes:[1,.6,.2]}});
+Object.assign(QLOOK,{
+  forgehound:{col:[.16,.1,.08],dark:[.06,.04,.03],len:1.15,hgt:.7,ears:true,tail:true,muzzle:true,mane:true,scale:1.25,eyes:[1,.55,.1],eyeE:2.6},
+  cinderpup:{col:[.22,.13,.09],dark:[.08,.05,.03],len:1.05,hgt:.62,ears:true,tail:true,muzzle:true,scale:.9,eyes:[1,.6,.15],eyeE:2.4},
+  ashmaw:{col:[.1,.07,.06],dark:[.04,.03,.02],len:1.2,hgt:.75,ears:true,tail:true,muzzle:true,mane:true,scale:2.9,eyes:[1,.4,.05],eyeE:3.2}});
+Object.assign(MOBH,{kragmor:5.4,ignara:3.6,pyrrus:3.6,ashmaw:3.4,cinderpup:1.1,magmaroth:6.2,magmaling:1.7,selvara:3.9,flameacolyte:2,gravoth:6.8,obsidianshard:3,vyrathos:8,emberspawn:1.7,cinderguard:2.6,emberpriest:2.2,forgehound:1.5,magmaspawn:3.1,obsidianbrute:3.9});
+Object.assign(MOBMAT,{kragmor:'metal',cinderguard:'metal',ignara:'flesh',pyrrus:'flesh',selvara:'flesh',emberpriest:'flesh',flameacolyte:'flesh',ashmaw:'flesh',forgehound:'flesh',cinderpup:'flesh',magmaroth:'rock',magmaspawn:'rock',magmaling:'rock',obsidianbrute:'rock',gravoth:'rock',obsidianshard:'rock',vyrathos:'scale',emberspawn:'rock'});
+Object.assign(MOBVOICE,{kragmor:'armor',cinderguard:'armor',ignara:'caster',pyrrus:'caster',selvara:'caster',emberpriest:'caster',flameacolyte:'caster',ashmaw:'wolf',forgehound:'wolf',cinderpup:'wolf',magmaroth:'fireMob',magmaspawn:'fireMob',magmaling:'fireMob',obsidianbrute:'roar',gravoth:'roar',obsidianshard:'fireMob',vyrathos:'roar',emberspawn:'fireMob'});
+
+/* ---------- moving parts ---------- */
+function drawShard(m,X,gy,Z,dd,hit,sc,dead){ const t=now(), y=gy+1.3+Math.sin(t*2+m.id)*.22; mreset(); mtr(X,y,Z); mry(t*.8+m.id); msc(sc*(dead?Math.max(.05,1-dd*1.5):1)); const e=hit?1:.25;
+  P(GEO.cone,.6,1.7,.6,[.12,.08,.16],e,0,0,0); mpush(); mrz(Math.PI); P(GEO.cone,.6,1.1,.6,[.1,.07,.14],e,0,0,0); mpop();
+  for(let k=0;k<5;k++){ const a=k/5*6.283; P(GEO.cone,.16,.65,.16,[.62,.32,1],2.2,Math.cos(a)*.5,.25,Math.sin(a)*.5); } P(GEO.sph,.32,.32,.32,[.85,.55,1],3.2,0,.35,0); addLight(X,y,Z,7,[.7,.4,1.3]);
+  const G=RAID.boss.gravoth; if(!dead&&G&&!G.dead&&Math.random()<.85){ const bx=G.rx/TS, bz=G.ry/TS, by=groundY(G.rx,G.ry)+4.5, f=Math.random(); P3(X+(bx-X)*f,y+(by-y)*f,Z+(bz-Z)*f,(bx-X)*.6,(by-y)*.6,(bz-Z)*.6,.6,.12,Math.random()<.5?'#c07aff':'#ffffff',{glow:true,drag:1}); } }
+function drawRaidDyn(near,t){
+  for(const D of RAID.doors){ const cx=(D.x0+D.x1+1)/2, cz=(D.y0+D.y1+1)/2; if(!near(cx*TS,cz*TS,40)) continue; const open=D.need.every(k=>RAID.boss[k]&&RAID.boss[k].dead); D.lift=lerp(D.lift||0,open?1:0,.035);
+    const vert=D.x0===D.x1, W=vert?D.y1-D.y0+1:D.x1-D.x0+1, iron=[.1,.08,.08]; mreset(); mtr(cx,.3+D.lift*3.25,cz); if(!vert) mry(Math.PI/2);
+    for(let k=0;k<=W*3;k++){ const z=-W/2+.12+k*(W-.24)/(W*3); P(GEO.cyl,.075,3.3,.075,iron,0,0,0,z); P(GEO.cone,.1,.18,.1,[1,.45,.1],1.4,0,0,z); }
+    for(let h=0;h<5;h++) P(GEO.box,.1,.08,W,iron,0,0,.25+h*.72,0); }
+  if(near(RAID.gate.x,RAID.gate.y,36)&&!raidIsOpen()){ const y=hgt(170.5,22.5); mreset(); mtr(170.5,y,21.1); P(GEO.box,4.6,8.2,.35,[.1,.09,.09],0,0,4.1,.15); for(let k=0;k<4;k++) P(GEO.box,4.8,.18,.18,[.2,.18,.17],.1,0,1.4+k*1.9,.4); P(GEO.cyl,.75,.25,.75,[.6,.2,.05],.8,0,4,.38); if(Math.random()<.2) P3(170.5+(Math.random()-.5)*3.6,y+.4,21.6,0,.6,.2,2,.3,'#5a4a44',{big:true,drag:.97}); }
+  else if(near(RAID.gate.x,RAID.gate.y,36)&&Math.random()<.75){ const y=hgt(170.5,22.5); P3(170.5+(Math.random()-.5)*3.6,y+.3+Math.random()*6.8,21.35,(Math.random()-.5)*.15,.45,.3,1.8,.12,Math.random()<.5?'#ff7a1a':'#ffd36a',{glow:true,drag:.97}); }
+  { const x=RX0+3.4, z=OWH+13.5; if(near(x*TS,z*TS,30)&&Math.random()<.55) P3(x,.6+Math.random()*3.6,z+(Math.random()-.5)*2.3,.35,.25,0,1.4,.1,Math.random()<.5?'#ff7a1a':'#ffd36a',{glow:true,drag:.97}); }
+  for(const lx of [134,148]){ const x=RX0+lx+.5, z=OWH+3.4; if(near(x*TS,z*TS,32)) for(let k=0;k<2;k++) if(Math.random()<.6) P3(x+(Math.random()-.5)*2.6,.3,z+.5,(Math.random()-.5)*.8,1.4+Math.random()*1.6,.5+Math.random(),1,.14,Math.random()<.5?'#ff6a1a':'#ffc04a',{glow:true}); }
+  { const V=RAID.boss.vyrathos; if(V&&!V.dead&&V.air&&near(V.rx,V.ry,40)&&Math.random()<.6){ const X=V.rx/TS, Z=V.ry/TS; P3(X+(Math.random()-.5)*5,groundY(V.rx,V.ry)+4.5,Z+(Math.random()-.5)*5,0,-2.5,0,1,.25,'#ff8a2a',{glow:true}); } } }
+
+/* ---------- the Ashborn Nightmare ---------- */
+function ashbornFx(o,mv){ const t=now(); addLight(o.x,o.y+1.6,o.z,5.5,[1.5,.55,.15]);
+  if(Math.random()<.7) P3(o.x+(Math.random()-.5)*1.6,o.y+1.4+Math.random()*1.1,o.z+(Math.random()-.5)*1.6,(Math.random()-.5)*.3,.9+Math.random(),(Math.random()-.5)*.3,1,.09,Math.random()<.5?'#ff7a1a':'#ffd36a',{glow:true,drag:.97});
+  if(mv>.25&&Math.random()<.9){ const fx=Math.cos(o.face), fz=Math.sin(o.face); P3(o.x-fx*(.5+Math.random()*.9),o.y+.12,o.z-fz*(.5+Math.random()*.9),-fx*.3,.6+Math.random()*.6,-fz*.3,.8,.2,Math.random()<.4?'#ffd36a':'#ff5a10',{glow:true,drag:.94}); }
+  const fl=mv>.2?Math.sin(t*7)*.5:Math.sin(t*2)*.22; mreset(); mtr(o.x,o.y,o.z); mry(-o.face);
+  for(const s of [-1,1]){ mpush(); mtr(.15,1.72,s*.3); mrx(-s*(.5+fl)); P(GEO.wing,.55,.42,.55*s,[1,.2,.03],.55,0,0,0,.3); P(GEO.wing,.34,.42,.34*s,[1,.38,.06],.8,.05,.02,0,.26); mpop(); } }
+
+/* ---------- static decor: the gate in the caldera and the furnishings of every chamber ---------- */
+function addRaid(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
+  const obs=[.13,.11,.11], obs2=[.08,.07,.07], ember=[.95,.28,.05], iron=[.12,.11,.11], gold=[.8,.62,.28], bone=[.82,.77,.66], crim=[.4,.06,.04];
+  const W=(lx,ly)=>[RX0+lx+.5,OWH+ly+.5], fire=(x,y,z,r,col)=>STAT_LIGHTS.push({x,y,z,r,c:col||[1.5,.6,.2],fire:!col});
+  const brazier=(lx,ly,s,col)=>{ s=s||1; const [x,z]=W(lx,ly), y0=.3; gAdd(d,RC,x,y0,z,0,.26*s,1.1*s,.26*s,iron); gAdd(d,RFR,x,y0+1.1*s,z,0,.95*s,.45*s,.95*s,iron); box(x,y0+1.1*s,z,.8*s,.06,.8*s,gold);
+    gAdd(d,RS,x,y0+1.5*s,z,0,.7*s,.4*s,.7*s,col||[1,.45,.1],2.8); fire(x,y0+2*s,z,9*s,col?col.map(v=>v*1.5):null); };
+  /* ---- the Cinderhold Gate ---- */
+  { const gx=170.5, gz=21, y0=Math.min(hgt(gx-2,gz+1.8),hgt(gx+2,gz+1.8),hgt(gx,gz+1.8),hgt(gx-3,gz-1),hgt(gx+3,gz-1))-.1;
+    for(const s of [-1,1]){ const px=gx+s*3.1; box(px,y0+4,gz,1.8,8,2,obs); box(px,y0+.35,gz,2.4,.7,2.5,obs2); box(px,y0+8.15,gz,2.1,.3,2.3,obs2);
+      for(let k=0;k<5;k++){ box(px,y0+1.3+k*1.4,gz+1.02,.42,.42,.05,ember,0,1.1); box(px,y0+1.3+k*1.4,gz+1.035,.16,.16,.05,[1,.55,.15],0,1.6); }
+      gAdd(d,RCN,px,y0+8.3,gz,0,1,2,1,obs2);
+      for(let k=0;k<6;k++) gAdd(d,RC,px+s*(.7+k*.33),y0+7.1+k*.42,gz,0,.34-k*.05,.55,.34-k*.05,bone,0,-s*(.45+k*.2));
+      const bx=px+s*2.4, bz=gz+2.2, by=hgt(bx,bz); gAdd(d,RC,bx,by,bz,0,.22,1.5,.22,iron); gAdd(d,RFR,bx,by+1.5,bz,0,.85,.42,.85,iron); gAdd(d,RS,bx,by+1.85,bz,0,.62,.38,.62,[1,.45,.1],2.8); fire(bx,by+2.4,bz,10); }
+    box(gx,y0+8.9,gz,8.8,1.3,2.2,obs); box(gx,y0+9.7,gz,9.2,.3,2.4,obs2); box(gx,y0+8.9,gz+1.12,2.6,.7,.06,ember,0,1.1);
+    gAdd(d,RS,gx,y0+10.4,gz+.3,0,1.2,.85,1.1,bone); for(const s of [-1,1]){ gAdd(d,RS,gx+s*.4,y0+10.45,gz+1.2,0,.2,.16,.1,[1,.5,.1],3.2); gAdd(d,RC,gx+s*.7,y0+10.6,gz+.3,0,.18,.9,.18,bone,0,-s*.9); }
+    box(gx,y0+4,gz-.25,4.4,8,.2,[.03,.01,0]); box(gx,y0+3.6,gz-.1,3.8,6.8,.05,[.55,.08,.01],0,.7); box(gx,y0+.9,gz-.05,3.6,1.6,.05,[.9,.25,.03],0,1);
+    for(let k=0;k<6;k++) box(gx,y0-.08-k*.22,gz+1.3+k*.45,5.6,.3,.5,obs2);
+    STAT_LIGHTS.push({x:gx,y:y0+3,z:gz+1.8,r:12,c:[1.7,.6,.15]}); }
+  /* ---- R0 the Ember Threshold ---- */
+  for(const [lx,ly] of [[4,7],[14,7],[4,19],[14,19]]) brazier(lx,ly);
+  { const [x,z]=W(3,13); box(x-.45,2.7,z,.35,4.8,3.4,obs); box(x-.25,2.55,z,.06,3.9,2.5,[.75,.14,.02],0,.9); STAT_LIGHTS.push({x:x+.7,y:2.4,z,r:8,c:[1.4,.5,.15]});
+    for(const s of [-1,1]) box(x-.3,2.6,z+s*1.85,.5,4.6,.5,obs2); }
+  { const [x,z]=W(5,10); box(x,.75,z+1.2,1.6,.9,.8,[.3,.2,.12]); box(x,1.22,z+1.2,1.7,.06,.9,gold); for(let k=0;k<3;k++) gAdd(d,RS,x-.5+k*.5,1.32,z+1.2,0,.14,.14,.14,[1,.5,.12],2.4); }
+  /* ---- R1 the Great Forge ---- */
+  { const [cx,cz]=W(37,13); gAdd(d,RC,cx,.31,cz,0,9.2,.012,9.2,[.15,.09,.07]); for(let k=0;k<30;k++){ const a=k/30*6.283; box(cx+Math.cos(a)*6.7,.335,cz+Math.sin(a)*6.7,.55,.02,.14,ember,-a,.8); }
+    const [fx,fz]=W(37,3.6); box(fx,1.7,fz,5.2,3.2,1.9,obs); box(fx,1.4,fz+.97,3.2,1.7,.06,[.95,.3,.04],0,1.3); box(fx,3.45,fz,5.6,.4,2.2,obs2); gAdd(d,RFR,fx,3.65,fz,0,2.5,2.8,1.7,obs2); gAdd(d,RC,fx,6.4,fz,0,.6,2.5,.6,obs2);
+    STAT_LIGHTS.push({x:fx,y:1.8,z:fz+1.8,r:12,c:[1.9,.65,.15],fire:true});
+    for(const [lx,ly] of [[31,13],[43,13],[37,19]]){ const [x,z]=W(lx,ly); box(x,.62,z,.9,.62,.5,iron); box(x,1.02,z,1.45,.26,.58,[.34,.31,.3]); gAdd(d,RCN,x+.86,.98,z,0,.18,.6,.2,[.34,.31,.3],0,-Math.PI/2); box(x-.2,1.2,z,.5,.08,.2,[1,.5,.1],0,2.2); }
+    for(const [lx,ly] of [[29,8],[45,8],[29,18],[45,18]]) brazier(lx,ly);
+    for(const [lx,ly] of [[33,9],[41,9],[33,17],[41,17]]){ const [x,z]=W(lx,ly); for(let k=0;k<7;k++) box(x,5.6-k*.5,z,.12,.38,.12,iron,k*.8); } }
+  /* ---- R2 the Hall of Twin Flames ---- */
+  { const [x0,z]=W(57,13), [x1]=W(83,13); box((x0+x1)/2,.33,z,x1-x0+1,.02,2.2,crim); for(const s of [-1,1]) box((x0+x1)/2,.337,z+s*1.1,x1-x0+1,.02,.12,gold);
+    for(const [lx,ly] of [[63,9],[63,17]]) brazier(lx,ly,1.1); for(const [lx,ly] of [[77,9],[77,17]]) brazier(lx,ly,1.1,[.35,.65,1.2]);
+    for(const [lx,col] of [[66,[1,.42,.1]],[75,[.4,.7,1.3]]]){ const [x,z2]=W(lx,13); gAdd(d,RC,x,.31,z2,0,3,.015,3,col,1.4); } }
+  /* ---- R3 Ashmaw's Den ---- */
+  { const R=mulberry32(5757), [cx,cz]=W(105,13); for(let i=0;i<70;i++){ const a=R()*6.283, r=2.5+R()*8.5, x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r; if(tAt(Math.floor(x),Math.floor(z))!==T.DFLOOR) continue;
+      if(i%3===0){ const s=.3+R()*.5; gAdd(d,RCN,x,.3,z,0,s,s*3,s,obs2); } else { const s=.12+R()*.16; gAdd(d,RC,x,.32,z,R()*3,s*.35,s*5,s*.35,bone,0,1.5); } }
+    gAdd(d,RS,cx+.5,.5,cz-6,0,1.2,.5,1.2,[.2,.14,.1]); for(const [lx,ly] of [[99,9],[111,17]]) brazier(lx,ly,.9); }
+  /* ---- R4 the Magma Falls ---- */
+  { for(const lx of [134,148]){ const [x,z]=W(lx,2.6); box(x,3.3,z,3,6.4,.5,[.95,.32,.05],0,1.3); STAT_LIGHTS.push({x,y:2,z:z+1.6,r:12,c:[1.8,.6,.15]}); }
+    for(const [lx,ly] of [[125,4],[157,4],[125,24],[157,24],[141,4],[141,24]]) brazier(lx,ly); }
+  /* ---- R5 the Pyromancer's Sanctum ---- */
+  { const [cx,cz]=W(153.5,55); gAdd(d,RC,cx,.31,cz,0,15,.012,15,[.16,.05,.04]); for(let k=0;k<40;k++){ const a=k/40*6.283; box(cx+Math.cos(a)*7.2,.335,cz+Math.sin(a)*7.2,.55,.02,.14,ember,-a,.8); }
+    for(let k=0;k<6;k++){ const a=k/6*6.283-1.57, b=(k+2)/6*6.283-1.57, ax=cx+Math.cos(a)*6.6, az=cz+Math.sin(a)*6.6, bx=cx+Math.cos(b)*6.6, bz=cz+Math.sin(b)*6.6; box((ax+bx)/2,.337,(az+bz)/2,Math.hypot(bx-ax,bz-az),.02,.12,ember,-Math.atan2(bz-az,bx-ax),.8); }
+    const [ax,az]=W(161,55); box(ax,.7,az,1.6,.8,2.6,obs); box(ax,1.12,az,1.8,.06,2.8,gold); gAdd(d,RS,ax,1.5,az,0,.45,.45,.45,[1,.5,.12],3); fire(ax,2,az,9); }
+  /* ---- R6 the Obsidian Crucible ---- */
+  { const R=mulberry32(6262), [cx,cz]=W(108,55); gAdd(d,RC,cx,.31,cz,0,7,.012,7,[.1,.05,.14]);
+    for(let i=0;i<34;i++){ const a=i/34*6.283+R()*.1, r=10.2+R()*1.6, x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r; if(tAt(Math.floor(x),Math.floor(z))===T.VOID) continue; const s=.35+R()*.55; gAdd(d,RCN,x,.3,z,0,s,s*(3+R()*3),s,[.07,.05,.09],.15); }
+    for(const a of [.6,2.2,3.8,5.3]){ const x=cx+Math.cos(a)*8, z=cz+Math.sin(a)*8; gAdd(d,RCN,x,.3,z,0,.4,1.6,.4,[.6,.3,1],1.6); STAT_LIGHTS.push({x,y:1.4,z,r:7,c:[.7,.35,1.3]}); } }
+  /* ---- R7 the Heart of Cinderhold ---- */
+  { const [cx,cz]=W(44,68), R=mulberry32(7777); gAdd(d,RC,cx,.31,cz,0,12,.18,12,obs2); gAdd(d,RC,cx,.48,cz,0,11,.02,11,[.2,.07,.04]);
+    for(let k=0;k<48;k++){ const a=k/48*6.283; box(cx+Math.cos(a)*10.6,.5,cz+Math.sin(a)*10.6,.7,.03,.16,ember,-a,.8); }
+    for(let i=0;i<120;i++){ const a=R()*6.283, r=8+R()*3.5, x=cx-8+Math.cos(a)*r*.5, z=cz+12+Math.sin(a)*r*.25; if(tAt(Math.floor(x),Math.floor(z))!==T.DFLOOR) continue; gAdd(d,RS,x,.3,z,0,.25+R()*.3,.12+R()*.2,.25+R()*.3,gold,.25); }
+    for(let i=0;i<14;i++){ const a=R()*6.283, r=14+R()*6, x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r*.85; if(tAt(Math.floor(x),Math.floor(z))!==T.DFLOOR) continue; gAdd(d,RC,x,.32,z,R()*3,.18,2.2+R()*1.5,.18,bone,0,1.3+R()*.3); }
+    { const [x,z]=W(44,45.5); box(x,2.6,z,7,5,1.2,obs); box(x,5.4,z,7.6,.5,1.5,obs2); gAdd(d,RS,x,6.4,z,0,2,1.4,1.4,bone); for(const s of [-1,1]){ gAdd(d,RS,x+s*.7,6.5,z+1.2,0,.3,.24,.1,[1,.45,.08],3.4); gAdd(d,RC,x+s*1.6,6.8,z,0,.3,2,.3,bone,0,-s*.8); } }
+    for(const [lx,ly] of [[30,52],[58,52],[30,80],[58,80]]){ const [x,z]=W(lx,ly); STAT_LIGHTS.push({x,y:1.2,z,r:10,c:[1.8,.55,.12]}); }
+    for(const [lx,ly] of [[21,60],[21,72],[67,60],[67,72]]) brazier(lx,ly,1.25); }
+  /* ---- portcullis lintels ---- */
+  for(const D of RAID.doors){ if(D.x0===D.x1){ const cz=(D.y0+D.y1+1)/2; box(D.x0+.5,.3+4.15,cz,1.06,1.5,D.y1-D.y0+1,obs); box(D.x0+.5,.3+3.45,cz,1.1,.14,D.y1-D.y0+1,ember,0,.9); }
+    else { const cx=(D.x0+D.x1+1)/2; box(cx,.3+4.15,D.y0+.5,D.x1-D.x0+1,1.5,1.06,obs); box(cx,.3+3.45,D.y0+.5,D.x1-D.x0+1,.14,1.1,ember,0,.9); } }
+  /* ---- the long stair down and the lava's glow ---- */
+  { const [x,z0]=W(153.5,27); for(let k=0;k<16;k++) box(x,.33,z0+k,4,.04,.08,[.05,.04,.04]); }
+  for(let ty=OWH;ty<MH;ty+=2)for(let tx=RX0;tx<MW;tx+=2){ if(map[ty*MW+tx]!==T.LAVA) continue; STAT_LIGHTS.push({x:tx+1,y:.7,z:ty+1,r:5,c:[1.25,.4,.1]}); }
+}
+
+/* ---------- the surprise: Cinderhold stays sealed until the realm owner types /raid unveil ---------- */
+function raidIsOpen(){ return !!window.__raidOpen||!!(saves&&saves.raidSeen)||netState==='solo'; }
+let RSHOWN=false, RASSERT=false;
+function raidSync(){ if(window.__raidOpen&&saves&&!saves.raidSeen){ saves.raidSeen=1; saveAll(saves); }
+  if(saves&&saves.raidOpen&&!window.__raidOpen&&!RASSERT&&room&&typeof room.raidOpen==='function'&&isRealmOwner()){ RASSERT=true; room.raidOpen(true); }
+  const o=raidIsOpen(); if(o===RSHOWN) return; RSHOWN=o;
+  const i=NPCS.findIndex(n=>n.id==='thalia'); if(o&&i<0) NPCS.push(THALIA); else if(!o&&i>=0) NPCS.splice(i,1);
+  const j=POIS.findIndex(q=>q.id==='cinderhold'); if(o&&j<0) POIS.push(RPOI); else if(!o&&j>=0) POIS.splice(j,1);
+  for(const a of RACH){ const k=ACH.indexOf(a); if(o&&k<0) ACH.push(a); else if(!o&&k>=0) ACH.splice(k,1); } }
+setInterval(()=>{ try{ raidSync(); }catch(e){} },1000);
+function raidUnveiled(){ raidSync(); if(!me) return; banner('CINDERHOLD AWAKENS','The gate beneath the Cinder Caldera has opened','boss'); try{ snd('horn'); shake(5); }catch(e){}
+  chatLine('🔥 The ground shudders. Far to the north, beneath the Cinder Caldera, the Cinderhold Gate grinds open and a terrible heat pours out. Emberwarden Thalia waits at the gate for heroes of level 20.','c-yell'); }
+
 Object.assign(LOOK,{drowned:{...LOOK.cultist,robe:[.2,.32,.32],torso:[.24,.36,.36],arms:[.22,.34,.34],legs:[.16,.22,.24],boots:[.1,.12,.12],head:'hood',hood:[.12,.2,.22],skin:[.5,.62,.6],trim:[.5,.6,.55],weapon:'sword',eyes:[.4,1,.9]},
   tidecaller:{...LOOK.bogwitch,robe:[.1,.32,.4],torso:[.1,.32,.4],arms:[.1,.3,.38],skin:[.5,.7,.72],hat:[.06,.2,.26],weapon:'lantern',eyes:[.5,1,1]}});
 const LPAL={murkcrab:[[.18,.3,.36],[.26,.42,.5],[.62,.36,.3],[1,.6,.3],.85],grimmaw:[[.08,.18,.2],[.14,.3,.32],[.3,.5,.46],[.4,1,.9],2.2],lurker:[[.22,.36,.2],[.3,.48,.27],[.42,.6,.32],[1,.95,.4],1.1],crawler:[[.28,.24,.18],[.38,.33,.24],[.5,.46,.32],[.4,1,.8],.72],siltling:[[.3,.28,.2],[.42,.38,.26],[.55,.5,.34],[.4,1,.8],.55],siltmother:[[.2,.19,.14],[.3,.28,.21],[.44,.4,.29],[.3,1,.75],2.5]};
@@ -5796,7 +6252,7 @@ function update(dt){
     }
     if(t-saveT>10){ saveT=t; persist(); }
   }
-  if(amHost){ hostSim(dt); try{ mobSeparate(dt); }catch(e){} }
+  if(amHost){ try{ hostSim(dt); }catch(e){ frameErr(e,'host'); } try{ mobSeparate(dt); }catch(e){} }
   const k=1-Math.pow(.0005,dt);
   for(const m of mobs){ const ox=m.rx, oy=m.ry;
     if(Math.abs(m.rx-m.x)>200||Math.abs(m.ry-m.y)>200){m.rx=m.x;m.ry=m.y}
@@ -5824,6 +6280,7 @@ function frame(){
   emaDt=lerp(emaDt,Math.min(.2,rawDt),.05); rsT+=dt; if(rsT>1.5){ rsT=0; const old=RSCALE; if(emaDt>.026&&RSCALE>GFX.rmin) RSCALE=Math.max(GFX.rmin,RSCALE-.1); else if(emaDt<.0145&&RSCALE<RSMAX) RSCALE=Math.min(RSMAX,RSCALE+.1); if(Math.abs(old-RSCALE)>.01) resize(); }
   if(rawDt>3&&room&&amHost) HOSTPAUSE=true;
   try{ update(dt); }catch(e){ frameErr(e,'update'); }
+  try{ if(me) sendPresence(false); }catch(e){ frameErr(e,'net'); }
   try{ render(dt); }catch(e){ frameErr(e,'render'); }
   try{ if(me){ updateBar(); if(++uiTick%3===0){ updateUI(); drawMini(); } } }catch(e){ frameErr(e,'ui'); }
   requestAnimationFrame(frame);

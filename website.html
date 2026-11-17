@@ -193,6 +193,38 @@ window.SITE = {
 /* Emberfall website data. NEWS = patch notes (add new entries at the top). TIERS = support packs. GD and ACH are generated from the game. */
 window.NEWS=[
 {
+"v": "v0.57",
+"date": "16 Nov 2026",
+"title": "Ready for test night",
+"sum": "A sturdier realm for big groups: parties of up to 8, a world host that hands over to a steadier computer, and a server that keeps going when someone's connection struggles.",
+"items": [
+[
+"new",
+"Parties can now hold up to 8 heroes, with a compact party list so everyone fits on screen"
+],
+[
+"imp",
+"The world host (the computer that runs the monsters) is now chosen more carefully: phones, tablets and computers that are struggling hand the job to a steadier one, and a host that stops responding is replaced within seconds"
+],
+[
+"imp",
+"If one player's connection chokes, the server skips them for a moment instead of slowing everyone else down, and reconnects them cleanly if it does not recover"
+],
+[
+"fix",
+"A rare error in the monster simulation can no longer freeze every monster in the realm: the game recovers and keeps going"
+],
+[
+"fix",
+"Big fights no longer lose damage or warning circles when lots happens at once: more events fit in every network update"
+],
+[
+"imp",
+"The server protects itself against unexpected errors and reports its health (players online, memory and uptime) at /api/version"
+]
+]
+},
+{
 "v": "v0.56",
 "date": "16 Nov 2026",
 "title": "Fewer monsters, steadier music",
