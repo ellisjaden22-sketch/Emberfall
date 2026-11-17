@@ -438,7 +438,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.58</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.59</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -561,7 +561,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 58;
+const VERSION = 59;
 const TS = 32, MW = 336, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1261,8 +1261,8 @@ const SLOTICON={weapon:'🗡',armor:'🥋',trinket:'💍'};
   {...A,rx:[190,228],key:'colossus',name:'Molten Colossus',lv:[17,18],hp:1300,hpL:40,dmg:32,dmgL:2.4,spd:56,rng:58,as:2.6,aggro:150,r:24,col:'#3a2620',n:3,light:'#ff6a1a',sp:{k:'slam',cd:9,r:120,delay:1.5,mul:1.45}},
   {...A,rx:[198,228],key:'stalker',name:'Ashen Stalker',lv:[18,19],hp:760,hpL:34,dmg:28,dmgL:2.4,spd:104,rng:36,as:1.5,aggro:170,r:15,col:'#1a1418',n:4,light:'#b45cff',sp:{k:'leap',cd:10,r:70,delay:1.0,mul:1.2}},
   {...A,key:'skarn',name:'Skarn the Ashlord',lv:[18,18],hp:7800,hpL:0,dmg:46,dmgL:0,spd:74,rng:62,as:2.3,aggro:200,r:26,col:'#7a2a1a',n:1,elite:true,resp:150,spots:[[212,47]],light:'#ff7a1a',sp:{k:'slam',cd:8,r:150,delay:1.6,mul:1.5}},
-  {...A,key:'pyraxis',name:'Pyraxis, Herald of the Tyrant',lv:[19,19],hp:16000,hpL:0,dmg:52,dmgL:0,spd:76,rng:80,as:2.4,aggro:230,r:40,col:'#ff4a1a',n:1,boss:true,resp:240,spots:[[192,11]],light:'#ff6a1a',sp:{k:'r_pyx'},xp:4000},
-  {...A,key:'pyxwhelp',name:'Herald Whelp',lv:[17,17],hp:900,hpL:0,dmg:22,dmgL:0,spd:100,rng:30,as:1.4,aggro:500,r:12,col:'#ff9a2a',fly:true,light:'#ffb03a',n:3,summon:true,owner:'pyraxis',spots:[[192,11],[192,11],[192,11]]});
+  {...A,key:'pyraxis',name:'Pyraxis, Herald of the Tyrant',lv:[19,19],fly:true,hp:16000,hpL:0,dmg:52,dmgL:0,spd:76,rng:80,as:2.4,aggro:230,r:40,col:'#ff4a1a',n:1,boss:true,resp:240,spots:[[192,11]],light:'#ff6a1a',sp:{k:'r_pyx'},xp:4000},
+  {...A,key:'pyxwhelp',name:'Ember Fledgling',lv:[17,17],hp:900,hpL:0,dmg:22,dmgL:0,spd:100,rng:30,as:1.4,aggro:500,r:12,col:'#ff9a2a',fly:true,light:'#ffb03a',n:3,summon:true,owner:'pyraxis',spots:[[192,11],[192,11],[192,11]]});
   for(const mt of MOBT) if(mt.spots&&mt.reg) mt.n=mt.spots.length; }
 MOUNTS[6]={name:'Ashborn Nightmare',col:[.07,.06,.06],mane:[1,.42,.06],cost:0,speed:2.35,lvl:20,ashborn:true,drop:'Vyrathos, the Ember Tyrant (Cinderhold raid)'};
 
@@ -1281,7 +1281,7 @@ const mobs=[], mobById={};
       else do{ x=(3+R()*(MW-6))*TS; y=(3+R()*(OWH-6))*TS; tries++;
         const tx=Math.floor(x/TS),ty=Math.floor(y/TS);
         var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>8 && Math.hypot(tx-170,ty-24)>13 && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
-        if(ok&&mt.zone==='ash') ok = (mt.reg==='reach')===inReachT(tx,ty) && Math.hypot(tx-REACH.cx,ty-REACH.cy)>16 && (!mt.rx||(tx>=mt.rx[0]&&tx<=mt.rx[1]));
+        if(ok&&mt.zone==='ash') ok = (mt.reg==='reach')===inReachT(tx,ty) && Math.hypot(tx-REACH.cx,ty-REACH.cy)>16 && Math.hypot(tx-192,ty-11)>10 && Math.hypot(tx-212,ty-47)>8 && (!mt.rx||(tx>=mt.rx[0]&&tx<=mt.rx[1]));
         if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
         if(ok){ const gap=tries<1500?112:tries<3000?96:70; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
@@ -1776,7 +1776,7 @@ function gainXp(n){
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
   while(c.lvl<MAXLVL && c.xp>=xpNeed(c.lvl)){ c.xp-=xpNeed(c.lvl); c.lvl++; recalc(); me.hp=me.mhp; if(CLS[c.cls].res==='mana') me.res=me.mres;
     toast(`Level ${c.lvl}!`); sfx('level'); setTimeout(()=>{ toast('Talent point! Press N to spend it','small'); sysMsg('You earned a talent point. Open Talents (N) to spend it.','c-xp'); },1400); TALC=null; setTimeout(()=>armorySync(true),500); if(c.lvl===10&&!c.mounts.length){ setTimeout(()=>toast('Mounts unlocked! Visit Hilde the Stable Master','small'),900); sysMsg('You can now ride! Hilde the Stable Master, just outside the East Gate of Hearthmere, sells mounts. Look for the golden horseshoe on your map.'); renderTracker(); } burst(me.x,me.y,'#ffd66a',40,200,{glow:true}); for(const ab of curAbils()) if(ab.lvl===c.lvl) { sysMsg(`New ability learned: ${ab.name} (key ${curAbils().indexOf(ab)+1})`); toast('New ability: '+ab.name,'small'); } sysMsg(`You have reached level ${c.lvl}. Your power grows.`); ring(me.x,me.y,'#ffd66a',90); }
-  if(c.lvl>=MAXLVL) c.xp=0;
+  if(c.lvl>=MAXLVL){ c.xp=0; if(!c.raidTold){ c.raidTold=1; setTimeout(()=>{ try{ banner('LEVEL 20','Cinderhold is open to you','boss'); chatLine('🔥 Level 20! The Cinderhold raid is now open to you. Emberwarden Thalia waits at the Cinderhold Gate, east of the Wyrm\'s Lair. Bring a Bulwark, a Mender, a Bard and damage: 5 to 8 heroes.','c-yell'); }catch(e){} },2500); } }
   persist();
 }
 
@@ -3155,9 +3155,40 @@ function drawMob3_(m,dead){
       for(const s of [-1,1]) P(GEO.sph,.08,.1,.08,[.15,.03,0],0,.28,.1,s*.12); P(GEO.box,.04,.05+(swing>=0?Math.sin(swing*Math.PI)*.1:0),.16,[.2,.04,0],0,.3,-.06,0);
       addLight(X,y,Z,6,[1.4,.6,.15]); if(Math.random()<.5) burst3(X,y+.3,Z,'#ffb03a',1,.4,{glow:true,up:1.5}); break; }
     case 'obsidianshard': drawShard(m,X,gy,Z,dd,hit,sc,dead); break;
-    case 'wyrm': case 'vyrathos': case 'pyraxis': drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
+    case 'pyraxis': drawPhoenix(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
+    case 'wyrm': case 'vyrathos': drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
   }
 }
+function drawPhoenix(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const md=MATD; MATD=2; try{ return drawPhoenix0(m,X,gy,Z,mv,ph,swing,dd,hit,sc); } finally{ MATD=md; } }
+function drawPhoenix0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const t=now(), e=hit?1:0, hot=m.enr;
+  const C1=hot?[1,.8,.4]:[1,.6,.16], C2=hot?[1,.45,.12]:[1,.32,.05], C3=hot?[.9,.18,.05]:[.72,.1,.03], C4=[.35,.05,.02], gold=[1,.78,.3];
+  const fly=dd>=0?Math.max(0,2.7-dd*2.2):2.7+Math.sin(t*1.8)*.32, flap=dd>=0?.9:Math.sin(t*(mv>.3?4.2:2.6))*(mv>.3?.75:.5);
+  mreset(); mtr(X,gy+fly,Z); mry(-(m.rf??m.face??0)); msc(sc*2.05); if(dd>=0){ mrz(-Math.min(1,dd/.9)*.9); }
+  else { mrz(Math.sin(t*1.8+.6)*.06-mv*.12); if(swing>0) mrz(-swing*.35); }
+  /* body: a burning heart wrapped in feathers */
+  P(GEO.sph,1.15,.85,.78,C2,.7+e,0,0,0); P(GEO.sph,.9,.72,.62,C1,.9+e,.28,-.08,0); P(GEO.sph,.45,.45,.45,[1,.85,.5],1.6,.1,0,0,.6);
+  /* neck and head */
+  mpush(); mtr(.85,.45,0); mrz(.5); P(GEO.sph,.42,.62,.4,C2,.7+e,0,.3,0); mtr(0,.75,0); mrz(-.55);
+    P(GEO.sph,.48,.42,.4,C2,.8+e,0,0,0); P(GEO.cone,.16,.55,.16,gold,.6,.42,-.06,0); mpush(); mtr(.42,-.06,0); mrz(-Math.PI/2); P(GEO.cone,.16,.55,.16,gold,.6); mpop();
+    for(const s of [-1,1]) P(GEO.sph,.09,.09,.06,[1,1,.9],5,.2,.08,s*.3);
+    for(let k=0;k<6;k++){ mpush(); mtr(-.15-k*.06,.25,0); mrz(1.9+k*.16+Math.sin(t*3+k)*.06); P(GEO.cone,.08,.75-k*.06,.08,k%2?C3:C1,.9,0,0,0); mpop(); }
+  mpop();
+  /* wings: three ranks of flame feathers, a slow powerful beat */
+  for(const s of [-1,1]){ mpush(); mtr(.1,.35,s*.45); mrx(-s*(.15+flap));
+    for(let L=0;L<4;L++){ mpush(); mtr(.05*L,.04*L,0); mry(-s*(.42-L*.2)); mrx(-s*L*.05); P(GEO.wing,2.3-L*.35,.8,(2.2-L*.32)*s,[C3,C3,C2,C1][L],[.4,.5,.65,.85][L]+e,0,0,0); mpop(); }
+    for(let k=0;k<6;k++){ mpush(); mtr(-.25-k*.2,0,s*(.85+k*.24)); mrx(s*1.5708); P(GEO.cone,.11,.7+k*.09,.06,k%2?C3:C2,.7,0,0,0); mpop(); }
+    mpop();
+    if(GFX.q!=='low'&&Math.random()<.5){ const a=-(m.rf??m.face??0), w=1.2+Math.random()*2.2; const lx=-.3, lz=s*w; const wx=X+(Math.cos(a)*lx-Math.sin(a)*lz)*sc*2.05, wz=Z+(Math.sin(a)*lx+Math.cos(a)*lz)*sc*2.05;
+      P3(wx,gy+fly+.5+Math.random()*.6,wz,(Math.random()-.5)*.6,.9+Math.random(),(Math.random()-.5)*.6,.9,.16,Math.random()<.5?'#ffb03a':'#ff5a10',{glow:true,drag:.96}); } }
+  /* tail: five long plumes ending in ember eyes */
+  for(let k=0;k<5;k++){ const sp=(k-2)*.22, sw=Math.sin(t*2.2+k*.7)*.12; mpush(); mtr(-.95,-.1,sp*.6); mry(sp+sw); mrz(-1.95-Math.abs(k-2)*.06);
+    P(GEO.limb,.14,1.4,.07,C2,.7,0,0,0); mtr(0,-1.4,0); mrz(.25+sw); P(GEO.limb,.11,1.3,.06,C3,.6,0,0,0); mtr(0,-1.3,0); P(GEO.sph,.26,.34,.1,C1,1.2,0,-.1,0); P(GEO.sph,.12,.15,.11,[.2,.55,1],2,0,-.12,0); mpop(); }
+  /* talons */
+  for(const s of [-1,1]){ mpush(); mtr(.15,-.6,s*.28); mrz(.4); P(GEO.limb,.1,.5,.1,C4,0,0,0,0); mtr(0,-.5,0); for(let q=-1;q<=1;q++){ mpush(); mrz(-1.2); mry(q*.5); P(GEO.cone,.05,.22,.05,gold,.4,0,0,0); mpop(); } mpop(); }
+  addLight(X,gy+fly+.5,Z,14,hot?[1.6,1,.5]:[1.6,.6,.18]); addLight(X,gy+.3,Z,7,[1.2,.4,.1]);
+  if(dd<0&&GFX.q!=='low'){ if(Math.random()<.6) P3(X+(Math.random()-.5)*1.4,gy+fly-.3,Z+(Math.random()-.5)*1.4,(Math.random()-.5)*.3,-1.2-Math.random(),(Math.random()-.5)*.3,1,.12,'#ffd36a',{glow:true});
+    if(Math.random()<.35) P3(X+(Math.random()-.5)*2,gy+.15,Z+(Math.random()-.5)*2,0,.25,0,1.4,.6,'#ff6a1a',{glow:true,big:true,drag:.98}); }
+  else if(dd>=0&&dd<2.5&&Math.random()<.8) P3(X+(Math.random()-.5)*2,gy+fly+.5,Z+(Math.random()-.5)*2,0,.8,0,2,.5,'#4a3a34',{big:true,drag:.97}); }
 function drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const md=MATD; MATD=2; try{ return drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc); } finally{ MATD=md; } }
 function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
   const t=now(), e=hit?.9:0, VY=m.t.key==='vyrathos', PX=m.t.key==='pyraxis', col=PX?(m.enr?[.95,.5,.1]:[.85,.42,.12]):VY?(m.enr?[.5,.1,.05]:[.32,.1,.08]):m.enr?[.85,.22,.1]:[.75,.3,.12], dark=VY?[.12,.05,.04]:[.3,.1,.05], belly=VY?[1,.42,.08]:[1,.6,.2], WYL=m.air?3.8+Math.sin(t*2)*.35:0, WYS=VY?1.35:PX?.9:1.05;
@@ -5942,12 +5973,12 @@ QUESTS.push(
   {id:'reach4',giver:'ysolde',pre:'reach1',title:'The Burning Lights',type:'kill',mob:'cinderwisp',n:10,xp:9000,gold:50,lvl:16,text:'Cinder Wisps drift in from the lava fields at night and set our tents alight. Snuff out ten of them, and watch out: they root you in place before they burn.'},
   {id:'reach5',giver:'ysolde',pre:'reach4',title:'Zealots of the Tyrant',type:'kill',mob:'zealot',n:10,xp:11000,gold:60,lvl:17,text:'Ember Zealots preach that a "Tyrant" will rise from below and burn the world clean. They\'re calling something. Silence ten of them.'},
   {id:'reach6',giver:'fenwick',pre:'reach2',title:'Walking Mountains',type:'kill',mob:'colossus',n:6,xp:11000,gold:60,lvl:17,text:'Molten Colossi have started walking out of the lava. One flattened my best tracker. Six of them, please, and keep out of the circle when they raise their fists.'},
-  {id:'reach7',giver:'fenwick',pre:'reach6',title:'Eyes on the Enemy',type:'explore',pois:['scorchspire','roost'],n:2,xp:6000,gold:40,lvl:17,text:'I need eyes on two places: Skarn\'s warcamp in the far east of the Reach, and the high roost in the north where something huge with wings has been seen. Look, don\'t fight. Not yet.'},
+  {id:'reach7',giver:'fenwick',pre:'reach6',title:'Eyes on the Enemy',type:'explore',pois:['scorchspire','roost'],n:2,xp:6000,gold:40,lvl:17,text:'I need eyes on two places: Skarn\'s warcamp in the far east of the Reach, and the high roost in the north, where a bird made of fire, bigger than a house, has been seen circling. Look, don\'t fight. Not yet.'},
   {id:'reach8',giver:'fenwick',pre:'reach7',title:'Things in the Smoke',type:'kill',mob:'stalker',n:8,xp:13000,gold:70,lvl:18,text:'Ashen Stalkers hunt in the smoke east of here. They leap from the haze before you even see them. Eight of them. Travel in pairs.'},
   {id:'reach9',giver:'ysolde',pre:'reach5',title:'Skarn the Ashlord',type:'kill',mob:'skarn',n:1,xp:15000,gold:90,lvl:18,item:3,text:'Skarn leads the Ravagers from his warcamp in the east. Cut off the head and the raids stop. He hits like a falling wall: stay out of his slam and bring friends.'},
-  {id:'reach10',giver:'ysolde',pre:'reach9',title:"The Herald's Fire",type:'kill',mob:'pyraxis',n:1,xp:25000,gold:150,lvl:19,epic:true,text:'The winged thing on the northern roost is Pyraxis, the Herald of something far older that sleeps beneath this caldera. Kill the Herald before its master hears the call. Bring a full party: it breathes fire, sweeps with its tail and calls its whelps.'});
+  {id:'reach10',giver:'ysolde',pre:'reach9',title:"The Herald's Fire",type:'kill',mob:'pyraxis',n:1,xp:25000,gold:150,lvl:19,epic:true,text:'The winged thing on the northern roost is Pyraxis, the Herald of something far older that sleeps beneath this caldera. Kill the Herald before its master hears the call. It is a phoenix the size of a house. Bring a full party: it pours fire down in a line, beats the ground behind it with burning wings, and calls its fledglings when wounded.'});
 Object.assign(BOSSY,{
-  pyraxis:{title:'Herald of the Tyrant',pull:'You hear that, little flames? That is HIS heartbeat beneath you.',p50:'Whelps! To me!',p20:'He wakes... he WAKES...',die:'The Herald... falls... but the Tyrant... remembers...'},
+  pyraxis:{title:'Herald of the Tyrant',pull:'*a scream like a forge bursting* You hear that, little flames? That is HIS heartbeat beneath you.',p50:'Fledglings! Rise from the ash!',p20:'He wakes... he WAKES...',die:'The Herald... falls... but the Tyrant... remembers...'},
   skarn:{title:'Ashlord of the Ravagers',pull:'Fresh meat for the ash!',p50:'You bleed well!',p20:'RAVAGERS! TO ME!',die:'The ash... takes... me...'}});
 BOSSLOOT.pyraxis={n:2,p:[0,0,35,65,0]};
 Object.assign(LOOK,{
@@ -5961,7 +5992,7 @@ Object.assign(LOOK,{
 Object.assign(QLOOK,{
   crusher:{col:[.3,.2,.14],dark:[.14,.09,.07],tusk:[1,.55,.2],len:1.3,hgt:.42,ears:true,tusks:true,bristle:true,scale:1.7,eyes:[1,.55,.1],eyeE:2.4},
   stalker:{col:[.12,.1,.12],dark:[.05,.04,.06],len:1.15,hgt:.72,ears:true,tail:true,muzzle:true,mane:true,scale:1.3,eyes:[.8,.45,1],eyeE:2.8}});
-Object.assign(MOBH,{ravager:2.4,crusher:1.6,cinderwisp:1.7,zealot:2.2,colossus:4.6,stalker:1.6,skarn:4,pyraxis:4.5,pyxwhelp:1.6});
+Object.assign(MOBH,{ravager:2.4,crusher:1.6,cinderwisp:1.7,zealot:2.2,colossus:4.6,stalker:1.6,skarn:4,pyraxis:7,pyxwhelp:1.6});
 Object.assign(MOBMAT,{ravager:'metal',crusher:'flesh',cinderwisp:'rock',zealot:'flesh',colossus:'rock',stalker:'flesh',skarn:'metal',pyraxis:'scale',pyxwhelp:'rock'});
 Object.assign(MOBVOICE,{ravager:'roar',crusher:'boar',cinderwisp:'fireMob',zealot:'caster',colossus:'fireMob',stalker:'wolf',skarn:'roar',pyraxis:'roar',pyxwhelp:'fireMob'});
 setTimeout(()=>ACH.push(
@@ -6053,6 +6084,7 @@ try{ const m=$('escMenu'); m.querySelector('[data-e="hearth"]').onclick=()=>{ m.
   for(const m of mobs){ if(m.t.summon||m.t.swim||m.t.fly&&!m.t.ranged||m.sy>=OWH*TS||m.t.spots) continue; const tx=Math.floor(m.sx/TS), ty=Math.floor(m.sy/TS); if(seen[ty*MW+tx]) continue;
     const q=near(tx,ty); if(q){ m.sx=m.x=m.rx=m.wx=q[0]*TS+16; m.sy=m.y=m.ry=m.wy=q[1]*TS+16; } }
   for(const n of NODES){ if(seen[n.ty*MW+n.tx]) continue; const q=near(n.tx,n.ty); if(q){ n.tx=q[0]; n.ty=q[1]; n.x=q[0]*TS+16; n.y=q[1]*TS+16; } } }
+QUESTS.push({id:'gatebelow',giver:'ysolde',pre:'reach10',title:'The Gate Below',type:'explore',pois:['cinderhold'],n:1,xp:8000,gold:80,lvl:19,text:'The Herald is dead, but what it served is not. North of here stands the Cinderhold Gate, black glass over a heart of fire. Emberwarden Thalia watches it. Go and see what waits below. When you are level 20 and have a raid of five to eight heroes, she will let you in.'});
 QUESTS.push(
   {id:'daily1',giver:'ysolde',daily:true,title:'Daily Bounty: Ravager Raids',type:'kill',mob:'ravager',n:12,xp:9000,gold:60,lvl:18,text:'The Ravagers never stop coming. Twelve of them, today, before they reach the supply road. Come back tomorrow, there will be more. (Repeatable every day. At level 20 the bounty also pays a Tyrant\'s Ember.)'},
   {id:'daily2',giver:'fenwick',daily:true,title:'Daily Bounty: Smoke Hunters',type:'kill',mob:'stalker',n:8,xp:9000,gold:60,lvl:18,text:'The Stalkers are back in the smoke. Eight of them, same as always. (Repeatable every day. At level 20 the bounty also pays a Tyrant\'s Ember.)'},
@@ -6209,8 +6241,8 @@ function raidReqs(all){ const out=[], n=all.length;
 function raidCmd(k){ if(!me) return false; const inside=inRaid(me.x,me.y);
   if(k==='e'){ if(inside){ sysMsg('You are already inside Cinderhold. Type -o to leave, or -d once the Ember Tyrant has fallen.','c-err'); return true; }
     if(!raidNear(me.x,me.y)) return false; if(me.dead){ sysMsg('You cannot do that while dead.','c-err'); return true; }
-    if(!raidIsOpen()&&!isGM){ sysMsg('The great gate will not move. Its seals are hot to the touch, and from somewhere far below comes the slow breathing of something vast...','c-err'); return true; }
-    if(!raidIsOpen()) sysMsg('GM: Cinderhold is still SEALED for players. Type /raid unveil when you want to reveal it.','c-gm');
+    if(false){ sysMsg('The great gate will not move. Its seals are hot to the touch, and from somewhere far below comes the slow breathing of something vast...','c-err'); return true; }
+    if(false) sysMsg('GM: Cinderhold is still SEALED for players. Type /raid unveil when you want to reveal it.','c-gm');
     const mem=partyMembers().filter(o=>!o.d), all=[{n:me.c.name,l:me.c.lvl,c:me.c.cls},...mem.map(o=>({n:o.n,l:o.l,c:o.c}))], probs=raidReqs(all);
     if(probs.length&&!isGM){ sysMsg('🔥 The Cinderhold Gate will not open:','c-err'); for(const p of probs) sysMsg('• '+p,'c-err'); return true; }
     if(probs.length) sysMsg(`GM override: entering without the full raid requirements (${probs.length} unmet).`,'c-gm');
@@ -6429,7 +6461,7 @@ function addRaid(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,
 }
 
 /* ---------- the surprise: Cinderhold stays sealed until the realm owner types /raid unveil ---------- */
-function raidIsOpen(){ return !!window.__raidOpen||!!(saves&&saves.raidSeen)||netState==='solo'; }
+function raidIsOpen(){ return true; }
 let RSHOWN=false, RASSERT=false;
 function raidSync(){ if(window.__raidOpen&&saves&&!saves.raidSeen){ saves.raidSeen=1; saveAll(saves); }
   if(saves&&saves.raidOpen&&!window.__raidOpen&&!RASSERT&&room&&typeof room.raidOpen==='function'&&isRealmOwner()){ RASSERT=true; room.raidOpen(true); }
@@ -6438,6 +6470,7 @@ function raidSync(){ if(window.__raidOpen&&saves&&!saves.raidSeen){ saves.raidSe
   const j=POIS.findIndex(q=>q.id==='cinderhold'); if(o&&j<0) POIS.push(RPOI); else if(!o&&j>=0) POIS.splice(j,1);
   for(const a of RACH){ const k=ACH.indexOf(a); if(o&&k<0) ACH.push(a); else if(!o&&k>=0) ACH.splice(k,1); } }
 setInterval(()=>{ try{ raidSync(); }catch(e){} },1000);
+setTimeout(function raidTease(){ if(!me){ return setTimeout(raidTease,3000); } if(me.c.lvl<MAXLVL) chatLine(`🔥 Cinderhold, the first raid, awaits heroes of level 20 beneath the Cinder Caldera: seven bosses, the Ember Tyrant, a legendary weapon for your class and the Ashborn Nightmare. You are level ${me.c.lvl}. Keep climbing!`,'c-yell'); else chatLine('🔥 You are level 20: Cinderhold is open to you. Gather 5 to 8 heroes at the Cinderhold Gate in the Cinder Caldera (talk to Emberwarden Thalia).','c-yell'); },4000);
 function raidUnveiled(){ raidSync(); if(!me) return; banner('CINDERHOLD AWAKENS','The gate beneath the Cinder Caldera has opened','boss'); try{ snd('horn'); shake(5); }catch(e){}
   chatLine('🔥 The ground shudders. Far to the north, beneath the Cinder Caldera, the Cinderhold Gate grinds open and a terrible heat pours out. Emberwarden Thalia waits at the gate for heroes of level 20.','c-yell'); }
 
