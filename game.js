@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 63;
+const VERSION = 64;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -130,6 +130,10 @@ function carveCoast(){ const P=PORT, C=COAST;
   /* piers: a long main pier with a T head, and two side jetties */
   P.piers=[{y0:110,y1:110,len:9},{y0:P.cy-1,y1:P.cy,len:13,head:true},{y0:132,y1:132,len:8}];
   for(const p of P.piers){ for(let y=p.y0;y<=p.y1;y++) for(let x=P.x1+1;x<=P.x1+p.len;x++) setT(x,y,T.BRIDGE); if(p.head) for(let y=p.y0-3;y<=p.y1+3;y++) for(const x of [P.x1+p.len-1,P.x1+p.len]) setT(x,y,T.BRIDGE); }
+  /* the breakwater: a stone mole from the south corner of the quay, out and round to the north, sheltering the harbour */
+  P.mole={y:P.y1+1,x0:P.x1,x1:P.x1+16,yEnd:P.y1-9};
+  for(let x=P.mole.x0;x<=P.mole.x1;x++) for(const y of [P.mole.y,P.mole.y+1]) setT(x,y,T.COBBLE);
+  for(let y=P.mole.yEnd;y<=P.mole.y+1;y++) for(const x of [P.mole.x1-1,P.mole.x1]) setT(x,y,T.COBBLE);
   /* the lighthouse on its headland, with the keeper's cottage */
   { const L=C.light; for(let y=L.y-4;y<=L.y+4;y++)for(let x=L.x-6;x<=L.x+3;x++){ const t=tAt(x,y); if(t!==T.WATER&&Math.hypot(x-L.x+1,y-L.y)<5.5) setT(x,y,T.GRASS); }
     for(let y=L.y;y<=L.y+1;y++)for(let x=L.x;x<=L.x+1;x++) setT(x,y,T.PROP); for(let y=L.y+2;y<=L.y+3;y++)for(let x=L.x-5;x<=L.x-3;x++) setT(x,y,T.PROP); }
@@ -785,7 +789,7 @@ function posW(mt){ const [x,y]=mt.pos; if(y>=112) return [x,y+OWH-112]; const k=
 /* mob spawn table: deterministic so every client agrees on ids */
 const mobs=[], mobById={};
 /* v63: the monsters of the Stormwake Coast */
-{ const C='coast', away=(tx,ty)=>!(tx>=PORT.x0-9&&tx<=PORT.x1+3&&ty>=PORT.y0-9&&ty<=PORT.y1+18)&&Math.hypot(tx-COAST.light.x,ty-COAST.light.y)>8&&Math.abs(ty-COAST.passY)+Math.max(0,tx-350)>8&&Math.hypot(tx-COAST.cove.x,ty-COAST.cove.y)>9&&Math.hypot(tx-COAST.shrine.x,ty-COAST.shrine.y)>6;
+{ const C='coast', away=(tx,ty)=>!(tx>=PORT.x0-9&&tx<=PORT.x1+20&&ty>=PORT.y0-9&&ty<=PORT.y1+18)&&Math.hypot(tx-COAST.light.x,ty-COAST.light.y)>8&&Math.abs(ty-COAST.passY)+Math.max(0,tx-350)>8&&Math.hypot(tx-COAST.cove.x,ty-COAST.cove.y)>9&&Math.hypot(tx-COAST.shrine.x,ty-COAST.shrine.y)>6;
   const shore=(tx,ty)=>coastX(ty)-tx<9, moor=(tx,ty)=>tx<382&&ty>60&&ty<205, south=(tx,ty)=>ty>158&&tx>376, north=(tx,ty)=>ty<78&&tx>378;
   MOBT.push(
   {zone:C,key:'shellback',name:'Shellback Crab',lv:[12,13],hp:360,hpL:24,dmg:18,dmgL:1.8,spd:66,rng:36,as:2.1,aggro:130,r:16,col:'#a8462a',n:7,cb:(x,y)=>away(x,y)&&shore(x,y)&&y>84},
@@ -6285,22 +6289,90 @@ function addPort(d){ const P=PORT; if(!P.B||!P.B.length) return; const y0=.55;
     for(let y=P.y0+4;y<P.y1;y+=8) if(!P.piers.some(p=>y>=p.y0-1&&y<=p.y1+1)){ box(qx-.4,y0+.1,y+.5,.7,.2,.7,DST); cyl(qx-.4,y0+.2,y+.5,.12,4.2,TIM); gAdd(d,RB,qx+.4,y0+4,y+.5,0,2.2,.18,.18,TIM,0,-.25); cyl(qx+1.35,y0+1.8,y+.5,.012,2.3,[.6,.5,.35]); box(qx+1.35,y0+1.6,y+.5,.5,.4,.5,[.5,.36,.2]); }
     for(let y=P.y0+3;y<=P.y1-3;y+=2) if(lampOk(P.x1-.4,y+.5)&&(y-P.y0)%6===3) lamp(P.x1-.4,y+.5); }
   function lampOk(x,z){ const t=tAt(Math.floor(x),Math.floor(z)); return !SOLID.has(t); }
-  /* piers on posts, lanterns at the ends, boats tied alongside */
-  for(const p of P.piers){ const xa=P.x1+1, xb=P.x1+p.len+1; for(let x=xa+.3;x<xb;x+=1.5) for(const z of [p.y0+.05,p.y1+.95]) cyl(x,-1.4,z,.1,1.95,[.26,.19,.12]);
-    for(const z of [p.y0+.04,p.y1+.96]) box((xa+xb)/2,.36,z,xb-xa,.12,.1,[.3,.22,.14]);
-    if(p.head){ for(let z=p.y0-3+.3;z<p.y1+4;z+=1.5) for(const x of [xb-2+.05,xb-.05]) cyl(x,-1.4,z,.1,1.95,[.26,.19,.12]); for(const s of [-1,1]) lamp(xb-1,(s<0?p.y0-2.5:p.y1+3.5),.45); }
-    else lamp(xb-.5,p.y0+.5+(p.y1-p.y0)/2,.45); }
-  if(P.jetty){ const J=P.jetty; for(let x=J.x0+.3;x<=J.x1+1;x+=1.5) for(const z of [J.y+.05,J.y+.95]) cyl(x,-1.4,z,.09,1.9,[.26,.19,.12]); }
-  const boat=(x,z,ry,L,big,sail)=>{ const c=Math.cos(ry), s=Math.sin(ry), at=(u,v)=>[x+u*c+v*s,z-u*s+v*c], B=L*.36;
-    const hc=[[.34,.22,.13],[.2,.3,.36],[.42,.16,.12]][Math.floor(hash2(x|0,z|0,73)*3)];
-    gAdd(d,RS,x,.12,z,ry,L,1,B,hc); gAdd(d,RS,x,.2,z,ry,L*.98,.62,B*.98,[.86,.82,.7]); box(x,.45,z,L*.78,.06,B*.72,[.45,.33,.2],ry);
-    for(let k=-1;k<=1;k++){ const [bx,bz]=at(k*L*.25,0); box(bx,.52,bz,.12,.08,B*.7,[.36,.26,.16],ry); }
-    if(big){ const [cx2,cz2]=at(-L*.27,0); box(cx2,.85,cz2,L*.22,.8,B*.6,[.36,.26,.16],ry); box(cx2,1.3,cz2,L*.26,.1,B*.68,[.3,.2,.12],ry); }
-    const [mx,mz]=at(L*.06,0), mh=L*(big?1.05:.85); cyl(mx,.45,mz,.06,mh,[.3,.22,.14]);
-    if(sail){ const [sx2,sz2]=at(-L*.14,0); gAdd(d,RB,sx2,.45+mh*.55,sz2,ry,L*.42,mh*.72,.03,[.92,.88,.78]); gAdd(d,RB,sx2,.45+mh*.18,sz2,ry,L*.5,.07,.07,[.3,.22,.14]); }
-    else { const [sx2,sz2]=at(-L*.12,0); gAdd(d,RB,sx2,.45+mh*.3,sz2,ry,L*.46,.14,.14,[.85,.8,.68]); }
-    STAT_LIGHTS.push({x:mx,y:.45+mh*.4,z:mz,r:3,c:[1,.62,.3],night:true}); };
-  boat(P.x1+5,108.6,0,4.2,false,false); boat(P.x1+6.5,112.2,0,3.4,false,true); boat(P.x1+8,P.cy-2.6,0,6.4,true,true); boat(P.x1+7,P.cy+2.6,0,5,true,false); boat(P.x1+4.6,130.6,0,3.2,false,false); boat(P.x1+5.8,134.1,0,3.8,false,true); boat(P.x1+17,P.cy+8,.5,7.6,true,true); if(P.jetty){ boat(P.jetty.x1-1,P.jetty.y-1.1,0,3.4,false,false); boat(P.jetty.x0+1.4,P.jetty.y+2.6,.35,3,false,false); }
+  /* ---------- v63b: the harbour ---------- */
+  const line=(x1,y1,z1,x2,y2,z2,r,col)=>{ const dx=x2-x1, dy=y2-y1, dz=z2-z1, h=Math.hypot(dx,dz), L=Math.hypot(h,dy); if(L<.01) return; gAdd(d,RB,(x1+x2)/2,(y1+y2)/2,(z1+z2)/2,Math.atan2(-dz,dx),L,r,r,col,0,Math.atan2(dy,h)); };
+  const PILE=[.27,.2,.13], ALG=[.12,.16,.1], ROPE=[.62,.52,.34], PLANK=[.46,.34,.22];
+  const pile=(x,z,r,top)=>{ cyl(x,-1.6,z,r,1.45,ALG); cyl(x,-.15,z,r,(top??.5)+.15,PILE); cyl(x,(top??.5),z,r*1.08,.05,[.2,.15,.1]); };
+  /* hull: a lofted, planked shape with a raked stem, a flat transom, sheer that rises to the bow, a waterline band */
+  const hullGeo=(L,B,D,paint,trim)=>{ const g=G0(), NU=16, NV=10, P=[], Q=[];
+    const W=u=>B/2*(u<.55?lerp(.7,1,Math.sin(u/.55*Math.PI/2)):Math.pow(Math.max(0,Math.cos((u-.55)/.45*Math.PI/2)),.75)), TOP=u=>D*(.92+.32*u*u*u+.1*(1-u)*(1-u)), K=u=>D*.62*(u>.85?.55+.45*(1-u)/.15:1);
+    for(let i=0;i<=NU;i++){ const u=i/NU, x=(u-.5)*L+(u>.9?(u-.9)*L*.35:0); for(let j=0;j<=NV;j++){ const t=j/NV*2-1, s=Math.sqrt(Math.max(0,1-t*t)); P.push([x,TOP(u)-(TOP(u)+K(u))*Math.pow(s,.8),W(u)*t]); Q.push([x,TOP(u)-.06-(TOP(u)+K(u)-.12)*Math.pow(s,.8),W(u)*t*.9]); } }
+    const nrm=(A,i,j,sg)=>{ const id=(a,b)=>clamp(a,0,NU)*(NV+1)+clamp(b,0,NV); const pu=A[id(i+1,j)], mu=A[id(i-1,j)], pv=A[id(i,j+1)], mv=A[id(i,j-1)]; const a=[pu[0]-mu[0],pu[1]-mu[1],pu[2]-mu[2]], b=[pv[0]-mv[0],pv[1]-mv[1],pv[2]-mv[2]]; let n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]; const l=Math.hypot(...n)||1; return n.map(v=>v/l*sg); };
+    const surf=(A,sg,colf)=>{ const b0=g.p.length/3; for(let i=0;i<=NU;i++)for(let j=0;j<=NV;j++){ const p=A[i*(NV+1)+j], n=nrm(A,i,j,sg); gPush(g,p[0],p[1],p[2],n[0],n[1],n[2],colf(p,i,j)); }
+      for(let i=0;i<NU;i++)for(let j=0;j<NV;j++){ const a=b0+i*(NV+1)+j; g.i.push(a,a+NV+1,a+1,a+1,a+NV+1,a+NV+2); } };
+    surf(P,-1,(p,i,j)=>{ const tt=Math.abs(j/NV*2-1); if(p[1]<.04) return [.4,.13,.1]; if(tt>.93) return trim; const pl=(Math.floor((p[1]+.5)*6)%2)?.93:1; return paint.map(v=>v*pl); });
+    surf(Q,1,(p)=>p[1]<.02?[.3,.21,.13]:[.48,.35,.22]);
+    { const b0=g.p.length/3; for(let j=0;j<=NV;j++){ const a=P[j], c=Q[j]; gPush(g,a[0],a[1],a[2],-1,0,0,paint.map(v=>v*.85)); gPush(g,c[0],c[1],c[2],-1,0,0,[.42,.3,.19]); } for(let j=0;j<NV;j++){ const a=b0+j*2; g.i.push(a,a+2,a+1,a+1,a+2,a+3); }
+      const c0=g.p.length/3, tp=P[Math.floor(NV/2)]; for(let j=0;j<=NV;j++){ const a=P[j]; gPush(g,a[0]-.01,a[1],a[2],-1,0,0,paint.map(v=>v*.8)); } const cc=gPush(g,tp[0]-.01,TOP(0),0,-1,0,0,paint.map(v=>v*.8)); for(let j=0;j<NV;j++) g.i.push(c0+j,cc,c0+j+1); }
+    return g; };
+  const sailGeo=(H,F,tri,belly)=>{ const g=G0(), N=6; for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){ const a=i/N, b=j/N, w=tri?(1-a):1; const x=-F*b*w+(tri?0:F/2), y=a*H, z=Math.sin(Math.PI*b)*Math.sin(Math.PI*Math.min(1,a*1.15))*belly*w; gPush(g,x,y,z,0,0,1,[.93,.89,.8]); }
+    for(let i=0;i<N;i++)for(let j=0;j<N;j++){ const a=i*(N+1)+j; g.i.push(a,a+N+1,a+1,a+1,a+N+1,a+N+2); } for(let k=0;k<g.n.length;k+=3){ g.n[k]=0; g.n[k+1]=0; g.n[k+2]=1; } return g; };
+  const PAINTS=[[[.18,.3,.4],[.85,.82,.72]],[[.5,.16,.12],[.88,.84,.72]],[[.86,.84,.78],[.16,.36,.42]],[[.3,.22,.14],[.75,.6,.3]],[[.2,.36,.28],[.86,.8,.62]]];
+  /* boats: kind 'row' (rowing boat), 'fish' (fishing smack, furled or set sail), 'ship' (a merchant cog with a square sail and an aft castle) */
+  const vessel=(x,z,ry,kind,o)=>{ o=o||{}; const L=o.L||(kind==='ship'?8.6:kind==='fish'?5:3), B=L*(kind==='ship'?.34:kind==='fish'?.36:.4), D=kind==='ship'?1.05:kind==='fish'?.62:.42, pc=PAINTS[(o.p??Math.floor(hash2(x|0,z|0,73)*PAINTS.length))%PAINTS.length], y=o.y??-.04;
+    const c=Math.cos(ry), s=Math.sin(ry), at=(u,v,h)=>[x+u*c+v*s,y+(h||0),z-u*s+v*c];
+    gAdd(d,hullGeo(L,B,D,pc[0],pc[1]),x,y,z,ry,1,1,1,[1,1,1],0,o.rz||0);
+    const gun=D*.95; if(o.rz) return;
+    for(let k=0;k<(kind==='row'?3:4);k++){ const [bx,by,bz]=at((k/(kind==='row'?2:3)-.5)*L*.55,0,gun-.12); box(bx,by,bz,.16,.06,B*.82,PLANK,ry); }
+    if(kind==='row'){ for(const sd of [-1,1]){ const [ax,ay,az]=at(-L*.05,sd*B*.42,gun+.02), [bx,by,bz]=at(L*.32,sd*B*.2,gun+.05); line(ax,ay,az,bx,by,bz,.05,[.55,.42,.26]); } return; }
+    if(kind==='fish'){ const [cx2,cy2,cz2]=at(-L*.2,0,gun-.05); box(cx2,cy2+.06,cz2,L*.3,.12,B*.7,PLANK,ry);
+      gAdd(d,RBL,...at(L*.12,B*.08,gun+.05),ry,.9,.35,.7,[.2,.3,.24]); for(const q of [-1,1]) box(...at(-L*.32,q*B*.18,gun+.12),.36,.24,.3,[.5,.36,.2],ry);
+      const [mx,my,mz]=at(L*.12,0,gun-.1), mh=L*.95; cyl(mx,my,mz,.05,mh,[.32,.23,.14]);
+      for(const q of [-1,1]){ const [gx,gy,gz]=at(L*.1,q*B*.47,gun); line(mx,my+mh*.92,mz,gx,gy,gz,.014,[.18,.16,.13]); } { const [fx,fy,fz]=at(L*.52,0,gun+.1); line(mx,my+mh*.95,mz,fx,fy,fz,.014,[.18,.16,.13]); }
+      if(o.sail){ gAdd(d,sailGeo(mh*.82,L*.55,true,.18),mx,my+.35,mz,ry,1,1,1,[1,1,1]); const [bx,by,bz]=at(L*.12-L*.28,0,gun+.25); gAdd(d,RB,bx,by,bz,ry,L*.56,.07,.07,[.3,.22,.14]); }
+      else { const [bx,by,bz]=at(L*.12-L*.28,0,gun+.3); gAdd(d,RB,bx,by,bz,ry,L*.56,.07,.07,[.3,.22,.14]); const [s1x,s1y,s1z]=at(L*.1,0,gun+.42), [s2x,s2y,s2z]=at(L*.12-L*.52,0,gun+.42); line(s1x,s1y,s1z,s2x,s2y,s2z,.2,[.88,.84,.74]); }
+      const [lx,ly,lz]=at(-L*.46,0,gun); cyl(lx,ly,lz,.025,1,[.2,.2,.2]); box(lx,ly+1.05,lz,.16,.22,.16,[1,.7,.35],0,1.2); STAT_LIGHTS.push({x:lx,y:ly+1.05,z:lz,r:3,c:[1,.62,.3],night:true}); return; }
+    /* the cog */
+    { const [ax,ay,az]=at(-L*.33,0,gun); box(ax,ay+.45,az,L*.26,.9,B*.86,[.4,.29,.18],ry); box(ax,ay+.95,az,L*.28,.08,B*.92,[.3,.21,.13],ry);
+      for(let k=0;k<6;k++){ for(const q of [-1,1]){ const [px,py,pz]=at(-L*.46+k*L*.052,q*B*.44,gun+1.15); box(px,py,pz,.05,.35,.05,[.3,.21,.13]); } } for(const q of [-1,1]){ const [rx,ry2,rz]=at(-L*.33,q*B*.44,gun+1.3); box(rx,ry2,rz,L*.27,.05,.05,[.3,.21,.13],ry); }
+      for(const q of [-1,1]){ const [wx,wy,wz]=at(-L*.33,q*B*.43,gun+.45); box(wx,wy,wz,.08,.3,.3,[1,.72,.38],ry,1.1); }
+      const [lx,ly,lz]=at(-L*.47,0,gun+1.3); cyl(lx,ly,lz,.03,.7,[.2,.2,.2]); box(lx,ly+.75,lz,.22,.3,.22,[1,.7,.35],0,1.5); STAT_LIGHTS.push({x:lx,y:ly+.75,z:lz,r:5,c:[1.1,.7,.35],night:true}); }
+    { const [hx,hy,hz]=at(L*.18,0,gun-.1); box(hx,hy,hz,.9,.4,.7,[.36,.26,.16],ry); }
+    const [mx,my,mz]=at(L*.06,0,gun-.2), mh=L*1.15; cyl(mx,my,mz,.09,mh,[.32,.23,.14]); cyl(mx,my+mh*.86,mz,.22,.3,[.3,.21,.13]);
+    { const [bx,by,bz]=at(L*.5,0,gun+.15), [tx,ty,tz]=at(L*.82,0,gun+.85); line(bx,by,bz,tx,ty,tz,.08,[.32,.23,.14]); line(mx,my+mh*.97,mz,tx,ty,tz,.02,[.16,.14,.12]); const [sx2,sy2,sz2]=at(-L*.46,0,gun+1.2); line(mx,my+mh*.97,mz,sx2,sy2,sz2,.02,[.16,.14,.12]); }
+    for(const q of [-1,1]) for(let k=0;k<3;k++){ const [gx,gy,gz]=at(L*(-.04+k*.08),q*B*.49,gun); line(mx,my+mh*.84,mz,gx,gy,gz,.016,[.16,.14,.12]); }
+    { const yd=my+mh*.78, [ya,,yb]=at(L*.06,-B*1.05,0), [yc,,ye]=at(L*.06,B*1.05,0); line(ya,yd,yb,yc,yd,ye,.12,[.3,.21,.13]);
+      if(o.sail){ const S=sailGeo(mh*.5,B*1.9,false,.35), [sx,,sz]=at(L*.06+.06,0,0); gAdd(d,S,sx,yd-mh*.52,sz,ry-Math.PI/2,1,1,1,[1,1,1]); const [ex,,ez]=at(L*.06+.07,0,0); box(ex,yd-mh*.27,ez,.03,.4,.4,[.62,.12,.1],ry+Math.PI/2,.05); }
+      else { const [fa,,fb]=at(L*.06,-B*.95,0), [fc,,fe]=at(L*.06,B*.95,0); line(fa,yd-.16,fb,fc,yd-.16,fe,.3,[.88,.84,.74]); } }
+    { const fy=my+mh+.05; cyl(mx,fy-.1,mz,.02,.6,[.2,.15,.1]); const [fx,,fz]=at(L*.06-.4,0,0); box(fx,fy+.38,fz,.75,.42,.02,NAVY,ry,.1); box(fx,fy+.38,fz,.25,.18,.025,GOLD,ry,.3); }
+    for(let k=0;k<3;k++){ const [cx3,cy3,cz3]=at(-L*.05+k*.4,(k-1)*.35,gun); box(cx3,cy3+.22,cz3,.45,.45,.45,[.52,.38,.22],ry+k); } };
+  /* mooring: a rope from a point on the boat down to a pier post */
+  const moor=(a,b)=>line(a[0],a[1],a[2],b[0],.5,b[1],.022,ROPE);
+  /* piers: piles with weed at the waterline, stringers, cleats, ladders, lanterns, and the gear of a working harbour */
+  for(const p of P.piers){ const xa=P.x1+1, xb=P.x1+p.len+1;
+    for(let x=xa+.25;x<xb;x+=1.5) for(const z of [p.y0+.06,p.y1+.94]) pile(x,z,.11,.52);
+    for(const z of [p.y0+.05,p.y1+.95]) box((xa+xb)/2,.34,z,xb-xa,.14,.1,[.3,.22,.14]);
+    for(let x=xa+1.5;x<xb-.5;x+=3) for(const z of [p.y0-.03,p.y1+1.03]){ box(x,.53,z,.36,.06,.1,IRON); box(x,.49,z,.08,.06,.08,IRON); }
+    { const lz=p.y0-.06; for(const q of [-.22,.22]) gAdd(d,RB,xb-.9+q,-.3,lz,0,.05,1.7,.05,[.25,.2,.15]); for(let k=0;k<5;k++) box(xb-.9,-.95+k*.33,lz,.46,.04,.05,[.25,.2,.15]); }
+    if(p.head){ for(let z=p.y0-3+.25;z<p.y1+4;z+=1.5) for(const x of [xb-2+.06,xb-.06]) pile(x,z,.11,.52); for(const s of [-1,1]) lamp(xb-1,(s<0?p.y0-2.5:p.y1+3.5),.45);
+      for(let k=0;k<3;k++) gAdd(d,RFR,xb-1.6+k*.02,.47,p.y0-1.6+k*.62,0,.5,.72,.5,[.42,.28,.15]); box(xb-.6,.75,p.y1+1.6,.6,.56,.6,[.5,.36,.2],.3); box(xb-.55,1.28,p.y1+1.62,.45,.45,.45,[.55,.4,.22],.9);
+      for(let k=0;k<3;k++) cyl(xb-1.5,.47+k*.06,p.y1+2.4,.28-k*.04,.06,ROPE); }
+    else lamp(xb-.5,p.y0+.5,.45);
+    for(let k=0;k<(p.len>9?3:2);k++){ const x=xa+2.3+k*2.7; gAdd(d,RC,x,.47,p.y0+.5+(k%2?.18:-.18),0,.55,.42,.55,[.42,.3,.18]); for(let q=0;q<4;q++) box(x,.47+.1+q*.1,p.y0+.5+(k%2?.18:-.18),.56,.015,.56,[.3,.22,.14]); } }
+  if(P.jetty){ const J=P.jetty; for(let x=J.x0+.25;x<=J.x1+1;x+=1.5) for(const z of [J.y+.06,J.y+.94]) pile(x,z,.1,.5); for(const z of [J.y+.05,J.y+.95]) box((J.x0+J.x1+1)/2,.33,z,J.x1-J.x0+1,.12,.09,[.3,.22,.14]); lamp(J.x1+.5,J.y+.5,.45); }
+  /* the breakwater: big squared stones on both faces, rubble on the sea side, and a beacon at the end */
+  if(P.mole){ const M=P.mole, st=k=>[.52,.5,.47].map(v=>v*(.86+hash2(k,3,7)*.2));
+    for(let x=M.x0+1;x<=M.x1;x+=1.1){ for(const [z,o] of [[M.y-.05,-1],[M.y+2.05,1]]){ box(x,-.25,z,1.08,1.6,.5,st(x*7+o),hash2(x|0,o,2)*.06); } box(x,.62,M.y-.12,1.06,.18,.34,[.6,.58,.54]); if(hash2(x|0,9,4)<.7) gAdd(d,RBL,x+.2,-.55,M.y+2.75,hash2(x|0,1,1)*6,1.6,1.1,1.3,[.45,.44,.42]); }
+    for(let z=M.yEnd;z<=M.y+1.2;z+=1.1){ for(const [x,o] of [[M.x1-1.05,-1],[M.x1+1.05,1]]){ box(x,-.25,z,.5,1.6,1.08,st(z*11+o),hash2(z|0,o,2)*.06); } box(M.x1-1.12,.62,z,.34,.18,1.06,[.6,.58,.54]); if(hash2(z|0,8,4)<.7) gAdd(d,RBL,M.x1+1.75,-.55,z+.2,hash2(z|0,2,1)*6,1.3,1.1,1.6,[.45,.44,.42]); }
+    for(let x=M.x0+.55;x<=M.x1+.5;x+=1.02) box(x,.6,M.y+1,.98,.1,1.9,[.58,.56,.52].map(v=>v*(.9+hash2(x*3|0,5,5)*.14)));
+    for(let z=M.yEnd+.55;z<M.y;z+=1.02) box(M.x1,.6,z,1.9,.1,.98,[.58,.56,.52].map(v=>v*(.9+hash2(z*3|0,6,5)*.14)));
+    for(let x=M.x0+2;x<M.x1-1;x+=4){ cyl(x,.55,M.y+.25,.13,.42,IRON); cyl(x,.97,M.y+.25,.17,.08,IRON); }
+    { const bx=M.x1, bz=M.yEnd+.6; cyl(bx,.5,bz,.9,2.6,[.86,.84,.78]); cyl(bx,.5,bz,1,.35,[.5,.48,.45]); for(const b of [.95,1.9]) cyl(bx,.5+b,bz,.92,.22,[.2,.42,.32]); cyl(bx,3.1,bz,.98,.12,[.25,.25,.28]); cyl(bx,3.22,bz,.42,.62,[.5,1,.6],2.4); gAdd(d,RCN,bx,3.84,bz,0,1.1,.7,1.1,[.18,.2,.24]); STAT_LIGHTS.push({x:bx,y:3.5,z:bz,r:10,c:[.4,1.2,.5],night:true}); } }
+  /* buoys marking the channel */
+  for(const [bx,bz,col] of [[P.x1+17.5,P.y1-11.5,[.8,.15,.12]],[P.x1+18.5,P.y1-16.5,[.15,.55,.25]],[P.x1+21,P.cy-8,[.8,.15,.12]]]){ gAdd(d,RS,bx,.05,bz,0,.62,.55,.62,col); cyl(bx,.25,bz,.04,.9,IRON); gAdd(d,RCN,bx,1.15,bz,0,.24,.3,.24,col); }
+  /* the fleet: moored to the piers with real lines */
+  { const X=P.x1;
+    vessel(X+5.2,108.85,0,'fish',{p:0}); moor([X+7.4,.55,108.85],[X+7.7,110.06]); moor([X+3,.55,108.85],[X+2.7,110.06]);
+    vessel(X+6.6,112.2,Math.PI,'fish',{p:1,sail:true,L:4.4}); moor([X+8.6,.55,112.2],[X+8.7,110.94]);
+    vessel(X+7.6,P.cy-2.55,0,'fish',{p:2,L:5.6}); moor([X+10.3,.6,P.cy-2.55],[X+10.25,P.cy-1+.06]); moor([X+5,.6,P.cy-2.55],[X+4.2,P.cy-1+.06]);
+    vessel(X+6.2,P.cy+2.35,Math.PI,'row',{p:4}); moor([X+7.6,.4,P.cy+2.35],[X+7.25,P.cy+.94]);
+    vessel(X+8.8,P.cy+2.6,0,'row',{p:3,L:2.7}); 
+    vessel(X+P.piers[1].len+2.7,P.cy+.2,Math.PI/2,'ship',{p:1,sail:false}); moor([X+P.piers[1].len+1.6,.9,P.cy-3.2],[X+P.piers[1].len+.94,P.cy-2.75]); moor([X+P.piers[1].len+1.6,.9,P.cy+3.6],[X+P.piers[1].len+.94,P.cy+3.25]);
+    vessel(X+4.8,130.75,0,'row',{p:0}); moor([X+3.4,.4,130.75],[X+2.7,131.94-.88]);
+    vessel(X+5.4,133.85,Math.PI,'fish',{p:3,L:4.2}); moor([X+7.4,.55,133.85],[X+7.25,132.94]);
+    vessel(X+27,P.cy-10,.35,'ship',{p:0,sail:true,L:9.4});
+    if(P.jetty){ const J=P.jetty; vessel(J.x1-1.2,J.y-1.05,0,'fish',{p:4,L:4}); moor([J.x1+.7,.55,J.y-1.05],[J.x1+.7,J.y+.06]);
+      for(const [dx,dz,rr] of [[-3.5,1.8,.5],[-4.6,-1.2,-.4]]){ const bx=J.x0+dx, bz=J.y+dz, by=Math.max(.05,hgt(bx,bz))-.1; vessel(bx,bz,rr,'row',{p:(dx>-4?2:4),L:2.8,y:by,rz:.32}); } } }
   /* the plaza fountain: a bronze anchor over a round basin */
   { const fx=P.cx+.5, fz=P.cy+.5, br=[.36,.52,.46]; cyl(fx,y0,fz,1.55,.55,STONE); cyl(fx,y0+.5,fz,1.38,.06,[.2,.45,.6],.15); cyl(fx,y0,fz,.42,1.2,STONE);
     cyl(fx,y0+1.15,fz,.09,2.4,br); box(fx,y0+3.35,fz,1.1,.14,.14,br); gAdd(d,RS,fx,y0+3.62,fz,0,.32,.32,.12,br); for(const s of [-1,1]){ gAdd(d,RB,fx+s*.42,y0+1.35,fz,0,.9,.12,.14,br,0,s*.75); gAdd(d,RCN,fx+s*.78,y0+1.62,fz,0,.26,.3,.14,br); } STAT_LIGHTS.push({x:fx,y:y0+1.5,z:fz,r:5,c:[.6,.85,1],night:true}); }
