@@ -1,9 +1,9 @@
 {
- "version": "v0.57",
- "title": "Ready for test night",
+ "version": "v0.58",
+ "title": "The Scorched Reach",
  "date": "16 Nov 2026",
- "text": "A sturdier realm for big groups: parties of up to 8, a world host that hands over to a steadier computer, and a server that keeps going when someone's connection struggles.\n\n✨ Parties can now hold up to 8 heroes, with a compact party list so everyone fits on screen\n⬆️ The world host (the computer that runs the monsters) is now chosen more carefully: phones, tablets and computers that are struggling hand the job to a steadier one, and a host that stops responding is replaced within seconds\n⬆️ If one player's connection chokes, the server skips them for a moment instead of slowing everyone else down, and reconnects them cleanly if it does not recover\n🔧 A rare error in the monster simulation can no longer freeze every monster in the realm: the game recovers and keeps going\n🔧 Big fights no longer lose damage or warning circles when lots happens at once: more events fit in every network update\n⬆️ The server protects itself against unexpected errors and reports its health (players online, memory and uptime) at /api/version",
+ "text": "A new level 15–19 zone in the east of the Cinder Caldera, with the Emberwatch outpost, a ten-quest storyline, daily bounties, and a lot of everyday improvements.\n\n✨ The Scorched Reach: a new zone for levels 15 to 19 east of the Wyrm's Lair. Follow the road east and report to Commander Ysolde at Emberwatch (Captain Oriel will point you there at level 15)\n✨ Six new monsters (Ashen Ravagers, Cinderback Crushers, Cinder Wisps, Ember Zealots, Molten Colossi and Ashen Stalkers), the elite Skarn the Ashlord, and Pyraxis, Herald of the Tyrant, a dragon world boss for a full party\n✨ Ten new quests take you from level 15 to 20, plus three daily bounties that reset every day\n✨ Hearth: channel for 8 seconds to return to Hearthmere (every 5 minutes). Use the game menu (Esc) or type /hearth\n✨ Stuck? Type /stuck or use the game menu to get free\n✨ Damage meter: see your party's damage and healing per second (game menu or /meter). Click it to switch between damage and healing\n✨ Sell junk: at a merchant, one click sells every common and uncommon item you cannot use or that is weaker than what you wear\n⬆️ Bags now hold 24 items instead of 18\n🔧 A few monsters and a gathering node that had spawned in places nobody could reach now appear on open ground\n⬆️ The game menu now shows the real version number",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-16T14:06:28Z"
+ "time": "2026-11-16T16:50:30Z"
 }
