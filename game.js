@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 67;
+const VERSION = 68;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -5262,7 +5262,7 @@ function innBuild(song,t0){ const spb=60/song.bpm, ev=[], chords=song.chords.spl
 function innPlay(e){ const [t,k,a,b,c]=e; if(k==='pl') pluck(a,t,b,c); else if(k==='pl2'){ for(const [j,n] of a.entries()) pluck(n,t+j*.025,b,c); } else if(k==='hp') harpN(a,t,b,c);
   else if(k==='ld'){ const dur=Math.max(.25,c*.95); if(b==='flute') flute(a,t,.05,dur); else if(b==='fiddle') fiddle(a,t,.032,dur); else harpN(a,t,.11,Math.max(1.2,dur*1.6)); } }
 function innTick(t){ let S=AUD.inn; if(!S||(S.i>=S.ev.length&&t>S.end+3.5)){ let k; do{ k=Math.random()*INN_ALBUM.length|0; } while(INN_ALBUM.length>1&&k===AUD.innLast); AUD.innLast=k; S=AUD.inn=innBuild(INN_ALBUM[k],t+.4);
-    try{ chatLine(`♪ ${INN_ALBUM[k].name}${INN_ALBUM[k].trad?' (traditional)':''} — ${me&&zoneAtPx(me.x,me.y)==='port'?'The Gull & Anchor, Brinehaven':'The Hearthmere Inn'}`,'c-sys'); }catch(e){} }
+    try{ chatLine(`♪ ${INN_ALBUM[k].name}${INN_ALBUM[k].trad?' (traditional)':''} — ${me&&zoneAtPx(me.x,me.y)==='port'?'The Gull & Anchor, Brinehaven':me&&zoneAtPx(me.x,me.y)==='town'?'The Hearthmere Inn':'Songs of Emberfall'}`,'c-sys'); }catch(e){} }
   while(S.i<S.ev.length&&S.ev[S.i][0]<t+.6){ try{ innPlay(S.ev[S.i]); }catch(e){} S.i++; } }
 /* ---- recorded tavern music ---- */
 const FMUS={list:[{f:'tavern-rafters-glow.mp3',n:"By the Rafters' Glow",a:'Kaazoom'},{f:'tavern-embers-flagstone.mp3',n:'Embers on the Flagstone',a:'Kaazoom'},{f:'tavern-city-ambient.mp3',n:'Medieval City Tavern',a:'DeusLower'}],
@@ -5276,7 +5276,7 @@ function fmusPlay(){ if(FMUS.dead||FMUS.pending) return; const a=fmusEl(); if(!a
 function fmusLevel(){ const v=(typeof AUD!=='undefined'&&AUD.vol)||{master:.8,music:.6}; return v.mute?0:clamp((v.master??.8)*(v.music??.6)*.9,0,1); }
 function fmusTick(){ const F=FMUS; let want=false; if(F.dead){ F.want=false; if(F.el&&!F.el.paused) try{ F.el.pause(); }catch(e){} return; }
   if(F.el&&!F.ok&&!F.blocked&&F.srcT&&performance.now()-F.srcT>30000&&F.el.readyState===0){ if(!F.triedRealm&&/^https?:$/.test(location.protocol)&&F.cur){ F.triedRealm=true; F.useRealm=true; F.el.src=fmusBase()+F.cur.f; F.srcT=performance.now(); F.pending=false; fmusPlay(); } else { F.dead=true; F.want=false; try{ F.el.pause(); }catch(e){} return; } }
-  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=(z==='town'||z==='port')&&!fight; }
+  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=z!=='vault'&&z!=='crypt'&&z!=='raid'&&!fight; }
   F.want=want; const target=want?fmusLevel():0;
   if(want&&(!F.el||F.el.paused)&&!F.blocked) fmusPlay();
   if(!F.el) return; F.vol+=clamp(target-F.vol,want?-.05:-.12,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
@@ -5290,7 +5290,7 @@ function fitLogin(){ const w=document.querySelector('.lg-wrap'); if(!w) return; 
 addEventListener('resize',()=>setTimeout(fitLogin,50)); setTimeout(fitLogin,60); setTimeout(fitLogin,600); setTimeout(fitLogin,2000);
 new MutationObserver(()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitLogin,40); }).observe(document.getElementById('login')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
-  let tr=z==='town'||z==='port'?'tavern':z==='vault'||z==='crypt'||z==='raid'?'eerie':'quiet'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
+  let tr=z==='vault'||z==='crypt'||z==='raid'?'eerie':'tavern'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
   if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';
   if(tr===AUD.track&&AUD.want!==tr){ AUD.want=tr; AUD.mbus.gain.setTargetAtTime(1,t,.4); }
   if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.inn=null; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
@@ -6188,7 +6188,7 @@ function villSeg(v,t){ const [ax,az,bx,bz]=v.seg, Lr=Math.hypot(bx-ax,bz-az), P=
     VILL.push({seg:segs[i],spd:.8+R()*.5,ph:R()*500,pause:2+R()*5,L,skin:Math.floor(R()*5)}); } }
 /* v63 balance: Barbarian and Hunter were out-damaging every other class. Both deal about 12% less, the Hunter's wolf 15% less. */
 { const nerf=(cls,k)=>{ const A=CLS[cls].auto; A.dmg*=k; A.dmgL*=k; for(const a of ABIL[cls]||[]){ if(a.dmg) a.dmg=a.dmg.map(v=>Math.round(v*k*10)/10); if(a.aoeDmg) a.aoeDmg=a.aoeDmg.map(v=>Math.round(v*k*10)/10); } };
-  nerf('barbarian',.88); nerf('hunter',.88); }
+  nerf('barbarian',.88); nerf('hunter',.88); for(const k of ['warden','mender','arcanist','assassin','bard']) if(CLS[k]) nerf(k,.88); }
 /* the professions window says live whether you are standing at an anvil */
 setInterval(()=>{ try{ const a=document.getElementById('pfAnv'); if(!a||!me) return; const ok=stationOk({prof:'blacksmithing'}); const t=ok?'⚒ You are at an anvil: smithing is ready.':'⚒ Stand at an anvil to smith: Doran\'s forge in Hearthmere, Garrick\'s forge in Brinehaven or Jarl Hakon\'s camp in Frostwatch.'; if(a.textContent!==t){ a.textContent=t; a.className='pfanv '+(ok?'ok':'no'); } }catch(e){} },500);
 /* boats rock gently on the water; gulls circle and glide over the harbour */

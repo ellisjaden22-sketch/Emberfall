@@ -1,9 +1,9 @@
 {
- "version": "v0.67",
- "title": "Stars, jumping mounts and quiet roads",
+ "version": "v0.68",
+ "title": "Music on the road, and a fairer fight",
  "date": "17 Nov 2026",
- "text": "Upgrades show as gold stars, mounts can jump, monsters well below your level leave you alone, and music stays in town.\n\n⬆️ Ordinary monsters 3 or more levels below you no longer attack on sight. They still fight back if you attack them, and elites and bosses still attack whoever comes close\n✨ Mounts can jump (Space) and leap over fences and small rocks. Mountain walls and the edge of the world still stop you\n⬆️ Upgraded gear shows a gold star for every upgrade rank (up to seven), on its icon, beside its name and in its tooltip\n🔧 Music no longer follows you out of town. Towns have their music, the open world has wind, water and birds, and battle music still plays in every fight. Dungeons keep their own eerie score\n🔧 Garrick's forge in Brinehaven is named correctly, and the forge tells you the new star rank after each upgrade",
+ "text": "The music now travels with you, and every class has had its damage brought in line.\n\n⬆️ The music no longer cuts off when you leave town. It keeps playing as you travel, gives way to battle music in a fight, and picks up again where it paused once the fight is over. Dungeons keep their own eerie music\n• Bulwark, Mender, Arcanist, Assassin and Bard: auto attacks and every ability deal about 12% less damage, the same cut the Barbarian and Hunter received in v0.63. Healing is unchanged",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-17T12:38:32Z"
+ "time": "2026-11-17T13:10:05Z"
 }
