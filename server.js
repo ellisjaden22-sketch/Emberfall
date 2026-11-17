@@ -4,7 +4,9 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION = 'v0.57';
+const SERVER_VERSION = 'v0.70';
+// The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
+const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
 // never let one bad message or a library hiccup take the whole realm down on test night
 process.on('uncaughtException', e => { try { console.error(new Date().toISOString().slice(11, 19), '! uncaught', e && e.stack || e); } catch (_) {} });
@@ -152,7 +154,7 @@ function sendFile(res, file, extra) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
-  if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); return json(res, 200, { server: SERVER_VERSION, music, musicFound: music.length > 0, online: [...clients.values()].filter(c => c.p && c.p.v).length, connections: clients.size, uptimeMin: Math.round((Date.now() - STARTED) / 60000), memoryMB: Math.round(process.memoryUsage().rss / 1048576), slowClients: [...clients.values()].filter(c => c.slow).length, raidOpen }); }
+  if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); return json(res, 200, { server: SERVER_VERSION, launcher: LAUNCHER_VERSION, music, musicFound: music.length > 0, online: [...clients.values()].filter(c => c.p && c.p.v).length, connections: clients.size, uptimeMin: Math.round((Date.now() - STARTED) / 60000), memoryMB: Math.round(process.memoryUsage().rss / 1048576), slowClients: [...clients.values()].filter(c => c.slow).length, raidOpen }); }
   if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
   if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);
     const all = armoryList(); const exact = all.filter(a => a.name.toLowerCase() === q); const part = all.filter(a => a.name.toLowerCase() !== q && a.name.toLowerCase().includes(q));

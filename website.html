@@ -198,6 +198,26 @@ window.SITE = {
 /* Emberfall website data. NEWS = patch notes (add new entries at the top). TIERS = support packs. GD and ACH are generated from the game. */
 window.NEWS=[
 {
+"v": "v0.70",
+"date": "18 Nov 2026",
+"title": "The Emberfall desktop app",
+"sum": "Emberfall installs like a real PC game.",
+"items": [
+[
+"new",
+"Windows: the downloaded Emberfall.exe now installs itself the first time you run it, with no administrator password: an Emberfall Online shortcut on your desktop and in the Start menu, and an entry in Settings > Apps so you can uninstall it like any other program"
+],
+[
+"new",
+"Linux: the app adds itself to your applications menu, with its icon, the first time it runs"
+],
+[
+"new",
+"The app checks for a newer version of itself each time it starts and tells you if there is one. The game inside it always updates automatically, as before"
+]
+]
+},
+{
 "v": "v0.69",
 "date": "17 Nov 2026",
 "title": "Class balance",
@@ -2686,7 +2706,7 @@ function download(){
   app.innerHTML=`<section><div class="wrap">${secTitle('Download Emberfall','Play in your browser instantly, or install the game app for its own window and taskbar icon.')}
    <div class="grid g5">
      <div class="panel dl"><div class="os">🌐</div><h3>Browser</h3><p>Nothing to install. Works on PC, Mac, phones and tablets.</p><a class="btn gold" href="/play/">▶ Play now</a></div>
-     <div class="panel dl"><div class="os">🪟</div><h3>Windows</h3><p>Windows 10 or 11.<br>Unzip and run Emberfall.exe</p><a class="btn" href="/downloads/Emberfall-Windows.zip" download>⬇ Download</a></div>
+     <div class="panel dl"><div class="os">🪟</div><h3>Windows</h3><p>Windows 10 or 11.<br>Unzip and run Emberfall.exe: it installs itself with a desktop and Start-menu shortcut</p><a class="btn" href="/downloads/Emberfall-Windows.zip" download>⬇ Download</a></div>
      <div class="panel dl"><div class="os">🍎</div><h3>Mac</h3><p>macOS 11 or newer, Apple Silicon and Intel.</p><a class="btn" href="/downloads/Emberfall-Mac.zip" download>⬇ Download</a></div>
      <div class="panel dl"><div class="os">🐧</div><h3>Linux</h3><p>64-bit, with Chrome or Chromium installed.</p><a class="btn" href="/downloads/Emberfall-Linux.zip" download>⬇ Download</a></div>
      <div class="panel dl"><div class="os">📱</div><h3>iPad, iPhone &amp; Android</h3><p>Install it from the browser, no app store needed.</p><a class="btn gold" href="/play/">Open the game</a></div></div>

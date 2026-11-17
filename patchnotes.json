@@ -1,9 +1,9 @@
 {
- "version": "v0.69",
- "title": "Class balance",
- "date": "17 Nov 2026",
- "text": "Targeted changes for the two classes that cleared monsters fastest.\n\n• Barbarian: auto attacks and every ability deal a further 12% less damage. In testing it cleared monsters almost twice as fast as any other class\n• Barbarian: Savagery now adds 12% critical damage per rank (was 20%)\n• Assassin: Ambush deals 20% less damage and Eviscerate 10% less\n• Assassin: Opportunist now adds 10% damage from stealth per rank (was 20%), Lethality 7% critical damage per rank (was 10%), and Death Mark 20% Eviscerate damage (was 35%, still refunds a combo point)",
+ "version": "v0.70",
+ "title": "The Emberfall desktop app",
+ "date": "18 Nov 2026",
+ "text": "Emberfall installs like a real PC game.\n\n✨ Windows: the downloaded Emberfall.exe now installs itself the first time you run it, with no administrator password: an Emberfall Online shortcut on your desktop and in the Start menu, and an entry in Settings > Apps so you can uninstall it like any other program\n✨ Linux: the app adds itself to your applications menu, with its icon, the first time it runs\n✨ The app checks for a newer version of itself each time it starts and tells you if there is one. The game inside it always updates automatically, as before",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-17T15:47:48Z"
+ "time": "2026-11-17T23:39:43Z"
 }
