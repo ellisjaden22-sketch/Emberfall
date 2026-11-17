@@ -141,7 +141,7 @@ body.bardui #castbar{bottom:calc(150px*var(--uis,1))!important}
 .pbar{height:9px;background:#1a120a;border:1px solid #4a3418;border-radius:5px;overflow:hidden;margin-top:4px}.pbar i{display:block;height:100%;background:linear-gradient(90deg,#3a8adf,#8fd0ff)}
 .pfr{flex:1;overflow:auto;min-width:0;padding-right:4px}
 .prc{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(120,90,50,.3)}.prc .nm{flex:1;min-width:0}.prc .nm b{font-size:14px}.prc .nm span{font-size:12px;display:block}
-.prc button{padding:4px 9px;font-size:12px}.prc.no{opacity:.55}
+.prc button{padding:4px 9px;font-size:12px}.prc button.dim{opacity:.6}.pfanv{font-size:13px;padding:5px 8px;margin:0 0 6px;border-radius:5px}.pfanv.ok{background:rgba(80,140,60,.25);color:#b8f0a0}.pfanv.no{background:rgba(160,60,40,.25);color:#ffb8a0}.prc.no{opacity:.55}
 .pc-orange{color:#ff9a3a}.pc-yellow{color:#ffe14a}.pc-green{color:#5fe06a}.pc-grey{color:#9a9a9a}.pc-red{color:#ff5a4a}
 .ptool{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.ptool input{background:#120c08;color:#f3e6c8;border:1px solid #6a4a2a;border-radius:4px;padding:4px 6px;flex:1;min-width:90px}
 .ptier{font-family:Cinzel,serif;color:#e8c46a;margin:10px 0 2px;font-size:13px;letter-spacing:1px}

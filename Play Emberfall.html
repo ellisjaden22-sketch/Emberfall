@@ -151,7 +151,7 @@ body.bardui #castbar{bottom:calc(150px*var(--uis,1))!important}
 .pbar{height:9px;background:#1a120a;border:1px solid #4a3418;border-radius:5px;overflow:hidden;margin-top:4px}.pbar i{display:block;height:100%;background:linear-gradient(90deg,#3a8adf,#8fd0ff)}
 .pfr{flex:1;overflow:auto;min-width:0;padding-right:4px}
 .prc{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(120,90,50,.3)}.prc .nm{flex:1;min-width:0}.prc .nm b{font-size:14px}.prc .nm span{font-size:12px;display:block}
-.prc button{padding:4px 9px;font-size:12px}.prc.no{opacity:.55}
+.prc button{padding:4px 9px;font-size:12px}.prc button.dim{opacity:.6}.pfanv{font-size:13px;padding:5px 8px;margin:0 0 6px;border-radius:5px}.pfanv.ok{background:rgba(80,140,60,.25);color:#b8f0a0}.pfanv.no{background:rgba(160,60,40,.25);color:#ffb8a0}.prc.no{opacity:.55}
 .pc-orange{color:#ff9a3a}.pc-yellow{color:#ffe14a}.pc-green{color:#5fe06a}.pc-grey{color:#9a9a9a}.pc-red{color:#ff5a4a}
 .ptool{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.ptool input{background:#120c08;color:#f3e6c8;border:1px solid #6a4a2a;border-radius:4px;padding:4px 6px;flex:1;min-width:90px}
 .ptier{font-family:Cinzel,serif;color:#e8c46a;margin:10px 0 2px;font-size:13px;letter-spacing:1px}
@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.61</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.63</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -534,7 +534,7 @@ body.touch canvas{touch-action:none}
   <div id="deathWin" class="win panel hidden"><h2>You have fallen</h2><p style="color:var(--dim)">Your spirit drifts back toward Hearthmere.</p><button id="releaseBtn">Release Spirit</button></div>
 </div>
 <div id="tip" class="panel hidden"></div>
-<div id="escMenu" class="panel hidden"><h2>Game Menu</h2><button data-e="resume" class="gold">Resume</button><button data-e="options">Options</button><button data-e="help">How to play</button><button data-e="bug">Report a bug</button><button data-e="hearth">🏠 Hearth to Hearthmere</button><button data-e="stuck">I'm stuck</button><button data-e="meter">📊 Damage meter</button><button data-e="repick">Character select</button><button data-e="quit" class="danger">Quit game</button><div class="escver" id="escVer">Emberfall Online · Beta</div></div>
+<div id="escMenu" class="panel hidden"><h2>Game Menu</h2><button data-e="resume" class="gold">Resume</button><button data-e="options">Options</button><button data-e="help">How to play</button><button data-e="bug">Report a bug</button><button data-e="hearth">🏠 Hearth home</button><button data-e="stuck">I'm stuck</button><button data-e="meter">📊 Damage meter</button><button data-e="repick">Character select</button><button data-e="quit" class="danger">Quit game</button><div class="escver" id="escVer">Emberfall Online · Beta</div></div>
 <div id="optWin" class="win panel hidden"><button class="close" data-close="optWin">×</button><h2>Options</h2><div class="obodywrap"></div></div>
 <div id="bugWin" class="win panel hidden"><button class="close" data-close="bugWin">×</button><h2>Report a bug or problem</h2><p style="color:var(--dim);font-size:13px">What happened, and what did you expect? Your report becomes a ticket for the Game Masters, and you get a reply in game when it is handled. Your position, level and game version are added automatically.</p><div class="bugcat">Type: <select id="bugCat"><option>Bug</option><option value="Stuck">Stuck somewhere</option><option value="Player">Player problem</option><option value="Item">Item or gold</option><option>Quest</option><option>Other</option></select></div><textarea id="bugTxt" maxlength="1500" rows="6"></textarea><div class="btns" style="display:flex;justify-content:flex-end;margin-top:8px"><button id="bugSend" class="gold">Send ticket</button></div></div><div id="ahWin" class="win panel hidden"><button class="close" data-close="ahWin">×</button><h2>⚖ Auction House</h2><div class="ahbody"></div></div><div id="trWin" class="win panel hidden"><button class="close" id="trX">×</button><h2>🤝 Trade</h2><div class="trbody"></div></div><div id="tkWin" class="win panel hidden"><button class="close" data-close="tkWin">×</button><h2>🎫 Tickets</h2><div class="tkbody"></div></div><div id="ctxMenu" class="panel hidden"></div><div id="confirmPop" class="panel hidden"></div>
 
@@ -562,8 +562,8 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 61;
-const TS = 32, MW = 336, OWH = 222, MH = OWH+98;
+const VERSION = 63;
+const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
 function WP(x,y){ const dx=x-TL.x, dy=y-TL.y, d=Math.hypot(dx,dy); if(d<=TL.r) return [TC.x+dx,TC.y+dy]; const f=(TL.r+(d-TL.r)*WS)/d; return [TC.x+dx*f,TC.y+dy*f]; }
@@ -605,6 +605,8 @@ const ZONES={
   ruins:{name:'Ruins of Vael',sub:'Level 5–7'},
   ash:{name:'Cinder Caldera',sub:'Level 7–10'},
   reach:{name:'The Scorched Reach',sub:'Level 15–19'},
+  coast:{name:'Stormwake Coast',sub:'Level 12–15'},
+  port:{name:'Brinehaven',sub:'Sanctuary · Harbour town'},
   lake:{name:'Mirrowmere',sub:'Tranquil waters'},
   vault:{name:'The Sunken Vault',sub:'Dungeon · Level 10'},
   raid:{name:'Cinderhold',sub:'Raid · Level 20 · 5–8 heroes'},
@@ -614,6 +616,7 @@ function zoneOf(tx,ty){
   if(ty>=OWH&&tx>=RX0) return 'raid';
   if(ty>=AR.y0-3) return 'arena';
   if(ty>=OWH) return 'vault';
+  if(tx>=EX0) return zoneOfE(tx,ty);
   if(Math.hypot(tx-TOWN.x,ty-TOWN.y)<TOWN.r) return 'town';
   const L=WI(tx,ty); return zoneOfL(L[0],L[1]); }
 function zoneOfL(tx,ty){
@@ -637,6 +640,70 @@ const VAULT={OX:8,OY:OWH+3,range:60,gate:{x:(99.5+(VGO[0]|0))*TS,y:(48.75+(VGO[1
 /* ---------- v57: Cinderhold raid, columns RX0..MW of the underground rows ---------- */
 const RX0=158;
 const REACH={x0:150,y1:58,cx:160,cy:47};
+/* ---------- v63: the Stormwake Coast, columns EX0..MW east of Frostpeak, and the harbour town of Brinehaven ---------- */
+const EX0=336; T.PROP=16;
+const PORT={x0:384,x1:414,y0:104,y1:138,cx:399,cy:121,B:[],piers:[],gates:[]};
+const COAST={passY:150,pass:[326,342],shrine:{x:404,y:30,r:9,h:1.1},cove:{x:410,y:197,r:8,h:.42},light:{x:424,y:88,r:4,h:1.25}};
+function coastX0(ty){ return 421+(fbm(ty*.03,1.7,91)-.5)*30+(fbm(ty*.11,4.2,97)-.5)*9+(vnoise(ty*.3,3.1,92)-.5)*2.5+Math.max(0,1-Math.abs(ty-88)/8)*11; }
+/* the shore line: a calm harbour straight off the town quay, blending out to the open coast */
+function coastX(ty){ const a=PORT.y0-1, b=PORT.y1+1; if(ty>=a&&ty<=b) return PORT.x1+.5; const d=ty<a?a-ty:ty-b, k=clamp(d/11,0,1), sm=k*k*(3-2*k); return lerp(PORT.x1+.5,coastX0(ty),sm); }
+const inPort=(px,py)=>{ const X=px/TS, Y=py/TS; return X>=PORT.x0-1&&X<=PORT.x1+14&&Y>=PORT.y0-1&&Y<=PORT.y1+1; };
+function zoneOfE(tx,ty){ return tx>=PORT.x0&&tx<=PORT.x1&&ty>=PORT.y0&&ty<=PORT.y1?'port':'coast'; }
+function coastTile(x,y,h,n){ const cx=coastX(y); if(x>cx) return T.WATER; if(x>cx-3.1-(fbm(x*.3,y*.3,93)>.58?1.6:0)) return T.SAND;
+  const f=fbm(x*.085,y*.085,94), north=y<80, moor=x<378;
+  if(f>(north?.52:moor?.64:.6)&&h<(north?.5:.3)) return T.TREE; if(h>.991) return T.ROCK; return T.GRASS; }
+function coastH(tx,ty,n,n2){ const d=coastX(ty)-tx; let h=d<0?-1.5:.22+clamp(d/38,0,1)*1.9+(n*1.5+n2*.4)*clamp(d/7,0,1);
+  const dx=Math.max(PORT.x0-tx,0,tx-PORT.x1), dy=Math.max(PORT.y0-ty,0,ty-PORT.y1), dr=Math.hypot(dx,dy); if(dr<12&&d>=0) h=lerp(.55,h,clamp((dr-2)/10,0,1));
+  for(const k of ['shrine','cove','light']){ const s=COAST[k], ds=Math.hypot(tx-s.x,ty-s.y); if(ds<s.r+5&&d>=0) h=lerp(s.h,h,clamp((ds-s.r)/5,0,1)); }
+  return h; }
+function carveCoast(){ const P=PORT, C=COAST;
+  /* the sites take their places along whatever shape the coast has */
+  C.shrine.x=Math.min(404,Math.round(coastX0(30))-13); C.cove.x=Math.round(coastX0(C.cove.y))-7; C.light.x=Math.round(coastX0(C.light.y))-4;
+  const road=(pts,w,seed)=>{ for(let i=0;i<pts.length-1;i++){ const [x0,y0]=pts[i],[x1,y1]=pts[i+1], L=Math.hypot(x1-x0,y1-y0)||1, nx=-(y1-y0)/L, ny=(x1-x0)/L;
+      for(let k=0;k<=L*3;k++){ const f=k/(L*3), wob=Math.sin(f*Math.PI)*(fbm(f*3+i*1.7,seed,95)-.5)*Math.min(7,L*.22), cx=x0+(x1-x0)*f+nx*wob, cy=y0+(y1-y0)*f+ny*wob;
+        for(let oy=-w;oy<=w;oy++)for(let ox=-w;ox<=w;ox++){ const tx=Math.round(cx+ox), ty=Math.round(cy+oy); if(tx<3||ty<3||tx>=MW-3||ty>=OWH-3) continue; const cur=tAt(tx,ty);
+          if(cur===T.COBBLE||cur===T.TWALL||cur===T.HOUSE||cur===T.BRIDGE||cur===T.FOUNT||cur===T.PROP||cur===T.RUIN) continue; setT(tx,ty,cur===T.WATER||cur===T.LAVA?T.BRIDGE:T.PATH); } } } };
+  /* Stormwake Pass: a notch through the eastern wall of Frostpeak */
+  for(let y=C.passY-3;y<=C.passY+3;y++)for(let x=C.pass[0];x<=C.pass[1];x++){ if(Math.abs(y-C.passY)===3&&hash2(x,y,96)<.5) continue; setT(x,y,x<EX0?T.SNOW:T.GRASS); }
+  /* Brinehaven: walls on the landward sides, the harbour on the east */
+  for(let y=P.y0;y<=P.y1;y++)for(let x=P.x0;x<=P.x1;x++) setT(x,y,T.COBBLE);
+  P.gates=[{x:P.x0,y:P.cy,hx:0,hy:1,side:'w'},{x:P.cx,y:P.y0,hx:1,hy:0,side:'n'},{x:P.cx,y:P.y1,hx:1,hy:0,side:'s'}];
+  const gate=(x,y)=>P.gates.some(g=>Math.abs(x-g.x)<=g.hx&&Math.abs(y-g.y)<=g.hy);
+  for(let x=P.x0;x<=P.x1;x++) for(const y of [P.y0,P.y1]) if(!gate(x,y)) setT(x,y,T.TWALL);
+  for(let y=P.y0;y<=P.y1;y++) if(!gate(P.x0,y)) setT(P.x0,y,T.TWALL);
+  P.B=[{k:'hall',x:386,y:106,w:8,h:6,door:'s',st:2},{k:'house',x:395,y:106,w:3,h:4,door:'s',st:2},{k:'house',x:386,y:114,w:4,h:4,door:'e'},{k:'house',x:391,y:114,w:3,h:3,door:'s'},
+    {k:'inn',x:401,y:106,w:7,h:5,door:'s',st:2},{k:'warehouse',x:409,y:106,w:4,h:6,door:'s'},{k:'house',x:402,y:113,w:3,h:3,door:'s'},{k:'office',x:408,y:114,w:5,h:4,door:'w',st:2},
+    {k:'temple',x:386,y:130,w:7,h:7,door:'n'},{k:'house',x:386,y:124,w:4,h:4,door:'n',st:2},{k:'house',x:391,y:124,w:3,h:3,door:'n'},{k:'house',x:395,y:129,w:3,h:4,door:'e'},{k:'house',x:394,y:134,w:4,h:3,door:'n'},
+    {k:'smithy',x:403,y:126,w:5,h:4,door:'s'},{k:'house',x:401,y:133,w:4,h:4,door:'n',st:2},{k:'house',x:409,y:133,w:4,h:4,door:'n'}];
+  /* the fishing hamlet outside the south wall, on the strand */
+  P.B.push({k:'hut',x:403,y:141,w:3,h:3,door:'e'},{k:'hut',x:408,y:142,w:3,h:2,door:'w'},{k:'hut',x:403,y:146,w:4,h:3,door:'e'},{k:'hut',x:407,y:150,w:3,h:3,door:'n'});
+  { const y=145, x0=Math.ceil(coastX(y))-2; P.jetty={x0,x1:x0+6,y}; }
+  for(const b of P.B) for(let y=b.y;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++) setT(x,y,T.HOUSE);
+  for(let x=P.jetty.x0;x<=P.jetty.x1;x++) setT(x,P.jetty.y,T.BRIDGE);
+  for(let y=P.cy-1;y<=P.cy+1;y++)for(let x=P.cx-1;x<=P.cx+1;x++) setT(x,y,T.FOUNT);
+  setT(396,117,T.PROP);                                                         /* the well */
+  setT(395,114,T.TREE); 
+  /* piers: a long main pier with a T head, and two side jetties */
+  P.piers=[{y0:110,y1:110,len:9},{y0:P.cy-1,y1:P.cy,len:13,head:true},{y0:132,y1:132,len:8}];
+  for(const p of P.piers){ for(let y=p.y0;y<=p.y1;y++) for(let x=P.x1+1;x<=P.x1+p.len;x++) setT(x,y,T.BRIDGE); if(p.head) for(let y=p.y0-3;y<=p.y1+3;y++) for(const x of [P.x1+p.len-1,P.x1+p.len]) setT(x,y,T.BRIDGE); }
+  /* the lighthouse on its headland, with the keeper's cottage */
+  { const L=C.light; for(let y=L.y-4;y<=L.y+4;y++)for(let x=L.x-6;x<=L.x+3;x++){ const t=tAt(x,y); if(t!==T.WATER&&Math.hypot(x-L.x+1,y-L.y)<5.5) setT(x,y,T.GRASS); }
+    for(let y=L.y;y<=L.y+1;y++)for(let x=L.x;x<=L.x+1;x++) setT(x,y,T.PROP); for(let y=L.y+2;y<=L.y+3;y++)for(let x=L.x-5;x<=L.x-3;x++) setT(x,y,T.PROP); }
+  /* the Drowned Shrine: a sunken temple of the old sea-god on the northern cliffs */
+  { const S=C.shrine; for(let y=S.y-8;y<=S.y+8;y++)for(let x=S.x-11;x<=S.x+11;x++){ const e=((x-S.x)/10.5)**2+((y-S.y)/7.5)**2; if(e<=1&&tAt(x,y)!==T.WATER) setT(x,y,T.RUIN); }
+    for(let k=0;k<22;k++){ const a=k/22*6.283; if(k%5===2||(a>1.2&&a<1.95)) continue; const x=Math.round(S.x+Math.cos(a)*9.6), y=Math.round(S.y+Math.sin(a)*6.8); if(tAt(x,y)===T.RUIN) setT(x,y,T.WALL); }
+    for(const [dx,dy] of [[-4,-3],[4,-3],[-4,3],[4,3]]) setT(S.x+dx,S.y+dy,T.WALL); }
+  /* Wreckers' Cove: a beached ship and the camp of the men who lured it onto the rocks */
+  { const W=C.cove; for(let y=W.y-6;y<=W.y+6;y++)for(let x=W.x-9;x<=W.x+6;x++){ if(((x-W.x)/8.5)**2+((y-W.y)/6)**2>1) continue; const t=tAt(x,y); if(t!==T.WATER) setT(x,y,T.SAND); }
+    for(let y=W.y-3;y<=W.y+2;y++) for(let x=W.x+3;x<=W.x+4;x++) if(tAt(x,y)!==T.WATER) setT(x,y,T.PROP); }
+  /* roads */
+  road([[297,163],[312,157],[326,151],[342,C.passY],[357,146],[371,131],[P.x0-1,P.cy]],1,31);
+  road([[P.cx,P.y0-1],[P.cx,95],[402,70],[C.shrine.x,C.shrine.y+8]],1,32);
+  road([[P.cx,96],[C.light.x-7,C.light.y+2]],0,33);
+  road([[P.cx,P.y1+1],[P.cx-1,150],[392,170],[C.cove.x-8,C.cove.y-2]],1,34);
+  road([[357,146],[362,170],[368,192]],0,35);
+}
+
 const RAID={gate:{x:170.5*TS,y:23.2*TS},range:140,start:{x:(RX0+8.5)*TS,y:(OWH+13.5)*TS},exit:{x:170.5*TS,y:26.4*TS},doors:[],boss:{},emptySince:0,hint:false};
 const inRaid=(px,py)=>py>=OWH*TS&&px>=RX0*TS;
 function carveRaid(){ const O=(x,y,t)=>setT(RX0+x,OWH+y,t);
@@ -693,7 +760,7 @@ function carveArena(){ const {x0,y0,w,h,cx,cy}=AR;
     for(let i=0;i<len;i++) setT(x+(vert?0:i),y+(vert?i:0),T.DWALL);
   for(const [x,y] of [[40,AR.cy-6],[40,AR.cy+5],[119,AR.cy-6],[119,AR.cy+5],[56,AR.cy],[103,AR.cy-1]]) { setT(x,y,T.COLUMN); setT(x+1,y,T.COLUMN); }
 }
-function edgeOf(tx,ty){ if(ty>=OWH) return Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); const L=WI(tx,ty); return Math.min(tx,ty,MW-1-tx,OWH-1-ty,Math.max(0,Math.min(L[0],L[1],159-L[0],111-L[1]))*WS); }
+function edgeOf(tx,ty){ if(ty>=OWH) return Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); if(tx>=EX0) return Math.min(ty,OWH-1-ty,tx-EX0+.5); const L=WI(tx,ty); return Math.min(tx,ty,EX0-1-tx,OWH-1-ty,Math.max(0,Math.min(L[0],L[1],159-L[0],111-L[1]))*WS); }
 function ridgeL(tx,ty){ const L=WI(tx,ty); return L[0]>=109.5&&L[0]<=114.5&&!(L[1]>=56&&L[1]<=62); }
 const inVault=(px,py)=>py>=OWH*TS&&py<(AR.y0-3)*TS&&px<RX0*TS;
 const inArena=(px,py)=>py>=(AR.y0-3)*TS&&px<RX0*TS, arenaSafe=(px,py)=>AR.shr.some(([sx,sy])=>Math.hypot(px/TS-sx,py/TS-sy)<5.2), pvpOn=(px,py)=>inArena(px,py)&&!arenaSafe(px,py);
@@ -727,6 +794,8 @@ function genWorld(){
       case 'lake': { const d=Math.hypot(lx-90,ly-93)*WS+(fbm(x*.2,y*.2,11)-.5)*6; t=d<8.5*WS?T.WATER:d<10*WS?T.SAND:T.GRASS; break; }
       case 'frost': { t=T.SNOW; const d=Math.hypot(lx-142,ly-84)*WS+(fbm(x*.2,y*.2,12)-.5)*5; if(d<8*WS) t=T.ICE; else if(h<.13&&n>.42) t=T.TREE; else if(h>.985) t=T.ROCK; break; }
       case 'crypt': t=T.RUIN; break;
+      case 'coast': t=coastTile(x,y,h,n); break;
+      case 'port': t=T.COBBLE; break;
       case 'vault': case 'raid': t=T.VOID; break;
       case 'arena': t=T.VOID; break;
     }
@@ -783,7 +852,7 @@ function genWorld(){
     const inGate=a=>TOWN.gates.some(g=>Math.abs(Math.atan2(Math.sin(a-g.c),Math.cos(a-g.c)))<half);
     for(let y=TOWN.y-29;y<=TOWN.y+29;y++)for(let x=TOWN.x-29;x<=TOWN.x+29;x++){ const d=Math.hypot(x-TOWN.x,y-TOWN.y); if(d<R-.75||d>=R+.8) continue;
       if(Math.abs(y-TOWN.y)<=1&&inGate(Math.atan2(y-TOWN.y,x-TOWN.x))) continue; setT(x,y,T.TWALL); } }
-  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate(); carveReach();
+  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate(); carveReach(); carveCoast();
 }
 /* the kinds of props the World Editor can place (solid ones block movement) */
 const PROPK={tree:{solid:1},pine:{solid:1},deadtree:{solid:1},rock:{solid:1},boulder:{solid:1},house:{solid:1},tent:{solid:1},well:{solid:1},statue:{solid:1},pillar:{solid:1},wall:{solid:1},tower:{solid:1},
@@ -807,7 +876,7 @@ const zoneAtPx=(x,y)=>zmap[clamp(Math.floor(y/TS),0,MH-1)*MW+clamp(Math.floor(x/
 /* v58: the Scorched Reach is the eastern caldera; terrain stays 'ash', gameplay (names, spawns, levels) calls it 'reach' */
 function inReachT(tx,ty){ return tx>=REACH.x0&&ty<=REACH.y1&&ty>=0&&tx<MW&&zmap[ty*MW+tx]==='ash'; }
 function gZone(x,y){ const z=zoneAtPx(x,y); return z==='ash'&&inReachT(Math.floor(x/TS),Math.floor(y/TS))?'reach':z; }
-const inTown=(x,y)=>Math.hypot(x/TS-TOWN.x,y/TS-TOWN.y)<TOWN.r+1;
+const inTown=(x,y)=>Math.hypot(x/TS-TOWN.x,y/TS-TOWN.y)<TOWN.r+1||inPort(x,y);
 
 /* =====================================================================
    DATA
@@ -956,7 +1025,7 @@ const QUESTS=[
   {id:'obsidian',giver:'vok',title:'Obsidian for the Forge',type:'gather',mat:'obsidian',n:5,xp:900,gold:14,lvl:7,text:'Obsidian forms where lava cools. Mine the purple shards in the Caldera.'},
 ];
 const MATS={
-  sunpetal:{name:'Sunpetal',icon:'🌼',col:'#ffd34a',kind:'herb',zones:['meadow','lake']},
+  sunpetal:{name:'Sunpetal',icon:'🌼',col:'#ffd34a',kind:'herb',zones:['meadow','lake','coast']},
   thornbloom:{name:'Thornbloom',icon:'🌺',col:'#ff4a8a',kind:'herb',zones:['forest']},
   mireroot:{name:'Mireroot',icon:'🌿',col:'#8cff4a',kind:'herb',zones:['swamp']},
   ghostcap:{name:'Ghostcap',icon:'🍄',col:'#b9a0ff',kind:'herb',zones:['ruins']},
@@ -966,7 +1035,7 @@ const MATS={
   obsidian:{name:'Obsidian',icon:'💎',col:'#9a5aff',kind:'ore',zones:['ash']},
 };
 const NODES=[]; (function(){ const R=mulberry32(777); let id=1; for(const k in MATS){ const M=MATS[k]; let n=0,tries=0;
-  while(n<22&&tries<14000){ tries++; const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-8)); if(!M.zones.includes(zmap[ty*MW+tx])) continue;
+  while(n<(M.zones.includes('coast')?32:22)&&tries<14000){ tries++; const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-8)); if(!M.zones.includes(zmap[ty*MW+tx])) continue;
     const t=tAt(tx,ty); if(SOLID.has(t)||t===T.WATER||t===T.LAVA||t===T.PATH||t===T.BRIDGE) continue; if(inTown(tx*TS,ty*TS)||Math.hypot(tx-LAIR.x,ty-LAIR.y)<9) continue;
     if(NODES.some(o=>Math.hypot(o.tx-tx,o.ty-ty)<4)) continue; NODES.push({id:id++,mat:k,tx,ty,x:tx*TS+16,y:ty*TS+16,resp:0}); n++; } } })();
 const RECIPES=[
@@ -1184,9 +1253,9 @@ NPCGREET.varro='"Blood on the sand, glory in the stands! In my arena every hero 
 NPCGREET.hakon='"Welcome to the frontier, southerner. Up here the cold kills more than the monsters do. Almost."';
 for(let i=0;i<4;i++) NPCGREET['guard'+i]=['"Keep your blade sheathed inside the walls, traveller."','"Wolves have been bold this season. Stay on the roads."','"Hearthmere\'s gates close to no one in need."','"Report anything strange to Captain Oriel."'][i];
 MATS.frostbloom={name:'Frostbloom',icon:'❄️',col:'#8fe8ff',kind:'herb',zones:['frost']};
-MATS.mithril={name:'Mithril Ore',icon:'🔷',col:'#7ab8ff',kind:'ore',zones:['frost']};
+MATS.mithril={name:'Mithril Ore',icon:'🔷',col:'#7ab8ff',kind:'ore',zones:['frost','coast']};
 (function(){ const R=mulberry32(888); let id=NODES.length+1; for(const k of ['frostbloom','mithril']){ const M=MATS[k]; let n=0,tries=0;
-  while(n<22&&tries<14000){ tries++; const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-8)); if(!M.zones.includes(zmap[ty*MW+tx])) continue; const t=tAt(tx,ty);
+  while(n<(M.zones.includes('coast')?32:22)&&tries<14000){ tries++; const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-8)); if(!M.zones.includes(zmap[ty*MW+tx])) continue; const t=tAt(tx,ty);
     if(SOLID.has(t)||t===T.WATER||t===T.PATH||t===T.ICE) continue; if(NODES.some(o=>Math.hypot(o.tx-tx,o.ty-ty)<4)) continue; NODES.push({id:id++,mat:k,tx,ty,x:tx*TS+16,y:ty*TS+16,resp:0}); n++; } } })();
 RECIPES.push({id:'swift',name:'Frostbloom Tonic',desc:'+20% movement speed for 10 minutes.',need:{frostbloom:2,sunpetal:1},buff:'swift'});
 BUFFNAME.swift=['Swiftness','💨'];
@@ -1271,6 +1340,20 @@ MOUNTS[6]={name:'Ashborn Nightmare',col:[.07,.06,.06],mane:[1,.42,.06],cost:0,sp
 function posW(mt){ const [x,y]=mt.pos; if(y>=112) return [x,y+OWH-112]; const k=mt.key; if(k==='lich'||/^lich|crypt/.test(k)||(x>=130&&x<=150&&y>=8&&y<=24)) return [x+CRO[0],y+CRO[1]]; if(k==='hking') return [x+RUO[0],y+RUO[1]]; if(x===56&&y===9) return [LAIR.x,LAIR.y]; return WP(x,y); }
 /* mob spawn table: deterministic so every client agrees on ids */
 const mobs=[], mobById={};
+/* v63: the monsters of the Stormwake Coast */
+{ const C='coast', away=(tx,ty)=>!(tx>=PORT.x0-9&&tx<=PORT.x1+3&&ty>=PORT.y0-9&&ty<=PORT.y1+18)&&Math.hypot(tx-COAST.light.x,ty-COAST.light.y)>8&&Math.abs(ty-COAST.passY)+Math.max(0,tx-350)>8&&Math.hypot(tx-COAST.cove.x,ty-COAST.cove.y)>9&&Math.hypot(tx-COAST.shrine.x,ty-COAST.shrine.y)>6;
+  const shore=(tx,ty)=>coastX(ty)-tx<9, moor=(tx,ty)=>tx<382&&ty>60&&ty<205, south=(tx,ty)=>ty>158&&tx>376, north=(tx,ty)=>ty<78&&tx>378;
+  MOBT.push(
+  {zone:C,key:'shellback',name:'Shellback Crab',lv:[12,13],hp:360,hpL:24,dmg:18,dmgL:1.8,spd:66,rng:36,as:2.1,aggro:130,r:16,col:'#a8462a',n:7,cb:(x,y)=>away(x,y)&&shore(x,y)&&y>84},
+  {zone:C,key:'brinehound',name:'Moorland Brinehound',lv:[12,13],hp:300,hpL:22,dmg:19,dmgL:1.8,spd:102,rng:36,as:1.6,aggro:160,r:14,col:'#5a666e',n:7,cb:(x,y)=>away(x,y)&&moor(x,y)},
+  {zone:C,key:'cutthroat',name:'Wrecker Cutthroat',lv:[13,14],hp:440,hpL:26,dmg:21,dmgL:2,spd:80,rng:40,as:1.8,aggro:160,r:14,col:'#7a2a1e',n:6,cb:(x,y)=>away(x,y)&&south(x,y),sp:{k:'leap',cd:12,r:70,delay:1.0,mul:1.15}},
+  {zone:C,key:'slinger',name:'Wrecker Slinger',lv:[13,14],hp:340,hpL:24,dmg:20,dmgL:2,spd:70,rng:220,as:2.3,aggro:190,r:13,col:'#6a5a3a',n:5,ranged:true,proj:'#d8c8a0',cb:(x,y)=>away(x,y)&&south(x,y)},
+  {zone:C,key:'deepcaller',name:'Drowned Deepcaller',lv:[14,15],hp:400,hpL:26,dmg:22,dmgL:2.1,spd:64,rng:230,as:2.4,aggro:200,r:14,col:'#1a6a72',n:5,ranged:true,proj:'#6fffe0',light:'#4affd8',sp:{k:'root',cd:12,rng:230},cb:(x,y)=>away(x,y)&&north(x,y)},
+  {zone:C,key:'brineshade',name:'Brine Shade',lv:[14,15],hp:460,hpL:28,dmg:23,dmgL:2.1,spd:84,rng:40,as:1.9,aggro:170,r:14,col:'#4ad8c8',n:5,fly:true,light:'#4affd8',sp:{k:'drain',cd:9},cb:(x,y)=>away(x,y)&&north(x,y)},
+  {zone:C,key:'blackwake',name:'Captain Blackwake',lv:[15,15],hp:5200,hpL:0,dmg:38,dmgL:0,spd:78,rng:52,as:2.0,aggro:200,r:20,col:'#2a2228',n:1,elite:true,resp:150,spots:[[COAST.cove.x-2,COAST.cove.y]],sp:{k:'slam',cd:8,r:130,delay:1.5,mul:1.45}},
+  {zone:C,key:'thalassor',name:'Thalassor, the Tidewyrm',lv:[15,15],hp:11000,hpL:0,dmg:42,dmgL:0,spd:80,rng:66,as:2.3,aggro:230,r:34,col:'#1a8a8a',n:1,boss:true,resp:240,spots:[[COAST.shrine.x,COAST.shrine.y-1]],light:'#4affd8',sp:{k:'slam',cd:7,r:160,delay:1.5,mul:1.5},xp:3200});
+}
+
 (function genSpawns(){
   const R=mulberry32(1337); let id=1;
   for(let ti=0;ti<MOBT.length;ti++){const mt=MOBT[ti];
@@ -1283,6 +1366,7 @@ const mobs=[], mobById={};
         const tx=Math.floor(x/TS),ty=Math.floor(y/TS);
         var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>8 && Math.hypot(tx-170,ty-24)>13 && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
         if(ok&&mt.zone==='ash') ok = (mt.reg==='reach')===inReachT(tx,ty) && Math.hypot(tx-REACH.cx,ty-REACH.cy)>16 && Math.hypot(tx-192,ty-11)>10 && Math.hypot(tx-212,ty-47)>8 && (!mt.rx||(tx>=mt.rx[0]&&tx<=mt.rx[1]));
+        if(ok&&mt.zone==='coast'&&mt.cb) ok=mt.cb(tx,ty);
         if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
         if(ok){ const gap=tries<1500?112:tries<3000?96:70; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
@@ -1771,7 +1855,7 @@ function takeDamage(amt,mob,vis){ try{ if(me&&amt>me.mhp*.08) shake(Math.min(6,a
 function healMe(amt,from){ if(me.dead) return; const before=me.hp; me.hp=Math.min(me.mhp,me.hp+amt); const h=Math.round(me.hp-before);
   if(h>0) fct(me.x,me.y-30,'+'+h,'#6dff7a'); sparkle(me.x,me.y,'#9dffb0'); }
 function die(){ try{ snd('die'); }catch(e){} if(me&&me.pvpBy&&now()-me.pvpBy.t<10&&inArena(me.x,me.y)){ const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.d++; P.st=0; pushAct(14,me.pvpBy.u,0,0); sysMsg(`⚔ ${me.pvpBy.n} defeated you. Release to return to a shrine.`,'c-err'); } if(me) me.pvpBy=null; if(me){ me.song=0; me.banner=null; me.encoreU=0; } stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
-function release(){ me.dead=false; if(inArena(me.x,me.y)){ const [sx,sy]=AR.shr[Math.random()*2|0]; me.x=(sx+(Math.random()-.5)*2)*TS; me.y=(sy+(Math.random()-.5)*2)*TS; me.hp=me.mhp; } else if(inRaid(me.x,me.y)){ const q=raidCheckpoint(); me.x=q[0]; me.y=q[1]; } else if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { me.x=SPAWN.x; me.y=SPAWN.y; } me.rootU=0; me.hp=inArena(me.x,me.y)?me.mhp:Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
+function release(){ me.dead=false; if(inArena(me.x,me.y)){ const [sx,sy]=AR.shr[Math.random()*2|0]; me.x=(sx+(Math.random()-.5)*2)*TS; me.y=(sy+(Math.random()-.5)*2)*TS; me.hp=me.mhp; } else if(inRaid(me.x,me.y)){ const q=raidCheckpoint(); me.x=q[0]; me.y=q[1]; } else if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { const g=restPoint(me.x,me.y); me.x=g.x; me.y=g.y; } me.rootU=0; me.hp=inArena(me.x,me.y)?me.mhp:Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
 function gainXp(n){
   const c=me.c; if(c.lvl>=MAXLVL){ return; }
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
@@ -2010,7 +2094,7 @@ function updatePet(dt,t){ if(!me||me.c.cls!=='hunter'){ me&&(me.pet=null,me.petO
   const d=Math.hypot(tx-p.x,ty-p.y); if(dist(p.x,p.y,me.x,me.y)>900){ p.x=me.x; p.y=me.y; }
   const sp=(me.mounted?330:me.moving||tgtM?220:150)*dt; p.mv=d>6; if(d>4){ const k=Math.min(1,sp/d), nx=p.x+(tx-p.x)*k, ny=p.y+(ty-p.y)*k; if(!blocked(nx,ny,8)||blocked(p.x,p.y,8)){ p.x=nx; p.y=ny; } else { p.x=nx; p.y=ny; } p.face=Math.atan2(ty-p.y,tx-p.x); }
   if(tgtM){ if(d<14) p.face=Math.atan2(tgtM.ry-p.y,tgtM.rx-p.x); p.atkT-=dt; if(d<18&&p.atkT<=0&&!tgtM.dead){ p.atkT=1.6; p.swingT=t;
-      const lg=me.c.eq.weapon&&me.c.eq.weapon.leg==='hunter'?1.3:1, mk=me.markU>t&&me.markId===tgtM.id?1.15:1; const dm=Math.round((5+2.1*(me.c.lvl-1)+me.pow*.35)*(1+TAL('pet'))*lg*mk*(.9+Math.random()*.2));
+      const lg=me.c.eq.weapon&&me.c.eq.weapon.leg==='hunter'?1.3:1, mk=me.markU>t&&me.markId===tgtM.id?1.15:1; const dm=Math.round((5+2.1*(me.c.lvl-1)+me.pow*.35)*.85*(1+TAL('pet'))*lg*mk*(.9+Math.random()*.2));
       pushAct(0,tgtM.id,dm,0); fct(tgtM.rx,tgtM.ry-26,dm,'#d8e0ff'); tgtM.hit=t; meterAdd(tgtM,'Wolf companion',dm,false); } } }
 function updateLeap(t){ const L=me.leap, k=Math.min(1,(t-L.t0)/L.dur); me.x=lerp(L.sx,L.ex,k); me.y=lerp(L.sy,L.ey,k); me.jumpH=Math.sin(k*Math.PI)*1.1; if(k>=1){ me.leap=null; me.jumpH=0; footDust(me.x,me.y); } }
 function drawPetAt(x,y,face,mv,swingT,st,dt){ if(Math.hypot(x/TS-CAM.tx,y/TS-CAM.tz)>70) return; const X=x/TS, Z=y/TS; animState(st,dt,x,y,mv,1); const sw=(now()-(swingT||-9))/.4;
@@ -2099,7 +2183,8 @@ const GLSL_NOISE=`
 float h21(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y); }
 float fbm2(vec2 p){ return vn(p)*.5+vn(p*2.03)*.25+vn(p*4.1)*.125+vn(p*8.3)*.0625; }
-vec3 tone(vec3 c){ c*=1.32; return clamp((c*(2.51*c+.03))/(c*(2.43*c+.59)+.14),0.,1.); }
+vec3 acesF(vec3 c){ return (c*(2.51*c+.03))/(c*(2.43*c+.59)+.14); }
+vec3 tone(vec3 c){ c=max(c*1.32,vec3(0.)); vec3 a=acesF(c); float m=max(c.r,max(c.g,c.b)); vec3 h=c*(acesF(vec3(m)).x/max(m,1e-4)); return clamp(mix(a,h,.6),0.,1.); }
 `;
 const VS_LIT=`#version 300 es
 precision highp float;
@@ -2140,12 +2225,12 @@ uniform vec3 uSunDir; uniform vec3 uSunCol; uniform vec3 uSky; uniform vec3 uGnd
 uniform float uFogD; uniform float uTime; uniform float uShOn; uniform float uHFog;
 uniform int uNL; uniform vec4 uLP[16]; uniform vec3 uLC[16];
 uniform int uND; uniform vec4 uDec[12]; uniform vec4 uDecC[12];
-uniform highp sampler2D uShadow;
+uniform highp sampler2DShadow uShadow;
 out vec4 o;
 ${GLSL_NOISE}
 const vec2 PD[12]=vec2[12](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));
 float shadowF(){ vec3 p=vS.xyz/vS.w*.5+.5; if(p.x<0.||p.x>1.||p.y<0.||p.y>1.||p.z>1.) return 1.;
-  vec2 ts=1./vec2(textureSize(uShadow,0)); float bias=.0011+.0012*(1.-abs(dot(normalize(vN),uSunDir))); float s=0.; for(int i=0;i<12;i++){ s+= (p.z-bias > texture(uShadow,p.xy+PD[i]*ts*1.9).r) ? 0. : 1.; } return smoothstep(0.,1.,s/12.); }
+  vec2 ts=1./vec2(textureSize(uShadow,0)); float bias=.0011+.0012*(1.-abs(dot(normalize(vN),uSunDir))); float s=0.; float ra=6.2831*fract(52.9829*fract(dot(gl_FragCoord.xy,vec2(.06711,.00584)))); mat2 RT=mat2(cos(ra),sin(ra),-sin(ra),cos(ra)); for(int i=0;i<12;i++){ s+=texture(uShadow,vec3(p.xy+RT*PD[i]*ts*2.1,p.z-bias)); } return smoothstep(0.,1.,s/12.); }
 void main(){
   if(uFade.w>.5){ vec3 A=uFade.xyz, ab=uCam-A; float tt=clamp(dot(vW-A,ab)/max(dot(ab,ab),.001),0.,1.); float dd=length(vW-(A+ab*tt));
     float k=(1.-smoothstep(.9,2.3,dd))*smoothstep(.03,.16,tt)*smoothstep(-1.4,-.2,vW.y-A.y);
@@ -2462,7 +2547,7 @@ function cellType(wx,wy){
 (function buildHeights(){
   const TT=new Float32Array(MW*MH);
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const i=ty*MW+tx, t=map[i], z=zmap[i]; const n=fbm(tx*.08,ty*.08,301), n2=fbm(tx*.22,ty*.22,302);
-    let h; switch(z){ case 'town':h=.55;break; case 'meadow':h=.4+n*2.6;break; case 'forest':h=.6+n*3.2+n2*.7;break; case 'swamp':h=.2+n*.35;break; case 'ruins':h=.7+n*1.7;break; case 'lake':h=.35+n*.9;break; case 'frost':h=1.2+n*3.8+n2*.9;break; case 'crypt':h=2.2;break; case 'vault': case 'raid':h=t===T.VOID?6.5:.3;break; case 'arena':h=t===T.VOID?7.5:t===T.DWALL?.3:.3+n*.18;break; case 'ash':h=3.1+n*1.5+n2*.6;break; default:h=.5; }
+    let h; switch(z){ case 'town':h=.55;break; case 'meadow':h=.4+n*2.6;break; case 'forest':h=.6+n*3.2+n2*.7;break; case 'swamp':h=.2+n*.35;break; case 'ruins':h=.7+n*1.7;break; case 'lake':h=.35+n*.9;break; case 'frost':h=1.2+n*3.8+n2*.9;break; case 'crypt':h=2.2;break; case 'vault': case 'raid':h=t===T.VOID?6.5:.3;break; case 'arena':h=t===T.VOID?7.5:t===T.DWALL?.3:.3+n*.18;break; case 'ash':h=3.1+n*1.5+n2*.6;break; case 'coast':h=coastH(tx,ty,n,n2);break; case 'port':h=.55;break; default:h=.5; }
     const edge=edgeOf(tx,ty);
     if(t===T.ICE) h=.22; else if(t===T.WATER) h=-1.5; else if(t===T.LAVA) h=z==='raid'?-1.1:1.4; else if(t===T.BRIDGE) h=z==='ash'?3.0:.4;
     else if(t===T.ROCK && (edge<3||ridgeL(tx,ty))) h+=4.5+hash2(tx,ty,9)*4+(edge<2?3.5:0)+(edge<1?3:0);
@@ -2504,7 +2589,7 @@ function drawTerrain(){ gl.bindVertexArray(TERRAIN.vao); const VD=(GFX.q==='low'
 const HTEX=(function(){ const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex); const data=new Float32Array(HN*HNZ*2); for(let k=0;k<HN*HNZ;k++){ data[k*2]=HG[k]; data[k*2+1]=HLM[k]; }
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RG16F,HN,HNZ,0,gl.RG,gl.FLOAT,data); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); return tex; })();
-const PLANE=(function(){ const d=G0(); const S=MW+40; for(const [x,z] of [[-20,-20],[S,-20],[S,S],[-20,S]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
+const PLANE=(function(){ const d=G0(); const S=MW+170; for(const [x,z] of [[-20,-20],[S,-20],[S,S],[-20,S]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
 const RLPLANE=(function(){ const d=G0(); for(const [x,z] of [[RX0,OWH],[MW,OWH],[MW,MH],[RX0,MH]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
 const LPLANE=(function(){ const d=G0(); for(const [x,z] of [[0,0],[MW,0],[MW,OWH],[0,OWH]]) gPush(d,x,0,z,0,1,0); d.i.push(0,1,2,0,2,3); return mkVAO(d); })();
 
@@ -2630,7 +2715,7 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     for(let k=0;k<7;k++){ const a=k/7*Math.PI*2; gAdd(d,RBL,x+Math.cos(a)*.55,y0+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); }
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
-  addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
+  addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); addPort(d); addCoastSites(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
   const V=mkVAO(d); V.chunks=[...SCH.values()].filter(c=>c.d.i.length).map(c=>{ const v=mkVAO(c.d); v.cx=c.cx; v.cz=c.cz; return v; }); SCH.clear(); STATIC_D=null; return V; })();
 if(EDITOR_MODE){ window.__EF={MW,MH,OWH,TS,T:{...T},map:Array.from(map.subarray(0,MW*OWH)),zmap:zmap.slice(0,MW*OWH),zones:Object.fromEntries(Object.entries(ZONES).map(([k,v])=>[k,v.name])),
     npcs:NPCS.filter(n=>n.y<OWH*TS).map(n=>({id:n.id,name:n.name,title:n.title,x:Math.floor(n.x/TS),y:Math.floor(n.y/TS)})),pois:POIS.filter(p=>p.y<OWH).map(p=>({name:p.name,x:p.x,y:p.y,r:p.r})),
@@ -2657,7 +2742,7 @@ function hMin(x,z,r){ return Math.min(hgt(x,z),hgt(x+r,z),hgt(x-r,z),hgt(x,z+r),
 const INST=(function(){ const R=mulberry32(9090); const trees=[[],[],[]], rocks=[], grass=[], flowers=[];
   const push=(arr,x,y,z,ry,sx,sy,sz,sw,c)=>arr.push(x,y,z,ry,sx,sy,sz,sw,c[0],c[1],c[2]);
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){ const t=map[ty*MW+tx], z=zmap[ty*MW+tx];
-    if(t===T.TREE){ const wd=wallDist(tx,ty); if(wd<1.9){ map[ty*MW+tx]=z==='frost'?T.SNOW:groundT(T.TREE,tx,ty); R(); R(); R(); continue; } const jx=wd<3.5?0:(R()-.5)*.5, jz=wd<3.5?0:(R()-.5)*.5; const x=tx+.5+jx, zz=ty+.5+jz, y=hMin(x,zz,.35)-.05; const pine=(z==='forest'&&R()<.55);
+    if(t===T.TREE){ const wd=wallDist(tx,ty); if(wd<1.9){ map[ty*MW+tx]=z==='frost'?T.SNOW:groundT(T.TREE,tx,ty); R(); R(); R(); continue; } const jx=wd<3.5?0:(R()-.5)*.5, jz=wd<3.5?0:(R()-.5)*.5; const x=tx+.5+jx, zz=ty+.5+jz, y=hMin(x,zz,.35)-.05; const pine=(z==='forest'&&R()<.55)||(z==='coast'&&R()<.8);
       const s=Math.min(.75+R()*.55,wd<9?(wd-.9)/2.1:9); const tint=pine?[.85+R()*.25,.9+R()*.2,.85+R()*.15]:z==='swamp'?[.7,.85,.8]:z==='forest'?[.8+R()*.2,.85+R()*.2,.8]:[.85+R()*.25,.95+R()*.15,.85]; push(trees[z==='frost'?2:pine?1:0],x,y,zz,R()*6.28,s,s*(.9+R()*.3),s,.004,tint); }
     else if(t===T.ROCK){ const edge=edgeOf(tx,ty), ridge=ridgeL(tx,ty); if((edge<3||ridge)&&R()>.28) continue; const wd=wallDist(tx,ty); if(wd<1.5&&!(edge<3||ridge)){ map[ty*MW+tx]=z==='frost'?T.SNOW:groundT(T.ROCK,tx,ty); continue; } const x=tx+.5, zz=ty+.5, y=hMin(x,zz,.45);
       const s=Math.min((edge<3||ridge)?2+R()*2.2:.9+R()*.7,(edge<3||ridge)?9:Math.max(.6,(wd-.5)*.9)); const c=z==='frost'?[.92,.97,1.1]:z==='ash'?[.42,.36,.34]:[.95+R()*.1,.95,.9]; push(rocks,x,y-.15,zz,R()*6.28,s*1.15,s*(.7+R()*.4),s,0,c); } }
@@ -2672,7 +2757,7 @@ const INST=(function(){ const R=mulberry32(9090); const trees=[[],[],[]], rocks=
 /* ---------- shadow map ---------- */
 const SM_SIZE=GFX.sm; const SM=(function(){ const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT24,SM_SIZE,SM_SIZE,0,gl.DEPTH_COMPONENT,gl.UNSIGNED_INT,null);
-  for(const [k,v] of [[gl.TEXTURE_MIN_FILTER,gl.NEAREST],[gl.TEXTURE_MAG_FILTER,gl.NEAREST],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D,k,v);
+  for(const [k,v] of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE],[gl.TEXTURE_COMPARE_MODE,gl.COMPARE_REF_TO_TEXTURE],[gl.TEXTURE_COMPARE_FUNC,gl.LEQUAL]]) gl.texParameteri(gl.TEXTURE_2D,k,v);
   const fb=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,fb); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,tex,0); gl.drawBuffers([gl.NONE]); gl.readBuffer(gl.NONE);
   gl.bindFramebuffer(gl.FRAMEBUFFER,null); return {tex,fb}; })();
 /* particles buffer */
@@ -3132,14 +3217,14 @@ function drawMob3_(m,dead){
       const op=.15+(swing>=0?Math.sin(swing*Math.PI)*.5:0)+Math.sin(t*3)*.03; for(const sd of [-1,1]){ mpush(); mtr(.28,-.1,sd*.12); mry(sd*op); mrz(-1.9); P(GEO.cone,.08,.26,.08,[.75,.7,.55],e); mpop(); }
       mpop(); mpop(); addLight(X,gy+2,Z,9,[.5,1,.6]); if(!dead&&Math.random()<.15) P3(X+(Math.random()-.5)*2,gy+1.2,Z+(Math.random()-.5)*2,0,-1.5,0,.7,.07,'#5a5038',{});
       break; }
-    case 'lurker': case 'crawler': case 'siltling': case 'murkcrab': case 'grimmaw': { const LP=LPAL[mt.key]||LPAL.lurker; mreset(); mtr(X,gy,Z); mry(-smoothFace(m,m.face||0)); msc(sc*LP[4]); if(swing>=0&&!dead) mrz(swing<.55?Math.sin(Math.PI*swing/.55)*.34:-Math.sin(Math.PI*(swing-.55)/.45)*.2); if(dead) mtr(0,-Math.min(.6,dd*.6),0); const e=hit?.9:0;
+    case 'lurker': case 'crawler': case 'siltling': case 'murkcrab': case 'grimmaw': case 'shellback': { const LP=LPAL[mt.key]||LPAL.lurker; mreset(); mtr(X,gy,Z); mry(-smoothFace(m,m.face||0)); msc(sc*LP[4]); if(swing>=0&&!dead) mrz(swing<.55?Math.sin(Math.PI*swing/.55)*.34:-Math.sin(Math.PI*(swing-.55)/.45)*.2); if(dead) mtr(0,-Math.min(.6,dd*.6),0); const e=hit?.9:0;
       mtr(0,Math.abs(Math.sin(ph*1.5))*.08*mv+Math.sin(t*1.5+m.id)*.03,0); mrx(Math.sin(ph*1.5)*.05*mv); const BL=Math.sin(t*.7+m.id*3)>.97?.15:1;
       for(let k=0;k<6;k++){ mpush(); const a=k/6*Math.PI*2; mtr(Math.cos(a)*.45,.3,Math.sin(a)*.45); mry(-a); for(let s=0;s<3;s++){ mrz(-.6+Math.sin(t*3+k+s)*.35+Math.sin(ph*1.5+k*1.05+s*.4)*.32*mv); P(GEO.limb,.14-s*.03,.35,.14-s*.03,LP[0],e); mtr(0,-.33,0); } mpop(); }
       P(GEO.sph,1.25,.75,1.2,LP[1],e,0,.5,0); P(GEO.sph,1.0,.45,.95,LP[2],e,0,.65,0);
       if(mt.key==='siltmother'){ for(let k=0;k<7;k++){ const a=(k/6-.5)*2.4; mpush(); mtr(-.15+Math.cos(a)*.1,.92,Math.sin(a)*.42); mrx(-Math.sin(a)*.6); mrz(.35); P(GEO.cone,.14,.5,.14,LP[0],e); mpop(); } P(GEO.sph,.78,.62,.78,[.7,.78,.5],.5+Math.sin(t*2)*.2,-.62,.55,0); for(let k=0;k<5;k++) P(GEO.sph,.16,.16,.16,[.85,.95,.6],.9,-.62+Math.cos(k*1.3)*.3,.62+Math.sin(k*2.1)*.16,Math.sin(k*1.3)*.3); addLight(X,gy+2,Z,9,[.5,1,.6]); }
       for(const [ox,oz] of [[.45,-.2],[.5,0],[.45,.2]]){ P(GEO.sph,.14,.14*BL,.14,LP[3],1.5,ox,.75,oz); P(GEO.sph,.06,.06,.06,[0,0,0],0,ox+.06,.76,oz); }
       P(GEO.box,.12,.06+(swing>=0?Math.sin(swing*Math.PI)*.22:0),.5,[.1,.05,.05],0,.58,.55,0); if(swing>=0) P(GEO.box,.1,.04,.44,[.6,.15,.12],.3,.6,.5,0); break; }
-    case 'wraith': case 'icewraith': case 'tidewraith': case 'drownedshade': { const ice=mt.key==='icewraith', tide=mt.key==='tidewraith'||mt.key==='drownedshade'; const c1=tide?[.3,.8,.74]:ice?[.6,.82,1]:[.42,.32,.7], c2=tide?[.22,.62,.58]:ice?[.5,.72,.95]:[.35,.25,.6], c3=tide?[.08,.3,.3]:ice?[.25,.4,.6]:[.2,.12,.35];
+    case 'wraith': case 'icewraith': case 'tidewraith': case 'drownedshade': case 'brineshade': { const ice=mt.key==='icewraith', tide=mt.key==='tidewraith'||mt.key==='drownedshade'||mt.key==='brineshade'; const c1=tide?[.3,.8,.74]:ice?[.6,.82,1]:[.42,.32,.7], c2=tide?[.22,.62,.58]:ice?[.5,.72,.95]:[.35,.25,.6], c3=tide?[.08,.3,.3]:ice?[.25,.4,.6]:[.2,.12,.35];
       mreset(); mtr(X,gy+.5+Math.sin(t*2+m.id)*.15,Z); mry(-(m.rf??m.face??0)); msc(sc*(ice?1.15:mt.key==='drownedshade'?1.25:1)); const al=dead?Math.max(0,.75-dd):.75;
       mrz(-.25*mv+Math.sin(t*1.3+m.id)*.04-(swing>=0?Math.sin(Math.PI*swing)*.35:0)); mrx(Math.sin(t*.9+m.id)*.05);
       for(let k=0;k<7;k++){ const a=k/7*6.283; mpush(); mtr(Math.cos(a)*.28,.3,Math.sin(a)*.28); mry(-a); mrz(.25+mv*.5+Math.sin(t*3+k*1.3)*.18); P(GEO.cone,.12,.55+(k%2)*.2,.05,k%2?c2:c3,.4,0,-.5,0,al*.8); mpop(); }
@@ -3157,7 +3242,7 @@ function drawMob3_(m,dead){
       addLight(X,y,Z,6,[1.4,.6,.15]); if(Math.random()<.5) burst3(X,y+.3,Z,'#ffb03a',1,.4,{glow:true,up:1.5}); break; }
     case 'obsidianshard': drawShard(m,X,gy,Z,dd,hit,sc,dead); break;
     case 'pyraxis': drawPhoenix(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
-    case 'wyrm': case 'vyrathos': drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc); break;
+    case 'wyrm': case 'vyrathos': case 'thalassor': { const n0=cmds.length, t0=tcmds.length, l0=L3.length; drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc); if(mt.key==='thalassor'){ const f=c=>Array.isArray(c)?[c[2]*.95,(c[0]+c[1])*.55,c[0]*.85]:c; for(let i=n0;i<cmds.length;i++) cmds[i].c=f(cmds[i].c); for(let i=t0;i<tcmds.length;i++) tcmds[i].c=f(tcmds[i].c); for(let i=l0;i<L3.length;i++) L3[i].c=f(L3[i].c); } } break;
   }
 }
 function drawPhoenix(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const md=MATD; MATD=2; try{ return drawPhoenix0(m,X,gy,Z,mv,ph,swing,dd,hit,sc); } finally{ MATD=md; } }
@@ -3192,7 +3277,7 @@ function drawPhoenix0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const t=now(), e=hit?1:0,
   else if(dd>=0&&dd<2.5&&Math.random()<.8) P3(X+(Math.random()-.5)*2,gy+fly+.5,Z+(Math.random()-.5)*2,0,.8,0,2,.5,'#4a3a34',{big:true,drag:.97}); }
 function drawWyrm(m,X,gy,Z,mv,ph,swing,dd,hit,sc){ const md=MATD; MATD=2; try{ return drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc); } finally{ MATD=md; } }
 function drawWyrm0(m,X,gy,Z,mv,ph,swing,dd,hit,sc){
-  const t=now(), e=hit?.9:0, VY=m.t.key==='vyrathos', PX=m.t.key==='pyraxis', col=PX?(m.enr?[.95,.5,.1]:[.85,.42,.12]):VY?(m.enr?[.5,.1,.05]:[.32,.1,.08]):m.enr?[.85,.22,.1]:[.75,.3,.12], dark=VY?[.12,.05,.04]:[.3,.1,.05], belly=VY?[1,.42,.08]:[1,.6,.2], WYL=m.air?3.8+Math.sin(t*2)*.35:0, WYS=VY?1.35:PX?.9:1.05;
+  const t=now(), e=hit?.9:0, VY=m.t.key==='vyrathos', PX=m.t.key==='pyraxis', col=PX?(m.enr?[.95,.5,.1]:[.85,.42,.12]):VY?(m.enr?[.5,.1,.05]:[.32,.1,.08]):m.enr?[.85,.22,.1]:[.75,.3,.12], dark=VY?[.12,.05,.04]:[.3,.1,.05], belly=VY?[1,.42,.08]:[1,.6,.2], WYL=m.air?3.8+Math.sin(t*2)*.35:0, WYS=VY?1.35:PX?.9:m.t.key==='thalassor'?1.12:1.05;
   const WB=1+Math.sin(t*1.4)*.025, trk=dd>=0?0:lookYaw(m);
   mreset(); mtr(X,gy+WYL,Z); mry(-(m.rf??m.face??0)); msc(sc*WYS); if(dd>=0){ mrx(Math.min(1,dd/.8)*1.3); mtr(0,-Math.min(1.2,dd*.5),0); }
   else { mtr(0,Math.abs(Math.sin(ph*.8))*.12*mv+Math.sin(t*1.4)*.03,0); mrx(Math.sin(ph*.8)*.04*mv); }
@@ -3445,7 +3530,7 @@ function updateCamera(dt){
   ey=Math.max(ey,hgt(ex,ez)+.45);
   const sh=shakeMag*.04; CAM.ex=ex+(Math.random()-.5)*sh; CAM.ey=ey+(Math.random()-.5)*sh; CAM.ez=ez+(Math.random()-.5)*sh;
 }
-function toScreen(X,Y,Z){ const v=VP; const x=v[0]*X+v[4]*Y+v[8]*Z+v[12], y=v[1]*X+v[5]*Y+v[9]*Z+v[13], w=v[3]*X+v[7]*Y+v[11]*Z+v[15]; if(w<.2) return null; return [(x/w*.5+.5)*W,(.5-y/w*.5)*H,w]; }
+function toScreen(X,Y,Z){ const v=VP; const x=v[0]*X+v[4]*Y+v[8]*Z+v[12], y=v[1]*X+v[5]*Y+v[9]*Z+v[13], w=v[3]*X+v[7]*Y+v[11]*Z+v[15]; if(!(w>=.2)) return null; const sx=(x/w*.5+.5)*W, sy=(.5-y/w*.5)*H; if(!isFinite(sx)||!isFinite(sy)) return null; return [sx,sy,w]; }
 function smoothY(st,y,dt){ if(st._ys==null||Math.abs(y-st._ys)>2.5||!(dt>0)) st._ys=y; else st._ys+=(y-st._ys)*(1-Math.exp(-dt*11)); return st._ys; }
 function animState(o,dt,x,y,moving,scale){ const ox=o._ax??x, oy=o._ay??y; const dm=Math.hypot(x-ox,y-oy); o._ax=x; o._ay=y; o.walkP=(o.walkP||0)+dm/TS*3.6/(scale||1)*((dm>.2&&o.rf!=null&&Math.cos(Math.atan2(y-oy,x-ox)-o.rf)<-.35)?-1:1);
   { const tg=(moving||dm>.3)?1:0; o.mvS=lerp(o.mvS||0,tg,Math.min(1,dt*(tg?9:7))); }
@@ -3476,7 +3561,7 @@ const VILL=(()=>{ const R=mulberry32(4242), out=[]; const cloth=[[.55,.3,.2],[.3
     const L={torso:c,arms:c.map(v=>v*.92),legs:fem?c:c2.map(v=>v*.7),boots:[.25,.17,.1],trim:c2,head:R()<.35?'hoodopen':'bald',hood:c2,robe:fem?c:null,pack:R()<.25};
     out.push({r:18.75+(R()-.5)*.3,a0:R()*6.283,span:(.5+R()*1.1)*(R()<.5?-1:1),spd:.9+R()*.5,ph:R()*500,pause:2+R()*4,L,skin:Math.floor(R()*5)}); }
   return out; })();
-function villPos(v,t){ const Lr=Math.abs(v.span)*v.r, P=v.pause, cyc=2*Lr/v.spd+2*P; let s=((t+v.ph)%cyc+cyc)%cyc, u, dir, mv=1;
+function villPos(v,t){ if(v.seg) return villSeg(v,t); const Lr=Math.abs(v.span)*v.r, P=v.pause, cyc=2*Lr/v.spd+2*P; let s=((t+v.ph)%cyc+cyc)%cyc, u, dir, mv=1;
   if(s<P){ u=0; dir=1; mv=0; } else if(s<P+Lr/v.spd){ u=(s-P)*v.spd/Lr; dir=1; } else if(s<2*P+Lr/v.spd){ u=1; dir=-1; mv=0; } else { u=1-(s-2*P-Lr/v.spd)*v.spd/Lr; dir=-1; }
   const a=v.a0+v.span*u; const x=TOWN.x+.5+Math.cos(a)*v.r, z=TOWN.y+.5+Math.sin(a)*v.r; const tang=a+Math.sign(v.span)*dir*Math.PI/2;
   return {x,z,face:mv?tang:tang+Math.PI*.5,mv,walk:u*Lr*3.4}; }
@@ -3752,7 +3837,7 @@ void main(){ vec3 c=fxaa(vUV); vec3 b=texture(uBloom,vUV).rgb; c+=b*uBK; c=c+b*b
   if(uSunS.z>.001){ vec2 dv=(uSunS.xy-vUV)/28.; vec2 uv=vUV; float dec=1.; vec3 sh=vec3(0.); for(int i=0;i<28;i++){ uv+=dv; vec3 bs=texture(uBloom,clamp(uv,0.,1.)).rgb; sh+=bs*dec; dec*=.93; } c+=sh/12.*uSunS.z*uSunT; }
   float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,uSat); c=(c-.5)*uCon+.5; c*=uTint; c+=vec3(.012,.008,.02)*(1.-l);
   float l2=dot(c,vec3(.299,.587,.114)); c=mix(c,c*vec3(1.035,1.0,.95),smoothstep(.45,.95,l2)*.6); c=mix(c,c*vec3(.95,.99,1.06),smoothstep(.35,.0,l2)*.6);
-  c=c/(1.+max(c-.92,0.)*1.6);
+  { float m=max(c.r,max(c.g,c.b)); if(m>.82){ float nm=.82+.18*(1.-exp(-(m-.82)/.18)); c*=nm/m; } c=max(c,vec3(0.)); }
   vec2 d=vUV-.5; c*=1.-dot(d,d)*.35; c+=(fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5)/255.; o=vec4(c,1.); }`;
 let PBR=null,PBL=null,PCO=null; const POST={ok:true,w:0,h:0};
 function mkTex(w,h){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
@@ -3775,15 +3860,15 @@ function fsTri(){ gl.bindVertexArray(SKYVAO); gl.drawArrays(gl.TRIANGLES,0,3); }
 function postProcess(){ const w=POST.w,h=POST.h; gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER,POST.ms); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,POST.rfb); gl.blitFramebuffer(0,0,w,h,0,0,w,h,gl.COLOR_BUFFER_BIT,gl.NEAREST);
   gl.bindFramebuffer(gl.FRAMEBUFFER,POST.afb); gl.viewport(0,0,POST.qw,POST.qh); gl.useProgram(PBR.p); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,POST.rt);
-  gl.uniform1i(PBR.u.uTex,0); gl.uniform2f(PBR.u.uPx,1/w,1/h); gl.uniform1f(PBR.u.uTh,.87); fsTri();
+  gl.uniform1i(PBR.u.uTex,0); gl.uniform2f(PBR.u.uPx,1/w,1/h); gl.uniform1f(PBR.u.uTh,.9); fsTri();
   gl.useProgram(PBL.p); gl.uniform1i(PBL.u.uTex,0);
   for(let k=0;k<2;k++){ gl.bindFramebuffer(gl.FRAMEBUFFER,POST.bfb); gl.bindTexture(gl.TEXTURE_2D,POST.at); gl.uniform2f(PBL.u.uDir,(1+k)/POST.qw,0); fsTri();
     gl.bindFramebuffer(gl.FRAMEBUFFER,POST.afb); gl.bindTexture(gl.TEXTURE_2D,POST.bt); gl.uniform2f(PBL.u.uDir,0,(1+k)/POST.qh); fsTri(); }
   gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,w,h); gl.useProgram(PCO.p);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,POST.rt); gl.uniform1i(PCO.u.uScene,0);
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,POST.at); gl.uniform1i(PCO.u.uBloom,1);
-  const z=me?zoneAtPx(me.x,me.y):'town'; const tint=z==='frost'?[.96,1,1.06]:z==='ash'?[1.06,.98,.92]:z==='vault'?[.92,1,1.04]:z==='raid'?[1.07,.97,.9]:z==='crypt'?[.94,.97,1.08]:z==='swamp'?[.97,1.02,.96]:[1.02,1,.97];
-  gl.uniform2f(PCO.u.uPx,1/w,1/h); gl.uniform1f(PCO.u.uSharp,RSCALE<.99?.35:.12); gl.uniform1f(PCO.u.uBK,.42+curDark*.45); gl.uniform1f(PCO.u.uSat,1.12); gl.uniform1f(PCO.u.uCon,1.06); gl.uniform3fv(PCO.u.uTint,tint); { let st=0, sx=.5, sy=.5; try{ const S=SKY.realSun; if(S&&S[1]>-.02&&(SKY.night||0)<.6){ const k=900, q=toScreen(CAM.ex+S[0]*k,CAM.ey+S[1]*k,CAM.ez+S[2]*k); if(q){ sx=q[0]/W; sy=1-q[1]/H; const off=Math.max(0,Math.max(Math.abs(sx-.5),Math.abs(sy-.5))-.5); st=.55*clamp(1-off*2.2,0,1)*clamp((S[1]+.02)*5,0,1)*(1-(SKY.night||0))*(1-(SKY.storm||0)*.8)*(GFX.q==='low'?0:1); } } }catch(e){} if(PCO.u.uSunS) gl.uniform3f(PCO.u.uSunS,sx,sy,st); if(PCO.u.uSunT) gl.uniform3fv(PCO.u.uSunT,SKY.sunCol||[1,.9,.7]); } fsTri();
+  const z=me?zoneAtPx(me.x,me.y):'town'; const tint=z==='coast'?[.98,1,1.03]:z==='port'?[1.02,1,.98]:z==='frost'?[.96,1,1.06]:z==='ash'?[1.06,.98,.92]:z==='vault'?[.92,1,1.04]:z==='raid'?[1.07,.97,.9]:z==='crypt'?[.94,.97,1.08]:z==='swamp'?[.97,1.02,.96]:[1.02,1,.97];
+  gl.uniform2f(PCO.u.uPx,1/w,1/h); gl.uniform1f(PCO.u.uSharp,RSCALE<.99?.35:.12); gl.uniform1f(PCO.u.uBK,.42+curDark*.45); gl.uniform1f(PCO.u.uSat,1.06); gl.uniform1f(PCO.u.uCon,1.05); gl.uniform3fv(PCO.u.uTint,tint); { let st=0, sx=.5, sy=.5; try{ const S=SKY.realSun; if(S&&S[1]>-.02&&(SKY.night||0)<.6){ const k=900, q=toScreen(CAM.ex+S[0]*k,CAM.ey+S[1]*k,CAM.ez+S[2]*k); if(q){ sx=q[0]/W; sy=1-q[1]/H; const off=Math.max(0,Math.max(Math.abs(sx-.5),Math.abs(sy-.5))-.5); st=.55*clamp(1-off*2.2,0,1)*clamp((S[1]+.02)*5,0,1)*(1-(SKY.night||0))*(1-(SKY.storm||0)*.8)*(GFX.q==='low'?0:1); } } }catch(e){} if(PCO.u.uSunS) gl.uniform3f(PCO.u.uSunS,sx,sy,st); if(PCO.u.uSunT) gl.uniform3fv(PCO.u.uSunT,SKY.sunCol||[1,.9,.7]); } fsTri();
   gl.activeTexture(gl.TEXTURE0); gl.enable(gl.DEPTH_TEST); }
 
 function render(dt){
@@ -4564,7 +4649,8 @@ function renderWho(){ const l=$('whoList'); const rows=[{n:me.c.name,c:me.c.cls,
 function renderQlog(){ const el=$('qlogList'); const qs=activeQuests(); if(!qs.length){ el.innerHTML='<p style="color:var(--dim)">No active quests.</p>'; return; }
   el.innerHTML=qs.map(q=>{ const s=me.c.qs[q.id]; return `<div class="qlog"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(q.title)}</b><span style="color:var(--dim);font-size:12px">${esc(npcName(q.giver))}</span></div>
     <div style="font-size:13px;color:#d9c9a6;margin:3px 0">${esc(q.text)}</div><div class="${s.st==='done'?'done':'obj'}" style="font-size:13px">${s.st==='done'?'✔ Return to '+esc(npcName(q.giver)):esc(objText(q,s))}</div>
-    <button class="abandon" data-q="${q.id}">Abandon</button></div>`; }).join('');
+    <button class="abandon" data-q="${q.id}">Abandon</button>${me.party&&!q.daily?`<button class="abandon qshare" data-s="${q.id}" style="margin-right:6px">Share</button>`:''}</div>`; }).join('');
+  el.querySelectorAll('.qshare').forEach(b=>b.onclick=()=>shareQuest(b.dataset.s));
   el.querySelectorAll('.abandon').forEach(b=>b.onclick=()=>{ abandonQuest(b.dataset.q); renderQlog(); }); }
 const DSEL={i:0};
 function dlgOpts(){ const d=$('dlg'); if(!d||d.classList.contains('hidden')) return []; return [...d.querySelectorAll('.qline,button:not(.close):not([disabled]),.shoprow button:not([disabled])')].filter((e,i,a)=>a.indexOf(e)===i&&e.offsetParent!==null); }
@@ -4597,13 +4683,13 @@ function questDlg(n,q){ const s=me.c.qs[q.id]; const rw=`${q.xp} xp · ${q.gold}
   if(!s) h+='<button id="qGo" class="gold">Accept quest</button>'; else if(s.st==='done') h+='<button id="qGo" class="gold">Complete quest</button>'; h+='</div>';
   dlg(h); $('qBack').onclick=()=>talk(n); if($('qGo')) $('qGo').onclick=()=>{ if(!s) acceptQuest(q); else completeQuest(q); talk(n); }; }
 function openShop(){ shopOpen=true; const c=me.c;
-  dlg(`<h2>${LASTTALK&&LASTTALK.id==='ilsa'?'Quartermaster Ilsa':'Mira the Peddler'}</h2><p>"Potions and trinkets. And I'll take any loot you don't want. Click items in your bags to sell them."</p>
+  dlg(`<h2>${esc(LASTTALK&&LASTTALK.id!=='mira'&&RSVC[LASTTALK.id]&&RSVC[LASTTALK.id].some(q=>q[0]==='shop')?LASTTALK.name:'Mira the Peddler')}</h2><p>"Potions and trinkets. And I'll take any loot you don't want. Click items in your bags to sell them."</p>
     <div class="shoprow"><span>🧪 Healing Draught <span style="color:var(--dim)">(you have ${c.pots})</span></span><button id="buyP">Buy · 2 gold</button></div>
     <div class="shoprow"><span>🧪×5 Bundle of Draughts</span><button id="buyP5">Buy · 9 gold</button></div>
     <div class="shoprow"><span>Sell all common (grey) items</span><button id="sellJ">Sell</button></div>
     <div style="margin-top:10px;color:var(--gold)">Your gold: ${c.gold}</div><div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   const buy=(n,cost)=>{ if(c.gold<cost) return err('Not enough gold'); c.gold-=cost; c.pots+=n; persist(); renderInv(); openShop(); };
-  $('buyP').onclick=()=>buy(1,2); $('buyP5').onclick=()=>buy(5,9); $('bk').onclick=()=>talk(NPCS.find(x=>x.id==='mira'));
+  $('buyP').onclick=()=>buy(1,2); $('buyP5').onclick=()=>buy(5,9); $('bk').onclick=()=>talk(LASTTALK&&RSVC[LASTTALK.id]&&RSVC[LASTTALK.id].some(q=>q[0]==='shop')?LASTTALK:NPCS.find(x=>x.id==='mira'));
   $('sellJ').onclick=()=>{ let g2=0; c.inv=c.inv.filter(it=>{ if(it.rar===0){g2+=it.val;return false} return true}); c.gold+=g2; if(g2) chatLine(`Sold common items for ${g2} gold.`,'c-loot'); persist(); renderInv(); openShop(); };
   toggleWin('invWin',true); shopOpen=true; renderInv(); }
 const needTxt=need=>Object.entries(need).map(([k,v])=>`<span style="color:${(me.c.mats[k]||0)>=v?'#9fd18b':'#ff8a7a'}">${MATS[k].icon} ${MATS[k].name} ${me.c.mats[k]||0}/${v}</span>`).join(' · ');
@@ -4620,10 +4706,10 @@ function openSmith(n){ const c=me.c;
   dlg(`<h2>Doran's Forge</h2><p>"Each upgrade adds 15% to an item's power and stamina. Up to +7 (mithril from Frostpeak for the last two)."</p>${SLOTS.map(s=>{ const it=c.eq[s]; if(!it) return `<div class="shoprow"><span style="color:var(--dim)">No ${s} equipped</span></div>`;
     const cost=upCost(it); const ok=cost&&c.gold>=cost.gold&&(c.mats[cost.mat]||0)>=cost.n;
     const P0=Math.round(it.pow*upMul(it)), S0=Math.round(it.sta*upMul(it)), P1=Math.round(it.pow*(upMul(it)+.15)), S1=Math.round(it.sta*(upMul(it)+.15)), pc=(a,b)=>a>0?Math.round((b-a)/a*100):0;
-    return `<div class="shoprow"><span><b class="t${it.rar}">${esc(it.name)}${it.up?' +'+it.up:''}</b><br><span style="font-size:13px">${cost?`${cost.gold} gold · ${needTxt({[cost.mat]:cost.n})}`:'Fully upgraded'}</span>${cost?`<br><span style="font-size:13px;color:#8f8">Power ${P0} → ${P1} (+${pc(P0,P1)}%) · Stamina ${S0} → ${S1} (+${pc(S0,S1)}%)</span>`:''}</span><button data-u="${s}" ${ok?'':'disabled'}>Upgrade</button></div>`; }).join('')}
+    return `<div class="shoprow"><span><b class="t${it.rar}">${esc(it.name)}${it.up?' +'+it.up:''}</b><br><span style="font-size:13px">${cost?`${cost.gold} gold · ${needTxt({[cost.mat]:cost.n})}`:'Fully upgraded'}</span>${cost?`<br><span style="font-size:13px;color:#8f8">Power ${P0} → ${P1} (+${pc(P0,P1)}%) · Stamina ${S0} → ${S1} (+${pc(S0,S1)}%)</span>`:''}</span><button data-u="${s}" class="${ok?'':'dim'}" ${cost?'':'disabled'}>Upgrade</button></div>`; }).join('')}
     <div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   $('bk').onclick=()=>talk(n);
-  document.querySelectorAll('#dlg [data-u]').forEach(b=>b.onclick=()=>{ const it=c.eq[b.dataset.u]; const cost=upCost(it); c.gold-=cost.gold; c.mats[cost.mat]-=cost.n; it.up=(it.up||0)+1;
+  document.querySelectorAll('#dlg [data-u]').forEach(b=>b.onclick=()=>{ const it=c.eq[b.dataset.u]; const cost=upCost(it); if(!cost) return; if(c.gold<cost.gold) return err(`Not enough gold: the upgrade costs ${cost.gold}`); if((c.mats[cost.mat]||0)<cost.n) return err(`You need ${cost.n} ${MATS[cost.mat].name} (you have ${c.mats[cost.mat]||0})`); c.gold-=cost.gold; c.mats[cost.mat]-=cost.n; it.up=(it.up||0)+1;
     chatLine(`Doran hammers your ${it.name} to +${it.up}.`,'c-loot'); const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',30,3,{glow:true}); recalc(); persist(); renderInv(); openSmith(n); }); }
 function openStable(n){ const c=me.c;
   dlg(`<h2>Hilde's Stable</h2><p>"Press R to call your mount, and R again to hop off. They don't like fighting or deep water."</p>${MOUNTS.slice(1).map((m,i)=>{ const id=i+1, own=c.mounts.includes(id); if(m.ashborn&&!own&&!raidIsOpen()) return '';
@@ -4635,7 +4721,7 @@ function openStable(n){ const c=me.c;
 
 /* ---------- world map ---------- */
 let mapBase=null; const MAPS=5;
-const ZCENT={}; (function(){ const acc={}; for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){ const z=zmap[y*MW+x]; (acc[z]=acc[z]||[0,0,0]); acc[z][0]+=x; acc[z][1]+=y; acc[z][2]++; } for(const z in acc) ZCENT[z]=[acc[z][0]/acc[z][2],acc[z][1]/acc[z][2]]; ZCENT.ash=WP(56,18); ZCENT.lake=WP(90,93); ZCENT.reach=[196,30]; })();
+const ZCENT={}; (function(){ const acc={}; for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){ const z=zmap[y*MW+x]; (acc[z]=acc[z]||[0,0,0]); acc[z][0]+=x; acc[z][1]+=y; acc[z][2]++; } for(const z in acc) ZCENT[z]=[acc[z][0]/acc[z][2],acc[z][1]/acc[z][2]]; ZCENT.ash=WP(56,18); ZCENT.lake=WP(90,93); ZCENT.reach=[196,30]; ZCENT.coast=[364,182]; ZCENT.port=[PORT.cx,PORT.y0-4]; })();
 setInterval(drawWorldMap,50);
 function drawMini(){
   const mc=document.getElementById('miniC'), c=mc.getContext('2d'); const S=mc.width; c.clearRect(0,0,S,S);
@@ -4668,7 +4754,7 @@ function migrateChar(c){ c.qs=c.qs||{}; c.mats=c.mats||{}; c.prof=c.prof&&typeof
 function qAvail(q){ const qs=me.c.qs; if(qs[q.id]){ if(q.daily&&qs[q.id].st==='complete'&&Date.now()-(qs[q.id].at||0)>20*3600e3) delete qs[q.id]; else return false; } if(q.pre&&(!qs[q.pre]||qs[q.pre].st!=='complete')) return false; return (q.lvl||1)<=me.c.lvl+1; }
 function npcMark(n){ if(!me) return n.id==='mira'||n.id==='doran'?'$':''; let m='';
   for(const q of QUESTS){ if(q.giver!==n.id) continue; const s=me.c.qs[q.id]; if(s&&s.st==='done') return '?'; if(qAvail(q)) m='!'; }
-  if(m) return m; return n.id==='mira'||n.id==='doran'||n.id==='tamsin'||n.id==='pell'||n.id==='liesl'||(n.id==='hilde'&&me.c.lvl>=10)?'$':''; }
+  if(m) return m; return n.id==='mira'||n.id==='doran'||n.id==='tamsin'||n.id==='pell'||n.id==='odessa'||n.id==='garrick'||n.id==='liesl'||(n.id==='hilde'&&me.c.lvl>=10)?'$':''; }
 const activeQuests=()=>QUESTS.filter(q=>me.c.qs[q.id]&&me.c.qs[q.id].st!=='complete');
 function objText(q,s){ s=s||{c:0,p:[]};
   if(q.type==='kill'){ const mt=MOBT.find(m=>m.key===q.mob); return q.n>1?`${mt.name}s slain: ${s.c}/${q.n}`:`Defeat ${mt.name}: ${s.c}/1`; }
@@ -4922,7 +5008,7 @@ function recName(r){ return r.label||(r.gear?r.gear.name:r.prospect?'Prospect':(
 function craftItem(g){ const rar=g.rar; const budget=(2.2+g.lv*1.7)*[1,1.45,2,2.8,3.8][rar]*1.06; const pf=[.72,.25,.5][SLOTS.indexOf(g.slot)];
   const it={id:rid(6),slot:g.slot,name:g.name,rar,pow:Math.max(0,Math.round(budget*pf)),sta:Math.max(1,Math.round(budget*(1-pf))),lv:g.lv,val:Math.max(1,Math.round(g.lv*[.5,1.4,3,7][rar])),cr:me.c.name.slice(0,14)};
   if(g.at) it.at=g.at; return it; }
-const ANVILS=()=>NPCS.filter(n=>n.id==='doran'||n.id==='hakon');
+const ANVILS=()=>NPCS.filter(n=>n.id==='doran'||n.id==='hakon'||n.id==='garrick');
 const FOOTP=[];
 function footPrint(x,y,face,side,big){ const tl=tAt(Math.floor(x/TS),Math.floor(y/TS)); const col=tl===T.SNOW?[.56,.6,.68]:tl===T.SAND?[.5,.4,.26]:tl===T.ASH?[.1,.09,.08]:null; if(!col) return;
   const rx=-Math.sin(face), ry=Math.cos(face); FOOTP.push({x:x+rx*side*5*(big||1),y:y+ry*side*5*(big||1),f:face,t:now(),col,s:big||1}); if(FOOTP.length>160) FOOTP.shift(); }
@@ -4951,8 +5037,8 @@ const hasMats=r=>Object.entries(r.mats).every(([k,v])=>(me.c.mats[k]||0)>=v);
 const canMake=r=>{ let n=1e9; for(const [k,v] of Object.entries(r.mats)) n=Math.min(n,Math.floor((me.c.mats[k]||0)/v)); return n===1e9?0:n; };
 let CRAFTQ=0;
 function craft(id,times){ const r=RECIPES2.find(x=>x.id===id); if(!r||!me||me.dead) return; const sk=profSkill(r.prof); if(!sk) return err('You have not learned '+PROF[r.prof].name);
-  if(sk<r.req) return err(`Requires ${PROF[r.prof].name} ${r.req}`); if(!stationOk(r)) return err('You need an anvil: Doran\'s forge in Hearthmere or the anvil at Jarl Hakon\'s camp in Frostwatch');
-  if(!hasMats(r)) return err('Missing materials'); if(r.gear&&me.c.inv.length>=BAGMAX) return err('Bags are full'); if(me.cast) return err('You are busy');
+  if(sk<r.req) return err(`Requires ${PROF[r.prof].name} ${r.req}`); if(!stationOk(r)) return err('You need an anvil: Doran\'s forge in Hearthmere, Garrick\'s forge in Brinehaven or the anvil at Jarl Hakon\'s camp in Frostwatch');
+  if(!hasMats(r)){ const miss=Object.entries(r.mats).filter(([k,v])=>(me.c.mats[k]||0)<v).map(([k,v])=>`${v-(me.c.mats[k]||0)} ${MATS[k].name}`); return err('Missing materials: '+miss.join(', ')); } if(r.gear&&me.c.inv.length>=BAGMAX) return err('Bags are full'); if(me.cast) return err('You are busy');
   if(me.mounted) dismount(); if(FISH) fishStop(); CRAFTQ=Math.max(0,(times||1)-1);
   const fx={tailoring:'#e8e0c8',blacksmithing:'#ffb03a',leatherworking:'#c89a5a',alchemy:'#8cff4a',jewelcrafting:'#9fe8ff',cooking:'#ff7a2a'}[r.prof];
   me.cast={ab:{id:'craft',name:{tailoring:'Sewing',blacksmithing:'Smithing',leatherworking:'Stitching',alchemy:'Brewing',jewelcrafting:'Cutting',cooking:'Cooking'}[r.prof]},t0:now(),dur:r.gear?2.6:1.5,
@@ -4990,14 +5076,14 @@ function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c
   const list=ks.map(k=>{ const P=c.prof[k], R=PRANK[P.r]; return `<div class="pfi ${k===PSEL?'on':''}" data-pf="${k}"><b>${PROF[k].icon} ${PROF[k].name}</b><small>${R.n} · ${P.s} / ${R.max}</small><div class="pbar"><i style="width:${P.s/300*100}%"></i></div></div>`; }).join('');
   const P=c.prof[PSEL], D=PROF[PSEL]; let right=`<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><b style="font-family:Cinzel,serif">${D.icon} ${D.name}</b><button id="pfUn" style="font-size:11px;padding:3px 7px">Unlearn</button></div><p style="color:var(--dim);font-size:13px;margin:4px 0 8px">${D.desc}</p>`;
   const recs=RECIPES2.filter(r=>r.prof===PSEL);
-  if(recs.length){ right+=`<div class="ptool"><input id="pfQ" placeholder="Search recipes" value="${esc(PFILT)}"><label style="font-size:12px"><input type="checkbox" id="pfH" ${PHAVE?'checked':''}> Have materials</label></div>`;
+  if(recs.length){ if(PSEL==='blacksmithing') right+=`<div id="pfAnv" class="pfanv"></div>`; right+=`<div class="ptool"><input id="pfQ" placeholder="Search recipes" value="${esc(PFILT)}"><label style="font-size:12px"><input type="checkbox" id="pfH" ${PHAVE?'checked':''}> Have materials</label></div>`;
     let lastT=-1; for(const r of recs){ if(r.tier>P.r) continue; const nm=recName(r); if(PFILT&&!nm.toLowerCase().includes(PFILT.toLowerCase())) continue; const n=canMake(r); if(PHAVE&&!n) continue;
       if(r.tier!==lastT){ lastT=r.tier; right+=`<div class="ptier">${TIERN[r.tier].toUpperCase()}</div>`; }
       const col=pcol(P.s,r.req), out=r.gear?`<span style="color:var(--dim)">${RAR[r.gear.rar]} ${r.gear.slot==='armor'?ARMNAME[r.gear.at]+' armour':r.gear.slot} · item level ${r.gear.lv}</span>`:r.desc?`<span style="color:var(--dim)">${r.desc}</span>`:(MATS[r.make]&&MATS[r.make].use)?`<span style="color:var(--dim)">${esc((MATS[r.make].use.buff?BUFFTIP[MATS[r.make].use.buff]:BUFFTIP[MATS[r.make].use.food])||'')}, 30 min</span>`:'';
       const mats=Object.entries(r.mats).map(([k,v])=>`<span style="color:${(c.mats[k]||0)>=v?'#9fd18b':'#ff8a7a'}">${MATS[k].icon} ${MATS[k].name} ${c.mats[k]||0}/${v}</span>`).join(' · ');
       const ok=P.s>=r.req&&n>0;
-      right+=`<div class="prc ${ok?'':'no'}"><div class="nm"><b class="pc-${col}">${esc(nm)}</b> <small class="pc-${col}">(${r.req})</small>${out}<span>${mats}</span></div><button data-cr="${r.id}" ${ok?'':'disabled'}>Make</button>${r.gear?'':`<button data-cra="${r.id}" ${ok&&n>1?'':'disabled'} title="Make as many as you can">×${Math.min(n,20)||''}</button>`}</div>`; }
-    right+=`<p style="font-size:12px;color:var(--dim);margin-top:8px">Skill-ups: <span class="pc-orange">orange</span> always, <span class="pc-yellow">yellow</span> often, <span class="pc-green">green</span> sometimes, <span class="pc-grey">grey</span> never.${PSEL==='blacksmithing'?' Blacksmithing needs an anvil: the forge by Doran in Hearthmere, or the anvil and forge at the camp of Jarl Hakon in Frostwatch (⚒ on the minimap).':''}</p>`; }
+      right+=`<div class="prc ${ok?'':'no'}"><div class="nm"><b class="pc-${col}">${esc(nm)}</b> <small class="pc-${col}">(${r.req})</small>${out}<span>${mats}</span></div><button data-cr="${r.id}" class="${ok?'':'dim'}">Make</button>${r.gear?'':`<button data-cra="${r.id}" class="${ok&&n>1?'':'dim'}" title="Make as many as you can">×${Math.min(n,20)||''}</button>`}</div>`; }
+    right+=`<p style="font-size:12px;color:var(--dim);margin-top:8px">Skill-ups: <span class="pc-orange">orange</span> always, <span class="pc-yellow">yellow</span> often, <span class="pc-green">green</span> sometimes, <span class="pc-grey">grey</span> never.${PSEL==='blacksmithing'?' Blacksmithing needs an anvil: the forge by Doran in Hearthmere, Garrick\'s forge in Brinehaven, or the anvil and forge at the camp of Jarl Hakon in Frostwatch (⚒ on the minimap).':''}</p>`; }
   else if(PSEL==='fishing'){ const T=FISH?[]:null; right+=`<button id="pfFish" class="gold">🎣 Cast a line</button><p style="font-size:13px;margin-top:8px">Face open water and press <kbd>F</kbd> (or this button, or type <b>/fish</b>). When the bobber dips and splashes, press <kbd>F</kbd> or click the bobber within a second.</p><div style="font-size:13px;color:var(--dim)"><div>🐟 Amber Perch: any water</div><div>🐍 Mire Eel: Gloamfen and Thornwood (75+)</div><div>🐠 Silverfin: Mirrowmere and Vael (130+)</div><div>🐡 Icefin Cod: Frostpeak and the Caldera (200+)</div><div>🎏 Golden Koi: very rare, anywhere (150+)</div><div>Sometimes a chest of treasure.</div></div>`; }
   else if(PSEL==='mining'||PSEL==='herbalism'){ const ok=PSEL==='mining'?['copper','iron','obsidian','mithril']:['sunpetal','thornbloom','mireroot','ghostcap','emberlily','frostbloom'];
     right+=`<div style="font-size:13px">${ok.map(k=>`<div><span class="pc-${pcol(P.s,nodeReq(k))}">${MATS[k].icon} ${MATS[k].name} (${nodeReq(k)})</span> <span style="color:var(--dim)">${MATS[k].zones.map(z=>ZONES[z]?ZONES[z].name:z).join(', ')}</span></div>`).join('')}</div><p style="font-size:13px;color:var(--dim);margin-top:8px">With the profession you gather faster and find ${PSEL==='mining'?'gems':'Starleaf'}. Every node gives one material. Large glittering <b>rich</b> ${PSEL==='mining'?'veins':'patches'} appear on your map once your skill is high enough.</p>`; }
@@ -5007,7 +5093,7 @@ function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c
   const q=$('pfQ'); if(q){ q.oninput=()=>{ PFILT=q.value; const pos=q.selectionStart; renderProf(); const q2=$('pfQ'); q2.focus(); q2.setSelectionRange(pos,pos); }; q.onkeydown=e=>e.stopPropagation(); }
   const hv=$('pfH'); if(hv) hv.onchange=()=>{ PHAVE=hv.checked; renderProf(); };
   el.querySelectorAll('[data-cr]').forEach(b=>b.onclick=()=>craft(b.dataset.cr,1));
-  el.querySelectorAll('[data-cra]').forEach(b=>b.onclick=()=>{ const r=RECIPES2.find(x=>x.id===b.dataset.cra); craft(r.id,Math.min(20,canMake(r))); });
+  el.querySelectorAll('[data-cra]').forEach(b=>b.onclick=()=>{ const r=RECIPES2.find(x=>x.id===b.dataset.cra); craft(r.id,Math.max(1,Math.min(20,canMake(r)))); });
   const fb=$('pfFish'); if(fb) fb.onclick=()=>{ toggleWin('profWin',false); fishStart(); };
   $('pfUn').onclick=()=>askConfirm(`Unlearn <b>${PROF[PSEL].name}</b>? Your skill (${P.s}) is lost for good.`,'Unlearn',()=>{ delete me.c.prof[PSEL]; chatLine(`You unlearn ${PROF[PSEL].name}.`,'c-prof'); PSEL=null; persist(); renderProf(); },true); }
 function profGM(arg){ const m=String(arg||'').match(/^(\S+)\s+(\d+)$/); if(!m||!PROF[m[1]]) return sysMsg('Usage: /setprof <'+Object.keys(PROF).join('|')+'> <skill 1-300>','c-err');
@@ -5119,6 +5205,9 @@ function sendChat(raw){
     if(cmd==='hearth'||cmd==='home'||cmd==='recall') return hearthStart();
     if(cmd==='stuck'||cmd==='unstuck') return unstuck();
     if(cmd==='meter'||cmd==='dps') return meterToggle();
+    if(cmd==='ready'||cmd==='readycheck'||cmd==='rc') return readyCheck();
+    if(cmd==='pull') return pullTimer(arg);
+    if(cmd==='share') return shareQuest(arg);
     if(cmd==='sort') return sortBags();
     if(cmd==='prof'||cmd==='professions') return toggleWin('profWin',true);
     if(cmd==='setprof'){ if(!isGM) return sysMsg('You are not a Game Master.','c-err'); return profGM(arg); }
@@ -5459,11 +5548,11 @@ function renderPartyWin(){ const w=$('partyWin'); if(!w||w.classList.contains('h
   else h+='<div class="pwsub">You are not in a party. Invite someone below, or click a player and press <b>Invite</b>.</div>';
   const cand=[...others.values()].filter(o=>seenO(o)&&o.pt!==me.party||(!me.party&&seenO(o)));
   h+=`<h4>Invite players</h4>${cand.length?cand.map(o=>`<div class="pwrow small"><span class="pwic" style="background:${CLS[o.c].col}">${CLS[o.c].glyph}</span><span class="pwn" style="color:${CLS[o.c].col}">${esc(o.n)}</span><span class="pwl">Lv ${o.l}${o.pt?' · in a party':''}</span><button data-inv="${esc(o.u)}" class="gold">Invite</button></div>`).join(''):'<div class="pwsub">No other players online right now.</div>'}`;
-  h+=`<div class="btns" style="margin-top:12px">${me.party?'<button id="pwLeave">Leave party</button>':''}<button id="pwName">Join by name…</button></div>`;
+  h+=`<div class="btns" style="margin-top:12px">${me.party?'<button id="pwLeave">Leave party</button>':''}<button id="pwName">Join by name…</button>${me.party&&lead?'<button id="pwReady">✔ Ready check</button><button id="pwPull">⏱ Pull in 10</button>':''}</div>`;
   w.querySelector('.pwbody').innerHTML=h;
   w.querySelectorAll('[data-inv]').forEach(b=>b.onclick=()=>inviteTo(othersByU.get(b.dataset.inv)));
   w.querySelectorAll('[data-kick]').forEach(b=>b.onclick=()=>{ const o=othersByU.get(b.dataset.kick); if(o) kickMember(o); });
-  if($('pwLeave')) $('pwLeave').onclick=()=>{ joinParty(''); renderPartyWin(); }; $('pwName').onclick=partyDlg; if($('pwRaid')) $('pwRaid').onclick=convertToRaid; }
+  if($('pwLeave')) $('pwLeave').onclick=()=>{ joinParty(''); renderPartyWin(); }; $('pwName').onclick=partyDlg; if($('pwRaid')) $('pwRaid').onclick=convertToRaid; if($('pwReady')) $('pwReady').onclick=readyCheck; if($('pwPull')) $('pwPull').onclick=()=>pullTimer('10'); }
 /* the leader renames the party to raid-<name>; every member follows (party event 'RG') */
 function convertToRaid(){ if(!me.party||isRaidGrp()) return; if(!amLeader()) return err('Only the party leader can do that'); const nn=('raid-'+me.party).slice(0,20); myChat.push([++chSeq,3,'RG:'+nn]); if(myChat.length>3) myChat.shift(); sendPresence(true);
   const keep=me.party; setTimeout(()=>{ if(me.party===keep){ me.lead=1; joinParty(nn,true); me.lead=1; sysMsg(`Your party is now a raid group: up to ${RAID_MAX} players can join.`); banner('Raid group formed','Up to '+RAID_MAX+' players'); renderPartyWin(); $('party').dataset.sig=''; } },400); }
@@ -5721,7 +5810,7 @@ function fmusPlay(){ if(FMUS.dead||FMUS.pending) return; const a=fmusEl(); if(!a
 function fmusLevel(){ const v=(typeof AUD!=='undefined'&&AUD.vol)||{master:.8,music:.6}; return v.mute?0:clamp((v.master??.8)*(v.music??.6)*.9,0,1); }
 function fmusTick(){ const F=FMUS; let want=false; if(F.dead){ F.want=false; return; }
   if(F.el&&!F.ok&&!F.blocked&&F.srcT&&performance.now()-F.srcT>30000&&F.el.readyState===0){ if(!F.triedRealm&&/^https?:$/.test(location.protocol)&&F.cur){ F.triedRealm=true; F.useRealm=true; F.el.src=fmusBase()+F.cur.f; F.srcT=performance.now(); F.pending=false; fmusPlay(); } else { F.dead=true; F.want=false; try{ F.el.pause(); }catch(e){} return; } }
-  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=z==='town'&&!fight; }
+  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=(z==='town'||z==='port')&&!fight; }
   F.want=want; const target=want?fmusLevel():0;
   if(want&&(!F.el||F.el.paused)&&!F.blocked) fmusPlay();
   if(!F.el) return; F.vol+=clamp(target-F.vol,-.05,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
@@ -5735,14 +5824,14 @@ function fitLogin(){ const w=document.querySelector('.lg-wrap'); if(!w) return; 
 addEventListener('resize',()=>setTimeout(fitLogin,50)); setTimeout(fitLogin,60); setTimeout(fitLogin,600); setTimeout(fitLogin,2000);
 new MutationObserver(()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitLogin,40); }).observe(document.getElementById('login')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
-  let tr=z==='town'?'tavern':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
+  let tr=z==='town'||z==='port'?'tavern':z==='coast'?'pastoral':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
   if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';
   if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.inn=null; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
   const spb=AUD.track==='tavern'?60/138/2*2:AUD.track==='battle'?60/150/2*2:60/70/2*2; const stepDur=AUD.track==='tavern'?.19:AUD.track==='battle'?.2:AUD.track==='combat'?.21:.42;
   if(AUD.track===AUD.want){ if(AUD.track==='tavern'){ if(!FMUS.want) innTick(t); } else while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; } }
   // ambience levels per zone
   const T0={wind:0,leaves:0,water:0,rumble:0,insects:0,frost:0,cave:0,town:0}; const set=o=>Object.assign(T0,o);
-  if(z==='town') set({wind:.025,town:.05}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
+  if(z==='town') set({wind:.025,town:.05}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='coast') set({wind:.2,water:.32}); if(z==='port') set({wind:.08,water:.22,town:.04}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
   if(z==='ruins') set({wind:.22}); if(z==='ash'||z==='lair') set({rumble:.55,wind:.05}); if(z==='frost') set({frost:.06,wind:.18}); if(z==='crypt'||z==='vault') set({cave:.45}); if(z==='raid') set({cave:.3,rumble:.45});
   if(isWaterAt(me.x,me.y)) T0.water=.4; if(me.inLava) T0.rumble=.8;
   for(const k in T0) AUD.layers[k].g.gain.setTargetAtTime(T0[k],t,1.2);
@@ -5935,6 +6024,7 @@ function vaultCmd(k){ if(!me) return; if(raidCmd(k)) return; if(me.dead) return 
     if(inVault(me.x,me.y)) return sysMsg('You are already inside the Sunken Vault. Type -o to leave early, or -d once the Drowned King has fallen.','c-err');
     if(!vaultNear(me.x,me.y)) return sysMsg(`Stand within 6 yards of the Sunken Vault gate to enter. You are ${Math.round(Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)/10)} yards away.`,'c-err');
     const mem=partyMembers().filter(o=>!o.d), far=mem.filter(o=>!vaultNear(o.rx,o.ry));
+    if(mem.length+1>PARTY_MAX&&!isGM){ sysMsg(`The Sunken Vault is a dungeon for up to ${PARTY_MAX} heroes. Your group has ${mem.length+1}: split into parties of ${PARTY_MAX} (raid groups are for Cinderhold).`,'c-err'); return; }
     if(far.length) return sysMsg('Your whole party must stand within 6 yards of the gate. Too far away: '+far.map(o=>o.n).join(', ')+'.','c-err');
     const busy=[...others.values()].filter(o=>seenO(o)&&inVault(o.rx,o.ry)&&!(me.party&&o.pt===me.party));
     if(busy.length) return sysMsg('Another group is inside the Sunken Vault ('+busy.map(o=>o.n).join(', ')+'). Wait until they finish.','c-err');
@@ -5963,6 +6053,57 @@ function vaultHostTick(players,t){ const inside=(me&&inVault(me.x,me.y))||[...ot
 /* a gentle hint at the gate */
 function vaultHint(){ if(!me||me.dead||inVault(me.x,me.y)) return; const n=vaultNear(me.x,me.y); if(n&&!VAULT.hint){ VAULT.hint=true; sysMsg('The Sunken Vault · Level 10 dungeon. Gather your party within 6 yards of the gate and type -e to descend together.'); } else if(!n&&Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)>200) VAULT.hint=false; }
 setInterval(vaultHint,1000);
+/* v63: HUD layout guard. Measures the action bar, menu buttons, chat and XP bar and moves or wraps them so nothing
+   overlaps, at any window size and UI scale. */
+function hudLayout(){ try{
+  const bar=$('bar'), mb=$('menuBtns'), ch=$('chat'), xp=$('xpbar'), cl=$('chatlog'); if(!bar||!mb||!ch) return;
+  const touch=document.body.classList.contains('touch'), s=+OPT.uiScale||1, W=innerWidth, H=innerHeight, gap=10;
+  for(const e of [mb,ch,cl,xp]) if(e) e.removeAttribute('style');
+  if(touch||!bar.children.length) return;
+  const br=bar.getBoundingClientRect(); if(!br.width) return;
+  if(xp) xp.style.width=Math.max(200,Math.min(br.width/s,(W-24)/s))+'px';
+  /* menu buttons: keep them to the right of the action bar, wrapping into rows; if there is no room, lift them above it */
+  let mr=mb.getBoundingClientRect();
+  if(mr.left<br.right+gap){ const avail=(W-12-br.right-gap)/s;
+    if(avail>=200){ mb.style.flexWrap='wrap'; mb.style.justifyContent='flex-end'; mb.style.maxWidth=avail+'px'; }
+    else { mb.style.flexWrap='wrap'; mb.style.justifyContent='flex-end'; mb.style.maxWidth=(W-24)/s+'px'; mb.style.bottom=Math.ceil(H-br.top+gap)+'px'; } }
+  /* chat: stays left of the action bar, narrower if it must; if even a narrow chat will not fit, it sits above the bar */
+  let cr=ch.getBoundingClientRect();
+  if(cr.right>br.left-gap){ const w=(br.left-gap-12)/s;
+    if(w>=190) ch.style.width=w+'px';
+    else { ch.style.width=Math.min(400,(W*.6)/s)+'px'; ch.style.bottom=Math.ceil(H-br.top+gap)+'px'; } }
+  /* the chat log never runs up into the party frames, the target frame or the menu */
+  cr=ch.getBoundingClientRect(); let top=0;
+  for(const id of ['party','pframe','meterWin']){ const e=$(id); if(!e||e.classList.contains('hidden')||!e.offsetParent) continue; const r=e.getBoundingClientRect(); if(r.height&&r.left<cr.right&&r.right>cr.left&&r.bottom<cr.bottom) top=Math.max(top,r.bottom); }
+  mr=mb.getBoundingClientRect(); if(mr.left<cr.right&&mr.right>cr.left&&mr.bottom<=cr.bottom) top=Math.max(top,mr.bottom);
+  if(top&&cr.top<top+gap&&cl){ const h=Math.max(60,cl.getBoundingClientRect().height/s-(top+gap-cr.top)/s); cl.style.height=h+'px'; }
+}catch(e){} }
+addEventListener('resize',()=>setTimeout(hudLayout,60)); setInterval(hudLayout,700); setTimeout(hudLayout,300);
+
+
+/* ---------- v62: group tools ---------- */
+function partyEvt(txt){ myChat.push([++chSeq,3,txt]); if(myChat.length>3) myChat.shift(); sendPresence(true); }
+const RCHK={id:0,at:0,ans:{},open:null};
+function readyCheck(){ if(!me.party) return err('You are not in a group'); if(!amLeader()) return err('Only the group leader can start a ready check'); if(now()-RCHK.at<15) return err('A ready check is already running');
+  RCHK.id=(Math.random()*1e6)|0; RCHK.at=now(); RCHK.ans={[me.c.name]:1}; partyEvt('RCHK:'+RCHK.id); sysMsg('✔ Ready check started…','c-party');
+  setTimeout(()=>{ if(!me||!me.party) return; const mem=partyMembers(), yes=[], no=[], none=[]; for(const o of mem){ const a=RCHK.ans[o.n]; (a===1?yes:a===0?no:none).push(o.n); }
+    sysMsg(no.length||none.length?`Ready check: ${yes.length+1}/${mem.length+1} ready.${no.length?' Not ready: '+no.join(', ')+'.':''}${none.length?' No answer: '+none.join(', ')+'.':''}`:`✔ Everyone is ready (${mem.length+1}/${mem.length+1})!`,no.length||none.length?'c-err':'c-party');
+    if(!no.length&&!none.length) try{ snd('horn'); }catch(e){} },16000); }
+function answerReady(id,ok){ $('confirmPop').classList.add('hidden'); partyEvt('RR:'+id+':'+(ok?1:0)); sysMsg(ok?'You are ready.':'You are not ready.','c-party'); }
+function pullTimer(arg){ if(!me.party) return err('You are not in a group'); if(!amLeader()) return err('Only the group leader can start a pull timer'); const n=clamp(parseInt(arg)||10,3,30); partyEvt('PL:'+n); pullShow(n,me.c.name); }
+function pullShow(n,who){ clearInterval(pullShow.iv); let k=n; const el=$('raidWarn')||(()=>{ const d=document.createElement('div'); d.id='raidWarn'; document.body.appendChild(d); return d; })();
+  const tick=()=>{ el.textContent=k>0?`Pull in ${k}`:'PULL!'; el.classList.remove('rw-on'); void el.offsetWidth; el.classList.add('rw-on'); if(k<=3) try{ snd(k>0?'step':'horn'); }catch(e){} if(k<=0){ clearInterval(pullShow.iv); setTimeout(()=>el.classList.remove('rw-on'),1500); } k--; };
+  sysMsg(`⏱ ${who} started a ${n} second pull timer.`,'c-party'); tick(); pullShow.iv=setInterval(tick,1000); }
+function shareQuest(id){ if(!me.party) return err('You are not in a group'); const q=QUESTS.find(x=>x.id===id||x.title.toLowerCase()===String(id).toLowerCase()); const st=q&&me.c.qs[q.id];
+  if(!q||!st||st.st==='complete') return err('Pick an active quest to share'); if(q.daily) return err('Daily bounties cannot be shared'); partyEvt('QS:'+q.id); sysMsg(`You shared "${q.title}" with your group.`,'c-party'); }
+function groupEvent(o,txt){ if(!me||!me.party||o.pt!==me.party) return false;
+  if(txt.startsWith('RCHK:')){ const id=txt.slice(5); askConfirm(`<b>${esc(o.n)}</b> started a ready check. Are you ready?`,'Ready',()=>answerReady(id,true)); const no=$('cfNo'); if(no){ no.textContent='Not ready'; no.onclick=()=>answerReady(id,false); } try{ snd('horn'); }catch(e){} return true; }
+  if(txt.startsWith('RR:')){ const [, id, a]=txt.split(':'); if(String(RCHK.id)===id) RCHK.ans[o.n]=+a; return true; }
+  if(txt.startsWith('PL:')){ pullShow(clamp(parseInt(txt.slice(3))||10,3,30),o.n); return true; }
+  if(txt.startsWith('QS:')){ const q=QUESTS.find(x=>x.id===txt.slice(3)); if(!q) return true; if(me.c.qs[q.id]) return sysMsg(`${o.n} shared "${q.title}", but you already have it or finished it.`,'c-sys'),true; if(!qAvail(q)) return sysMsg(`${o.n} shared "${q.title}", but you cannot take it yet.`,'c-sys'),true;
+    askConfirm(`<b>${esc(o.n)}</b> shares a quest: <b>${esc(q.title)}</b>. Accept it?`,'Accept',()=>{ acceptQuest(q); renderQlog(); }); return true; }
+  return false; }
+
 /* =====================================================================
    v58: THE SCORCHED REACH (levels 15–19) — Emberwatch outpost and its war
    ===================================================================== */
@@ -6043,6 +6184,8 @@ function addReachCamp(d){ const cx=REACH.cx+.5, cz=REACH.cy+.5, R=mulberry32(585
 /* ---------- v58 quality of life ---------- */
 var LASTTALK=null;
 try{ $('escVer').textContent='Emberfall Online · Beta v0.'+VERSION; }catch(e){}
+function homePos(){ const h=me&&me.c.home, n=h&&NPCS.find(q=>q.id===h); if(n&&h==='ilsa') return {x:REACH.cx*TS+16,y:(REACH.cy+2)*TS,name:'Emberwatch'}; if(n) return {x:n.x+40,y:n.y+40,name:"Jarl Hakon's camp"}; return {x:SPAWN.x,y:SPAWN.y,name:'Hearthmere'}; }
+function setHome(n){ me.c.home=n.id==='oriel'?'':n.id; persist(); const H=homePos(); chatLine(`🏠 ${H.name} is now your home. Your hearth (/hearth) brings you here.`,'c-sys'); banner('Home set',H.name); }
 function sortBags(){ const c=me&&me.c; if(!c) return; c.inv.sort((a,b)=>b.rar-a.rar||SLOTS.indexOf(a.slot)-SLOTS.indexOf(b.slot)||b.pow+b.sta-a.pow-a.sta); renderInv(); persist(); }
 /* junk: commons and uncommons you can't use, or that are weaker than what you already wear */
 function junkList(){ const c=me.c, sc=it=>(it?Math.round(it.pow*upMul(it))+Math.round(it.sta*upMul(it)):-1); return c.inv.filter(it=>it&&it.rar<=1&&!it.raid&&(!canUse(it,c.cls)||sc(it)<=sc(c.eq[it.slot]))); }
@@ -6054,8 +6197,8 @@ function hearthStart(){ if(!me||me.dead) return; const t=now(), cd=(me.c.hearthA
   if(inRaid(me.x,me.y)||inVault(me.x,me.y)||inArena(me.x,me.y)) return err('Not down here: type -o to leave first');
   if(cd>0) return err(`Your hearth is ready in ${Math.floor(cd/60)}:${String(Math.ceil(cd%60)).padStart(2,'0')}`); if(inCombat()) return err('You are in combat');
   if(me.mounted) dismount(); me.cast={ab:{id:'hearth',name:'Hearth to Hearthmere'},t0:t,dur:8,fin:()=>{ if(me.dead||inCombat()) return err('Interrupted');
-    me.c.hearthAt=Math.floor(Date.now()/1000); me.x=SPAWN.x+(Math.random()-.5)*40; me.y=SPAWN.y+(Math.random()-.5)*40; me.target=null; me.auto=false; if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; }
-    sendPresence(true); persist(); try{ const [X,Y,Z]=ph3(me.x,me.y,1); burst3(X,Y,Z,'#ffd36a',30,2.5,{glow:true}); sfx('quest'); }catch(e){} chatLine('You return to Hearthmere.','c-sys'); }};
+    me.c.hearthAt=Math.floor(Date.now()/1000); const H=homePos(); me.x=H.x+(Math.random()-.5)*40; me.y=H.y+(Math.random()-.5)*40; me.target=null; me.auto=false; if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; }
+    sendPresence(true); persist(); try{ const [X,Y,Z]=ph3(me.x,me.y,1); burst3(X,Y,Z,'#ffd36a',30,2.5,{glow:true}); sfx('quest'); }catch(e){} chatLine('You return to '+homePos().name+'.','c-sys'); }}; me.cast.ab.name='Hearth to '+homePos().name;
   chatLine('Channelling your hearth... (stand still for 8 seconds)','c-sys'); }
 /* stuck: step out of anything solid, or hearth for free if you are really boxed in */
 function unstuck(){ if(!me||me.dead) return; const t=now(); if(t-(unstuck.t||-99)<20) return err('Wait a moment before trying that again'); unstuck.t=t;
@@ -6269,7 +6412,7 @@ function raidEnter(msg){ if(me.mounted) dismount(); if(me.dead) return; const S=
   if(!me.c.disc.includes('cinderhold')){ me.c.disc.push('cinderhold'); persist(); } }
 function raidLeave(msg){ if(me.mounted) dismount(); if(me.dead) release(); const S=RAID.exit; me.x=S.x+(Math.random()-.5)*50; me.y=S.y+Math.random()*24; me.face=Math.PI/2; me.target=null; me.auto=false; me.cast=null;
   if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } sendPresence(true); sysMsg(msg); }
-function raidEvent(o,txt){ if(txt.startsWith('RG:')){ const nn=txt.slice(3).replace(/[^a-z0-9 _-]/g,'').slice(0,20); if(/^raid-/.test(nn)&&me.party&&o.pt===me.party){ me.lead=0; joinParty(nn,true); sysMsg(`${o.n} turned your party into a raid group (up to ${RAID_MAX} players).`); $('party').dataset.sig=''; } return true; } if(txt==='RE'){ if(!inRaid(me.x,me.y)&&raidNear(me.x,me.y)) raidEnter(`${o.n} leads your raid through the Cinderhold Gate.`); else if(!inRaid(me.x,me.y)) sysMsg(`${o.n} entered Cinderhold. Go to the Cinderhold Gate in the Cinder Caldera and type -e to follow.`,'c-party'); return true; }
+function raidEvent(o,txt){ if(groupEvent(o,txt)) return true; if(txt.startsWith('RG:')){ const nn=txt.slice(3).replace(/[^a-z0-9 _-]/g,'').slice(0,20); if(/^raid-/.test(nn)&&me.party&&o.pt===me.party){ me.lead=0; joinParty(nn,true); sysMsg(`${o.n} turned your party into a raid group (up to ${RAID_MAX} players).`); $('party').dataset.sig=''; } return true; } if(txt==='RE'){ if(!inRaid(me.x,me.y)&&raidNear(me.x,me.y)) raidEnter(`${o.n} leads your raid through the Cinderhold Gate.`); else if(!inRaid(me.x,me.y)) sysMsg(`${o.n} entered Cinderhold. Go to the Cinderhold Gate in the Cinder Caldera and type -e to follow.`,'c-party'); return true; }
   if(txt==='RD'){ if(inRaid(me.x,me.y)) raidLeave(`${o.n} completes the raid. You return to the surface together.`); return true; } return false; }
 function raidCheckpoint(){ const B=RAID.boss, dead=k=>B[k]&&B[k].dead, W=(x,y)=>[(RX0+x+.5)*TS,(OWH+y+.5)*TS];
   if(dead('gravoth')) return W(108,58); if(dead('selvara')) return W(150,55); if(dead('magmaroth')) return W(141,16); if(dead('ashmaw')) return W(105,16);
@@ -6333,8 +6476,8 @@ const RPOI={id:'cinderhold',name:'The Cinderhold Gate',x:170,y:24,r:5};
 NPCGREET.thalia='"Beneath the caldera lies Cinderhold, the forge-citadel of Vyrathos, the Ember Tyrant. Seven terrors stand between you and him. Bring at least five heroes, all level 20. I would bring a Bulwark to hold the line, a Mender to keep you breathing, a Bard to lift your arms, and blades to finish the work, but who you bring is your choice. Gather at the gate and type -e."';
 NPCGREET.brannoc='"Embers! Every Tyrant\'s Ember you bring me is a shard of his fire. Six of them and I\'ll forge you something worthy of this place."';
 NPCGREET.herald='"The fire remembers those who walk out alive. Shall I lead you back to the sky?"';
-const RSVC={ilsa:[['shop','Browse goods']],thalia:[['rinfo','📜 About Cinderhold']],brannoc:[['rembers',"🔥 Trade Tyrant's Embers"],['rout','Return to the surface']],herald:[['rout','Return to the surface']]};
-function raidActs(n){ return {rout:()=>{ closeDlg(); if(inRaid(me.x,me.y)) raidLeave('The fire lets you go. You climb back to the surface.'); },rembers:()=>openEmbers(n),rinfo:()=>raidInfo(n)}; }
+const RSVC={ilsa:[['shop','Browse goods'],['sethome','🏠 Make Emberwatch your home']],hakon:[['sethome','🏠 Make this camp your home']],oriel:[['sethome','🏠 Make Hearthmere your home']],thalia:[['rinfo','📜 About Cinderhold']],brannoc:[['rembers',"🔥 Trade Tyrant's Embers"],['rout','Return to the surface']],herald:[['rout','Return to the surface']]};
+function raidActs(n){ return {sethome:()=>{ closeDlg(); setHome(n); },rout:()=>{ closeDlg(); if(inRaid(me.x,me.y)) raidLeave('The fire lets you go. You climb back to the surface.'); },rembers:()=>openEmbers(n),rinfo:()=>raidInfo(n),sail:()=>sailFrom(n)}; }
 function raidInfo(n){ dlg(`<h2>Cinderhold</h2><p>A raid for <b>5 to ${RAID_MAX} heroes</b> (form a raid group from the Party window), all <b>level 20</b>. Recommended: a <b>Tank</b> (Bulwark), a <b>Healer</b> (Mender), a <b>Support</b> (Bard) and <b>Damage</b>, but any classes may enter. Gather at the gate and any of you types <b>-e</b>.</p>
   <p style="font-size:14px;color:#d9c9a6">1. Kragmor the Forgewarden · 2. Ignara and Pyrrus, the Twin Flames · 3. Ashmaw, Mother of Hounds · 4. Magmaroth, the Living Flow · 5. High Pyromancer Sel'vara · 6. Gravoth the Obsidian Colossus · 7. Vyrathos, the Ember Tyrant</p>
   <p style="font-size:14px;color:var(--dim)">The deeper you go, the better the loot. Every boss gives Tyrant's Embers for Brannoc's forge. The Ember Tyrant guards a legendary weapon for your class (2.5%) and the Ashborn Nightmare (1.5%). Watch for golden circles: stack in them together. Fallen heroes rise at the last chamber you cleared.</p>
@@ -6492,6 +6635,275 @@ QUESTS.push({id:'vaultking',giver:'selis',title:'The Drowned King',type:'kill',m
 /* =====================================================================
    OPTIONS, KEYBINDS, ESCAPE MENU, QUEST ARROW, TOUCH CONTROLS
    ===================================================================== */
+/* =====================================================================
+   v63: BRINEHAVEN AND THE STORMWAKE COAST (levels 12–15) — people, quests, travel
+   ===================================================================== */
+{ const put=(id,name,title,tx,ty,col,face)=>{ const [x,y]=findOpen(tx,ty); NPCS.push({id,name,title,x:x*TS+16,y:y*TS+16,col,face}); };
+  put('corwin','Harbourmaster Corwin','Brinehaven',390,113,'#3a5a8a',Math.PI/2);
+  put('della','Della Saltwhistle','The Gull & Anchor',405,112,'#a8643a',Math.PI/2);
+  put('odessa','Odessa Kettle','General Goods',404,117,'#4a8a7a',0);
+  put('garrick','Garrick Ironhull','Blacksmith',405,132,'#7a5a3a',Math.PI/2);
+  put('ysra','Tidemother Ysra','Temple of the Tides',390,127,'#5ac8b8',-Math.PI/2);
+  put('odo','Ferryman Odo','Harbour passage',PORT.x1+11,PORT.cy-1,'#6a5a3a',Math.PI);
+  put('tobin','Old Tobin','Fisherman',PORT.x1+7,110,'#4a7a9a',-Math.PI/2);
+  let gi=0; for(const [x,y,f] of [[PORT.x0-2,PORT.cy-2,Math.PI],[PORT.x0-2,PORT.cy+2,Math.PI],[PORT.cx-2,PORT.y0-2,-Math.PI/2],[PORT.cx+2,PORT.y0-2,-Math.PI/2],[PORT.cx-2,PORT.y1+2,Math.PI/2],[PORT.cx+2,PORT.y1+2,Math.PI/2]]) put('bguard'+(gi++),'Brinehaven Guard','Harbour Watch',x,y,'#3a6a7a',f); }
+POIS.push({id:'brinehaven',name:'Brinehaven',x:PORT.cx,y:PORT.cy,r:9},{id:'stormpass',name:'Stormwake Pass',x:EX0,y:COAST.passY,r:5},{id:'lighthouse',name:'Gullrock Lighthouse',x:COAST.light.x,y:COAST.light.y,r:5},
+  {id:'dshrine',name:'The Drowned Shrine',x:COAST.shrine.x,y:COAST.shrine.y,r:7},{id:'wcove',name:"Wreckers' Cove",x:COAST.cove.x,y:COAST.cove.y,r:7});
+Object.assign(NPCGREET,{
+  corwin:'"Brinehaven, traveller: free port, honest scales, and the best chowder east of the mountains. Mind you, the sea\'s been angry lately, and so has everything that lives beside it."',
+  della:'"Welcome to the Gull & Anchor! Warm bed, hot stew, and a hearth that remembers you. Plenty of sailors call this place home. You could too."',
+  odessa:'"Rope, lamp oil, potions, dried fish. If it floats or keeps you floating, I sell it."',
+  garrick:'"Sea air eats steel. I spend half my day fighting rust and the other half fighting it again. Need your gear worked?"',
+  ysra:'"The tide gives and the tide takes, child. Lately it only takes. The old shrine on the cliffs has started ringing its bells again, and nobody rings them."',
+  odo:'"Passage west along the coast and up the river to Mirrowmere landing. Five gold, no refunds if you get seasick."',
+  tobin:'"Forty years I\'ve fished this harbour. Never seen the crabs this big, or this angry. Something out there is stirring the deep."'});
+for(let i=0;i<6;i++) NPCGREET['bguard'+i]='"Brinehaven is a free town. Keep the peace inside the walls and you\'re welcome here."';
+QUESTS.push(
+  {id:'coastgo',giver:'oriel',title:'Sails Beyond the Mountains',type:'explore',pois:['brinehaven'],n:1,xp:2500,gold:25,lvl:12,text:'Hakon\'s scouts say that past the eastern wall of Frostpeak lies the sea, and a free harbour town called Brinehaven. Take the southern road through Frostpeak, cross Stormwake Pass, and make yourself known to Harbourmaster Corwin. A town that trades with the whole coast is a friend worth having.'},
+  {id:'coast1',giver:'corwin',title:'Claws on the Quay',type:'kill',mob:'shellback',n:10,xp:3600,gold:30,lvl:12,text:'Shellback Crabs have come up out of the shallows by the hundred. They cut nets, they cut rope and last week they cut a sailor. Clear ten of them off the beaches.'},
+  {id:'coast2',giver:'garrick',title:'Hounds on the Moor',type:'kill',mob:'brinehound',n:8,xp:3600,gold:30,lvl:12,text:'Brinehounds run in packs on the moors west of town and they have taken to hunting the pass road. My ore wagons won\'t come through until somebody thins them out. Eight should do it.'},
+  {id:'coast3',giver:'garrick',pre:'coast2',title:'Blue Steel',type:'gather',mat:'mithril',n:6,xp:4200,gold:35,lvl:13,text:'Mithril doesn\'t rust, and the sea cliffs are full of it. Bring me six chunks and I\'ll show this town what a proper anchor chain looks like.'},
+  {id:'coast4',giver:'corwin',pre:'coast1',title:'False Lights',type:'kill',mob:'cutthroat',n:10,xp:4800,gold:40,lvl:13,text:'Wreckers. They hang lanterns on the southern rocks so ships think they\'re near harbour, then strip whatever runs aground. Ten of their cutthroats, and put out every false light you find.'},
+  {id:'coast5',giver:'della',title:'Stones Through My Windows',type:'kill',mob:'slinger',n:8,xp:4800,gold:40,lvl:13,text:'Those wrecker slingers think it\'s funny to pelt my supply carts from the dunes. It isn\'t. Eight of them, and I\'ll keep a room warm for you.'},
+  {id:'coast6',giver:'ysra',title:'Bells Beneath the Waves',type:'explore',pois:['lighthouse','dshrine'],n:2,xp:3000,gold:25,lvl:13,text:'Climb to Gullrock Lighthouse and look north along the cliffs. Then go to the Drowned Shrine, where the old sea-god was worshipped before Brinehaven was built. Tell me who is ringing those bells.'},
+  {id:'coast7',giver:'ysra',pre:'coast6',title:'The Deepcallers',type:'kill',mob:'deepcaller',n:8,xp:6000,gold:50,lvl:14,text:'Drowned sailors, walking again, chanting in the old tongue around the shrine. They call the Deep to rise. Silence eight Deepcallers before the song is finished.'},
+  {id:'coast8',giver:'ysra',pre:'coast6',title:'Salt and Sorrow',type:'kill',mob:'brineshade',n:8,xp:6000,gold:50,lvl:14,text:'The Brine Shades are the grief of everyone the sea ever took. They drain the warmth out of the living. Lay eight of them to rest.'},
+  {id:'coast9',giver:'corwin',pre:'coast4',title:'Captain Blackwake',type:'kill',mob:'blackwake',n:1,xp:9000,gold:80,lvl:15,item:3,text:'Every false light, every wreck, every drowned crew leads back to one man: Captain Blackwake, who holds Wreckers\' Cove south of town. He fights like a storm. Take friends, end him, and the south coast is free.'},
+  {id:'coast10',giver:'ysra',pre:'coast7',title:'The Tidewyrm',type:'kill',mob:'thalassor',n:1,xp:15000,gold:130,lvl:15,epic:true,text:'The song has woken Thalassor, the Tidewyrm, old as the cliffs, and it has come to the Drowned Shrine to answer it. If it reaches the harbour, Brinehaven drowns. Gather a full party, stay out from under its tail, and send it back to the deep.'});
+Object.assign(BOSSY,{
+  thalassor:{title:'The Tidewyrm',pull:'THE SONG CALLED ME... AND YOU ARE NOT THE SINGER.',p50:'The tide rises!',p20:'I WILL DROWN YOUR LITTLE HARBOUR!',die:'The deep... will... call again...'},
+  blackwake:{title:'Lord of the Wreckers',pull:'Another ship on the rocks! Strip it, lads!',p50:'You fight like a sailor. A dead one!',p20:'All hands! ALL HANDS!',die:'The sea... keeps... what it takes...'}});
+BOSSLOOT.thalassor={n:2,p:[0,0,50,50,0]}; BOSSLOOT.blackwake={n:1,p:[0,10,60,30,0]};
+Object.assign(LOOK,{
+  corwin:{torso:[.14,.2,.34],legs:[.22,.2,.2],arms:[.14,.2,.34],boots:[.16,.12,.08],trim:[.86,.68,.3],cape:[.12,.16,.28],head:'cap',hat:[.12,.16,.28],beard:[.62,.6,.58],weapon:'none'},
+  della:{torso:[.62,.3,.24],legs:[.42,.24,.2],arms:[.62,.3,.24],boots:[.25,.16,.1],trim:[.92,.9,.84],tabard:[.92,.9,.84],robe:[.55,.27,.22],head:'hair',hair:[.62,.3,.14],weapon:'none'},
+  odessa:{torso:[.3,.48,.44],legs:[.28,.26,.22],arms:[.3,.48,.44],boots:[.24,.18,.12],trim:[.8,.66,.36],robe:[.28,.44,.4],head:'hair',hair:[.18,.12,.1],weapon:'none',pack:true},
+  garrick:{torso:[.4,.27,.18],legs:[.25,.2,.16],arms:[.74,.55,.42],boots:[.18,.12,.08],trim:[.3,.2,.12],tabard:[.3,.2,.12],head:'hair',hair:[.25,.18,.12],beard:[.28,.2,.12],weapon:'hammer',gloves:[.2,.14,.1]},
+  ysra:{robe:[.84,.86,.86],torso:[.84,.86,.86],arms:[.82,.84,.84],legs:[.6,.66,.66],boots:[.3,.3,.3],trim:[.2,.62,.6],cape:[.16,.46,.48],head:'hair',hair:[.92,.92,.95],weapon:'staff',orb:[.4,1,.9]},
+  odo:{torso:[.45,.32,.2],legs:[.3,.26,.2],arms:[.45,.32,.2],boots:[.2,.15,.1],trim:[.3,.25,.2],head:'cap',hat:[.3,.25,.18],beard:[.4,.3,.22],weapon:'none'},
+  tobin:{torso:[.26,.4,.46],legs:[.3,.28,.22],arms:[.26,.4,.46],boots:[.22,.18,.12],trim:[.5,.42,.3],head:'cap',hat:[.6,.55,.35],beard:[.82,.82,.8],weapon:'rod'},
+  cutthroat:{torso:[.3,.22,.16],legs:[.2,.17,.13],arms:[.36,.27,.2],boots:[.15,.1,.07],trim:[.62,.14,.1],head:'hood',hood:[.56,.12,.09],weapon:'rustsword',straps:true,strapC:[.2,.13,.08]},
+  slinger:{torso:[.4,.34,.24],legs:[.24,.2,.15],arms:[.4,.34,.24],boots:[.16,.11,.08],trim:[.5,.4,.25],head:'hoodopen',hood:[.36,.3,.2],weapon:'bow',straps:true,strapC:[.22,.15,.1]},
+  deepcaller:{...LOOK.tidecaller,robe:[.05,.2,.28],torso:[.05,.2,.28],arms:[.05,.18,.26],hat:[.03,.1,.14],eyes:[.3,1,.85],weapon:'trident',scale:1.1},
+  blackwake:{torso:[.12,.1,.11],legs:[.2,.16,.13],arms:[.12,.1,.11],boots:[.08,.06,.05],trim:[.86,.68,.3],cape:[.36,.06,.06],head:'cap',hat:[.08,.07,.07],beard:[.12,.08,.06],weapon:'greatsword',pauld:[.3,.26,.22],metal:[.4,.36,.3],scale:1.6,eyes:[1,.85,.5]}});
+for(let i=0;i<6;i++) LOOK['bguard'+i]={torso:[.6,.62,.66],legs:[.28,.3,.34],arms:[.58,.6,.64],boots:[.2,.17,.15],cape:[.13,.19,.33],trim:[.86,.68,.3],tabard:[.13,.19,.33],head:'helm',metal:[.66,.68,.72],pauld:[.64,.66,.7],weapon:'spear',off:'shield'};
+QLOOK.brinehound={...QLOOK.wolf,col:[.34,.38,.4],dark:[.16,.2,.24],eyes:[.5,1,.9],eyeE:1.8,mane:true,scale:1.12};
+LPAL.shellback=[[.46,.16,.1],[.64,.24,.13],[.86,.55,.36],[1,.75,.4],1.0];
+Object.assign(MOBH,{shellback:1,brinehound:1.35,cutthroat:2,slinger:2,deepcaller:2.4,brineshade:2.2,blackwake:3.4,thalassor:MOBH.wyrm||6.2});
+Object.assign(MOBMAT,{shellback:MOBMAT.murkcrab||'shell',brinehound:'flesh',brineshade:MOBMAT.tidewraith||'spirit',thalassor:MOBMAT.wyrm||'flesh'});
+Object.assign(MOBVOICE,{shellback:MOBVOICE.murkcrab,brinehound:MOBVOICE.wolf,cutthroat:MOBVOICE.cultist,slinger:MOBVOICE.cultist,deepcaller:MOBVOICE.tidecaller,brineshade:MOBVOICE.tidewraith,thalassor:MOBVOICE.wyrm});
+for(const k in MOBVOICE) if(MOBVOICE[k]===undefined) delete MOBVOICE[k];
+SKINK.shellback=1; SKINK.brinehound=1; MEATK.shellback='crabmeat'; MEATK.brinehound='gamemeat';
+/* services: the inn is a home, the merchant sells, the smith upgrades, the ferry sails */
+Object.assign(RSVC,{della:[['sethome','🏠 Make Brinehaven your home']],odessa:[['shop','Browse goods']],garrick:[['smith','Upgrade gear']],odo:[['sail','⛵ Sail to Mirrowmere (5 gold)']]});
+RSVC.bram=[...(RSVC.bram||[]),['sail','⛵ Sail to Brinehaven (5 gold)']];
+{ const hp0=homePos; homePos=function(){ if(me&&me.c.home==='della') return {x:405*TS+16,y:112*TS+16,name:'Brinehaven'}; return hp0(); }; }
+function restPoint(x,y){ const L=[{x:SPAWN.x,y:SPAWN.y},{x:396*TS+16,y:125*TS+16}], hk=NPCS.find(n=>n.id==='hakon'); if(hk) L.push({x:hk.x+40,y:hk.y+40}); L.push({x:REACH.cx*TS+16,y:(REACH.cy+2)*TS});
+  let b=L[0], bd=1e18; for(const p of L){ const d=(p.x-x)**2+(p.y-y)**2; if(d<bd){ bd=d; b=p; } } return b; }
+function sailFrom(n){ if(!me||me.dead) return; const toPort=n.id==='bram';
+  if(toPort&&!(me.c.disc||[]).includes('brinehaven')) return err('Odo only sails for those who have found Brinehaven on foot first');
+  if(me.c.lvl<10) return err('The crossing is too rough below level 10'); if(inCombat()) return err('You are in combat'); if(me.c.gold<5) return err('The passage costs 5 gold');
+  me.c.gold-=5; closeDlg(); if(me.mounted) dismount(); renderInv&&renderInv();
+  const f=document.createElement('div'); f.style.cssText='position:fixed;inset:0;background:#05080c;opacity:0;transition:opacity .7s;z-index:80;pointer-events:none;display:flex;align-items:center;justify-content:center;color:#e8d8b0;font:700 24px Cinzel,serif;letter-spacing:2px;text-shadow:0 2px 8px #000';
+  f.textContent=toPort?'⛵  Sailing east to Brinehaven…':'⛵  Sailing west to Mirrowmere…'; document.body.appendChild(f); requestAnimationFrame(()=>{ f.style.opacity='1'; }); try{ sfx('splash'); }catch(e){}
+  setTimeout(()=>{ let p; if(toPort){ const o=NPCS.find(q=>q.id==='odo'); p=[o.x-56,o.y]; } else { const B=NPCS.find(q=>q.id==='bram'); const q=findOpen(Math.floor(B.x/TS)+1,Math.floor(B.y/TS)+1); p=[q[0]*TS+16,q[1]*TS+16]; }
+    me.x=p[0]; me.y=p[1]; me.target=null; me.auto=false; if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } sendPresence(true); persist();
+    chatLine(toPort?'You step off the boat onto the Brinehaven pier.':'The boat bumps against the Mirrowmere landing.','c-sys');
+    setTimeout(()=>{ f.style.opacity='0'; setTimeout(()=>f.remove(),800); },700); },1300); }
+/* the people of Brinehaven going about their day */
+function villSeg(v,t){ const [ax,az,bx,bz]=v.seg, Lr=Math.hypot(bx-ax,bz-az), P=v.pause, cyc=2*Lr/v.spd+2*P; let s=((t+v.ph)%cyc+cyc)%cyc, u, dir=1, mv=1;
+  if(s<P){ u=0; mv=0; } else if(s<P+Lr/v.spd){ u=(s-P)*v.spd/Lr; } else if(s<2*P+Lr/v.spd){ u=1; dir=-1; mv=0; } else { u=1-(s-2*P-Lr/v.spd)*v.spd/Lr; dir=-1; }
+  return {x:ax+(bx-ax)*u,z:az+(bz-az)*u,face:Math.atan2(bz-az,bx-ax)+(dir<0?Math.PI:0),mv,walk:u*Lr*3.4}; }
+{ const R=mulberry32(6363), cloth=[[.16,.4,.44],[.13,.19,.33],[.55,.3,.2],[.86,.84,.78],[.4,.5,.3],[.6,.5,.35],[.3,.34,.4],[.5,.22,.18]];
+  const segs=[[385.8,120.3,396.4,120.3],[402.6,122.7,413.3,122.7],[398.4,105.6,398.4,118.3],[400.6,124.2,400.6,136.6],[413.6,106,413.6,136.4],[PORT.x1+1.5,PORT.cy-.3,PORT.x1+10,PORT.cy-.3],[386,112.6,394,112.6],[401,131.6,412,131.6],[385.5,128.7,385.5,136.5]];
+  for(let i=0;i<segs.length;i++){ const c=cloth[Math.floor(R()*cloth.length)], c2=cloth[Math.floor(R()*cloth.length)], fem=R()<.5, sailor=R()<.4;
+    const L={torso:c,arms:c.map(v=>v*.92),legs:fem?c:c2.map(v=>v*.7),boots:[.25,.17,.1],trim:c2,head:sailor?'cap':R()<.35?'hoodopen':'hair',hat:[.2,.22,.3],hair:[[.3,.2,.12],[.6,.45,.25],[.15,.1,.08],[.75,.75,.72]][Math.floor(R()*4)],hood:c2,robe:fem?c:null,pack:R()<.3};
+    VILL.push({seg:segs[i],spd:.8+R()*.5,ph:R()*500,pause:2+R()*5,L,skin:Math.floor(R()*5)}); } }
+/* v63 balance: Barbarian and Hunter were out-damaging every other class. Both deal about 12% less, the Hunter's wolf 15% less. */
+{ const nerf=(cls,k)=>{ const A=CLS[cls].auto; A.dmg*=k; A.dmgL*=k; for(const a of ABIL[cls]||[]){ if(a.dmg) a.dmg=a.dmg.map(v=>Math.round(v*k*10)/10); if(a.aoeDmg) a.aoeDmg=a.aoeDmg.map(v=>Math.round(v*k*10)/10); } };
+  nerf('barbarian',.88); nerf('hunter',.88); }
+/* the professions window says live whether you are standing at an anvil */
+setInterval(()=>{ try{ const a=document.getElementById('pfAnv'); if(!a||!me) return; const ok=stationOk({prof:'blacksmithing'}); const t=ok?'⚒ You are at an anvil: smithing is ready.':'⚒ Stand at an anvil to smith: Doran\'s forge in Hearthmere, Garrick\'s forge in Brinehaven or Jarl Hakon\'s camp in Frostwatch.'; if(a.textContent!==t){ a.textContent=t; a.className='pfanv '+(ok?'ok':'no'); } }catch(e){} },500);
+
+/* =====================================================================
+   v63: BRINEHAVEN — the scenery of the harbour town and the coast's landmarks
+   (called while the static world mesh is built; everything stays inside the functions)
+   ===================================================================== */
+function addPort(d){ const P=PORT; if(!P.B||!P.B.length) return; const y0=.55;
+  const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
+  const cyl=(x,y,z,r,h,col,e)=>gAdd(d,RC,x,y,z,0,r*2,h,r*2,col,e);
+  const WASH=[[.9,.88,.82],[.86,.84,.79],[.89,.85,.76],[.82,.85,.86],[.9,.83,.72]], SLATE=[[.25,.29,.35],[.29,.32,.37],[.22,.25,.3],[.33,.35,.39]];
+  const STONE=[.6,.58,.54], DST=[.45,.43,.41], TIM=[.24,.17,.11], TEAL=[.16,.4,.44], NAVY=[.13,.19,.33], GOLD=[.86,.68,.3], GLASS=[1,.74,.42], IRON=[.12,.11,.1], WOOD=[.38,.27,.17];
+  const lamp=(x,z,yb)=>{ const b=yb??y0; cyl(x,b,z,.07,2.7,IRON); cyl(x,b,z,.15,.18,IRON); box(x,b+2.9,z,.32,.42,.32,[1,.62,.25],0,1.3); box(x,b+3.16,z,.42,.08,.42,IRON); gAdd(d,RCN,x,b+3.2,z,0,.36,.28,.36,IRON); STAT_LIGHTS.push({x,y:b+2.9,z,r:9,c:[1.2,.75,.38],night:true,lamp:true}); };
+  /* a feature on one face of a building: u runs along the face from its left corner */
+  const onFace=(b,side,u,y,wd,ht,col,e,out)=>{ const o=out||0; if(side==='s') box(b.x+u,y,b.y+b.h+o,wd,ht,.08,col,0,e); else if(side==='n') box(b.x+u,y,b.y-o,wd,ht,.08,col,0,e); else if(side==='e') box(b.x+b.w+o,y,b.y+u,.08,ht,wd,col,0,e); else box(b.x-o,y,b.y+u,.08,ht,wd,col,0,e); };
+  const faceLen=(b,side)=>side==='n'||side==='s'?b.w:b.h;
+  const facePt=(b,side,u,o)=>side==='s'?[b.x+u,b.y+b.h+o]:side==='n'?[b.x+u,b.y-o]:side==='e'?[b.x+b.w+o,b.y+u]:[b.x-o,b.y+u];
+  const door=(b,side,col)=>{ const L=faceLen(b,side), u=L/2; onFace(b,side,u,y0+.36+.8,.95,1.6,col||TIM,0,.03); onFace(b,side,u,y0+.36+1.68,1.25,.2,STONE,0,.05); onFace(b,side,u+.28,y0+.36+.8,.07,.07,GOLD,0,.09);
+    const [sx,sz]=facePt(b,side,u,.32); box(sx,y0+.08,sz,side==='n'||side==='s'?1.3:.5,.16,side==='n'||side==='s'?.5:1.3,DST); };
+  const windows=(b,side,y,skipMid,glass,shut)=>{ const L=faceLen(b,side), n=Math.max(1,Math.round((L-.5)/1.55)); let lit=0;
+    for(let i=0;i<n;i++){ const u=(i+.5)*L/n; if(skipMid&&Math.abs(u-L/2)<.85) continue;
+      onFace(b,side,u,y,.62,.78,glass||GLASS,1.25,.03); onFace(b,side,u,y-.45,.8,.08,STONE,0,.07); onFace(b,side,u,y+.44,.78,.07,DST,0,.05);
+      for(const q of [-1,1]) onFace(b,side,u+q*.46,y,.2,.82,shut||TEAL,0,.06);
+      if(lit<1&&hash2(b.x+i,b.y,71)<.6){ lit++; const [lx,lz]=facePt(b,side,u,.6); STAT_LIGHTS.push({x:lx,y:y,z:lz,r:3.2,c:[1,.62,.3],night:true}); } } };
+  /* the harbour cottage: whitewashed stone, quoins, steep slate roof, teal shutters, a chimney */
+  const house=(b,o)=>{ o=o||{}; const x0=b.x, z0=b.y, w=b.w, h=b.h, cx=x0+w/2, cz=z0+h/2, hv=hash2(x0,z0,63);
+    const wall=o.wall||WASH[Math.floor(hv*WASH.length)], roof=o.roof||SLATE[Math.floor(hash2(z0,x0,64)*SLATE.length)], shut=o.shut||[TEAL,[.42,.2,.16],[.2,.3,.46],[.32,.4,.26]][Math.floor(hash2(x0,z0,65)*4)];
+    const H=o.H||(b.st===2?3.9:2.5), top=y0+.36+H;
+    box(cx,y0+.18,cz,w+.14,.36,h+.14,DST); box(cx,y0+.36+H/2,cz,w-.16,H,h-.16,wall);
+    for(const [qx,qz] of [[x0+.1,z0+.1],[x0+w-.1,z0+.1],[x0+.1,z0+h-.1],[x0+w-.1,z0+h-.1]]) box(qx,y0+.36+H/2,qz,.3,H,.3,o.quoin||STONE);
+    if(b.st===2) box(cx,y0+.36+H*.5,cz,w-.04,.13,h-.04,o.band||TIM);
+    const rx=w>=h, rw=(rx?h:w)+.55, rl=(rx?w:h)+.5, rh=Math.min(2.5,rw*.66);
+    box(cx,top+.06,cz,w+.32,.12,h+.32,TIM); gAdd(d,RP,cx,top+.1,cz,rx?Math.PI/2:0,rw,rh,rl,roof); box(cx,top+.12+rh,cz,rx?rl:.18,.1,rx?.18:rl,DST);
+    if(!o.noChim){ const chx=rx?x0+w-.75:cx+(rw/2-.6)*.5, chz=rx?cz+.35:z0+h-.75, ct=top+rh+.55; box(chx,(top+ct)/2,chz,.55,ct-top,.55,STONE); box(chx,ct+.06,chz,.68,.13,.68,DST); CHIMNEYS.push({x:chx,y:ct+.2,z:chz}); }
+    const dside=b.door||'s'; door(b,dside,o.doorC||[[.2,.34,.4],[.36,.22,.14],[.46,.16,.12]][Math.floor(hv*3)]);
+    for(const side of ['n','s','e','w']){ windows(b,side,y0+.36+1.25,side===dside,null,shut); if(b.st===2) windows(b,side,y0+.36+H*.5+1.05,false,null,shut); }
+    /* flower boxes and a barrel by the door */
+    { const [bx,bz]=facePt(b,dside,faceLen(b,dside)/2+.95,.45); gAdd(d,RFR,bx,y0,bz,0,.5,.72,.5,[.42,.28,.15]); }
+    return {top,rh}; };
+  for(const b of P.B){ const x0=b.x, z0=b.y, w=b.w, h=b.h, cx=x0+w/2, cz=z0+h/2;
+    if(b.k==='house') house(b);
+    else if(b.k==='hut'){ /* fishermen's huts: weathered planks on a stone footing, thatch, nets and a drying rack */
+      const H=2.2, top=y0+.3+H, gy=Math.max(y0,hgt(cx,cz))-.02, wood=[.44,.36,.27];
+      box(cx,gy+.15,cz,w+.1,.3,h+.1,DST); box(cx,gy+.3+H/2,cz,w-.14,H,h-.14,wood);
+      for(let x=x0+.3;x<x0+w;x+=.45) for(const fz of [z0+.05,z0+h-.05]) box(x,gy+.3+H/2,fz,.05,H,.05,[.3,.24,.17]);
+      const rx=w>=h; gAdd(d,RP,cx,gy+.3+H,cz,rx?Math.PI/2:0,(rx?h:w)+.7,1.9,(rx?w:h)+.6,[.6,.5,.3]); box(cx,gy+.32+H+1.9,cz,rx?w+.6:.22,.14,rx?.22:h+.6,[.48,.4,.24]);
+      const L=faceLen(b,b.door); { const [dx,dz]=facePt(b,b.door,L/2,.03); box(dx,gy+1.1,dz,b.door==='n'||b.door==='s'?.85:.08,1.5,b.door==='n'||b.door==='s'?.08:.85,[.3,.22,.14]); }
+      { const [wx,wz]=facePt(b,b.door,L/2+(L>3?1.1:.95),.03); box(wx,gy+1.5,wz,b.door==='n'||b.door==='s'?.5:.08,.45,b.door==='n'||b.door==='s'?.08:.5,GLASS,0,1.2); STAT_LIGHTS.push({x:wx,y:gy+1.5,z:wz,r:3,c:[1,.62,.3],night:true}); }
+      box(x0+w-.6,gy+.3+H+.9,cz,.45,1.6,.45,[.5,.47,.44]); CHIMNEYS.push({x:x0+w-.6,y:gy+.3+H+1.8,z:cz});
+      { const [rx2,rz2]=facePt(b,b.door==='n'?'w':'n',faceLen(b,b.door==='n'?'w':'n')/2,1.3); for(const q of [-.9,.9]) cyl(rx2+q,gy,rz2,.04,1.5,WOOD); box(rx2,gy+1.45,rz2,2,.05,.05,WOOD); for(let k=0;k<5;k++) box(rx2-.7+k*.35,gy+1.15,rz2,.08,.5,.03,[.7,.74,.78],0,.1); } }
+    else if(b.k==='office') { house(b,{wall:[.78,.74,.66],roof:[.2,.24,.3],shut:NAVY}); onFace(b,'w',h/2,y0+.36+3.5,.9,.6,NAVY,0,.06); onFace(b,'w',h/2,y0+.36+3.5,.3,.3,GOLD,.3,.1); }
+    else if(b.k==='hall'){ /* the Harbourmaster's Hall: stone below, timber above, a clock tower over the door */
+      const r=house(b,{wall:[.66,.64,.6],quoin:[.52,.5,.47],roof:[.22,.25,.3],shut:NAVY,H:4.3,noChim:true,doorC:[.3,.2,.12]}); const tz=z0+h-1.15, tH=8.6;
+      box(cx,y0+tH/2,tz,2.3,tH,2.3,[.62,.6,.56]); for(const q of [0,1,2]) box(cx,y0+2.6+q*2.4,tz,2.42,.14,2.42,DST);
+      for(const [dx,dz] of [[0,1],[0,-1],[1,0],[-1,0]]){ const fx=cx+dx*1.17, fz=tz+dz*1.17; gAdd(d,RC,fx,y0+tH-1.25,fz,0,1.05,.05,1.05,[.95,.92,.82],.9,dx?Math.PI/2:0,dz?Math.PI/2:0);
+        box(fx+dz*.0,y0+tH-1.25+.18,fz,dx?.05:.06,.36,dz?.05:.06,IRON); box(fx,y0+tH-1.25,fz+(dx?.12:0)+0,dx?.05:.26,.05,dz?.05:.26,IRON); box(cx+dx*1.18,y0+tH-2.7,tz+dz*1.18,dx?.06:.5,.9,dz?.06:.5,[.1,.08,.07]); }
+      box(cx,y0+tH+.08,tz,2.7,.18,2.7,DST); gAdd(d,RCN,cx,y0+tH+.16,tz,Math.PI/4,3.3,3.4,3.3,[.2,.24,.3]); cyl(cx,y0+tH+3.5,tz,.04,1.4,GOLD); box(cx+.36,y0+tH+4.55,tz,.64,.36,.03,NAVY,0,.15); box(cx+.36,y0+tH+4.55,tz+.02,.22,.16,.02,GOLD,0,.3);
+      STAT_LIGHTS.push({x:cx,y:y0+tH-1.2,z:tz+1.8,r:6,c:[1,.85,.55],night:true});
+      for(const s of [-1,1]){ onFace(b,'s',w/2+s*2.6,y0+.36+3.1,.7,1.7,NAVY,0,.06); onFace(b,'s',w/2+s*2.6,y0+.36+3.2,.28,.28,GOLD,.25,.09); }
+      for(let k=0;k<3;k++) box(cx,y0+.06+k*.1,z0+h+.55+(2-k)*.22,2.6-k*.3,.12,.5,DST); lamp(cx-2.3,z0+h+1.1); lamp(cx+2.3,z0+h+1.1); }
+    else if(b.k==='inn'){ /* the Gull & Anchor: two storeys, a balcony, a swinging sign and tables outside */
+      house(b,{wall:[.9,.84,.7],roof:[.3,.22,.18],shut:[.42,.2,.16],H:4.1,band:TIM,doorC:[.4,.24,.13]});
+      for(let x=x0+.1;x<=x0+w;x+=w/5) onFace(b,'s',x-x0,y0+.36+3.1,.12,1.9,TIM,0,.04); onFace(b,'s',w/2,y0+.36+4.05,w,.14,TIM,0,.04);
+      box(cx,y0+.36+2.2,z0+h+.55,w-1.2,.12,1.1,WOOD); for(let k=0;k<=8;k++) box(x0+.6+k*(w-1.2)/8,y0+.36+2.65,z0+h+1.06,.06,.8,.06,TIM); box(cx,y0+.36+3.04,z0+h+1.06,w-1.2,.08,.08,TIM);
+      for(const q of [.6,w-.6]) cyl(x0+q,y0,z0+h+1.05,.08,2.6,TIM);
+      { const sx=x0+1.2, sz=z0+h+.9; box(sx,y0+3,z0+h+.45,.08,.08,1,IRON); box(sx,y0+2.45,sz,1,.75,.07,[.3,.22,.14]); box(sx,y0+2.45,sz+.05,.07,.48,.02,[.85,.82,.72]); box(sx,y0+2.6,sz+.05,.3,.06,.02,[.85,.82,.72]); box(sx,y0+2.22,sz+.05,.42,.06,.02,[.85,.82,.72]); }
+      for(const ox of [-2.1,2.1]){ const x=cx+ox, z=z0+h+2.2; cyl(x,y0,z,.07,.75,WOOD); cyl(x,y0+.75,z,.6,.08,WOOD); for(const q of [-1,1]) box(x+q*.95,y0+.42,z,.3,.08,.9,WOOD); cyl(x+.2,y0+.83,z,.07,.18,[.8,.75,.6]); gAdd(d,RS,x-.15,y0+.9,z+.1,0,.14,.14,.14,[1,.7,.35],1.2); }
+      for(let k=0;k<3;k++) gAdd(d,RFR,x0+w+.4,y0,z0+.7+k*.75,0,.55,.8,.55,[.42,.28,.15]); STAT_LIGHTS.push({x:cx,y:y0+2.4,z:z0+h+1.8,r:7,c:[1.1,.66,.32],night:true}); }
+    else if(b.k==='warehouse'){ /* tarred planks, double doors and a hoist beam */
+      const H=3.6, top=y0+H, wood=[.34,.25,.17];
+      box(cx,y0+.15,cz,w+.1,.3,h+.1,DST); box(cx,y0+H/2,cz,w-.12,H,h-.12,wood);
+      for(let x=x0+.25;x<x0+w;x+=.42) for(const fz of [z0+.04,z0+h-.04]) box(x,y0+H/2,fz,.05,H,.06,[.22,.16,.1]);
+      for(let z=z0+.25;z<z0+h;z+=.42) for(const fx of [x0+.04,x0+w-.04]) box(fx,y0+H/2,z,.06,H,.05,[.22,.16,.1]);
+      const rx=w>=h; gAdd(d,RP,cx,top,cz,rx?Math.PI/2:0,(rx?h:w)+.5,1.7,(rx?w:h)+.4,[.28,.21,.15]);
+      onFace(b,b.door,faceLen(b,b.door)/2,y0+1.15,1.9,2.3,[.3,.2,.12],0,.04); onFace(b,b.door,faceLen(b,b.door)/2,y0+1.15,.06,2.3,IRON,0,.08); onFace(b,b.door,faceLen(b,b.door)/2,y0+2.5,1.6,.9,[.3,.2,.12],0,.04);
+      { const [hx,hz]=facePt(b,b.door,faceLen(b,b.door)/2,.6); box(hx,top-.1,hz,.16,.16,1.3,TIM,b.door==='e'||b.door==='w'?Math.PI/2:0); cyl(hx,top-1.9,hz,.012,1.7,[.6,.5,.35]); box(hx,top-2.25,hz,.6,.6,.6,[.55,.4,.22]); }
+      for(let k=0;k<4;k++){ const [px,pz]=facePt(b,b.door,.5+k*.42,.8); box(px,y0+.3,pz,.6,.6,.6,[.5,.36,.2],k*.4); } }
+    else if(b.k==='temple'){ /* the Temple of the Tides: pale stone, a verdigris dome, a pillared porch */
+      const H=4.4, top=y0+.36+H, pale=[.82,.8,.74];
+      box(cx,y0+.2,cz,w+.3,.4,h+.3,[.6,.58,.54]); box(cx,y0+.36+H/2,cz,w-.2,H,h-.2,pale); box(cx,top+.15,cz,w+.1,.3,h+.1,[.66,.64,.6]);
+      cyl(cx,top+.3,cz,2.3,.9,[.7,.68,.62]); gAdd(d,RS,cx,top+1.2,cz,0,4.6,3.6,4.6,[.34,.58,.52]); for(let k=0;k<8;k++){ const a=k/8*6.283; box(cx+Math.cos(a)*2.28,top+.75,cz+Math.sin(a)*2.28,.5,.5,.12,[1,.82,.5],-a+Math.PI/2,.9); }
+      cyl(cx,top+2.9,cz,.3,.7,[.7,.68,.62]); gAdd(d,RCN,cx,top+3.6,cz,0,.75,.9,.75,[.34,.58,.52]); gAdd(d,RS,cx,top+4.55,cz,0,.32,.32,.32,GOLD,.5);
+      for(const side of ['e','w','s']){ const L=faceLen(b,side); for(let k=0;k<3;k++){ const u=(k+.5)*L/3; onFace(b,side,u,y0+.36+2.2,.62,1.9,[[.25,.75,.85],[.35,.5,1],[.3,.9,.75]][k],1.3,.03); onFace(b,side,u,y0+.36+3.25,.7,.18,[.66,.64,.6],0,.05); } }
+      const fz=z0-.05; for(let k=0;k<4;k++){ const x=x0+1.1+k*(w-2.2)/3; cyl(x,y0+.36,fz-1.3,.24,3.3,pale); cyl(x,y0+.36,fz-1.3,.32,.25,[.66,.64,.6]); cyl(x,y0+3.5,fz-1.3,.32,.22,[.66,.64,.6]); }
+      box(cx,y0+3.95,fz-.75,w-.4,.35,1.7,[.72,.7,.65]); gAdd(d,RP,cx,y0+4.12,fz-.75,Math.PI/2,1.8,1.1,w-.2,[.34,.58,.52]);
+      for(let k=0;k<3;k++) box(cx,y0+.1+k*.12,fz-2.15-(2-k)*.0-k*.0,w-.6-k*.4,.14,.55,[.66,.64,.6]);
+      door(b,'n',[.3,.48,.46]); for(const s of [-1,1]){ const x=cx+s*(w/2+.6), z=fz-1.8; cyl(x,y0,z,.25,1,[.4,.42,.42]); gAdd(d,RS,x,y0+1.05,z,0,.5,.25,.5,[.5,1,.9],2); STAT_LIGHTS.push({x,y:y0+1.4,z,r:6,c:[.45,1,.9],night:true}); }
+      STAT_LIGHTS.push({x:cx,y:top+1.5,z:cz,r:7,c:[.6,1,.9],night:true}); }
+    else if(b.k==='smithy'){ /* Garrick's forge: a stone smithy with an open lean-to, glowing coals and an anvil */
+      house(b,{wall:[.62,.6,.56],quoin:[.5,.48,.45],roof:[.26,.27,.3],shut:[.3,.22,.15],noChim:true,doorC:[.3,.2,.12]});
+      const lz=z0+h, lt=y0+2.5; for(const q of [.3,w-.3]) cyl(x0+q,y0,lz+1.7,.09,2.4,TIM); gAdd(d,RB,cx,lt,lz+.85,0,w+.2,.1,1.95,[.3,.22,.16],0,0,.22);
+      box(x0+1,y0+.5,lz+.9,1.3,1,1.1,[.42,.4,.38]); box(x0+1,y0+1.02,lz+.9,1,.06,.8,[1,.42,.1],0,2.4); STAT_LIGHTS.push({x:x0+1,y:y0+1.4,z:lz+.9,r:7,c:[1.5,.6,.2],fire:true});
+      box(x0+1,(y0+1+top0(b))/2,lz+.4,.7,top0(b)-y0-1+2.4,.7,[.45,.42,.4]); CHIMNEYS.push({x:x0+1,y:top0(b)+2.6,z:lz+.4});
+      box(cx+.6,y0+.35,lz+1.1,.4,.7,.3,IRON); box(cx+.6,y0+.78,lz+1.1,.9,.18,.32,[.22,.22,.24]); gAdd(d,RFR,cx+1.7,y0,lz+1.2,0,.6,.8,.6,[.42,.28,.15]); cyl(cx+1.7,y0+.78,lz+1.2,.25,.02,[.2,.35,.45],.2);
+      for(let k=0;k<3;k++){ box(x0+w-.4,y0+1,lz+.5+k*.45,.06,1.8,.06,[.75,.76,.8],0,.1); } box(x0+w-.4,y0+1.85,lz+.95,.1,.1,1.3,WOOD); }
+  }
+  function top0(b){ return y0+.36+(b.st===2?3.9:2.5); }
+  /* walls and towers */
+  const WST=[.63,.6,.55], WDK=[.48,.46,.42];
+  for(let y=P.y0;y<=P.y1;y++)for(let x=P.x0;x<=P.x1;x++){ if(tAt(x,y)!==T.TWALL) continue; const vert=x===P.x0, X=x+.5, Z=y+.5, sh=.93+hash2(x,y,5)*.12, ry=vert?Math.PI/2:0;
+    box(X,y0+1.45,Z,1.04,2.9,1.0,WST.map(v=>v*sh),ry); box(X,y0+.22,Z,1.06,.44,1.16,WDK,ry); box(X,y0+2.95,Z,1.06,.14,1.14,WDK,ry);
+    const oo=vert?[-.38,0]:y===P.y0?[0,-.38]:[0,.38], io=[-oo[0],-oo[1]]; if((x+y)%2===0) box(X+oo[0],y0+3.32,Z+oo[1],vert?.3:.5,.62,vert?.5:.3,WST.map(v=>v*sh*.96)); else box(X+io[0],y0+3.25,Z+io[1],vert?.26:.5,.46,vert?.5:.26,WST.map(v=>v*sh*.96));
+    if((x+y)%9===4){ const bx=X+oo[0]*1.45, bz=Z+oo[1]*1.45; box(bx,y0+1.95,bz,vert?.04:.55,1.35,vert?.55:.04,NAVY); box(bx,y0+2.66,bz,vert?.06:.6,.08,vert?.6:.06,GOLD); box(bx,y0+2,bz,vert?.05:.2,.2,vert?.2:.05,GOLD,0,.35); } }
+  const tower=(x,z,big)=>{ const r=big?1.15:.95, h=big?4.8:4.2; gAdd(d,RC,x,y0,z,0,r*2,h,r*2,WST); gAdd(d,RC,x,y0,z,0,r*2+.2,.5,r*2+.2,WDK); gAdd(d,RC,x,y0+h,z,0,r*2+.3,.32,r*2+.3,WDK);
+    for(let q=0;q<8;q++){ const a=q/8*Math.PI*2; box(x+Math.cos(a)*(r+.05),y0+h+.55,z+Math.sin(a)*(r+.05),.42,.5,.42,WST,-a); }
+    gAdd(d,RCN,x,y0+h+.3,z,0,r*2+.5,big?2.3:1.9,r*2+.5,[.24,.28,.34]); cyl(x,y0+h+2.2,z,.03,1.2,[.2,.15,.1]); box(x+.32,y0+h+3.05,z,.6,.36,.03,NAVY,0,.15); box(x+.32,y0+h+3.05,z+.02,.2,.14,.02,GOLD,0,.3);
+    for(let q=0;q<2;q++) box(x,y0+2.3+q*.7,z+(q?r:-r),.22,.4,.08,[1,.7,.35],0,1.2); STAT_LIGHTS.push({x,y:y0+2.6,z,r:5,c:[1,.62,.3],night:true}); };
+  tower(P.x0+.5,P.y0+.5,true); tower(P.x0+.5,P.y1+.5,true); tower(P.x1+.5,P.y0+.5,true); tower(P.x1+.5,P.y1+.5,true);
+  for(const g of P.gates){ const vert=g.side==='w', gx=g.x+.5, gz=g.y+.5; for(const q of [-1,1]) tower(gx+(vert?0:q*2.6),gz+(vert?q*2.6:0),false);
+    box(gx,y0+3.55,gz,vert?1.1:3.4,.85,vert?3.4:1.1,WST); box(gx,y0+3.1,gz,vert?1.12:3.1,.12,vert?3.1:1.12,WDK);
+    for(let k=-1;k<=1;k++) box(gx+(vert?0:k*.9),y0+2.82,gz+(vert?k*.9:0),vert?.12:.08,.4,vert?.08:.12,IRON);
+    const out=g.side==='w'?[-1,0]:g.side==='n'?[0,-1]:[0,1]; box(gx+out[0]*.56,y0+3.6,gz+out[1]*.56,vert?.05:1.1,.7,vert?1.1:.05,NAVY,0,.1); box(gx+out[0]*.6,y0+3.62,gz+out[1]*.6,vert?.04:.36,.36,vert?.36:.04,GOLD,0,.35);
+    for(const q of [-1,1]){ const lx=gx+(vert?out[0]*1.4:q*1.9), lz=gz+(vert?q*1.9:out[1]*1.4); lamp(lx,lz); } }
+  /* the quay: a dressed stone edge down into the water, bollards, a crane, ladders */
+  { const qx=P.x1+1.02; box(qx-.1,-.32,(P.y0+P.y1+1)/2,.3,1.74,P.y1-P.y0+1,[.5,.48,.45]); box(qx-.15,y0+.06,(P.y0+P.y1+1)/2,.4,.12,P.y1-P.y0+1,[.58,.56,.52]);
+    for(let y=P.y0+2;y<P.y1;y+=3){ if(P.piers.some(p=>y>=p.y0-1&&y<=p.y1+1)) continue; cyl(qx-.45,y0,y+.5,.14,.45,IRON); cyl(qx-.45,y0+.45,y+.5,.18,.08,IRON); }
+    for(let y=P.y0+4;y<P.y1;y+=8) if(!P.piers.some(p=>y>=p.y0-1&&y<=p.y1+1)){ box(qx-.4,y0+.1,y+.5,.7,.2,.7,DST); cyl(qx-.4,y0+.2,y+.5,.12,4.2,TIM); gAdd(d,RB,qx+.4,y0+4,y+.5,0,2.2,.18,.18,TIM,0,-.25); cyl(qx+1.35,y0+1.8,y+.5,.012,2.3,[.6,.5,.35]); box(qx+1.35,y0+1.6,y+.5,.5,.4,.5,[.5,.36,.2]); }
+    for(let y=P.y0+3;y<=P.y1-3;y+=2) if(lampOk(P.x1-.4,y+.5)&&(y-P.y0)%6===3) lamp(P.x1-.4,y+.5); }
+  function lampOk(x,z){ const t=tAt(Math.floor(x),Math.floor(z)); return !SOLID.has(t); }
+  /* piers on posts, lanterns at the ends, boats tied alongside */
+  for(const p of P.piers){ const xa=P.x1+1, xb=P.x1+p.len+1; for(let x=xa+.3;x<xb;x+=1.5) for(const z of [p.y0+.05,p.y1+.95]) cyl(x,-1.4,z,.1,1.95,[.26,.19,.12]);
+    for(const z of [p.y0+.04,p.y1+.96]) box((xa+xb)/2,.36,z,xb-xa,.12,.1,[.3,.22,.14]);
+    if(p.head){ for(let z=p.y0-3+.3;z<p.y1+4;z+=1.5) for(const x of [xb-2+.05,xb-.05]) cyl(x,-1.4,z,.1,1.95,[.26,.19,.12]); for(const s of [-1,1]) lamp(xb-1,(s<0?p.y0-2.5:p.y1+3.5),.45); }
+    else lamp(xb-.5,p.y0+.5+(p.y1-p.y0)/2,.45); }
+  if(P.jetty){ const J=P.jetty; for(let x=J.x0+.3;x<=J.x1+1;x+=1.5) for(const z of [J.y+.05,J.y+.95]) cyl(x,-1.4,z,.09,1.9,[.26,.19,.12]); }
+  const boat=(x,z,ry,L,big,sail)=>{ const c=Math.cos(ry), s=Math.sin(ry), at=(u,v)=>[x+u*c+v*s,z-u*s+v*c], B=L*.36;
+    const hc=[[.34,.22,.13],[.2,.3,.36],[.42,.16,.12]][Math.floor(hash2(x|0,z|0,73)*3)];
+    gAdd(d,RS,x,.12,z,ry,L,1,B,hc); gAdd(d,RS,x,.2,z,ry,L*.98,.62,B*.98,[.86,.82,.7]); box(x,.45,z,L*.78,.06,B*.72,[.45,.33,.2],ry);
+    for(let k=-1;k<=1;k++){ const [bx,bz]=at(k*L*.25,0); box(bx,.52,bz,.12,.08,B*.7,[.36,.26,.16],ry); }
+    if(big){ const [cx2,cz2]=at(-L*.27,0); box(cx2,.85,cz2,L*.22,.8,B*.6,[.36,.26,.16],ry); box(cx2,1.3,cz2,L*.26,.1,B*.68,[.3,.2,.12],ry); }
+    const [mx,mz]=at(L*.06,0), mh=L*(big?1.05:.85); cyl(mx,.45,mz,.06,mh,[.3,.22,.14]);
+    if(sail){ const [sx2,sz2]=at(-L*.14,0); gAdd(d,RB,sx2,.45+mh*.55,sz2,ry,L*.42,mh*.72,.03,[.92,.88,.78]); gAdd(d,RB,sx2,.45+mh*.18,sz2,ry,L*.5,.07,.07,[.3,.22,.14]); }
+    else { const [sx2,sz2]=at(-L*.12,0); gAdd(d,RB,sx2,.45+mh*.3,sz2,ry,L*.46,.14,.14,[.85,.8,.68]); }
+    STAT_LIGHTS.push({x:mx,y:.45+mh*.4,z:mz,r:3,c:[1,.62,.3],night:true}); };
+  boat(P.x1+5,108.6,0,4.2,false,false); boat(P.x1+6.5,112.2,0,3.4,false,true); boat(P.x1+8,P.cy-2.6,0,6.4,true,true); boat(P.x1+7,P.cy+2.6,0,5,true,false); boat(P.x1+4.6,130.6,0,3.2,false,false); boat(P.x1+5.8,134.1,0,3.8,false,true); boat(P.x1+17,P.cy+8,.5,7.6,true,true); if(P.jetty){ boat(P.jetty.x1-1,P.jetty.y-1.1,0,3.4,false,false); boat(P.jetty.x0+1.4,P.jetty.y+2.6,.35,3,false,false); }
+  /* the plaza fountain: a bronze anchor over a round basin */
+  { const fx=P.cx+.5, fz=P.cy+.5, br=[.36,.52,.46]; cyl(fx,y0,fz,1.55,.55,STONE); cyl(fx,y0+.5,fz,1.38,.06,[.2,.45,.6],.15); cyl(fx,y0,fz,.42,1.2,STONE);
+    cyl(fx,y0+1.15,fz,.09,2.4,br); box(fx,y0+3.35,fz,1.1,.14,.14,br); gAdd(d,RS,fx,y0+3.62,fz,0,.32,.32,.12,br); for(const s of [-1,1]){ gAdd(d,RB,fx+s*.42,y0+1.35,fz,0,.9,.12,.14,br,0,s*.75); gAdd(d,RCN,fx+s*.78,y0+1.62,fz,0,.26,.3,.14,br); } STAT_LIGHTS.push({x:fx,y:y0+1.5,z:fz,r:5,c:[.6,.85,1],night:true}); }
+  /* the well and the old tree in the north-west yard */
+  { const wx=396.5, wz=117.5; cyl(wx,y0,wz,.62,.8,STONE); cyl(wx,y0+.78,wz,.52,.04,[.15,.3,.4]); for(const s of [-1,1]) box(wx+s*.55,y0+1.3,wz,.12,1.6,.12,WOOD); box(wx,y0+2.1,wz,1.4,.12,.12,WOOD); gAdd(d,RP,wx,y0+2.15,wz,Math.PI/2,1.3,.6,1.6,[.3,.22,.15]); cyl(wx,y0+1.4,wz,.16,.3,[.45,.32,.2]); }
+  /* market stalls, the fish market by the quay, crates and nets */
+  const stall=(mx,mz,col,goods)=>{ for(const [px,pz] of [[-1,-.5],[1,-.5],[-1,.5],[1,.5]]) box(mx+px,y0+1.1,mz+pz,.1,2.2,.1,WOOD);
+    for(let k=0;k<5;k++) box(mx-.8+k*.4,y0+2.25,mz,.4,.07,1.25,k%2?[.9,.87,.78]:col); box(mx,y0+.5,mz,2.1,.1,.9,WOOD); box(mx,y0+.25,mz,2,.5,.8,[.4,.27,.15]);
+    for(let k=0;k<4;k++) gAdd(d,RS,mx-.6+k*.4,y0+.65,mz,0,.22,.18,goods==='fish'?.12:.22,goods==='fish'?[.72,.76,.8]:[[.9,.3,.2],[.95,.75,.2],[.45,.75,.3],[.8,.5,.8]][k],goods==='fish'?.15:0); };
+  stall(406.5,115,[.16,.4,.46]); stall(406.5,118.4,[.62,.5,.15]); stall(411.5,124.5,[.2,.3,.5],'fish'); stall(411.5,127.5,[.16,.4,.46],'fish'); stall(411.5,130.5,[.5,.2,.18],'fish');
+  for(const [x,z] of [[386.5,112.5],[412.5,112.5],[408.5,131.5],[385.6,129.2],[393.6,127.6]]){ box(x,y0+.3,z,.6,.6,.6,[.5,.36,.2],hash2(x|0,z|0,3)); box(x+.55,y0+.28,z+.25,.55,.55,.55,[.46,.33,.18],.4); gAdd(d,RFR,x-.45,y0,z+.5,0,.5,.75,.5,[.42,.28,.15]); }
+  for(const z of [123.2,129]){ for(const s of [-1,1]) cyl(413.4,y0,z+s*.9,.05,2,WOOD); box(413.4,y0+1.95,z,.06,.06,1.9,WOOD); for(let k=0;k<5;k++) box(413.42,y0+1.3,z-.8+k*.4,.02,1.3,.34,[.3,.34,.3]); }
+  /* street lamps */
+  for(let x=P.x0+3;x<=P.x1-1;x+=4){ if(Math.abs(x-P.cx)<4) continue; for(const z of [P.cy-1.15,P.cy+2.15]) if(lampOk(x+.5,z)) lamp(x+.5,z); }
+  for(let y=P.y0+3;y<=P.y1-2;y+=4){ if(Math.abs(y-P.cy)<4) continue; for(const x of [P.cx-1.15,P.cx+2.15]) if(lampOk(x,y+.5)) lamp(x,y+.5); }
+}
+/* the lighthouse, the Drowned Shrine, Wreckers' Cove and the pass */
+function addCoastSites(d){ if(!PORT.B||!PORT.B.length) return; const C=COAST;
+  const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e), cyl=(x,y,z,r,h,col,e)=>gAdd(d,RC,x,y,z,0,r*2,h,r*2,col,e);
+  { const L=C.light, x=L.x+1, z=L.y+1, g=hgt(x,z)-.1, W=[.92,.9,.86], R=[.62,.15,.12];
+    cyl(x,g,z,1.7,.9,[.55,.53,.5]); let yb=g+.9; const TAP=gCyl(16,.45,.5); for(let k=0;k<4;k++){ const r0=1.25*Math.pow(.9,k), hh=2.7; gAdd(d,TAP,x,yb,z,0,r0*2,hh,r0*2,k%2?R:W); yb+=hh; }
+    for(let k=0;k<4;k++){ const a=k/4*6.283+.6; box(x+Math.cos(a)*1.03,g+2.4+k*2.4,z+Math.sin(a)*1.03,.26,.42,.26,[.3,.32,.36],-a,.6); }
+    cyl(x,yb,z,1.15,.18,[.25,.25,.28]); for(let k=0;k<14;k++){ const a=k/14*6.283; cyl(x+Math.cos(a)*1.05,yb+.18,z+Math.sin(a)*1.05,.03,.55,[.2,.2,.22]); } gAdd(d,RFR,x,yb+.72,z,0,2.15,.06,2.15,[.2,.2,.22]);
+    cyl(x,yb+.18,z,.68,1.35,[1,.92,.6],2.6); for(let k=0;k<6;k++){ const a=k/6*6.283; cyl(x+Math.cos(a)*.7,yb+.18,z+Math.sin(a)*.7,.035,1.35,[.15,.15,.17]); }
+    gAdd(d,RCN,x,yb+1.5,z,0,1.7,1.1,1.7,[.18,.2,.24]); cyl(x,yb+2.55,z,.03,.6,[.2,.2,.2]); STAT_LIGHTS.push({x,y:yb+.9,z,r:20,c:[1.6,1.3,.8],night:true}); STAT_LIGHTS.push({x,y:yb+.9,z,r:6,c:[.8,.65,.4]});
+    const hx=L.x-5, hz=L.y+2, hy=hgt(hx+1.5,hz+1)-.05; box(hx+1.5,hy+1.2,hz+1,2.8,2.1,1.85,[.9,.88,.82]); gAdd(d,RP,hx+1.5,hy+2.25,hz+1,Math.PI/2,2.4,1.4,3.3,[.25,.29,.35]); box(hx+2.5,hy+3,hz+.6,.45,1.4,.45,[.6,.58,.54]); CHIMNEYS.push({x:hx+2.5,y:hy+3.8,z:hz+.6});
+    box(hx+1.5,hy+.95,hz+1.95,.8,1.5,.08,[.2,.34,.4]); box(hx+.6,hy+1.5,hz+1.95,.55,.55,.06,[1,.74,.42],0,1.3); STAT_LIGHTS.push({x:hx+.6,y:hy+1.5,z:hz+2.6,r:3.2,c:[1,.62,.3],night:true}); }
+  { const S=C.shrine, g=hgt(S.x+.5,S.y+.5), br=[.36,.52,.46], st=[.52,.56,.54];
+    for(let k=0;k<10;k++){ const a=k/10*6.283+.2, x=S.x+.5+Math.cos(a)*6.4, z=S.y+.5+Math.sin(a)*4.6, broken=k%3===1, hh=broken?1.3+hash2(k,2,2)*1.4:4.4, y=hgt(x,z)-.1;
+      cyl(x,y,z,.36,hh,st); cyl(x,y,z,.48,.3,st.map(v=>v*.9)); for(let q=0;q<3;q++) cyl(x,y+.3+q*.2,z,.37,.08,[.24,.42,.34]); if(!broken) box(x,y+hh+.15,z,1.1,.3,1.1,[.58,.6,.58],a); else gAdd(d,RC,x+.9,y+.3,z+.4,a,.7,1.5,.7,st,0,Math.PI/2); }
+    box(S.x+.5,g+.35,S.y+.5,3.4,.7,2.2,[.46,.5,.48]); box(S.x+.5,g+.8,S.y+.5,2.6,.2,1.6,[.5,.56,.52]);
+    gAdd(d,RFR,S.x+2.3,g+.2,S.y+2.4,.6,2.1,1.9,2.1,br,0,1.95); cyl(S.x+2.3,g+.4,S.y+2.4,.6,.1,[.2,.3,.28]);
+    for(const [dx,dz] of [[-1.2,-.4],[1.3,.2],[0,-.8]]) gAdd(d,RS,S.x+.5+dx,g+1.05,S.y+.5+dz,0,.3,.18,.3,[.4,1,.9],2.2);
+    for(let k=0;k<26;k++){ const a=hash2(k,5,3)*6.283, r=2+hash2(k,6,3)*6.5, x=S.x+.5+Math.cos(a)*r, z=S.y+.5+Math.sin(a)*r*.75; gAdd(d,RCN,x,hgt(x,z)-.05,z,a,.14,.7+hash2(k,7,3)*.9,.14,[.18,.42,.26]); }
+    STAT_LIGHTS.push({x:S.x+.5,y:g+1.8,z:S.y+.5,r:10,c:[.35,1,.85]}); }
+  { const W=C.cove, hx=W.x+4, hz=W.y-.5, g=hgt(hx,hz);
+    gAdd(d,RS,hx,g+.15,hz,Math.PI/2-.12,7.2,2.2,2.6,[.3,.2,.13],0,.28); gAdd(d,RS,hx-.1,g+.5,hz,Math.PI/2-.12,6.9,1.2,2.4,[.42,.31,.2],0,.28);
+    for(let k=0;k<6;k++){ const z=hz-2.7+k*1.05; gAdd(d,RB,hx+.9,g+.9,z,0,.12,1.9,.12,[.2,.14,.09],0,-.35); }
+    gAdd(d,RC,hx-2.2,g+.35,hz+1.5,.4,.16,5.5,.16,[.3,.22,.14],0,Math.PI/2-.1); box(hx-.4,g+1.2,hz-1,1.6,.05,1.3,[.75,.72,.62],.3);
+    for(const [dx,dz,c] of [[-6,-2.5,[.55,.45,.3]],[-5.5,2.5,[.5,.32,.22]],[-2.8,-4,[.45,.4,.3]]]){ const x=W.x+dx, z=W.y+dz, y=hgt(x,z); gAdd(d,RP,x,y,z,0,2,1.5,2.2,c); box(x,y+.6,z+1.12,.5,1.1,.04,[.2,.15,.1]); }
+    { const x=W.x-3, z=W.y, y=hgt(x,z); for(let k=0;k<7;k++){ const a=k/7*6.283; gAdd(d,RBL,x+Math.cos(a)*.55,y+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); } for(let k=0;k<3;k++) gAdd(d,RC,x,y+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4); gAdd(d,RS,x,y+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
+    { const x=W.x+1, z=W.y-5, y=hgt(x,z); cyl(x,y,z,.06,3.4,[.25,.18,.12]); box(x,y+3.3,z,.3,.4,.3,[1,.55,.2],0,2); STAT_LIGHTS.push({x,y:y+3.3,z,r:9,c:[1.4,.7,.3],night:true}); }
+    for(const [dx,dz] of [[-7,1],[-1,4],[-4,-1.5]]){ const x=W.x+dx, z=W.y+dz, y=hgt(x,z); box(x,y+.3,z,.6,.6,.6,[.5,.36,.2],dx); gAdd(d,RFR,x+.6,y,z+.3,0,.5,.75,.5,[.42,.28,.15]); } }
+  { const x=344.5, z=C.passY-3.2, y=hgt(x,z); for(const s of [-1,1]) cyl(x+s*.8,y,z,.09,2.2,[.36,.25,.15]); box(x,y+1.8,z,1.9,.5,.08,[.45,.32,.18]); box(x,y+2.1,z+.05,1.2,.08,.02,[.9,.85,.7]);
+    cyl(x+2.2,y,z,.25,.9,[.3,.3,.32]); gAdd(d,RS,x+2.2,y+.95,z,0,.4,.25,.4,[1,.5,.15],2); STAT_LIGHTS.push({x:x+2.2,y:y+1.3,z,r:7,c:[1.3,.6,.2],fire:true}); }
+}
+
 const BIND_DEF={forward:'w',back:'s',left:'a',right:'d',jump:' ',interact:'f',lootall:'g',target:'tab',mount:'r',potion:'q',sit:'x',autorun:'`',
   ab1:'1',ab2:'2',ab3:'3',ab4:'4',ab5:'5',ab6:'6',ab7:'7',ab8:'8',character:'c',talents:'n',professions:'k',bags:'b',map:'m',quests:'l',party:'p',players:'o',help:'h'};
 const BIND_LABEL={forward:'Move forward',back:'Move backward',left:'Strafe left',right:'Strafe right',jump:'Jump',autorun:'Auto-run',interact:'Talk / loot / gather',lootall:'Take all loot',target:'Target enemy (attacking you or within 5 yd)',mount:'Mount / dismount',potion:'Drink potion',sit:'Sit',
@@ -6499,7 +6911,7 @@ const BIND_LABEL={forward:'Move forward',back:'Move backward',left:'Strafe left'
 const OPT=Object.assign({sens:1,invertY:false,camMax:30,questArrow:true,uiScale:innerWidth<760?.62:1,shake:true,names:true,gfx:'auto',fullscreen:true,autoLoot:false},saves.opts||{});
 let BIND=Object.assign({},BIND_DEF,saves.binds||{}); let KEYMAP={}; function rebuildKeymap(){ KEYMAP={}; for(const a in BIND) if(BIND[a]) KEYMAP[BIND[a]]=a; } rebuildKeymap();
 function saveOpts(){ saves.opts=OPT; saves.binds=BIND; saveAll(saves); applyOpts(); }
-function applyOpts(){ document.documentElement.style.setProperty('--uis',OPT.uiScale); }
+function applyOpts(){ document.documentElement.style.setProperty('--uis',OPT.uiScale); try{ setTimeout(hudLayout,30); }catch(e){} }
 applyOpts();
 const keyName=k=>k===' '?'Space':k==='tab'?'Tab':k==='`'?'`':k.startsWith('arrow')?k.replace('arrow','Arrow '):k.length===1?k.toUpperCase():k[0].toUpperCase()+k.slice(1);
 let capBind=null, autoRun=false;
