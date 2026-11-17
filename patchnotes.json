@@ -1,9 +1,9 @@
 {
- "version": "v0.59",
- "title": "Cinderhold: the first raid",
+ "version": "v0.60",
+ "title": "Raid groups",
  "date": "16 Nov 2026",
- "text": "Beneath the Cinder Caldera, the gate of Cinderhold stands open. Seven bosses, the Ember Tyrant, a legendary weapon for every class and a mount wreathed in flame. Only heroes of level 20 may enter.\n\n✨ Cinderhold, Emberfall's first raid, for 5 to 8 heroes at level 20. You need a Bulwark, a Mender, a Bard and damage. Find Emberwarden Thalia at the Cinderhold Gate, east of the Wyrm's Lair\n✨ Seven fights: Kragmor the Forgewarden, Ignara and Pyrrus the Twin Flames, Ashmaw, Magmaroth, High Pyromancer Sel'vara, Gravoth the Obsidian Colossus and Vyrathos, the Ember Tyrant\n✨ Loot gets better with every boss. Tyrant's Embers from every boss (and from daily bounties at level 20) buy Cinderhold epics from Quartermaster Brannoc\n✨ The Ember Tyrant can drop a Tyrant legendary weapon for your class (2.5%) and the Ashborn Nightmare mount (1.5%). First kill earns the title Tyrantslayer\n✨ Pyraxis, Herald of the Tyrant, is now a towering fire phoenix with burning wings and a tail of ember plumes\n✨ A new quest, The Gate Below, leads from the end of the Scorched Reach to the raid gate, and reaching level 20 points you straight at Cinderhold",
+ "text": "Parties hold 5 again, and any party leader can turn their party into a raid group of up to 20 heroes for Cinderhold.\n\n✨ Raid groups: the party leader opens the Party window and presses Convert to raid group. Up to 20 players can then join\n⬆️ Parties are back to 5 players\n⬆️ Cinderhold accepts 5 to 20 heroes. Its bosses grow tougher as more raiders come in, so a big raid still has to fight\n⬆️ With more than 7 members, the party frames switch to two compact columns\n⬆️ The raid reminder no longer appears when you log in",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-16T18:37:54Z"
+ "time": "2026-11-16T19:05:03Z"
 }
