@@ -1,9 +1,9 @@
 {
- "version": "v0.68",
- "title": "Music on the road, and a fairer fight",
+ "version": "v0.69",
+ "title": "Class balance",
  "date": "17 Nov 2026",
- "text": "The music now travels with you, and every class has had its damage brought in line.\n\n⬆️ The music no longer cuts off when you leave town. It keeps playing as you travel, gives way to battle music in a fight, and picks up again where it paused once the fight is over. Dungeons keep their own eerie music\n• Bulwark, Mender, Arcanist, Assassin and Bard: auto attacks and every ability deal about 12% less damage, the same cut the Barbarian and Hunter received in v0.63. Healing is unchanged",
+ "text": "Targeted changes for the two classes that cleared monsters fastest.\n\n• Barbarian: auto attacks and every ability deal a further 12% less damage. In testing it cleared monsters almost twice as fast as any other class\n• Barbarian: Savagery now adds 12% critical damage per rank (was 20%)\n• Assassin: Ambush deals 20% less damage and Eviscerate 10% less\n• Assassin: Opportunist now adds 10% damage from stealth per rank (was 20%), Lethality 7% critical damage per rank (was 10%), and Death Mark 20% Eviscerate damage (was 35%, still refunds a combo point)",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-17T13:10:05Z"
+ "time": "2026-11-17T15:47:48Z"
 }

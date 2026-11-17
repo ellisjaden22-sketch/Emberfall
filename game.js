@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 68;
+const VERSION = 69;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -6188,7 +6188,15 @@ function villSeg(v,t){ const [ax,az,bx,bz]=v.seg, Lr=Math.hypot(bx-ax,bz-az), P=
     VILL.push({seg:segs[i],spd:.8+R()*.5,ph:R()*500,pause:2+R()*5,L,skin:Math.floor(R()*5)}); } }
 /* v63 balance: Barbarian and Hunter were out-damaging every other class. Both deal about 12% less, the Hunter's wolf 15% less. */
 { const nerf=(cls,k)=>{ const A=CLS[cls].auto; A.dmg*=k; A.dmgL*=k; for(const a of ABIL[cls]||[]){ if(a.dmg) a.dmg=a.dmg.map(v=>Math.round(v*k*10)/10); if(a.aoeDmg) a.aoeDmg=a.aoeDmg.map(v=>Math.round(v*k*10)/10); } };
-  nerf('barbarian',.88); nerf('hunter',.88); for(const k of ['warden','mender','arcanist','assassin','bard']) if(CLS[k]) nerf(k,.88); }
+  nerf('barbarian',.88); nerf('hunter',.88); for(const k of ['warden','mender','arcanist','assassin','bard']) if(CLS[k]) nerf(k,.88);
+  /* v69 */ nerf('barbarian',.88);
+  { const ab=id=>ABIL.assassin.find(a=>a.id===id), sc=(a,k)=>{ if(a&&a.dmg) a.dmg=a.dmg.map(v=>Math.round(v*k*10)/10); };
+    sc(ab('ambush'),.8); sc(ab('evis'),.9);
+    const T=TALENTS.assassin, t=id=>T.find(x=>x.id===id);
+    if(t('r_opp')){ t('r_opp').e.opp=.1; t('r_opp').d='Attacks from stealth deal {10}% more damage.'; }
+    if(t('r_leth')){ t('r_leth').e.critd=.07; t('r_leth').d='Critical strikes deal {7}% more damage.'; }
+    if(t('r_death')){ t('r_death').e['ab:evis']=.2; t('r_death').d='Eviscerate deals 20% more damage and refunds 1 combo point.'; }
+    const sv=TALENTS.barbarian.find(x=>x.id==='x_rend'); if(sv){ sv.e.critd=.12; sv.d='Critical hits deal {12}% more damage.'; } } }
 /* the professions window says live whether you are standing at an anvil */
 setInterval(()=>{ try{ const a=document.getElementById('pfAnv'); if(!a||!me) return; const ok=stationOk({prof:'blacksmithing'}); const t=ok?'⚒ You are at an anvil: smithing is ready.':'⚒ Stand at an anvil to smith: Doran\'s forge in Hearthmere, Garrick\'s forge in Brinehaven or Jarl Hakon\'s camp in Frostwatch.'; if(a.textContent!==t){ a.textContent=t; a.className='pfanv '+(ok?'ok':'no'); } }catch(e){} },500);
 /* boats rock gently on the water; gulls circle and glide over the harbour */

@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.68</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.69</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 68;
+const VERSION = 69;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -6744,7 +6744,15 @@ function villSeg(v,t){ const [ax,az,bx,bz]=v.seg, Lr=Math.hypot(bx-ax,bz-az), P=
     VILL.push({seg:segs[i],spd:.8+R()*.5,ph:R()*500,pause:2+R()*5,L,skin:Math.floor(R()*5)}); } }
 /* v63 balance: Barbarian and Hunter were out-damaging every other class. Both deal about 12% less, the Hunter's wolf 15% less. */
 { const nerf=(cls,k)=>{ const A=CLS[cls].auto; A.dmg*=k; A.dmgL*=k; for(const a of ABIL[cls]||[]){ if(a.dmg) a.dmg=a.dmg.map(v=>Math.round(v*k*10)/10); if(a.aoeDmg) a.aoeDmg=a.aoeDmg.map(v=>Math.round(v*k*10)/10); } };
-  nerf('barbarian',.88); nerf('hunter',.88); for(const k of ['warden','mender','arcanist','assassin','bard']) if(CLS[k]) nerf(k,.88); }
+  nerf('barbarian',.88); nerf('hunter',.88); for(const k of ['warden','mender','arcanist','assassin','bard']) if(CLS[k]) nerf(k,.88);
+  /* v69 */ nerf('barbarian',.88);
+  { const ab=id=>ABIL.assassin.find(a=>a.id===id), sc=(a,k)=>{ if(a&&a.dmg) a.dmg=a.dmg.map(v=>Math.round(v*k*10)/10); };
+    sc(ab('ambush'),.8); sc(ab('evis'),.9);
+    const T=TALENTS.assassin, t=id=>T.find(x=>x.id===id);
+    if(t('r_opp')){ t('r_opp').e.opp=.1; t('r_opp').d='Attacks from stealth deal {10}% more damage.'; }
+    if(t('r_leth')){ t('r_leth').e.critd=.07; t('r_leth').d='Critical strikes deal {7}% more damage.'; }
+    if(t('r_death')){ t('r_death').e['ab:evis']=.2; t('r_death').d='Eviscerate deals 20% more damage and refunds 1 combo point.'; }
+    const sv=TALENTS.barbarian.find(x=>x.id==='x_rend'); if(sv){ sv.e.critd=.12; sv.d='Critical hits deal {12}% more damage.'; } } }
 /* the professions window says live whether you are standing at an anvil */
 setInterval(()=>{ try{ const a=document.getElementById('pfAnv'); if(!a||!me) return; const ok=stationOk({prof:'blacksmithing'}); const t=ok?'⚒ You are at an anvil: smithing is ready.':'⚒ Stand at an anvil to smith: Doran\'s forge in Hearthmere, Garrick\'s forge in Brinehaven or Jarl Hakon\'s camp in Frostwatch.'; if(a.textContent!==t){ a.textContent=t; a.className='pfanv '+(ok?'ok':'no'); } }catch(e){} },500);
 /* boats rock gently on the water; gulls circle and glide over the harbour */
