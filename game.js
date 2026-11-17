@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 64;
+const VERSION = 65;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -3128,6 +3128,7 @@ function buildScene(dt){
   if(me&&me.pet&&me.petOn&&!me.dead) drawPetAt(me.pet.x,me.pet.y,me.pet.face,me.pet.mv,me.pet.swingT,me.pet.st,dt);
   for(const o of others.values()) if(o.pe&&!o.d&&seenO(o)){ o.peSt=o.peSt||{}; o.peX=lerp(o.peX??o.pe[0],o.pe[0],.25); o.peY=lerp(o.peY??o.pe[1],o.pe[1],.25); drawPetAt(o.peX,o.peY,o.pe[2],!!o.pe[3],o.peSw,o.peSt,dt); }
   { const tt=Date.now()/1000; for(const v of VILL){ const p=villPos(v,tt); if(!near(p.x*TS,p.z*TS,60)) continue; drawHumanoid({x:p.x,y:groundY(p.x*TS,p.z*TS),z:p.z,face:p.face,mv:p.mv,walk:p.walk,dead:-1,L:v.L,skin:SKIN[v.skin]}); } }
+  try{ drawHarbourLife(t,near); }catch(e){}
   for(const n of NPCS){ if(!near(n.x,n.y,70)) continue; drawHumanoid({x:n.x/TS,y:groundY(n.x,n.y),z:n.y/TS,face:n.face??Math.PI/2,emote:n.emote,mv:0,walk:0,dead:-1,look:npcLook(n),L:LOOK[n.id]||LOOK.oriel,skin:SKIN[n.id==='mira'?1:2]}); }
   drawExtras(near,t);
   for(const m of mobs){ try{
@@ -6172,6 +6173,16 @@ function villSeg(v,t){ const [ax,az,bx,bz]=v.seg, Lr=Math.hypot(bx-ax,bz-az), P=
   nerf('barbarian',.88); nerf('hunter',.88); }
 /* the professions window says live whether you are standing at an anvil */
 setInterval(()=>{ try{ const a=document.getElementById('pfAnv'); if(!a||!me) return; const ok=stationOk({prof:'blacksmithing'}); const t=ok?'⚒ You are at an anvil: smithing is ready.':'⚒ Stand at an anvil to smith: Doran\'s forge in Hearthmere, Garrick\'s forge in Brinehaven or Jarl Hakon\'s camp in Frostwatch.'; if(a.textContent!==t){ a.textContent=t; a.className='pfanv '+(ok?'ok':'no'); } }catch(e){} },500);
+/* boats rock gently on the water; gulls circle and glide over the harbour */
+function drawHarbourLife(t,near){ const B=window.BOATS; if(!B||!B.length) return; if(Math.hypot(CAM.tx-PORT.x1-8,CAM.tz-PORT.cy)>110) return;
+  for(const b of B){ if(!near(b.x*TS,b.z*TS,95)) continue; const q=t*.9+b.ph, a=b.amp, sw=Math.sin(q*1.3)+.4*Math.sin(q*2.7+1.3);
+    mreset(); mtr(b.x,sw*.03*a-.01,b.z); mry(b.ry); mrx(Math.sin(q*1.05+.6)*.035*a); mrz(Math.sin(q*.75+2.1)*.012*a); mry(-b.ry); CAST_SH=true; P(b.v,1,1,1,[1,1,1],0); }
+  const cx=PORT.x1+9, cz=PORT.cy+2, W=[.95,.95,.93], G=[.62,.64,.68], K=[.12,.12,.12];
+  for(let k=0;k<7;k++){ const r=6+k*1.3+Math.sin(t*.13+k)*2, sp=(.16+k*.017)*(k%2?1:-1), an=t*sp+k*.9, x=cx+Math.cos(an)*r, z=cz+Math.sin(an)*r*.75, y=6.5+k*.45+Math.sin(t*.4+k*1.7)*.8;
+    if(!near(x*TS,z*TS,80)) continue; const head=an+(sp>0?Math.PI/2:-Math.PI/2), glide=Math.sin(t*.5+k)>.2, fl=glide?.08:Math.sin(t*9+k*2)*.6;
+    mreset(); mtr(x,y,z); mry(-head); mrz(Math.sin(t*.7+k)*.15*Math.sign(sp));
+    P(GEO.sph,.34,.12,.12,W,0,0,0,0); P(GEO.sph,.1,.09,.09,W,0,.16,.03,0); P(GEO.box,.07,.025,.035,[.95,.75,.2],0,.24,.02,0); P(GEO.box,.1,.02,.1,G,0,-.2,0,0);
+    for(const s of [-1,1]){ mpush(); mrx(s*fl); P(GEO.box,.16,.015,.36,G,0,.01,.01,s*.2); P(GEO.box,.12,.014,.16,K,0,.01,.01,s*.44); mpop(); } } }
 
 /* =====================================================================
    v63: BRINEHAVEN — the scenery of the harbour town and the coast's landmarks
@@ -6304,23 +6315,28 @@ function addPort(d){ const P=PORT; if(!P.B||!P.B.length) return; const y0=.55;
     surf(Q,1,(p)=>p[1]<.02?[.3,.21,.13]:[.48,.35,.22]);
     { const b0=g.p.length/3; for(let j=0;j<=NV;j++){ const a=P[j], c=Q[j]; gPush(g,a[0],a[1],a[2],-1,0,0,paint.map(v=>v*.85)); gPush(g,c[0],c[1],c[2],-1,0,0,[.42,.3,.19]); } for(let j=0;j<NV;j++){ const a=b0+j*2; g.i.push(a,a+2,a+1,a+1,a+2,a+3); }
       const c0=g.p.length/3, tp=P[Math.floor(NV/2)]; for(let j=0;j<=NV;j++){ const a=P[j]; gPush(g,a[0]-.01,a[1],a[2],-1,0,0,paint.map(v=>v*.8)); } const cc=gPush(g,tp[0]-.01,TOP(0),0,-1,0,0,paint.map(v=>v*.8)); for(let j=0;j<NV;j++) g.i.push(c0+j,cc,c0+j+1); }
+    /* floorboards: a deck laid inside the hull above the waterline, so the sea never shows inside a boat */
+    { const yf=.22, b0=g.p.length/3; let n=0;
+      for(let i=0;i<=NU;i++){ const u=i/NU, x=(u-.5)*L+(u>.9?(u-.9)*L*.35:0), r=(TOP(u)-.06-yf)/Math.max(.01,TOP(u)+K(u)-.12); let hw=0; if(r>0&&r<1){ const sq=Math.pow(r,1.25); hw=W(u)*.9*Math.sqrt(Math.max(0,1-sq*sq))+.03; } else if(r>=1) hw=0;
+        const pl=(i%2)?[.5,.37,.23]:[.44,.32,.2]; gPush(g,x,yf,-hw,0,1,0,pl); gPush(g,x,yf,hw,0,1,0,pl); n++; }
+      for(let i=0;i<n-1;i++){ const a=b0+i*2; g.i.push(a,a+2,a+1,a+1,a+2,a+3); } }
     return g; };
   const sailGeo=(H,F,tri,belly)=>{ const g=G0(), N=6; for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){ const a=i/N, b=j/N, w=tri?(1-a):1; const x=-F*b*w+(tri?0:F/2), y=a*H, z=Math.sin(Math.PI*b)*Math.sin(Math.PI*Math.min(1,a*1.15))*belly*w; gPush(g,x,y,z,0,0,1,[.93,.89,.8]); }
     for(let i=0;i<N;i++)for(let j=0;j<N;j++){ const a=i*(N+1)+j; g.i.push(a,a+N+1,a+1,a+1,a+N+1,a+N+2); } for(let k=0;k<g.n.length;k+=3){ g.n[k]=0; g.n[k+1]=0; g.n[k+2]=1; } return g; };
   const PAINTS=[[[.18,.3,.4],[.85,.82,.72]],[[.5,.16,.12],[.88,.84,.72]],[[.86,.84,.78],[.16,.36,.42]],[[.3,.22,.14],[.75,.6,.3]],[[.2,.36,.28],[.86,.8,.62]]];
   /* boats: kind 'row' (rowing boat), 'fish' (fishing smack, furled or set sail), 'ship' (a merchant cog with a square sail and an aft castle) */
-  const vessel=(x,z,ry,kind,o)=>{ o=o||{}; const L=o.L||(kind==='ship'?8.6:kind==='fish'?5:3), B=L*(kind==='ship'?.34:kind==='fish'?.36:.4), D=kind==='ship'?1.05:kind==='fish'?.62:.42, pc=PAINTS[(o.p??Math.floor(hash2(x|0,z|0,73)*PAINTS.length))%PAINTS.length], y=o.y??-.04;
+  const vesselBuild=(dd,x,z,ry,kind,o)=>{ o=o||{}; const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(dd,RB,x,y,z,ry||0,sx,sy,sz,col,e), cyl=(x,y,z,r,h,col,e)=>gAdd(dd,RC,x,y,z,0,r*2,h,r*2,col,e), line=(x1,y1,z1,x2,y2,z2,r,col)=>{ const dx=x2-x1, dy=y2-y1, dz=z2-z1, h=Math.hypot(dx,dz), L2=Math.hypot(h,dy); if(L2<.01) return; gAdd(dd,RB,(x1+x2)/2,(y1+y2)/2,(z1+z2)/2,Math.atan2(-dz,dx),L2,r,r,col,0,Math.atan2(dy,h)); }; const L=o.L||(kind==='ship'?8.6:kind==='fish'?5:3), B=L*(kind==='ship'?.34:kind==='fish'?.36:.4), D=kind==='ship'?1.05:kind==='fish'?.62:.42, pc=PAINTS[(o.p??Math.floor(hash2((o.wx??x)|0,(o.wz??z)|0,73)*PAINTS.length))%PAINTS.length], y=o.y??-.04;
     const c=Math.cos(ry), s=Math.sin(ry), at=(u,v,h)=>[x+u*c+v*s,y+(h||0),z-u*s+v*c];
-    gAdd(d,hullGeo(L,B,D,pc[0],pc[1]),x,y,z,ry,1,1,1,[1,1,1],0,o.rz||0);
+    gAdd(dd,hullGeo(L,B,D,pc[0],pc[1]),x,y,z,ry,1,1,1,[1,1,1],0,o.rz||0);
     const gun=D*.95; if(o.rz) return;
     for(let k=0;k<(kind==='row'?3:4);k++){ const [bx,by,bz]=at((k/(kind==='row'?2:3)-.5)*L*.55,0,gun-.12); box(bx,by,bz,.16,.06,B*.82,PLANK,ry); }
     if(kind==='row'){ for(const sd of [-1,1]){ const [ax,ay,az]=at(-L*.05,sd*B*.42,gun+.02), [bx,by,bz]=at(L*.32,sd*B*.2,gun+.05); line(ax,ay,az,bx,by,bz,.05,[.55,.42,.26]); } return; }
     if(kind==='fish'){ const [cx2,cy2,cz2]=at(-L*.2,0,gun-.05); box(cx2,cy2+.06,cz2,L*.3,.12,B*.7,PLANK,ry);
-      gAdd(d,RBL,...at(L*.12,B*.08,gun+.05),ry,.9,.35,.7,[.2,.3,.24]); for(const q of [-1,1]) box(...at(-L*.32,q*B*.18,gun+.12),.36,.24,.3,[.5,.36,.2],ry);
+      gAdd(dd,RBL,...at(L*.12,B*.08,gun+.05),ry,.9,.35,.7,[.2,.3,.24]); for(const q of [-1,1]) box(...at(-L*.32,q*B*.18,gun+.12),.36,.24,.3,[.5,.36,.2],ry);
       const [mx,my,mz]=at(L*.12,0,gun-.1), mh=L*.95; cyl(mx,my,mz,.05,mh,[.32,.23,.14]);
       for(const q of [-1,1]){ const [gx,gy,gz]=at(L*.1,q*B*.47,gun); line(mx,my+mh*.92,mz,gx,gy,gz,.014,[.18,.16,.13]); } { const [fx,fy,fz]=at(L*.52,0,gun+.1); line(mx,my+mh*.95,mz,fx,fy,fz,.014,[.18,.16,.13]); }
-      if(o.sail){ gAdd(d,sailGeo(mh*.82,L*.55,true,.18),mx,my+.35,mz,ry,1,1,1,[1,1,1]); const [bx,by,bz]=at(L*.12-L*.28,0,gun+.25); gAdd(d,RB,bx,by,bz,ry,L*.56,.07,.07,[.3,.22,.14]); }
-      else { const [bx,by,bz]=at(L*.12-L*.28,0,gun+.3); gAdd(d,RB,bx,by,bz,ry,L*.56,.07,.07,[.3,.22,.14]); const [s1x,s1y,s1z]=at(L*.1,0,gun+.42), [s2x,s2y,s2z]=at(L*.12-L*.52,0,gun+.42); line(s1x,s1y,s1z,s2x,s2y,s2z,.2,[.88,.84,.74]); }
+      if(o.sail){ gAdd(dd,sailGeo(mh*.82,L*.55,true,.18),mx,my+.35,mz,ry,1,1,1,[1,1,1]); const [bx,by,bz]=at(L*.12-L*.28,0,gun+.25); gAdd(dd,RB,bx,by,bz,ry,L*.56,.07,.07,[.3,.22,.14]); }
+      else { const [bx,by,bz]=at(L*.12-L*.28,0,gun+.3); gAdd(dd,RB,bx,by,bz,ry,L*.56,.07,.07,[.3,.22,.14]); const [s1x,s1y,s1z]=at(L*.1,0,gun+.42), [s2x,s2y,s2z]=at(L*.12-L*.52,0,gun+.42); line(s1x,s1y,s1z,s2x,s2y,s2z,.2,[.88,.84,.74]); }
       const [lx,ly,lz]=at(-L*.46,0,gun); cyl(lx,ly,lz,.025,1,[.2,.2,.2]); box(lx,ly+1.05,lz,.16,.22,.16,[1,.7,.35],0,1.2); STAT_LIGHTS.push({x:lx,y:ly+1.05,z:lz,r:3,c:[1,.62,.3],night:true}); return; }
     /* the cog */
     { const [ax,ay,az]=at(-L*.33,0,gun); box(ax,ay+.45,az,L*.26,.9,B*.86,[.4,.29,.18],ry); box(ax,ay+.95,az,L*.28,.08,B*.92,[.3,.21,.13],ry);
@@ -6332,11 +6348,16 @@ function addPort(d){ const P=PORT; if(!P.B||!P.B.length) return; const y0=.55;
     { const [bx,by,bz]=at(L*.5,0,gun+.15), [tx,ty,tz]=at(L*.82,0,gun+.85); line(bx,by,bz,tx,ty,tz,.08,[.32,.23,.14]); line(mx,my+mh*.97,mz,tx,ty,tz,.02,[.16,.14,.12]); const [sx2,sy2,sz2]=at(-L*.46,0,gun+1.2); line(mx,my+mh*.97,mz,sx2,sy2,sz2,.02,[.16,.14,.12]); }
     for(const q of [-1,1]) for(let k=0;k<3;k++){ const [gx,gy,gz]=at(L*(-.04+k*.08),q*B*.49,gun); line(mx,my+mh*.84,mz,gx,gy,gz,.016,[.16,.14,.12]); }
     { const yd=my+mh*.78, [ya,,yb]=at(L*.06,-B*1.05,0), [yc,,ye]=at(L*.06,B*1.05,0); line(ya,yd,yb,yc,yd,ye,.12,[.3,.21,.13]);
-      if(o.sail){ const S=sailGeo(mh*.5,B*1.9,false,.35), [sx,,sz]=at(L*.06+.06,0,0); gAdd(d,S,sx,yd-mh*.52,sz,ry-Math.PI/2,1,1,1,[1,1,1]); const [ex,,ez]=at(L*.06+.07,0,0); box(ex,yd-mh*.27,ez,.03,.4,.4,[.62,.12,.1],ry+Math.PI/2,.05); }
+      if(o.sail){ const S=sailGeo(mh*.5,B*1.9,false,.35), [sx,,sz]=at(L*.06+.06,0,0); gAdd(dd,S,sx,yd-mh*.52,sz,ry-Math.PI/2,1,1,1,[1,1,1]); const [ex,,ez]=at(L*.06+.07,0,0); box(ex,yd-mh*.27,ez,.03,.4,.4,[.62,.12,.1],ry+Math.PI/2,.05); }
       else { const [fa,,fb]=at(L*.06,-B*.95,0), [fc,,fe]=at(L*.06,B*.95,0); line(fa,yd-.16,fb,fc,yd-.16,fe,.3,[.88,.84,.74]); } }
     { const fy=my+mh+.05; cyl(mx,fy-.1,mz,.02,.6,[.2,.15,.1]); const [fx,,fz]=at(L*.06-.4,0,0); box(fx,fy+.38,fz,.75,.42,.02,NAVY,ry,.1); box(fx,fy+.38,fz,.25,.18,.025,GOLD,ry,.3); }
     for(let k=0;k<3;k++){ const [cx3,cy3,cz3]=at(-L*.05+k*.4,(k-1)*.35,gun); box(cx3,cy3+.22,cz3,.45,.45,.45,[.52,.38,.22],ry+k); } };
   /* mooring: a rope from a point on the boat down to a pier post */
+  /* boats afloat are built around their own origin and drawn every frame, so they ride the swell; boats on the beach stay put */
+  window.BOATS=window.BOATS||[];
+  const vessel=(x,z,ry,kind,o)=>{ o=o||{}; if(o.rz) return vesselBuild(d,x,z,ry,kind,o); const dd=G0(), l0=STAT_LIGHTS.length; vesselBuild(dd,0,0,ry,kind,{...o,wx:x,wz:z});
+    for(let k=l0;k<STAT_LIGHTS.length;k++){ STAT_LIGHTS[k].x+=x; STAT_LIGHTS[k].z+=z; }
+    const L=o.L||(kind==='ship'?8.6:kind==='fish'?5:3); BOATS.push({v:mkVAO(dd),x,z,ry,ph:hash2(x*7|0,z*7|0,91)*20,amp:kind==='ship'?.6:kind==='fish'?.85:1.1,L}); };
   const moor=(a,b)=>line(a[0],a[1],a[2],b[0],.5,b[1],.022,ROPE);
   /* piers: piles with weed at the waterline, stringers, cleats, ladders, lanterns, and the gear of a working harbour */
   for(const p of P.piers){ const xa=P.x1+1, xb=P.x1+p.len+1;
@@ -6351,6 +6372,9 @@ function addPort(d){ const P=PORT; if(!P.B||!P.B.length) return; const y0=.55;
     for(let k=0;k<(p.len>9?3:2);k++){ const x=xa+2.3+k*2.7; gAdd(d,RC,x,.47,p.y0+.5+(k%2?.18:-.18),0,.55,.42,.55,[.42,.3,.18]); for(let q=0;q<4;q++) box(x,.47+.1+q*.1,p.y0+.5+(k%2?.18:-.18),.56,.015,.56,[.3,.22,.14]); } }
   if(P.jetty){ const J=P.jetty; for(let x=J.x0+.25;x<=J.x1+1;x+=1.5) for(const z of [J.y+.06,J.y+.94]) pile(x,z,.1,.5); for(const z of [J.y+.05,J.y+.95]) box((J.x0+J.x1+1)/2,.33,z,J.x1-J.x0+1,.12,.09,[.3,.22,.14]); lamp(J.x1+.5,J.y+.5,.45); }
   /* the breakwater: big squared stones on both faces, rubble on the sea side, and a beacon at the end */
+  /* a dark line of weed and wet stone where the sea meets the quay and the breakwater */
+  box(P.x1+.9,-.02,(P.y0+P.y1+1)/2,.38,.24,P.y1-P.y0+1,[.16,.2,.15]);
+  if(P.mole){ const M=P.mole; for(const z of [M.y-.32,M.y+2.32]) box((M.x0+M.x1+1)/2+.5,-.02,z,M.x1-M.x0+1,.24,.08,[.16,.2,.15]); for(const x of [M.x1-1.32,M.x1+1.32]) box(x,-.02,(M.yEnd+M.y)/2+.5,.08,.24,M.y-M.yEnd+1.6,[.16,.2,.15]); }
   if(P.mole){ const M=P.mole, st=k=>[.52,.5,.47].map(v=>v*(.86+hash2(k,3,7)*.2));
     for(let x=M.x0+1;x<=M.x1;x+=1.1){ for(const [z,o] of [[M.y-.05,-1],[M.y+2.05,1]]){ box(x,-.25,z,1.08,1.6,.5,st(x*7+o),hash2(x|0,o,2)*.06); } box(x,.62,M.y-.12,1.06,.18,.34,[.6,.58,.54]); if(hash2(x|0,9,4)<.7) gAdd(d,RBL,x+.2,-.55,M.y+2.75,hash2(x|0,1,1)*6,1.6,1.1,1.3,[.45,.44,.42]); }
     for(let z=M.yEnd;z<=M.y+1.2;z+=1.1){ for(const [x,o] of [[M.x1-1.05,-1],[M.x1+1.05,1]]){ box(x,-.25,z,.5,1.6,1.08,st(z*11+o),hash2(z|0,o,2)*.06); } box(M.x1-1.12,.62,z,.34,.18,1.06,[.6,.58,.54]); if(hash2(z|0,8,4)<.7) gAdd(d,RBL,M.x1+1.75,-.55,z+.2,hash2(z|0,2,1)*6,1.3,1.1,1.6,[.45,.44,.42]); }
