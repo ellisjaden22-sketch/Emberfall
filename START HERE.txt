@@ -1,0 +1,36 @@
+EMBERFALL v0.65: PUT THE REPO BACK IN ORDER (3 uploads)
+
+Uploading several versions in a row cannot break anything for good: every update is a full
+copy of the same files, so whatever you upload LAST wins. Upload these three zips' contents
+now and your repo is exactly v0.65, the latest, whatever order you uploaded things before.
+No version from 57 to 65 added a file that later versions removed, so nothing old is left
+behind that could get in the way.
+
+On GitHub (repo ellisjaden22-sketch/Emberfall, branch main), in the SAME folder as your
+current game.js and server.js:
+
+UPLOAD 1  (this zip: Emberfall-v65-1-game-files.zip)
+  Add file -> Upload files -> drag in ALL 10 files below -> Commit changes.
+  Say yes to replacing files.
+    index.html, game.js, style.css, sw.js, website.html, Play Emberfall.html,
+    server.js, config.js, patchnotes.json, editor.html
+  (Do not upload this START HERE.txt file.)
+
+UPLOAD 2  (Emberfall-v65-2-downloads.zip)
+  Drag the whole "downloads" folder from that zip onto the upload page -> Commit.
+  You should end up with downloads/Emberfall-Windows.zip, downloads/Emberfall-Mac.zip
+  and downloads/Emberfall-Linux.zip.
+
+UPLOAD 3  (Emberfall-v65-3-music.zip)
+  Drag the whole "music" folder from that zip onto the upload page -> Commit.
+  If the three music files are already in your repo, you can skip this one.
+
+THEN
+  Render redeploys by itself in 2-3 minutes.
+  Open https://emberfall-sb6p.onrender.com/api/version : it should say "server": "v0.57"
+  (the server has not changed since v0.57; that is correct).
+  Open the game and press Ctrl+F5 (or Cmd+Shift+R on a Mac). The game menu (Esc) should
+  show "Beta v0.65". Everyone else gets the new version when they refresh.
+
+Your Discord webhook stays where it is (the DISCORD_WEBHOOK secret on GitHub). None of these
+files contain it, and none contain your email.
