@@ -1,9 +1,9 @@
 {
- "version": "v0.62",
- "title": "Raid night tools",
+ "version": "v0.61",
+ "title": "Bring who you like",
  "date": "16 Nov 2026",
- "text": "Ready checks, pull timers, quest sharing and a home of your choice.\n\n✨ Ready check: group leaders type /ready (or press Ready check in the Party window), and every member answers Ready or Not ready\n✨ Pull timer: /pull 10 shows a big countdown on everyone's screen\n✨ Share quests with your group from the quest log (Share button) or with /share\n✨ Choose your home: talk to Quartermaster Ilsa at Emberwatch or Jarl Hakon in Frostpeak to make it your home, and your hearth takes you there. Captain Oriel sets it back to Hearthmere\n⬆️ The Sunken Vault stays a dungeon for up to 5 heroes. Raid groups need to split into parties to enter it\n🔧 Fixed an error that could spam during big boss fights when a name label could not be placed on screen",
+ "text": "Cinderhold no longer requires particular classes. Any group of 5 to 20 level 20 heroes can enter.\n\n⬆️ Cinderhold no longer requires a Tank, Healer, Support and Damage: they are recommended, not required. You still need 5 to 20 heroes, all level 20\n⬆️ If your raid is missing a role, the gate tells you which one most raids bring, then lets you in anyway",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-16T20:17:54Z"
+ "time": "2026-11-16T19:38:38Z"
 }
