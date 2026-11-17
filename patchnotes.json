@@ -1,9 +1,9 @@
 {
- "version": "v0.60",
- "title": "Raid groups",
+ "version": "v0.62",
+ "title": "Raid night tools",
  "date": "16 Nov 2026",
- "text": "Parties hold 5 again, and any party leader can turn their party into a raid group of up to 20 heroes for Cinderhold.\n\n✨ Raid groups: the party leader opens the Party window and presses Convert to raid group. Up to 20 players can then join\n⬆️ Parties are back to 5 players\n⬆️ Cinderhold accepts 5 to 20 heroes. Its bosses grow tougher as more raiders come in, so a big raid still has to fight\n⬆️ With more than 7 members, the party frames switch to two compact columns\n⬆️ The raid reminder no longer appears when you log in",
+ "text": "Ready checks, pull timers, quest sharing and a home of your choice.\n\n✨ Ready check: group leaders type /ready (or press Ready check in the Party window), and every member answers Ready or Not ready\n✨ Pull timer: /pull 10 shows a big countdown on everyone's screen\n✨ Share quests with your group from the quest log (Share button) or with /share\n✨ Choose your home: talk to Quartermaster Ilsa at Emberwatch or Jarl Hakon in Frostpeak to make it your home, and your hearth takes you there. Captain Oriel sets it back to Hearthmere\n⬆️ The Sunken Vault stays a dungeon for up to 5 heroes. Raid groups need to split into parties to enter it\n🔧 Fixed an error that could spam during big boss fights when a name label could not be placed on screen",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-16T19:05:03Z"
+ "time": "2026-11-16T20:17:54Z"
 }

@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 60;
+const VERSION = 62;
 const TS = 32, MW = 336, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2889,7 +2889,7 @@ function updateCamera(dt){
   ey=Math.max(ey,hgt(ex,ez)+.45);
   const sh=shakeMag*.04; CAM.ex=ex+(Math.random()-.5)*sh; CAM.ey=ey+(Math.random()-.5)*sh; CAM.ez=ez+(Math.random()-.5)*sh;
 }
-function toScreen(X,Y,Z){ const v=VP; const x=v[0]*X+v[4]*Y+v[8]*Z+v[12], y=v[1]*X+v[5]*Y+v[9]*Z+v[13], w=v[3]*X+v[7]*Y+v[11]*Z+v[15]; if(w<.2) return null; return [(x/w*.5+.5)*W,(.5-y/w*.5)*H,w]; }
+function toScreen(X,Y,Z){ const v=VP; const x=v[0]*X+v[4]*Y+v[8]*Z+v[12], y=v[1]*X+v[5]*Y+v[9]*Z+v[13], w=v[3]*X+v[7]*Y+v[11]*Z+v[15]; if(!(w>=.2)) return null; const sx=(x/w*.5+.5)*W, sy=(.5-y/w*.5)*H; if(!isFinite(sx)||!isFinite(sy)) return null; return [sx,sy,w]; }
 function smoothY(st,y,dt){ if(st._ys==null||Math.abs(y-st._ys)>2.5||!(dt>0)) st._ys=y; else st._ys+=(y-st._ys)*(1-Math.exp(-dt*11)); return st._ys; }
 function animState(o,dt,x,y,moving,scale){ const ox=o._ax??x, oy=o._ay??y; const dm=Math.hypot(x-ox,y-oy); o._ax=x; o._ay=y; o.walkP=(o.walkP||0)+dm/TS*3.6/(scale||1)*((dm>.2&&o.rf!=null&&Math.cos(Math.atan2(y-oy,x-ox)-o.rf)<-.35)?-1:1);
   { const tg=(moving||dm>.3)?1:0; o.mvS=lerp(o.mvS||0,tg,Math.min(1,dt*(tg?9:7))); }
@@ -4008,7 +4008,8 @@ function renderWho(){ const l=$('whoList'); const rows=[{n:me.c.name,c:me.c.cls,
 function renderQlog(){ const el=$('qlogList'); const qs=activeQuests(); if(!qs.length){ el.innerHTML='<p style="color:var(--dim)">No active quests.</p>'; return; }
   el.innerHTML=qs.map(q=>{ const s=me.c.qs[q.id]; return `<div class="qlog"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(q.title)}</b><span style="color:var(--dim);font-size:12px">${esc(npcName(q.giver))}</span></div>
     <div style="font-size:13px;color:#d9c9a6;margin:3px 0">${esc(q.text)}</div><div class="${s.st==='done'?'done':'obj'}" style="font-size:13px">${s.st==='done'?'✔ Return to '+esc(npcName(q.giver)):esc(objText(q,s))}</div>
-    <button class="abandon" data-q="${q.id}">Abandon</button></div>`; }).join('');
+    <button class="abandon" data-q="${q.id}">Abandon</button>${me.party&&!q.daily?`<button class="abandon qshare" data-s="${q.id}" style="margin-right:6px">Share</button>`:''}</div>`; }).join('');
+  el.querySelectorAll('.qshare').forEach(b=>b.onclick=()=>shareQuest(b.dataset.s));
   el.querySelectorAll('.abandon').forEach(b=>b.onclick=()=>{ abandonQuest(b.dataset.q); renderQlog(); }); }
 const DSEL={i:0};
 function dlgOpts(){ const d=$('dlg'); if(!d||d.classList.contains('hidden')) return []; return [...d.querySelectorAll('.qline,button:not(.close):not([disabled]),.shoprow button:not([disabled])')].filter((e,i,a)=>a.indexOf(e)===i&&e.offsetParent!==null); }
@@ -4563,6 +4564,9 @@ function sendChat(raw){
     if(cmd==='hearth'||cmd==='home'||cmd==='recall') return hearthStart();
     if(cmd==='stuck'||cmd==='unstuck') return unstuck();
     if(cmd==='meter'||cmd==='dps') return meterToggle();
+    if(cmd==='ready'||cmd==='readycheck'||cmd==='rc') return readyCheck();
+    if(cmd==='pull') return pullTimer(arg);
+    if(cmd==='share') return shareQuest(arg);
     if(cmd==='sort') return sortBags();
     if(cmd==='prof'||cmd==='professions') return toggleWin('profWin',true);
     if(cmd==='setprof'){ if(!isGM) return sysMsg('You are not a Game Master.','c-err'); return profGM(arg); }
@@ -4903,11 +4907,11 @@ function renderPartyWin(){ const w=$('partyWin'); if(!w||w.classList.contains('h
   else h+='<div class="pwsub">You are not in a party. Invite someone below, or click a player and press <b>Invite</b>.</div>';
   const cand=[...others.values()].filter(o=>seenO(o)&&o.pt!==me.party||(!me.party&&seenO(o)));
   h+=`<h4>Invite players</h4>${cand.length?cand.map(o=>`<div class="pwrow small"><span class="pwic" style="background:${CLS[o.c].col}">${CLS[o.c].glyph}</span><span class="pwn" style="color:${CLS[o.c].col}">${esc(o.n)}</span><span class="pwl">Lv ${o.l}${o.pt?' · in a party':''}</span><button data-inv="${esc(o.u)}" class="gold">Invite</button></div>`).join(''):'<div class="pwsub">No other players online right now.</div>'}`;
-  h+=`<div class="btns" style="margin-top:12px">${me.party?'<button id="pwLeave">Leave party</button>':''}<button id="pwName">Join by name…</button></div>`;
+  h+=`<div class="btns" style="margin-top:12px">${me.party?'<button id="pwLeave">Leave party</button>':''}<button id="pwName">Join by name…</button>${me.party&&lead?'<button id="pwReady">✔ Ready check</button><button id="pwPull">⏱ Pull in 10</button>':''}</div>`;
   w.querySelector('.pwbody').innerHTML=h;
   w.querySelectorAll('[data-inv]').forEach(b=>b.onclick=()=>inviteTo(othersByU.get(b.dataset.inv)));
   w.querySelectorAll('[data-kick]').forEach(b=>b.onclick=()=>{ const o=othersByU.get(b.dataset.kick); if(o) kickMember(o); });
-  if($('pwLeave')) $('pwLeave').onclick=()=>{ joinParty(''); renderPartyWin(); }; $('pwName').onclick=partyDlg; if($('pwRaid')) $('pwRaid').onclick=convertToRaid; }
+  if($('pwLeave')) $('pwLeave').onclick=()=>{ joinParty(''); renderPartyWin(); }; $('pwName').onclick=partyDlg; if($('pwRaid')) $('pwRaid').onclick=convertToRaid; if($('pwReady')) $('pwReady').onclick=readyCheck; if($('pwPull')) $('pwPull').onclick=()=>pullTimer('10'); }
 /* the leader renames the party to raid-<name>; every member follows (party event 'RG') */
 function convertToRaid(){ if(!me.party||isRaidGrp()) return; if(!amLeader()) return err('Only the party leader can do that'); const nn=('raid-'+me.party).slice(0,20); myChat.push([++chSeq,3,'RG:'+nn]); if(myChat.length>3) myChat.shift(); sendPresence(true);
   const keep=me.party; setTimeout(()=>{ if(me.party===keep){ me.lead=1; joinParty(nn,true); me.lead=1; sysMsg(`Your party is now a raid group: up to ${RAID_MAX} players can join.`); banner('Raid group formed','Up to '+RAID_MAX+' players'); renderPartyWin(); $('party').dataset.sig=''; } },400); }
@@ -5379,6 +5383,7 @@ function vaultCmd(k){ if(!me) return; if(raidCmd(k)) return; if(me.dead) return 
     if(inVault(me.x,me.y)) return sysMsg('You are already inside the Sunken Vault. Type -o to leave early, or -d once the Drowned King has fallen.','c-err');
     if(!vaultNear(me.x,me.y)) return sysMsg(`Stand within 6 yards of the Sunken Vault gate to enter. You are ${Math.round(Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)/10)} yards away.`,'c-err');
     const mem=partyMembers().filter(o=>!o.d), far=mem.filter(o=>!vaultNear(o.rx,o.ry));
+    if(mem.length+1>PARTY_MAX&&!isGM){ sysMsg(`The Sunken Vault is a dungeon for up to ${PARTY_MAX} heroes. Your group has ${mem.length+1}: split into parties of ${PARTY_MAX} (raid groups are for Cinderhold).`,'c-err'); return; }
     if(far.length) return sysMsg('Your whole party must stand within 6 yards of the gate. Too far away: '+far.map(o=>o.n).join(', ')+'.','c-err');
     const busy=[...others.values()].filter(o=>seenO(o)&&inVault(o.rx,o.ry)&&!(me.party&&o.pt===me.party));
     if(busy.length) return sysMsg('Another group is inside the Sunken Vault ('+busy.map(o=>o.n).join(', ')+'). Wait until they finish.','c-err');
@@ -5407,6 +5412,30 @@ function vaultHostTick(players,t){ const inside=(me&&inVault(me.x,me.y))||[...ot
 /* a gentle hint at the gate */
 function vaultHint(){ if(!me||me.dead||inVault(me.x,me.y)) return; const n=vaultNear(me.x,me.y); if(n&&!VAULT.hint){ VAULT.hint=true; sysMsg('The Sunken Vault · Level 10 dungeon. Gather your party within 6 yards of the gate and type -e to descend together.'); } else if(!n&&Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)>200) VAULT.hint=false; }
 setInterval(vaultHint,1000);
+
+/* ---------- v62: group tools ---------- */
+function partyEvt(txt){ myChat.push([++chSeq,3,txt]); if(myChat.length>3) myChat.shift(); sendPresence(true); }
+const RCHK={id:0,at:0,ans:{},open:null};
+function readyCheck(){ if(!me.party) return err('You are not in a group'); if(!amLeader()) return err('Only the group leader can start a ready check'); if(now()-RCHK.at<15) return err('A ready check is already running');
+  RCHK.id=(Math.random()*1e6)|0; RCHK.at=now(); RCHK.ans={[me.c.name]:1}; partyEvt('RCHK:'+RCHK.id); sysMsg('✔ Ready check started…','c-party');
+  setTimeout(()=>{ if(!me||!me.party) return; const mem=partyMembers(), yes=[], no=[], none=[]; for(const o of mem){ const a=RCHK.ans[o.n]; (a===1?yes:a===0?no:none).push(o.n); }
+    sysMsg(no.length||none.length?`Ready check: ${yes.length+1}/${mem.length+1} ready.${no.length?' Not ready: '+no.join(', ')+'.':''}${none.length?' No answer: '+none.join(', ')+'.':''}`:`✔ Everyone is ready (${mem.length+1}/${mem.length+1})!`,no.length||none.length?'c-err':'c-party');
+    if(!no.length&&!none.length) try{ snd('horn'); }catch(e){} },16000); }
+function answerReady(id,ok){ $('confirmPop').classList.add('hidden'); partyEvt('RR:'+id+':'+(ok?1:0)); sysMsg(ok?'You are ready.':'You are not ready.','c-party'); }
+function pullTimer(arg){ if(!me.party) return err('You are not in a group'); if(!amLeader()) return err('Only the group leader can start a pull timer'); const n=clamp(parseInt(arg)||10,3,30); partyEvt('PL:'+n); pullShow(n,me.c.name); }
+function pullShow(n,who){ clearInterval(pullShow.iv); let k=n; const el=$('raidWarn')||(()=>{ const d=document.createElement('div'); d.id='raidWarn'; document.body.appendChild(d); return d; })();
+  const tick=()=>{ el.textContent=k>0?`Pull in ${k}`:'PULL!'; el.classList.remove('rw-on'); void el.offsetWidth; el.classList.add('rw-on'); if(k<=3) try{ snd(k>0?'step':'horn'); }catch(e){} if(k<=0){ clearInterval(pullShow.iv); setTimeout(()=>el.classList.remove('rw-on'),1500); } k--; };
+  sysMsg(`⏱ ${who} started a ${n} second pull timer.`,'c-party'); tick(); pullShow.iv=setInterval(tick,1000); }
+function shareQuest(id){ if(!me.party) return err('You are not in a group'); const q=QUESTS.find(x=>x.id===id||x.title.toLowerCase()===String(id).toLowerCase()); const st=q&&me.c.qs[q.id];
+  if(!q||!st||st.st==='complete') return err('Pick an active quest to share'); if(q.daily) return err('Daily bounties cannot be shared'); partyEvt('QS:'+q.id); sysMsg(`You shared "${q.title}" with your group.`,'c-party'); }
+function groupEvent(o,txt){ if(!me||!me.party||o.pt!==me.party) return false;
+  if(txt.startsWith('RCHK:')){ const id=txt.slice(5); askConfirm(`<b>${esc(o.n)}</b> started a ready check. Are you ready?`,'Ready',()=>answerReady(id,true)); const no=$('cfNo'); if(no){ no.textContent='Not ready'; no.onclick=()=>answerReady(id,false); } try{ snd('horn'); }catch(e){} return true; }
+  if(txt.startsWith('RR:')){ const [, id, a]=txt.split(':'); if(String(RCHK.id)===id) RCHK.ans[o.n]=+a; return true; }
+  if(txt.startsWith('PL:')){ pullShow(clamp(parseInt(txt.slice(3))||10,3,30),o.n); return true; }
+  if(txt.startsWith('QS:')){ const q=QUESTS.find(x=>x.id===txt.slice(3)); if(!q) return true; if(me.c.qs[q.id]) return sysMsg(`${o.n} shared "${q.title}", but you already have it or finished it.`,'c-sys'),true; if(!qAvail(q)) return sysMsg(`${o.n} shared "${q.title}", but you cannot take it yet.`,'c-sys'),true;
+    askConfirm(`<b>${esc(o.n)}</b> shares a quest: <b>${esc(q.title)}</b>. Accept it?`,'Accept',()=>{ acceptQuest(q); renderQlog(); }); return true; }
+  return false; }
+
 /* =====================================================================
    v58: THE SCORCHED REACH (levels 15–19) — Emberwatch outpost and its war
    ===================================================================== */
@@ -5487,6 +5516,8 @@ function addReachCamp(d){ const cx=REACH.cx+.5, cz=REACH.cy+.5, R=mulberry32(585
 /* ---------- v58 quality of life ---------- */
 var LASTTALK=null;
 try{ $('escVer').textContent='Emberfall Online · Beta v0.'+VERSION; }catch(e){}
+function homePos(){ const h=me&&me.c.home, n=h&&NPCS.find(q=>q.id===h); if(n&&h==='ilsa') return {x:REACH.cx*TS+16,y:(REACH.cy+2)*TS,name:'Emberwatch'}; if(n) return {x:n.x+40,y:n.y+40,name:"Jarl Hakon's camp"}; return {x:SPAWN.x,y:SPAWN.y,name:'Hearthmere'}; }
+function setHome(n){ me.c.home=n.id==='oriel'?'':n.id; persist(); const H=homePos(); chatLine(`🏠 ${H.name} is now your home. Your hearth (/hearth) brings you here.`,'c-sys'); banner('Home set',H.name); }
 function sortBags(){ const c=me&&me.c; if(!c) return; c.inv.sort((a,b)=>b.rar-a.rar||SLOTS.indexOf(a.slot)-SLOTS.indexOf(b.slot)||b.pow+b.sta-a.pow-a.sta); renderInv(); persist(); }
 /* junk: commons and uncommons you can't use, or that are weaker than what you already wear */
 function junkList(){ const c=me.c, sc=it=>(it?Math.round(it.pow*upMul(it))+Math.round(it.sta*upMul(it)):-1); return c.inv.filter(it=>it&&it.rar<=1&&!it.raid&&(!canUse(it,c.cls)||sc(it)<=sc(c.eq[it.slot]))); }
@@ -5498,8 +5529,8 @@ function hearthStart(){ if(!me||me.dead) return; const t=now(), cd=(me.c.hearthA
   if(inRaid(me.x,me.y)||inVault(me.x,me.y)||inArena(me.x,me.y)) return err('Not down here: type -o to leave first');
   if(cd>0) return err(`Your hearth is ready in ${Math.floor(cd/60)}:${String(Math.ceil(cd%60)).padStart(2,'0')}`); if(inCombat()) return err('You are in combat');
   if(me.mounted) dismount(); me.cast={ab:{id:'hearth',name:'Hearth to Hearthmere'},t0:t,dur:8,fin:()=>{ if(me.dead||inCombat()) return err('Interrupted');
-    me.c.hearthAt=Math.floor(Date.now()/1000); me.x=SPAWN.x+(Math.random()-.5)*40; me.y=SPAWN.y+(Math.random()-.5)*40; me.target=null; me.auto=false; if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; }
-    sendPresence(true); persist(); try{ const [X,Y,Z]=ph3(me.x,me.y,1); burst3(X,Y,Z,'#ffd36a',30,2.5,{glow:true}); sfx('quest'); }catch(e){} chatLine('You return to Hearthmere.','c-sys'); }};
+    me.c.hearthAt=Math.floor(Date.now()/1000); const H=homePos(); me.x=H.x+(Math.random()-.5)*40; me.y=H.y+(Math.random()-.5)*40; me.target=null; me.auto=false; if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; }
+    sendPresence(true); persist(); try{ const [X,Y,Z]=ph3(me.x,me.y,1); burst3(X,Y,Z,'#ffd36a',30,2.5,{glow:true}); sfx('quest'); }catch(e){} chatLine('You return to '+homePos().name+'.','c-sys'); }}; me.cast.ab.name='Hearth to '+homePos().name;
   chatLine('Channelling your hearth... (stand still for 8 seconds)','c-sys'); }
 /* stuck: step out of anything solid, or hearth for free if you are really boxed in */
 function unstuck(){ if(!me||me.dead) return; const t=now(); if(t-(unstuck.t||-99)<20) return err('Wait a moment before trying that again'); unstuck.t=t;
@@ -5689,7 +5720,7 @@ function raidReqs(all){ const out=[], n=all.length;
   const low=all.filter(a=>a.l<20); if(low.length) out.push(`Every hero must be level 20. Not yet: ${low.map(a=>a.n+' ('+a.l+')').join(', ')}.`);
   const has=r=>all.some(a=>CLS[a.c]&&CLS[a.c].role===r), miss=[];
   if(!has('Tank')) miss.push('a Tank (Bulwark)'); if(!has('Healer')) miss.push('a Healer (Mender)'); if(!has('Support')) miss.push('a Support (Bard)'); if(!has('Damage')) miss.push('Damage (Arcanist, Assassin, Barbarian or Hunter)');
-  if(miss.length) out.push('Your raid still needs '+miss.join(', ')+'.'); return out; }
+  out.missing=miss; return out; }
 function raidCmd(k){ if(!me) return false; const inside=inRaid(me.x,me.y);
   if(k==='e'){ if(inside){ sysMsg('You are already inside Cinderhold. Type -o to leave, or -d once the Ember Tyrant has fallen.','c-err'); return true; }
     if(!raidNear(me.x,me.y)) return false; if(me.dead){ sysMsg('You cannot do that while dead.','c-err'); return true; }
@@ -5698,6 +5729,7 @@ function raidCmd(k){ if(!me) return false; const inside=inRaid(me.x,me.y);
     const mem=partyMembers().filter(o=>!o.d), all=[{n:me.c.name,l:me.c.lvl,c:me.c.cls},...mem.map(o=>({n:o.n,l:o.l,c:o.c}))], probs=raidReqs(all);
     if(probs.length&&!isGM){ sysMsg('🔥 The Cinderhold Gate will not open:','c-err'); for(const p of probs) sysMsg('• '+p,'c-err'); return true; }
     if(probs.length) sysMsg(`GM override: entering without the full raid requirements (${probs.length} unmet).`,'c-gm');
+    if(probs.missing&&probs.missing.length) sysMsg('Suggestion: most raids bring '+probs.missing.join(', ')+'. You can go in without, but it will be harder.','c-sys');
     const far=mem.filter(o=>!raidNear(o.rx,o.ry)); if(far.length&&!isGM){ sysMsg(`Waiting for ${far.map(o=>o.n).join(', ')}: everyone must stand at the Cinderhold Gate.`,'c-err'); return true; }
     const busy=[...others.values()].filter(o=>seenO(o)&&inRaid(o.rx,o.ry)&&!(me.party&&o.pt===me.party)); if(busy.length&&!isGM){ sysMsg(`Another group is inside Cinderhold (${busy.slice(0,3).map(o=>o.n).join(', ')}). Wait for them to finish.`,'c-err'); return true; }
     raidEnter(me.party?'You lead your raid through the Cinderhold Gate.':'You step through the Cinderhold Gate.'); if(me.party){ myChat.push([++chSeq,3,'RE']); if(myChat.length>3) myChat.shift(); } return true; }
@@ -5712,14 +5744,14 @@ function raidEnter(msg){ if(me.mounted) dismount(); if(me.dead) return; const S=
   if(!me.c.disc.includes('cinderhold')){ me.c.disc.push('cinderhold'); persist(); } }
 function raidLeave(msg){ if(me.mounted) dismount(); if(me.dead) release(); const S=RAID.exit; me.x=S.x+(Math.random()-.5)*50; me.y=S.y+Math.random()*24; me.face=Math.PI/2; me.target=null; me.auto=false; me.cast=null;
   if(typeof CAM!=='undefined'){ CAM.tx=me.x/TS; CAM.tz=me.y/TS; } sendPresence(true); sysMsg(msg); }
-function raidEvent(o,txt){ if(txt.startsWith('RG:')){ const nn=txt.slice(3).replace(/[^a-z0-9 _-]/g,'').slice(0,20); if(/^raid-/.test(nn)&&me.party&&o.pt===me.party){ me.lead=0; joinParty(nn,true); sysMsg(`${o.n} turned your party into a raid group (up to ${RAID_MAX} players).`); $('party').dataset.sig=''; } return true; } if(txt==='RE'){ if(!inRaid(me.x,me.y)&&raidNear(me.x,me.y)) raidEnter(`${o.n} leads your raid through the Cinderhold Gate.`); else if(!inRaid(me.x,me.y)) sysMsg(`${o.n} entered Cinderhold. Go to the Cinderhold Gate in the Cinder Caldera and type -e to follow.`,'c-party'); return true; }
+function raidEvent(o,txt){ if(groupEvent(o,txt)) return true; if(txt.startsWith('RG:')){ const nn=txt.slice(3).replace(/[^a-z0-9 _-]/g,'').slice(0,20); if(/^raid-/.test(nn)&&me.party&&o.pt===me.party){ me.lead=0; joinParty(nn,true); sysMsg(`${o.n} turned your party into a raid group (up to ${RAID_MAX} players).`); $('party').dataset.sig=''; } return true; } if(txt==='RE'){ if(!inRaid(me.x,me.y)&&raidNear(me.x,me.y)) raidEnter(`${o.n} leads your raid through the Cinderhold Gate.`); else if(!inRaid(me.x,me.y)) sysMsg(`${o.n} entered Cinderhold. Go to the Cinderhold Gate in the Cinder Caldera and type -e to follow.`,'c-party'); return true; }
   if(txt==='RD'){ if(inRaid(me.x,me.y)) raidLeave(`${o.n} completes the raid. You return to the surface together.`); return true; } return false; }
 function raidCheckpoint(){ const B=RAID.boss, dead=k=>B[k]&&B[k].dead, W=(x,y)=>[(RX0+x+.5)*TS,(OWH+y+.5)*TS];
   if(dead('gravoth')) return W(108,58); if(dead('selvara')) return W(150,55); if(dead('magmaroth')) return W(141,16); if(dead('ashmaw')) return W(105,16);
   if(dead('ignara')&&dead('pyrrus')) return W(70,13); if(dead('kragmor')) return W(37,16); return [RAID.start.x,RAID.start.y]; }
 function raidHint(){ if(!me||me.dead||inRaid(me.x,me.y)) return; const n=raidNear(me.x,me.y);
   if(n&&!RAID.hint&&!raidIsOpen()){ RAID.hint=true; sysMsg('A colossal gate of black glass, sealed shut. The air shimmers with heat, and the stone hums faintly beneath your feet.','c-sys'); }
-  else if(n&&!RAID.hint){ RAID.hint=true; sysMsg('🔥 The Cinderhold Gate · Raid for 5 to 20 heroes, all level 20, with a Tank, a Healer, a Support and Damage. Gather your party here and type -e.','c-xp'); }
+  else if(n&&!RAID.hint){ RAID.hint=true; sysMsg('🔥 The Cinderhold Gate · Raid for 5 to 20 heroes, all level 20 (a Tank, a Healer, a Support and Damage are recommended). Gather your group here and type -e.','c-xp'); }
   else if(!n&&Math.hypot(me.x-RAID.gate.x,me.y-RAID.gate.y)>260) RAID.hint=false; }
 setInterval(raidHint,1000);
 /* portcullises: tell the raid when one opens */
@@ -5773,12 +5805,12 @@ const THALIA=(()=>{ const [tx,ty]=findOpen(165,26); return {id:'thalia',name:'Em
 NPCS.push({id:'brannoc',name:'Quartermaster Brannoc',title:"Tyrant's Ember trader",x:(RX0+6)*TS+16,y:(OWH+10)*TS+16,col:'#a87a3a'});
 NPCS.push({id:'herald',name:'Ashen Herald',title:'Leave Cinderhold',x:(RX0+21)*TS+16,y:(OWH+66)*TS+16,col:'#8a8a8a'});
 const RPOI={id:'cinderhold',name:'The Cinderhold Gate',x:170,y:24,r:5};
-NPCGREET.thalia='"Beneath the caldera lies Cinderhold, the forge-citadel of Vyrathos, the Ember Tyrant. Seven terrors stand between you and him. Bring at least five heroes, all level 20: a Bulwark to hold the line, a Mender to keep you breathing, a Bard to lift your arms, and blades to finish the work. Gather at the gate and type -e."';
+NPCGREET.thalia='"Beneath the caldera lies Cinderhold, the forge-citadel of Vyrathos, the Ember Tyrant. Seven terrors stand between you and him. Bring at least five heroes, all level 20. I would bring a Bulwark to hold the line, a Mender to keep you breathing, a Bard to lift your arms, and blades to finish the work, but who you bring is your choice. Gather at the gate and type -e."';
 NPCGREET.brannoc='"Embers! Every Tyrant\'s Ember you bring me is a shard of his fire. Six of them and I\'ll forge you something worthy of this place."';
 NPCGREET.herald='"The fire remembers those who walk out alive. Shall I lead you back to the sky?"';
-const RSVC={ilsa:[['shop','Browse goods']],thalia:[['rinfo','📜 About Cinderhold']],brannoc:[['rembers',"🔥 Trade Tyrant's Embers"],['rout','Return to the surface']],herald:[['rout','Return to the surface']]};
-function raidActs(n){ return {rout:()=>{ closeDlg(); if(inRaid(me.x,me.y)) raidLeave('The fire lets you go. You climb back to the surface.'); },rembers:()=>openEmbers(n),rinfo:()=>raidInfo(n)}; }
-function raidInfo(n){ dlg(`<h2>Cinderhold</h2><p>A raid for <b>5 to ${RAID_MAX} heroes</b> (form a raid group from the Party window), all <b>level 20</b>, with a <b>Tank</b> (Bulwark), a <b>Healer</b> (Mender), a <b>Support</b> (Bard) and <b>Damage</b>. Gather at the gate and any of you types <b>-e</b>.</p>
+const RSVC={ilsa:[['shop','Browse goods'],['sethome','🏠 Make Emberwatch your home']],hakon:[['sethome','🏠 Make this camp your home']],oriel:[['sethome','🏠 Make Hearthmere your home']],thalia:[['rinfo','📜 About Cinderhold']],brannoc:[['rembers',"🔥 Trade Tyrant's Embers"],['rout','Return to the surface']],herald:[['rout','Return to the surface']]};
+function raidActs(n){ return {sethome:()=>{ closeDlg(); setHome(n); },rout:()=>{ closeDlg(); if(inRaid(me.x,me.y)) raidLeave('The fire lets you go. You climb back to the surface.'); },rembers:()=>openEmbers(n),rinfo:()=>raidInfo(n)}; }
+function raidInfo(n){ dlg(`<h2>Cinderhold</h2><p>A raid for <b>5 to ${RAID_MAX} heroes</b> (form a raid group from the Party window), all <b>level 20</b>. Recommended: a <b>Tank</b> (Bulwark), a <b>Healer</b> (Mender), a <b>Support</b> (Bard) and <b>Damage</b>, but any classes may enter. Gather at the gate and any of you types <b>-e</b>.</p>
   <p style="font-size:14px;color:#d9c9a6">1. Kragmor the Forgewarden · 2. Ignara and Pyrrus, the Twin Flames · 3. Ashmaw, Mother of Hounds · 4. Magmaroth, the Living Flow · 5. High Pyromancer Sel'vara · 6. Gravoth the Obsidian Colossus · 7. Vyrathos, the Ember Tyrant</p>
   <p style="font-size:14px;color:var(--dim)">The deeper you go, the better the loot. Every boss gives Tyrant's Embers for Brannoc's forge. The Ember Tyrant guards a legendary weapon for your class (2.5%) and the Ashborn Nightmare (1.5%). Watch for golden circles: stack in them together. Fallen heroes rise at the last chamber you cleared.</p>
   <div class="btns" style="margin-top:12px"><button id="bk">Back</button></div>`); $('bk').onclick=()=>talk(n); }
@@ -5788,7 +5820,7 @@ function openEmbers(n){ const c=me.c, e=c.embers||0;
   $('bk').onclick=()=>talk(n);
   document.querySelectorAll('#dlg [data-em]').forEach(b=>b.onclick=()=>{ if((c.embers||0)<EMBER_COST) return; if(c.inv.length>=BAGMAX) return err('Bags are full'); const it=tyrantGear(b.dataset.em,c.cls); c.embers-=EMBER_COST; c.inv.push(it); renderInv(); persist();
     chatLine(`Brannoc forges you [${it.name}].`,'c-loot t3'); try{ const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',40,3,{glow:true}); sfx('quest'); }catch(e){} openEmbers(n); }); }
-QUESTS.push({id:'cinder1',giver:'thalia',title:'The Forgewarden',type:'kill',mob:'kragmor',n:1,xp:6000,gold:150,lvl:20,item:3,text:'Lead a raid into Cinderhold and silence Kragmor the Forgewarden, who keeps the Tyrant\'s great forge burning. You will need at least five heroes: a tank, a healer, a support and damage.'},
+QUESTS.push({id:'cinder1',giver:'thalia',title:'The Forgewarden',type:'kill',mob:'kragmor',n:1,xp:6000,gold:150,lvl:20,item:3,text:'Lead a raid into Cinderhold and silence Kragmor the Forgewarden, who keeps the Tyrant\'s great forge burning. You will need at least five heroes of level 20. A tank, a healer, a support and damage are recommended.'},
   {id:'cinder2',giver:'thalia',title:'Heart of the Tyrant',type:'kill',mob:'vyrathos',n:1,xp:20000,gold:500,lvl:20,pre:'cinder1',epic:true,text:'Fight through the twins, the hounds, the living flow, the pyromancer and the colossus, down to the Heart of Cinderhold. End Vyrathos, the Ember Tyrant, before his fire swallows Emberfall.'});
 Object.assign(BOSSY,{
   kragmor:{title:'Forgewarden of Cinderhold',pull:'The forge hungers. Feed it your bones!',p50:'Hotter! HOTTER!',p20:'The forge... overflows!',die:'The fires... go... cold...'},
