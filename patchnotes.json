@@ -1,9 +1,9 @@
 {
- "version": "v0.66",
- "title": "A tidy map and town music that stays in town",
+ "version": "v0.67",
+ "title": "Stars, jumping mounts and quiet roads",
  "date": "17 Nov 2026",
- "text": "The world map is readable again and town music no longer follows you out of town.\n\n⬆️ World map: no name is ever drawn over another name. Names that would collide move just below or above their marker, or wait until you zoom in (hover any marker to see its name)\n⬆️ World map: zone titles are smaller with the level range on its own line, undiscovered places show only their marker, and ordinary townsfolk only appear once you zoom in\n🔧 World map: bosses and places underground (the Sunken Vault, Cinderhold) no longer spill onto the bottom of the surface map, and names of places off the edge no longer pile up at the side\n🔧 Town music now stays inside the town walls: leaving town fades it out within a second, a finished song no longer starts the next one once you are outside, and stepping in and out at the gate can no longer leave the wrong music playing\n🔧 The inn music in Brinehaven is credited to the Gull & Anchor, not the Hearthmere Inn",
+ "text": "Upgrades show as gold stars, mounts can jump, monsters well below your level leave you alone, and music stays in town.\n\n⬆️ Ordinary monsters 3 or more levels below you no longer attack on sight. They still fight back if you attack them, and elites and bosses still attack whoever comes close\n✨ Mounts can jump (Space) and leap over fences and small rocks. Mountain walls and the edge of the world still stop you\n⬆️ Upgraded gear shows a gold star for every upgrade rank (up to seven), on its icon, beside its name and in its tooltip\n🔧 Music no longer follows you out of town. Towns have their music, the open world has wind, water and birds, and battle music still plays in every fight. Dungeons keep their own eerie score\n🔧 Garrick's forge in Brinehaven is named correctly, and the forge tells you the new star rank after each upgrade",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-17T04:10:24Z"
+ "time": "2026-11-17T12:38:32Z"
 }
