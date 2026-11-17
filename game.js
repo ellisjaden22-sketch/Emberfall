@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 65;
+const VERSION = 66;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -5083,23 +5083,39 @@ function mapCenterMe(){ if(!me) return; MAPZ.init=true; MAPZ.cx=me.x/TS; MAPZ.cy
 function drawWorldMap(){ if($('mapWin').classList.contains('hidden')||!me) return; if(!mapBase) mapBase=buildMapBase(); const cv2=$('mapC'), x=cv2.getContext('2d'); { const R0=mapRegion(); if(MAPZ.reg!==R0.y0){ MAPZ.reg=R0.y0; MAPZ.init=false; MAPZ.z=1; } if(!MAPZ.init){ MAPZ.init=true; MAPZ.cx=MW/2; MAPZ.cy=R0.y0+R0.h/2; } } const V=mapView(); const S=V.S, t=now(); mapFeat=[]; MAPZ.ox=V.ox; MAPZ.oy=V.oy;
   x.setTransform(1,0,0,1,0,0); x.fillStyle='#d8c49a'; x.fillRect(0,0,cv2.width,cv2.height); x.translate(V.ox,V.oy); x.imageSmoothingEnabled=true;
   x.drawImage(mapBase,0,0,MW*S,MH*S); { const R=V.R; x.fillStyle=R.y0?'#16140f':'#d8c49a'; if(R.y0) x.fillRect(-10,-4000,MW*S+20,R.y0*S+4000); x.fillRect(-10,(R.y0+R.h)*S,MW*S+20,4000); }
-  const txt=(s,px,py,size,col,w,stroke,cz)=>{ x.font=`${w||700} ${size}px ${cz?'Cinzel,serif':'"Alegreya Sans",sans-serif'}`; x.textAlign='center'; x.lineJoin='round'; x.lineWidth=stroke||3.5; x.strokeStyle='rgba(245,232,200,.85)'; x.strokeText(s,px,py); x.fillStyle=col; x.fillText(s,px,py); };
-  const txtD=(s,px,py,size,col)=>{ x.font=`700 ${size}px "Alegreya Sans",sans-serif`; x.textAlign='center'; x.lineJoin='round'; x.lineWidth=3; x.strokeStyle='rgba(20,12,4,.85)'; x.strokeText(s,px,py); x.fillStyle=col; x.fillText(s,px,py); };
-  for(const z in ZONES){ const c=ZCENT[z]; if(!c) continue; const sub=ZONES[z].sub||'', lv=/^Level\s+(\d+)\s*[–-]\s*(\d+)/.exec(sub); x.save(); x.font='700 16px Cinzel,serif'; if(x.letterSpacing!==undefined) x.letterSpacing='1.5px'; txt(ZONES[z].name.toUpperCase()+(lv?` (Lvl. ${lv[1]}-${lv[2]})`:''),c[0]*S,c[1]*S-2,16,'#4a2c10',700,4,true); x.restore(); if(sub&&!lv) txt(sub,c[0]*S,c[1]*S+13,11,'#7a5226',600,3); }
-  if(MAPF.quests) for(const q of activeQuests()){ const s=me.c.qs[q.id]; if(s.st==='done') continue; x.fillStyle='rgba(255,200,40,.16)'; x.strokeStyle='rgba(180,120,10,.8)'; x.lineWidth=1.5; x.setLineDash([5,4]);
+  const LQ=[]; let LP=0; const txt=(s,px,py,size,col,w,stroke,cz)=>LQ.push({lp:LP,x:px,y:py,L:[{s,size,col,w:w||700,stroke:stroke||3.5,cz,dk:false}]}), txtD=(s,px,py,size,col)=>{ const l={s,size,col,w:700,stroke:3,dk:true}, q=LQ[LQ.length-1]; if(q&&q.lp===LP&&Math.abs(q.x-px)<.5&&py>q.y&&py-q.y<17) q.L.push(l); else LQ.push({lp:LP,x:px,y:py,L:[l]}); };
+  const txt0=(s,px,py,size,col,w,stroke,cz)=>{ x.font=`${w||700} ${size}px ${cz?'Cinzel,serif':'"Alegreya Sans",sans-serif'}`; x.textAlign='center'; x.lineJoin='round'; x.lineWidth=stroke||3.5; x.strokeStyle='rgba(245,232,200,.85)'; x.strokeText(s,px,py); x.fillStyle=col; x.fillText(s,px,py); };
+  const txtD0=(s,px,py,size,col)=>{ x.font=`700 ${size}px "Alegreya Sans",sans-serif`; x.textAlign='center'; x.lineJoin='round'; x.lineWidth=3; x.strokeStyle='rgba(20,12,4,.85)'; x.strokeText(s,px,py); x.fillStyle=col; x.fillText(s,px,py); };
+  { const R=V.R, zs=clamp(S*6.2,11,17); for(const z in ZONES){ const c=ZCENT[z]; if(!c||c[1]<R.y0-2||c[1]>R.y0+R.h+2) continue; const sub=ZONES[z].sub||'', lv=/^Level\s+(\d+)\s*[–-]\s*(\d+)/.exec(sub);
+    LQ.push({lp:0,x:c[0]*S,y:c[1]*S-2,L:[{s:ZONES[z].name.toUpperCase(),size:zs,col:'#4a2c10',w:700,stroke:4,cz:true,sp:1},{s:lv?`Level ${lv[1]}–${lv[2]}`:sub.split('·')[0].trim(),size:Math.max(10,zs*.7),col:'#7a5226',w:700,stroke:3}]}); } }
+  LP=4; if(MAPF.quests) for(const q of activeQuests()){ const s=me.c.qs[q.id]; if(s.st==='done') continue; x.fillStyle='rgba(255,200,40,.16)'; x.strokeStyle='rgba(180,120,10,.8)'; x.lineWidth=1.5; x.setLineDash([5,4]);
     let cx=null,cz=null,r=4;
     if(q.type==='kill'){ const ms=mobs.filter(m=>m.t.key===q.mob); if(ms.length){ cx=ms.reduce((a,m)=>a+m.sx,0)/ms.length/TS; cz=ms.reduce((a,m)=>a+m.sy,0)/ms.length/TS; r=Math.max(3,...ms.map(m=>Math.hypot(m.sx/TS-cx,m.sy/TS-cz)))+2; } }
     if(q.type==='explore'){ const id=q.pois.find(id=>!s.p.includes(id)); const p=POIS.find(o=>o.id===id); if(p){ cx=p.x; cz=p.y; r=p.r; } }
     if(cx!==null){ x.beginPath(); x.arc(cx*S,cz*S,r*S,0,7); x.fill(); x.stroke(); mapFeat.push({x:cx*S,y:cz*S,r:Math.max(14,r*S*.6),tip:'Quest: '+q.title}); }
     x.setLineDash([]); if(q.type==='gather'&&MAPF.gather) for(const n of NODES) if(n.mat===q.mat){ x.fillStyle=MATS[n.mat].col; x.strokeStyle='#2a1a08'; x.lineWidth=1; x.beginPath(); x.arc((n.tx+.5)*S,(n.ty+.5)*S,3.5,0,7); x.fill(); x.stroke(); } }
-  for(const p of POIS){ const d=me.c.disc.includes(p.id); mapIcon(x,'poi',p.x*S,p.y*S,d?'#e0a830':'#a89878'); txt(d?p.name:'Unexplored',p.x*S,p.y*S-9,11,d?'#3a2408':'#8a7a5a',700,3); mapFeat.push({x:p.x*S,y:p.y*S,r:10,tip:d?p.name:'An unexplored place'}); }
-  for(const n of NPCS){ const m=npcMark(n); const px=n.x/TS*S, py=n.y/TS*S; if(n.id==='hilde'&&m==='$'){ drawShoe(x,px,py-2,.6,1); } else mapIcon(x,'npc',px,py,m==='!'||m==='?'?'#ffd34a':m==='$'?'#9fe07a':'#d8c8a8');
+  LP=3; for(const p of POIS){ if(p.y<V.R.y0-1||p.y>V.R.y0+V.R.h+1) continue; const d=me.c.disc.includes(p.id); mapIcon(x,'poi',p.x*S,p.y*S,d?'#e0a830':'#a89878'); if(d) txt(p.name,p.x*S,p.y*S-9,11,'#3a2408',700,3); mapFeat.push({x:p.x*S,y:p.y*S,r:10,tip:d?p.name:'An unexplored place'}); }
+  LP=1; for(const n of NPCS){ const m=npcMark(n); const px=n.x/TS*S, py=n.y/TS*S; if(n.y/TS<V.R.y0-1||n.y/TS>V.R.y0+V.R.h+1) continue; if(!m&&MAPZ.z<2.2) continue; if(n.id==='hilde'&&m==='$'){ drawShoe(x,px,py-2,.6,1); } else mapIcon(x,'npc',px,py,m==='!'||m==='?'?'#ffd34a':m==='$'?'#9fe07a':'#d8c8a8');
     if(m==='!'||m==='?') txtD(m,px,py-7,16,'#ffd34a'); mapFeat.push({x:px,y:py,r:8,tip:`${n.name} <${n.title}>`+(m==='!'?' · has a quest':m==='?'?' · quest ready to turn in':'')}); }
-  if(MAPF.bosses) for(const bm of mobs){ const mt=bm.t; if(!(mt.boss||mt.elite)||mt.summon) continue; const px=bm.sx/TS*S, py=bm.sy/TS*S; let rem=0; if(bm.dead){ rem=Math.max(0,(bm.resp&&bm.resp<1e9?bm.resp:(bm.deathT||t)+(mt.resp||60))-t); }
+  LP=2; if(MAPF.bosses) for(const bm of mobs){ const mt=bm.t; if(!(mt.boss||mt.elite)||mt.summon) continue; if(bm.sy/TS<V.R.y0-1||bm.sy/TS>V.R.y0+V.R.h+1) continue; const px=bm.sx/TS*S, py=bm.sy/TS*S; let rem=0; if(bm.dead){ rem=Math.max(0,(bm.resp&&bm.resp<1e9?bm.resp:(bm.deathT||t)+(mt.resp||60))-t); }
     mapIcon(x,bm.dead?'bossdead':mt.boss?'boss':'elite',px,py,null,mt.boss?1.15:.95); txtD(mt.name,px,py+(mt.boss?22:19),11,bm.dead?'#cfc4b8':mt.boss?'#ffb08a':'#ffe08a'); if(bm.dead) txtD(mt.vault?'Defeated':'Respawns in '+fmtT(rem),px,py+(mt.boss?34:31),10,'#e8dcc8');
     mapFeat.push({x:px,y:py,r:12,tip:`${mt.boss?'☠ Boss':'★ Elite'}: ${mt.name} · Level ${bm.lv}`+(bm.dead?` · respawns in ${fmtT(rem)}`:' · alive')+(dropText(mt.key)?' · Drops: '+dropText(mt.key):'')}); }
-  if(MAPF.players) for(const o of others.values()){ if(!seenO(o)) continue; const party=o.pt&&o.pt===me.party; x.fillStyle=party?'#3a8cff':CLS[o.c].col; x.strokeStyle='#fff'; x.lineWidth=1.5; x.beginPath(); x.arc(o.rx/TS*S,o.ry/TS*S,party?5:4,0,7); x.fill(); x.stroke(); if(party) txtD(o.n,o.rx/TS*S,o.ry/TS*S-8,11,'#bfe0ff'); mapFeat.push({x:o.rx/TS*S,y:o.ry/TS*S,r:8,tip:`${o.n} · Level ${o.l} ${CLS[o.c].name}`+(party?' · party':'')}); }
+  LP=1; if(MAPF.players) for(const o of others.values()){ if(!seenO(o)) continue; const party=o.pt&&o.pt===me.party; x.fillStyle=party?'#3a8cff':CLS[o.c].col; x.strokeStyle='#fff'; x.lineWidth=1.5; x.beginPath(); x.arc(o.rx/TS*S,o.ry/TS*S,party?5:4,0,7); x.fill(); x.stroke(); if(party) txtD(o.n,o.rx/TS*S,o.ry/TS*S-8,11,'#bfe0ff'); mapFeat.push({x:o.rx/TS*S,y:o.ry/TS*S,r:8,tip:`${o.n} · Level ${o.l} ${CLS[o.c].name}`+(party?' · party':'')}); }
   for(const L of LOOTS){ x.fillStyle='#ffd34a'; x.beginPath(); x.arc(L.x/TS*S,L.y/TS*S,2.5,0,7); x.fill(); }
+  /* place the labels: highest priority first; each one tries its spot, then just below, then above, and is
+     skipped (its marker and tooltip stay) if it would sit on another label or another marker */
+  { const placed=[], hit=(a)=>placed.some(b=>a[0]<b[0]+b[2]&&a[0]+a[2]>b[0]&&a[1]<b[1]+b[3]&&a[1]+a[3]>b[1]);
+    const font=l=>`${l.w} ${l.size}px ${l.cz?'Cinzel,serif':'"Alegreya Sans",sans-serif'}`, cw=$('mapC').width;
+    LQ.sort((a,b)=>a.lp-b.lp);
+    for(const e of LQ){ let w=0, h=0; for(const l of e.L){ x.font=font(l); if(x.letterSpacing!==undefined) x.letterSpacing=l.sp?'1px':'0px'; w=Math.max(w,x.measureText(l.s).width); h+=l.size+2; }
+      const sx=e.x+V.ox, sy=e.y+V.oy, chh=$('mapC').height; if(sx<-4||sx>cw+4||sy<-4||sy>chh+h) continue;
+      const px=clamp(e.x,-V.ox+w/2+6,-V.ox+cw-w/2-6), st=e.L[0].size+3;
+      const obs=mapFeat.filter(f=>Math.abs(f.x-e.x)>1.5||Math.abs(f.y-e.y)>40);
+      let ok=null; for(const dy of e.lp===0?[0,-st,st,-2*st,2*st]:[0,st+12,-st]){ const r=[px-w/2-3,e.y+dy-e.L[0].size,w+6,h+2];
+        if(hit(r)) continue; if(obs.some(f=>f.x>r[0]-f.r*.6&&f.x<r[0]+r[2]+f.r*.6&&f.y>r[1]-f.r*.6&&f.y<r[1]+r[3]+f.r*.6)) continue; ok=[r,dy]; break; }
+      if(!ok){ if(e.lp>0) continue; const r=[px-w/2-3,e.y-e.L[0].size,w+6,h+2]; ok=[r,0]; }
+      placed.push(ok[0]); let yy=e.y+ok[1];
+      for(const l of e.L){ x.save(); if(x.letterSpacing!==undefined) x.letterSpacing=l.sp?'1px':'0px'; if(l.dk) txtD0(l.s,px,yy,l.size,l.col); else txt0(l.s,px,yy,l.size,l.col,l.w,l.stroke,l.cz); x.restore(); yy+=l.size+2; } } }
   const pr=6+Math.sin(t*4)*2.5; x.strokeStyle='rgba(255,255,255,.7)'; x.lineWidth=2; x.beginPath(); x.arc(me.x/TS*S,me.y/TS*S,pr+6,0,7); x.stroke();
   x.save(); x.translate(me.x/TS*S,me.y/TS*S); x.rotate(me.face+Math.PI/2); x.fillStyle='#ffe27a'; x.strokeStyle='#2a1a08'; x.lineWidth=2; x.beginPath(); x.moveTo(0,-11); x.lineTo(7,8); x.lineTo(0,4); x.lineTo(-7,8); x.closePath(); x.fill(); x.stroke(); x.restore();
   x.setTransform(1,0,0,1,0,0);
@@ -5245,7 +5261,7 @@ function innBuild(song,t0){ const spb=60/song.bpm, ev=[], chords=song.chords.spl
 function innPlay(e){ const [t,k,a,b,c]=e; if(k==='pl') pluck(a,t,b,c); else if(k==='pl2'){ for(const [j,n] of a.entries()) pluck(n,t+j*.025,b,c); } else if(k==='hp') harpN(a,t,b,c);
   else if(k==='ld'){ const dur=Math.max(.25,c*.95); if(b==='flute') flute(a,t,.05,dur); else if(b==='fiddle') fiddle(a,t,.032,dur); else harpN(a,t,.11,Math.max(1.2,dur*1.6)); } }
 function innTick(t){ let S=AUD.inn; if(!S||(S.i>=S.ev.length&&t>S.end+3.5)){ let k; do{ k=Math.random()*INN_ALBUM.length|0; } while(INN_ALBUM.length>1&&k===AUD.innLast); AUD.innLast=k; S=AUD.inn=innBuild(INN_ALBUM[k],t+.4);
-    try{ chatLine(`♪ ${INN_ALBUM[k].name}${INN_ALBUM[k].trad?' (traditional)':''} — The Hearthmere Inn`,'c-sys'); }catch(e){} }
+    try{ chatLine(`♪ ${INN_ALBUM[k].name}${INN_ALBUM[k].trad?' (traditional)':''} — ${me&&zoneAtPx(me.x,me.y)==='port'?'The Gull & Anchor, Brinehaven':'The Hearthmere Inn'}`,'c-sys'); }catch(e){} }
   while(S.i<S.ev.length&&S.ev[S.i][0]<t+.6){ try{ innPlay(S.ev[S.i]); }catch(e){} S.i++; } }
 /* ---- recorded tavern music ---- */
 const FMUS={list:[{f:'tavern-rafters-glow.mp3',n:"By the Rafters' Glow",a:'Kaazoom'},{f:'tavern-embers-flagstone.mp3',n:'Embers on the Flagstone',a:'Kaazoom'},{f:'tavern-city-ambient.mp3',n:'Medieval City Tavern',a:'DeusLower'}],
@@ -5253,16 +5269,16 @@ const FMUS={list:[{f:'tavern-rafters-glow.mp3',n:"By the Rafters' Glow",a:'Kaazo
 function fmusBase(){ if(FMUS.useRealm||!/^https?:$/.test(location.protocol)){ try{ const u=new URL(((window.EMBERFALL_CONFIG||{}).serverUrl||'').replace(/^ws/,'http')); return u.origin+'/play/music/'; }catch(e){} } return 'music/'; }
 function fmusNext(){ const F=FMUS; if(!F.order.length||F.i>=F.order.length-1){ const last=F.order[F.i]; const o=F.list.map((_,k)=>k); for(let k=o.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; [o[k],o[j]]=[o[j],o[k]]; } if(o.length>1&&o[0]===last) o.push(o.shift()); F.order=o; F.i=0; } else F.i++;
   const T=F.list[F.order[F.i]]; F.cur=T; F.el.src=fmusBase()+T.f; F.announced=''; F.srcT=performance.now(); }
-function fmusEl(){ if(FMUS.el) return FMUS.el; const a=new Audio(); a.preload='auto'; a.loop=false; a.volume=0; a.addEventListener('ended',()=>{ FMUS.pending=false; fmusNext(); fmusPlay(); }); a.addEventListener('error',()=>{ if(!FMUS.useRealm&&FMUS.cur&&/^https?:$/.test(location.protocol)&&!FMUS.triedRealm){ FMUS.triedRealm=true; FMUS.useRealm=true; a.src=fmusBase()+FMUS.cur.f; fmusPlay(); return; } FMUS.dead=true; FMUS.want=false; try{ a.pause(); a.removeAttribute('src'); a.load(); }catch(e){} });
+function fmusEl(){ if(FMUS.el) return FMUS.el; const a=new Audio(); a.preload='auto'; a.loop=false; a.volume=0; a.addEventListener('ended',()=>{ FMUS.pending=false; fmusNext(); if(FMUS.want) fmusPlay(); }); a.addEventListener('error',()=>{ if(!FMUS.useRealm&&FMUS.cur&&/^https?:$/.test(location.protocol)&&!FMUS.triedRealm){ FMUS.triedRealm=true; FMUS.useRealm=true; a.src=fmusBase()+FMUS.cur.f; fmusPlay(); return; } FMUS.dead=true; FMUS.want=false; try{ a.pause(); a.removeAttribute('src'); a.load(); }catch(e){} });
   a.addEventListener('playing',()=>{ FMUS.ok=true; FMUS.playF=FMUS.cur&&FMUS.cur.f; if(me&&FMUS.cur&&FMUS.announced!==FMUS.cur.f){ FMUS.announced=FMUS.cur.f; try{ chatLine(`♪ ${FMUS.cur.n} — ${FMUS.cur.a}`,'c-sys'); }catch(e){} } }); FMUS.el=a; return a; }
 function fmusPlay(){ if(FMUS.dead||FMUS.pending) return; const a=fmusEl(); if(!a.getAttribute('src')) fmusNext(); FMUS.pending=true; const p=a.play(); if(p&&p.then) p.then(()=>{ FMUS.pending=false; FMUS.blocked=false; }).catch(e=>{ FMUS.pending=false; if(e&&e.name==='NotAllowedError') FMUS.blocked=true; }); else FMUS.pending=false; }
 function fmusLevel(){ const v=(typeof AUD!=='undefined'&&AUD.vol)||{master:.8,music:.6}; return v.mute?0:clamp((v.master??.8)*(v.music??.6)*.9,0,1); }
-function fmusTick(){ const F=FMUS; let want=false; if(F.dead){ F.want=false; return; }
+function fmusTick(){ const F=FMUS; let want=false; if(F.dead){ F.want=false; if(F.el&&!F.el.paused) try{ F.el.pause(); }catch(e){} return; }
   if(F.el&&!F.ok&&!F.blocked&&F.srcT&&performance.now()-F.srcT>30000&&F.el.readyState===0){ if(!F.triedRealm&&/^https?:$/.test(location.protocol)&&F.cur){ F.triedRealm=true; F.useRealm=true; F.el.src=fmusBase()+F.cur.f; F.srcT=performance.now(); F.pending=false; fmusPlay(); } else { F.dead=true; F.want=false; try{ F.el.pause(); }catch(e){} return; } }
   if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=(z==='town'||z==='port')&&!fight; }
   F.want=want; const target=want?fmusLevel():0;
   if(want&&(!F.el||F.el.paused)&&!F.blocked) fmusPlay();
-  if(!F.el) return; F.vol+=clamp(target-F.vol,-.05,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
+  if(!F.el) return; F.vol+=clamp(target-F.vol,want?-.05:-.12,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
   try{ F.el.volume=clamp(F.vol,0,1); }catch(e){}
   if(want&&me&&!F.el.paused&&F.cur&&F.playF===F.cur.f&&F.announced!==F.cur.f){ F.announced=F.cur.f; try{ chatLine(`♪ ${F.cur.n} — ${F.cur.a}`,'c-sys'); }catch(e){} } }
 setInterval(fmusTick,100);
@@ -5275,6 +5291,7 @@ new MutationObserver(()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
   let tr=z==='town'||z==='port'?'tavern':z==='coast'?'pastoral':z==='meadow'||z==='lake'||z==='forest'?'pastoral':z==='frost'?'frost':'eerie'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
   if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';
+  if(tr===AUD.track&&AUD.want!==tr){ AUD.want=tr; AUD.mbus.gain.setTargetAtTime(1,t,.4); }
   if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.inn=null; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
   const spb=AUD.track==='tavern'?60/138/2*2:AUD.track==='battle'?60/150/2*2:60/70/2*2; const stepDur=AUD.track==='tavern'?.19:AUD.track==='battle'?.2:AUD.track==='combat'?.21:.42;
   if(AUD.track===AUD.want){ if(AUD.track==='tavern'){ if(!FMUS.want) innTick(t); } else while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; } }

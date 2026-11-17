@@ -1,9 +1,9 @@
 {
- "version": "v0.65",
- "title": "A living harbour",
+ "version": "v0.66",
+ "title": "A tidy map and town music that stays in town",
  "date": "17 Nov 2026",
- "text": "Boats ride the swell and gulls circle over Brinehaven.\n\n⬆️ Every boat afloat in Brinehaven now rocks and bobs gently on the water instead of sitting frozen\n✨ Gulls wheel, flap and glide over the harbour\n🔧 No more sea water showing inside the boats: every boat has dry floorboards laid above the waterline\n⬆️ A dark line of weed and wet stone runs along the quay wall and the breakwater where they meet the sea",
+ "text": "The world map is readable again and town music no longer follows you out of town.\n\n⬆️ World map: no name is ever drawn over another name. Names that would collide move just below or above their marker, or wait until you zoom in (hover any marker to see its name)\n⬆️ World map: zone titles are smaller with the level range on its own line, undiscovered places show only their marker, and ordinary townsfolk only appear once you zoom in\n🔧 World map: bosses and places underground (the Sunken Vault, Cinderhold) no longer spill onto the bottom of the surface map, and names of places off the edge no longer pile up at the side\n🔧 Town music now stays inside the town walls: leaving town fades it out within a second, a finished song no longer starts the next one once you are outside, and stepping in and out at the gate can no longer leave the wrong music playing\n🔧 The inn music in Brinehaven is credited to the Gull & Anchor, not the Hearthmere Inn",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-17T02:12:27Z"
+ "time": "2026-11-17T04:10:24Z"
 }
