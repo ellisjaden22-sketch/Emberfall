@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 82;
+const VERSION = 83;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -821,7 +821,7 @@ const mobs=[], mobById={};
         if(ok){ const gap=tries<1500?150:tries<3000?124:96; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
       const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
-      const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1));
+      const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)*instHp(mt));
       const m={id:id++,ti,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:0,flags:0,hit:0};
       if(mt.summon){m.dead=true;m.resp=Infinity} mobs.push(m); mobById[m.id]=m;
     }
@@ -841,7 +841,7 @@ const mobs=[], mobById={};
   { const Y=TOWN.yard, DT={key:'dummy',name:'Training Dummy',lv:[1,1],hp:100000,hpL:0,dmg:0,dmgL:0,spd:0,rng:0,as:999,aggro:0,r:14,col:'#c8a868',zone:'town',n:0,dummy:true,resp:5};
     if(WE&&Array.isArray(WE.spawns)) for(const sp of WE.spawns){ const mt=MOBT.find(q=>q.key===sp.mob); if(!mt||mt.boss||mt.summon) continue; const n=clamp(sp.n|0||1,1,12);
       for(let k=0;k<n;k++){ const a=k/n*6.283, rr=n>1?1.5+R()*1.5:0, x=(sp.x+.5+Math.cos(a)*rr)*TS, y=(sp.y+.5+Math.sin(a)*rr)*TS; if(blocked(x,y,8)) continue; const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
-        const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)); const m={id:id++,ti:-1,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:R()*6.28,flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
+        const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)*instHp(mt)); const m={id:id++,ti:-1,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:R()*6.28,flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
     if(Y) for(let k=0;k<3;k++){ const x=(Y.x+Y.tx*(k-1)*2)*TS, y=(Y.y+Y.ty*(k-1)*2)*TS; const m={id:id++,ti:-1,t:DT,lv:1,sx:x,sy:y,x,y,rx:x,ry:y,hp:100000,mhp:100000,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:Math.atan2(TOWN.y-Y.y,TOWN.x-Y.x),flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
 })();
 
@@ -1141,7 +1141,11 @@ function summonAdds(boss){ let i=0; for(const a of mobs) if(a.t.summon&&a.t.owne
   a.x=a.rx=a.sx=boss.x+Math.cos(an)*80; a.y=a.ry=a.sy=boss.y+Math.sin(an)*80; a.threat={...boss.threat}; a.tag=boss.tag; }
   pushTg(boss.x,boss.y,110,.6,5); }
 const hostTels=[];
-const mobDmg=m=>(m.t.dmg+m.t.dmgL*(m.lv-1))*(m.t.critter?1:1.2)*(m.t.vault?(m.t.boss?1.5:1.35):1)*(m.t.raid?RAIDD.deal*(RAIDD.dsc||1)*(m.bers?1.75:1)*(m.emp?1.3:1):1);
+/* v83: instance difficulty. Dungeon and raid monsters get far more health and damage; bosses hit much harder. */
+function instKind(t){ return t.raid?'raid':(t.vault||t.zone==='crypt')?'dun':null; }
+function instHp(t){ const k=instKind(t); if(!k||t.critter) return 1; if(t.boss) return k==='dun'?1.3:1; return 1.8; }
+function instDmg(t){ const k=instKind(t); if(!k||t.critter) return 1; if(t.boss) return k==='dun'?1.6:1.5; return 1.6; }
+const mobDmg=m=>(m.t.dmg+m.t.dmgL*(m.lv-1))*(m.t.critter?1:1.2)*instDmg(m.t)*(m.t.vault?(m.t.boss?1.5:1.35):1)*(m.t.raid?RAIDD.deal*(RAIDD.dsc||1)*(m.bers?1.75:1)*(m.emp?1.3:1):1);
 function hostTel(m,x,y,r,delay,mul,kind,after){ pushTg(x,y,r,delay,kind); hostTels.push({m,x,y,r,at:now()+delay,dmg:mobDmg(m)*mul,after}); }
 function mobSpecial(m,p,players,dt,t){
   const sp=m.t.sp; if(!sp) return;

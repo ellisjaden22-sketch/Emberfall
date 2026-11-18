@@ -1,9 +1,9 @@
 {
- "version": "v0.82",
- "title": "A raid for an army",
+ "version": "v0.83",
+ "title": "No easy instances",
  "date": "18 Nov 2026",
- "text": "Cinderhold is now tuned for 10 to 20 heroes.\n\n• Cinderhold is built for 10 to 20 heroes: its bosses now last about twice as long as before and hit 25% harder. Smaller groups can still go in to explore, but the bosses no longer go easier on them\n• Groups of more than 15 heroes spread the fight further: the bosses take a little less damage per hero, so a full 20 still has to work for it",
+ "text": "Dungeon and raid monsters are much tougher, and bosses hit a lot harder.\n\n• Every monster in the Sunken Vault, Hollowdeep Crypt and Cinderhold has 80% more health and hits 60% harder\n• Dungeon bosses hit 60% harder and have 30% more health; Cinderhold's bosses hit 50% harder (on top of the raid tuning in v0.82)\n⬆️ Monsters out in the open world are unchanged",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T18:14:26Z"
+ "time": "2026-11-18T18:45:50Z"
 }
