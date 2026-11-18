@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 72;
+const VERSION = 73;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1877,8 +1877,9 @@ const FS_SKIN=FS_LIT.replace('#version 300 es','#version 300 es'+NL+'#define SKI
 let PKL=null, PKS=null, PKL48=null, PKS48=null; try{ PKL=program(VS_LIT,FS_SKIN,['SKIN']); PKS=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN']); }catch(e){ console.warn('skinned shaders unavailable',e); }
 try{ PKL48=program(VS_LIT,FS_SKIN,['SKIN','NBONE 48']); PKS48=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN','NBONE 48']); }catch(e){ console.warn('large-rig shaders unavailable',e); }
 /* which mobs wear which model: h = height in world units, arm = how far the arms drop from the T-pose, pv = hip height share */
-const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6}, wyrm:{f:'ork',h:4.4,ws:.42,big:1,ork:1} };
+const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6}, wyrm:{f:'ork',h:4.4,ws:.42,big:1,ork:1}, tidecaller:{f:'magus',h:2.2,statue:1,hover:.1}, bogwitch:{f:'oracle',h:2.05,statue:1,hover:.05}, vyrathos:{f:'dragon',h:7,big:1,dragon:1} };
 const SKM={}, SKQ=[];
+/* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 const SK=(()=>{
@@ -1898,7 +1899,7 @@ const SK=(()=>{
   function anims(name){ name=name||'anims'; if(AS[name]) return AS[name]; AS[name]=Promise.all([fetch(ROOT+name+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(ROOT+name+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })])
       .then(([m,b])=>{ const X=m; X.buf=b; X.dv=new DataView(b); X.bi={}; X.bones.forEach((n,i)=>X.bi[n]=i); X.rp=Math.hypot(...X.restPelvis); X.TQ=X.bones.map(()=>[0,0,0,0]); X.TP=X.bones.map(()=>[0,0,0]); if(name==='anims') A=X; return X; }).catch(()=>null); return AS[name]; }
   async function load(gl,name,root){ GL=gl; if(root) ROOT=root; const base=ROOT+name;
-    const [meta,bin]=await Promise.all([fetch(base+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(base+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]); const AN=await anims(meta.anims);
+    const [meta,bin]=await Promise.all([fetch(base+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(base+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]); const AN=meta.anims==='none'?null:await anims(meta.anims);
     const VS=40, ib=meta.u32?new Uint32Array(bin,meta.v*VS,meta.i):new Uint16Array(bin,meta.v*VS,meta.i), io=meta.v*VS+meta.i*(meta.u32?4:2), nb=meta.bones.length, ibm=new Float32Array(bin.slice(io,io+nb*64));
     const vao=gl.createVertexArray(); gl.bindVertexArray(vao); const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Uint8Array(bin,0,meta.v*VS),gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,VS,0); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,VS,12); gl.disableVertexAttribArray(2);
@@ -1938,7 +1939,7 @@ const SK=(()=>{
   return {load,pose,clipLen,hasAnims,tex,anims,setGL};
 })();
 
-function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||f==='ork'&&!PKL48||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
+function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||(f==='ork'||f==='dragon')&&!PKL48||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
   SKM[f]={M:null}; SK.load(gl,f).then(M=>{ SKM[f].M=M; }).catch(e=>{ SKM[f].err=String(e&&e.message||e); console.warn('model '+f+' not found, using the classic look'); }); return null; }
 /* animation: idle and walk blend by speed, alternating weapon swings (a throw for ranged mobs), a flinch when hit, knocked flat on death */
 const SKATK=[['atkA',0,.43],['atkB',0,.53],['atkC',0,.47]], SKTHROW=['throw',.3,1.0];
@@ -1958,9 +1959,26 @@ function skAnimOrk(S,M,b,m){ const t=now(), L=[], mv=clamp(b.mv||0,0,1), cl=c=>S
   L.push({c:'idle',t:t*.8,loop:true,w:(1-mv)*(1-aw*.7)+.0001});
   const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5) L.push({c:'hit',t:.12+fl*.2,loop:false,w:fl*1.4});
   return {L}; }
+/* v73: sculpted casters (no skeleton of their own): a simple spine rig with floating, swaying, casting lunges, recoils and a fall */
+function skAnimStatue(S,M,b,m){ const t=now()+((m.id||0)%9)*.7, R={}, add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, mv=clamp(b.mv||0,0,1);
+  if(b.dead>=0){ const k=eO(clamp(b.dead/.9,0,1)); add('root',1,0,0,-1.42*k); add('spine',1,0,0,.35*k); add('head',1,0,0,.25*k); return {R}; }
+  add('spine',1,0,0,.035*Math.sin(t*1.3)); add('spine',0,0,1,.03*Math.sin(t*.9)); add('head',0,1,0,.14*Math.sin(t*.5)); add('pelvis',0,0,1,.025*Math.sin(t*1.1));
+  add('pelvis',1,0,0,.13*mv); add('pelvis',0,0,1,.07*mv*Math.sin(b.walk||0)); add('spine',0,1,0,.08*mv*Math.sin(b.walk||0));
+  if(b.swing>=0){ const p=b.swing, a=p<.35?-.28*eO(p/.35):p<.55?-.28+.62*eO((p-.35)/.2):.34*(1-eI((p-.55)/.45)); add('spine',1,0,0,a); add('head',1,0,0,-a*.35); add('pelvis',1,0,0,a*.25); }
+  const fl=b.pitch?b.pitch/.2:0; if(fl>.05) add('spine',1,0,0,-.32*fl);
+  return {R}; }
+/* v73: Vyrathos as a true dragon: its own idle (breathing, wing beats), with bites, recoils and a fall layered on top */
+const DRG_NECK=['ACT_neck_3_019','ACT_neck_2_020','ACT_neck_1_021'];
+function skAnimDragon(S,M,b,m){ const t=now(), R={}, add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, mv=clamp(b.mv||0,0,1), cl=SK.clipLen('idle',M);
+  if(b.dead>=0){ const k=eO(clamp(b.dead/1.4,0,1)); add('_rootJoint',0,0,1,1.35*k); for(const n of DRG_NECK) add(n,1,0,0,.25*k); return {L:[{c:'idle',t:2.0,loop:true,w:1}],R}; }
+  const L=[{c:'idle',t:(t*(1+mv*.6))%cl,loop:true,w:1}];
+  if(b.swing>=0){ const p=b.swing, a=p<.3?-.35*eO(p/.3):p<.5?-.35+.95*eO((p-.3)/.2):.6*(1-eI((p-.5)/.5)); for(const n of DRG_NECK) add(n,1,0,0,a*.33); add('head_022',1,0,0,a*.35); add('breast_018',1,0,0,a*.12); }
+  const fl=b.pitch?b.pitch/.2:0; if(fl>.05){ for(const n of DRG_NECK) add(n,1,0,0,-.12*fl); }
+  if(mv>.05) add('_rootJoint',1,0,0,.05*mv);
+  return {L,R}; }
 function skDrawMob(m,mt,b){ const S=SKMOB[mt.key]; if(!S) return false; const M=skGet(S.f); if(!M) return false;
-  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); mreset(); mtr(b.x,b.y,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
-  SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L,null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
+  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.dragon?skAnimDragon(S,M,b,m):S.statue?skAnimStatue(S,M,b,m):S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); const hv=S.hover&&!(b.dead>=0)?S.hover*(1+.6*Math.sin(now()*1.7+(m.id||0))):0; mreset(); mtr(b.x,b.y+hv,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
+  SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L||[],A.R||null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
   if(HOVE) addLight(b.x,b.y+S.h*.6,b.z,2.2,[1,.95,.8]);
   return true; }
 /* ---------- v72: painted skies (day, sunset, twilight, clear and cloudy night) blended by the time of day ---------- */
