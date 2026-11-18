@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.71</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinder Wyrm.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.72</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -522,7 +522,7 @@ body.touch canvas{touch-action:none}
     <div style="margin-top:8px"><b>The Sunken Vault (level 10 dungeon):</b> the gate stands in the Ruins of Vael. Your whole party must stand within 6 yards of it; then anyone types <kbd>-e</kbd> and you all descend together. Fight past the Gatekeeper and Mother Silt to Vaelith, the Drowned King, who has a small chance to drop a legendary weapon for your class. Type <kbd>-o</kbd> to leave early and <kbd>-d</kbd> when the Drowned King has fallen to return together.</div>
     <div style="margin-top:8px"><b>Hearthmere</b> is the safe town. Talk to <span style="color:var(--gold)">Captain Oriel</span> for quests and <span style="color:var(--gold)">Mira the Peddler</span> to buy potions and sell loot (stand close and press <kbd>F</kbd>, or click them).</div>
     <div style="margin-top:8px"><b>Playing together:</b> everyone with this page open is in the same world. Monsters, their health and their attacks are shared. The first player to hit a monster tags it. Join the same party (<kbd>/party name</kbd> or the Party button) to share kill credit, quest progress and party chat (<kbd>/p</kbd>). Menders can heal anyone.</div>
-    <div style="margin-top:8px"><b>Zones:</b> Amberfield (lvl 1–2) · Thornwood (2–4) · Gloamfen (3–5) · Ruins of Vael (5–7) · Cinder Caldera (7–10, home of the Cinder Wyrm). Elites (★) and bosses (☠) hit hard and drop better loot. Day turns to night every 10 minutes. Your character is saved in this browser.</div>
+    <div style="margin-top:8px"><b>Zones:</b> Amberfield (lvl 1–2) · Thornwood (2–4) · Gloamfen (3–5) · Ruins of Vael (5–7) · Cinder Caldera (7–10, lair of Gorrakh the Cinderlord). Elites (★) and bosses (☠) hit hard and drop better loot. Day turns to night every 10 minutes. Your character is saved in this browser.</div>
     <div style="margin-top:8px"><b>Mounts:</b> from level 10, visit <span style="color:var(--gold)">Hilde the Stable Master</span> at the stables outside the East Gate of Hearthmere (golden horseshoe 🐎 over her head and on your map). Press <kbd>R</kbd> to ride.</div>
     <div style="margin-top:8px"><b>Loot:</b> defeated monsters drop a glowing bag. Walk up and press <kbd>F</kbd> to open it, then click items or <b>Take all</b>. Item colours: <span class="t0">Common</span> · <span class="t1">Uncommon</span> · <span class="t2">Rare</span> · <span class="t3">Epic</span> · <span class="t4">Legendary</span>. Each boss shows its drop chances; the last bosses can drop your class's legendary weapon. In your bags, drag items to move, equip, sell or destroy them (or right-click).</div>
     <div style="margin-top:8px"><b>Parties:</b> click a player and press <b>Invite to party</b>, use the <kbd>P</kbd> window, or type <kbd>/invite name</kbd>. Party members share kill credit and quest progress; <kbd>/p message</kbd> talks to your party.</div>
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 71;
+const VERSION = 72;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -725,7 +725,7 @@ function carveRaid(){ const O=(x,y,t)=>setT(RX0+x,OWH+y,t);
   ell(44,66,26,23); for(const [x,y] of [[30,52],[58,52],[30,80],[58,80]]) circ(x,y,2.2,T.LAVA); for(const [x,y] of [[24,60],[24,72],[64,60],[64,72],[36,46],[52,46],[36,86],[52,86]]) O(x,y,T.COLUMN);  // the Heart of Cinderhold
   RAID.doors=[[48,48,12,14,['kragmor']],[84,84,12,14,['ignara','pyrrus']],[115,115,12,14,['ashmaw']],[152,155,26,26,['magmaroth']],[141,141,54,56,['selvara']],[95,95,54,56,['gravoth']]].map(([x0,x1,y0,y1,need])=>({x0:RX0+x0,x1:RX0+x1,y0:OWH+y0,y1:OWH+y1,need,lift:0}));
 }
-/* the Cinderhold Gate in the Cinder Caldera (physical tiles) and a road down to the Wyrm's Lair road */
+/* the Cinderhold Gate in the Cinder Caldera (physical tiles) and a road down to the Warlord's Lair road */
 function carveRaidGate(){ const gx=170, gy=22;
   for(let y=gy-7;y<=gy+8;y++)for(let x=gx-9;x<=gx+9;x++){ if(Math.hypot(x-gx,(y-gy)*1.1)>8) continue; const t=tAt(x,y); setT(x,y,t===T.LAVA||t===T.WATER?T.BRIDGE:T.PATH); }
   for(let x=gx-3;x<=gx+3;x++){ setT(x,gy-2,T.DGATE); setT(x,gy-1,T.DGATE); }
@@ -833,8 +833,8 @@ function genWorld(){
   for(let y=LAIR.y-7;y<=LAIR.y+7;y++)for(let x=LAIR.x-9;x<=LAIR.x+9;x++){const d=Math.hypot((x-LAIR.x)/1.3,y-LAIR.y);
     if(d<6.2) setT(x,y,T.ASH); else if(d<7.2 && tAt(x,y)!==T.PATH && tAt(x,y)!==T.BRIDGE) setT(x,y,T.ROCK);}
   // town: houses + fountain
-  const H=[[-9,-7,5,3],[4,-7,5,3],[-9,3,5,3],[5,3,5,3],[-3,-10,6,2],[-6,-11,3,2],[4,-11,3,2],[-12,-5,3,3],[10,-6,2,3],[-10,7,3,2],[-3,10,6,3],[7,8,3,2],[10,4,2,3],[-12,3,2,3],[-8,-15,4,2],[-2,-16,4,2],[4,-15,4,2],[9,-12,3,2],[-13,-11,3,3],[-8,13,4,2],[3,14,4,2],[-14,9,3,2],[11,10,2,2],[14,-6,2,3],[14,4,2,3],[-16,-6,2,3],[-16,4,2,3]];
-  for(const [dx,dy,w,h] of H){const hx=TOWN.x+dx,hy=TOWN.y+dy;houses.push({x:hx,y:hy,w,h});
+  const H=[[-16,-8,5,5,'e'],[-10,-15,6,5,'s'],[5,-15,6,5,'s'],[12,-8,5,5,'w'],[-16,4,5,5,'e'],[-10,11,6,5,'n'],[5,11,6,5,'n'],[12,4,5,5,'w']];
+  for(const [dx,dy,w,h,door] of H){const hx=TOWN.x+dx,hy=TOWN.y+dy;houses.push({x:hx,y:hy,w,h,door,big:1});
     for(let y=hy;y<hy+h;y++)for(let x=hx;x<hx+w;x++)setT(x,y,T.HOUSE);}
   { const RR=mulberry32(4040), TX=TOWN.x, TY=TOWN.y, R0=19.7, R1=24.1;
     const okRect=(x0,y0,w,h,pad)=>{ for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){ const d=Math.hypot(x+.5-TX-.5,y+.5-TY-.5); if(d<R0||d>R1) return false; }
@@ -847,8 +847,10 @@ function genWorld(){
     TOWN.park=new Set(); for(let y=TY-26;y<=TY+26;y++)for(let x=TX-26;x<=TX+26;x++){ const dx=x+.5-TX-.5, dy=y+.5-TY-.5, d=Math.hypot(dx,dy), a=Math.atan2(dy,dx); if(d>=R0-.3&&d<=R1+.3&&a>1.95&&a<2.75&&tAt(x,y)===T.COBBLE){ setT(x,y,T.GRASS); TOWN.park.add(y*MW+x); } }
     { let k=0; for(const id of TOWN.park){ const x=id%MW, y=(id/MW)|0; if(hash2(x,y,41)<.07&&k<9&&Math.hypot(x-TX,y-TY)>19.5&&Math.hypot(x-TX,y-TY)<22.4){ setT(x,y,T.TREE); k++; } } }
     /* homes all around the new ring, sized to the curve of the wall */
-    for(let i=0;i<64;i++){ const a=-Math.PI+i/64*Math.PI*2+RR()*.03; const side=Math.abs(Math.cos(a))>Math.abs(Math.sin(a));
-      const w=side?2+Math.floor(RR()*2):3+Math.floor(RR()*2), h=side?3+Math.floor(RR()*2):2+Math.floor(RR()*2); put(a,w,h,null,1); }
+    /* homes in the outer ring, with room to walk round every one */
+    for(const [dx,dy,w,h,door] of [[-17,-16,4,3,'s'],[8,-20,5,3,'s'],[-12,-21,5,3,'s'],[17,9,3,4,'w'],[12,15,4,3,'n'],[-21,-6,3,4,'e'],[16,-15,3,3,'w']]){ const x0=TX+dx, y0=TY+dy; let ok=true;
+      for(let y=y0-1;y<y0+h+1&&ok;y++)for(let x=x0-1;x<x0+w+1;x++){ const t=tAt(x,y), inR=Math.hypot(x+.5-TX-.5,y+.5-TY-.5); if(t===T.HOUSE||t===T.FOUNT||t===T.TREE||(TOWN.park&&TOWN.park.has(y*MW+x))||(x>=x0&&x<x0+w&&y>=y0&&y<y0+h&&inR>24.2)){ ok=false; break; } }
+      if(!ok) continue; const o={x:x0,y:y0,w,h,door}; houses.push(o); for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++) setT(x,y,T.HOUSE); }
     /* the yard beside the barracks is kept clear for training */
     if(TOWN.barracks){ const B=TOWN.barracks, bx=B.x+B.w/2, by=B.y+B.h/2, dx=TX+.5-bx, dy=TY+.5-by, l=Math.hypot(dx,dy); TOWN.yard={x:bx+dx/l*3.4,y:by+dy/l*3.4,tx:-dy/l,ty:dx/l}; } }
   for(let y=-1;y<=1;y++)for(let x=-1;x<=1;x++)setT(TOWN.x+x,TOWN.y+y,T.FOUNT);
@@ -940,7 +942,7 @@ const MOBT=[
   {key:'hking',name:'The Hollow King',lv:[8,8],hp:2200,hpL:0,dmg:17,dmgL:0,spd:76,rng:54,as:2.1,aggro:200,r:26,col:'#e3dcc4',zone:'ruins',n:1,elite:true,boss:true,resp:90,pos:[88,40],light:'#7ef0ff',sp:{k:'slam',cd:8,r:135,delay:1.6,mul:1.4}},
   {key:'cultist',name:'Ashbound Cultist',lv:[7,9],hp:140,hpL:25,dmg:11,dmgL:2.7,spd:74,rng:230,as:2.4,aggro:190,r:13,col:'#7a1f2b',zone:'ash',n:6,ranged:true,proj:2,light:'#ff7a1a'},
   {key:'magma',name:'Magma Elemental',lv:[8,9],hp:200,hpL:28,dmg:12,dmgL:2.7,spd:62,rng:40,as:2.3,aggro:140,r:17,col:'#3a2620',zone:'ash',n:4,light:'#ff6a1a',sp:{k:'slam',cd:9,r:95,delay:1.3,mul:1.2}},
-  {key:'wyrm',name:'Cinder Wyrm',lv:[10,10],hp:3800,hpL:0,dmg:28,dmgL:0,spd:86,rng:62,as:2.2,aggro:230,r:34,col:'#d4521c',zone:'lair',n:1,boss:true,resp:120,pos:[56,9],light:'#ff8a2a',sp:{k:'wyrm'}},
+  {key:'wyrm',name:'Gorrakh the Cinderlord',lv:[10,10],hp:3800,hpL:0,dmg:28,dmgL:0,spd:86,rng:62,as:2.2,aggro:230,r:34,col:'#d4521c',zone:'lair',n:1,boss:true,resp:120,pos:[56,9],light:'#ff8a2a',sp:{k:'wyrm'}},
   {key:'emberling',name:'Emberling',lv:[9,9],hp:160,hpL:0,dmg:10,dmgL:0,spd:105,rng:30,as:1.4,aggro:320,r:10,col:'#ff9a2a',zone:'lair',n:3,summon:true,pos:[56,9],fly:true,light:'#ffb03a'},
 ];
 /* ---------- open world: landmarks, NPCs, quests, materials ---------- */
@@ -959,7 +961,7 @@ const POIS=[
   {id:'throne',name:'Throne of Vael',x:88,y:38,r:4},
   {id:'dock',name:'Mirrowmere Dock',x:81,y:93,r:5},
   {id:'gate',name:'The Ember Gate',x:56,y:27,r:4},
-  {id:'lair',name:"The Wyrm's Lair",x:56,y:11,r:6},
+  {id:'lair',name:"The Warlord's Lair",x:56,y:11,r:6},
 ];
 const STABLE={x:0,y:0,z:0}; const WINDMILL={}, CAULDRON={}, DOCK={x0:0,x1:0,z:93};
 (function prepWorld(){
@@ -998,7 +1000,7 @@ if(DOCK.x0){ const [bx,by]=findOpen(DOCK.x0-2,DOCK.z); NPCS.push({id:'bram',name
 const NPCGREET={oriel:'"Hearthmere stands because people like you stand for it. There\'s always work."',mira:'"Herbs in, potions out. Bring me petals and roots and I\'ll brew you something strong."',
   doran:'"Bring me ore and coin, and I\'ll make that blade of yours sing."',hilde:'"Every adventurer needs four good legs under them. Have a look at my beauties."',
   sylas:'"Quiet. The forest is listening. Something has the wolves and the thornlings stirred up."',marla:'"Mind the mud, dearie. The fen gives, and the fen takes."',
-  ithren:'"Do you know how old these stones are? Older than the Wyrm. Older than fire, maybe."',vok:'"Nothing comes through this gate without my say. Nothing good, anyway."',
+  ithren:'"Do you know how old these stones are? Older than the Cinderlord\'s chains. Older than fire, maybe."',vok:'"Nothing comes through this gate without my say. Nothing good, anyway."',
   bram:'"Fish aren\'t biting. Too many moths over the water, and that old boar keeps wrecking my nets."'};
 const QUESTS=[
   {id:'boar',giver:'oriel',title:'Boar Trouble',type:'kill',mob:'boar',n:6,xp:140,gold:4,lvl:1,text:'Thornback boars have been tearing up the fields of Amberfield, just north of town. Thin their numbers.'},
@@ -1008,7 +1010,7 @@ const QUESTS=[
   {id:'sentinel',giver:'oriel',pre:'lurker',title:'Restless Stones',type:'kill',mob:'sentinel',n:8,xp:760,gold:12,lvl:5,text:'The Ruins of Vael have stirred. Hollow Sentinels walk its broken halls again.'},
   {id:'hking',giver:'oriel',pre:'sentinel',title:'The Hollow King',type:'kill',mob:'hking',n:1,xp:1100,gold:20,lvl:6,item:2,text:'At the heart of Vael sits a crowned skeleton who commands the dead. When he raises his blade, get out of the circle. Bring friends.'},
   {id:'cultist',giver:'oriel',pre:'hking',title:'The Ashbound',type:'kill',mob:'cultist',n:6,xp:1000,gold:16,lvl:7,text:'Cultists gather in the Cinder Caldera, chanting to something beneath the lava. Silence them.'},
-  {id:'wyrm',giver:'oriel',pre:'cultist',title:'Heart of the Caldera',type:'kill',mob:'wyrm',n:1,xp:2400,gold:40,lvl:9,epic:true,text:'They have woken the Cinder Wyrm. It breathes fire, rains embers and calls its brood when wounded. Gather a party.'},
+  {id:'wyrm',giver:'oriel',pre:'cultist',title:'Heart of the Caldera',type:'kill',mob:'wyrm',n:1,xp:2400,gold:40,lvl:9,epic:true,text:'The Ashbound have freed Gorrakh the Cinderlord, an orc warlord their fathers chained beneath the lava. He swings two skull-axes, calls fire down from the sky and summons his ember-spawn when wounded. Gather a party.'},
   {id:'sunpetal',giver:'mira',title:'Petals for Potions',type:'gather',mat:'sunpetal',n:5,xp:130,gold:3,lvl:1,text:'Sunpetals grow wild in Amberfield. Walk up to the glowing yellow flowers and press F to pick them.'},
   {id:'moths',giver:'bram',title:'Lights on the Water',type:'kill',mob:'moth',n:6,xp:160,gold:3,lvl:1,text:'Glimmerwing moths swarm the meadows at dusk and scare the fish. Swat a few for me.'},
   {id:'crabs',giver:'bram',pre:'tusk',title:'Shells on the Shore',type:'kill',mob:'murkcrab',n:10,xp:700,gold:12,lvl:4,text:'Murkshell crabs have crawled up out of Mirrowmere and they cut through my nets like paper. Clear ten of them off the shore. Mind the claws.'},
@@ -1865,7 +1867,7 @@ function gainXp(n){
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
   while(c.lvl<MAXLVL && c.xp>=xpNeed(c.lvl)){ c.xp-=xpNeed(c.lvl); c.lvl++; recalc(); me.hp=me.mhp; if(CLS[c.cls].res==='mana') me.res=me.mres;
     toast(`Level ${c.lvl}!`); sfx('level'); setTimeout(()=>{ toast('Talent point! Press N to spend it','small'); sysMsg('You earned a talent point. Open Talents (N) to spend it.','c-xp'); },1400); TALC=null; setTimeout(()=>armorySync(true),500); if(c.lvl===10&&!c.mounts.length){ setTimeout(()=>toast('Mounts unlocked! Visit Hilde the Stable Master','small'),900); sysMsg('You can now ride! Hilde the Stable Master, just outside the East Gate of Hearthmere, sells mounts. Look for the golden horseshoe on your map.'); renderTracker(); } burst(me.x,me.y,'#ffd66a',40,200,{glow:true}); for(const ab of curAbils()) if(ab.lvl===c.lvl) { sysMsg(`New ability learned: ${ab.name} (key ${curAbils().indexOf(ab)+1})`); toast('New ability: '+ab.name,'small'); } sysMsg(`You have reached level ${c.lvl}. Your power grows.`); ring(me.x,me.y,'#ffd66a',90); }
-  if(c.lvl>=MAXLVL){ c.xp=0; if(!c.raidTold){ c.raidTold=1; setTimeout(()=>{ try{ banner('LEVEL 20','Cinderhold is open to you','boss'); chatLine('🔥 Level 20! The Cinderhold raid is now open to you. Emberwarden Thalia waits at the Cinderhold Gate, east of the Wyrm\'s Lair. Bring a Bulwark, a Mender, a Bard and damage: 5 to 20 heroes.','c-yell'); }catch(e){} },2500); } }
+  if(c.lvl>=MAXLVL){ c.xp=0; if(!c.raidTold){ c.raidTold=1; setTimeout(()=>{ try{ banner('LEVEL 20','Cinderhold is open to you','boss'); chatLine('🔥 Level 20! The Cinderhold raid is now open to you. Emberwarden Thalia waits at the Cinderhold Gate, east of the Warlord\'s Lair. Bring a Bulwark, a Mender, a Bard and damage: 5 to 20 heroes.','c-yell'); }catch(e){} },2500); } }
   persist();
 }
 
@@ -1884,7 +1886,7 @@ const SUF=['of the Hollow','of Cinders','of the Mire','of Dawnlight','of the Wol
 const LEGEND={
   warden:{name:'Dawnwarden, Oath of the Last Wall',desc:'Forged from the gate of a kingdom that never fell. +10% damage and threat.',pow:62,sta:58},
   mender:{name:'Solace, Staff of the Undying Sun',desc:'A shard of the first dawn burns in its crown. +10% healing and damage.',pow:58,sta:60},
-  arcanist:{name:'Cinderheart, Focus of the Wyrm',desc:'The still-beating heart of an elder wyrm, bound in mithril. +10% spell damage.',pow:68,sta:48}};
+  arcanist:{name:'Cinderheart, Focus of the Warlord',desc:'The still-burning heart of the Cinderlord, bound in mithril. +10% spell damage.',pow:68,sta:48}};
 LEGEND.barbarian={name:'Gorehowl, Maw of the North',desc:'A greataxe that drinks the warmth of every foe it fells. +10% damage, and Execute can be used on enemies below 35% health.',pow:68,sta:54};
 LEGEND.hunter={name:'Thornstring, Bow of the Wild Hunt',desc:'A living bow strung with wolf-gut. +10% damage, and your wolf deals 30% more damage.',pow:62,sta:50};
 LEGEND.bard={name:'Emberhorn, the Warsong Axe',desc:'An axe forged around the horn of a fallen wyrm. Your songs are 25% stronger and Power Chord hits 15% harder.',pow:64,sta:56};
@@ -1893,7 +1895,7 @@ function legendaryFor(cls){ const L=LEGEND[cls]||LEGEND.warden; return {id:rid(6
 // drop chances in % per rarity [common, uncommon, rare, epic, legendary]; the legendary is always for the looter's class
 const BOSSLOOT={oldtusk:{n:1,p:[55,40,5,0,0]},fangmaw:{n:1,p:[0,55,40,5,0]},hking:{n:1,p:[0,20,65,15,0]},wyrm:{n:2,p:[0,0,61,38.5,.5]},frostgiant:{n:2,p:[0,0,46,53.3,.7]},lich:{n:2,p:[0,0,0,98,2]}};
 function rollRar(p){ let r=Math.random()*100; for(let i=0;i<p.length;i++){ r-=p[i]; if(r<0) return i; } return p.findIndex(v=>v>0); }
-function dropText(key){ const B=BOSSLOOT[key]; if(!B) return ''; return B.p.map((v,i)=>v?`${RAR[i]} ${v}%`:'').filter(Boolean).join(' · ')+(key==='vyrathos'?' · ✦ Tyrant legendary 2.5% · ✦ Ashborn Nightmare 1.5%':''); }
+function dropText(key){ const B=BOSSLOOT[key]; if(!B) return ''; return B.p.map((v,i)=>v?`${RAR[i]} ${v}%`:'').filter(Boolean).join(' · ')+(key==='wyrm'?' · 🔥 Emberfang, the Fire Axe 40% (axe-wielders)':'')+(key==='vyrathos'?' · ✦ Tyrant legendary 2.5% · ✦ Ashborn Nightmare 1.5%':''); }
 function genItem(lv,rar,cls){ cls=cls||(me?me.c.cls:'warden'); if(rar>=4) return legendaryFor(cls);
   const R=Math.random, slot=SLOTS[R()*3|0];
   const budget=(2.2+lv*1.7)*[1,1.45,2,2.8,3.8][rar];
@@ -1912,6 +1914,8 @@ function lootFor(m){
   if(BL){ for(let k=0;k<BL.n;k++){ const r=rollRar(BL.p); const it=r===4?legendaryFor(c.cls):genItem(m.lv,r); items.push(it); if(r===4){ banner('LEGENDARY!',it.name,'win'); sfx('legend'); stat('legendary',1); chatLine(`A legendary weapon drops: [${it.name}]!`,'c-loot t4'); } } }
   if(mt.key==='vaelith'&&!c.mounts.includes(5)&&Math.random()<.03){ c.mounts.push(5); c.mount=5; setTimeout(()=>{ banner('RARE MOUNT!','Cragmaw Mountain Goat','win'); sfx('legend'); },1200); chatLine('The Drowned King drops a rare mount: the Cragmaw Mountain Goat! Press R to ride.','c-loot t4'); persist(); }
   else if(mt.boss){ items.push(genItem(m.lv,Math.random()<.3?3:2)); }
+  if(mt.key==='wyrm'&&Math.random()<.4&&(CLS_WEAP[c.cls]||[]).includes('Greataxe')){ let it=null; for(let i=0;i<60&&(!it||it.slot!=='weapon');i++) it=genItem(m.lv+1,3,c.cls);
+    if(it&&it.slot==='weapon'){ it.name='Emberfang, Fire Greataxe of the Cinderlord'; it.pow=Math.round(it.pow*1.12); it.val=Math.round((it.val||10)*1.5); items.push(it); chatLine('Gorrakh\'s Fire Axe falls from his grip: [Emberfang, Fire Greataxe of the Cinderlord]!','c-loot t3'); } }
   else if(mt.elite){ items.push(genItem(m.lv,Math.random()<.5?2:1)); }
   else if(!mt.summon && Math.random()<.24){ const r=Math.random(); items.push(genItem(m.lv, r<.06?2:r<.36?1:0)); }
   if(mt.raid) try{ raidLoot(m,items); }catch(e){ console.error(e); }
@@ -2194,7 +2198,11 @@ const VS_LIT=`#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPos; layout(location=1) in vec3 aNor; layout(location=2) in vec4 aCol;
 #ifdef SKIN
-layout(location=3) in vec2 aUV; layout(location=4) in uvec4 aJ; layout(location=5) in vec4 aWt; uniform mat4 uJ[24];
+layout(location=3) in vec2 aUV; layout(location=4) in uvec4 aJ; layout(location=5) in vec4 aWt; 
+#ifndef NBONE
+#define NBONE 24
+#endif
+uniform mat4 uJ[NBONE];
 #endif
 #ifdef TEX
 layout(location=6) in vec2 aUVt;
@@ -2381,6 +2389,7 @@ precision highp float;
 in vec2 vP; uniform mat4 uInvVP; uniform vec3 uSunDir; uniform vec3 uRealSun; uniform vec3 uZen; uniform vec3 uHor; uniform vec3 uSunCol; uniform float uNight; uniform float uTime; uniform float uCloud; uniform float uStorm; uniform float uFlash; uniform float uAurora;
 out vec4 o;
 ${GLSL_NOISE}
+uniform float uSkyOn; uniform sampler2D uSky0; uniform sampler2D uSky1; uniform sampler2D uSky2; uniform sampler2D uSky3; uniform sampler2D uSky4;
 void main(){
   vec4 a=uInvVP*vec4(vP,-1.,1.), b=uInvVP*vec4(vP,1.,1.); vec3 dir=normalize(b.xyz/b.w-a.xyz/a.w);
   float h=dir.y; vec3 col=mix(uHor,uZen,pow(clamp(h,0.,1.),.55)); if(h<0.) col=uHor*(1.+h*.6);
@@ -2394,6 +2403,10 @@ void main(){
     vec3 cc=(mix(uHor*1.15,vec3(1.),.45)*(1.-uNight*.85)+uSunCol*.15)*(1.-uStorm*.6);
     cc*=mix(1.14,.7,thick); cc+=uSunCol*pow(max(sd,0.),6.)*.55*(1.-thick)*(1.-uStorm*.7);
     col=mix(col,cc,c*(.7+uStorm*.25)); }
+  if(uSkyOn>.5&&h>-.08){ float az=atan(dir.z,dir.x), saz=atan(uRealSun.z,uRealSun.x); vec2 uv=vec2(fract((az-saz)/6.2831853+.5918),acos(clamp(h,-1.,1.))/3.14159265);
+    float sy=uRealSun.y, wDay=smoothstep(.04,.28,sy), wNight=smoothstep(-.04,-.24,sy), wTw=smoothstep(.06,-.1,sy)*(1.-wNight), wDusk=max(0.,1.-wDay-wNight-wTw), nc=clamp(uCloud*1.4-.3,0.,1.);
+    vec3 tc=texture(uSky0,uv).rgb*wDay+texture(uSky1,uv).rgb*wDusk+texture(uSky2,uv).rgb*wTw+mix(texture(uSky3,uv).rgb,texture(uSky4,uv).rgb,nc)*wNight;
+    tc*=mix(1.,.42,uStorm); float k=smoothstep(-.08,.05,h)*(1.-uStorm*.6); col=mix(col,tc*1.05,k); col+=uSunCol*pow(max(sd,0.),900.)*6.*k; }
   if(uAurora>0.&&h>0.){ vec2 q=dir.xz/(h+.25); float a=0.; for(int k=0;k<3;k++){ float fk=float(k); float band=sin(q.x*1.3+fk*2.1+uTime*.06+vn(q*.7+fk)*3.5)*.5+.5; a+=smoothstep(.68,1.,band)*(.55+.45*vn(q*3.+vec2(uTime*.15,fk))); }
     col+=mix(vec3(.1,1.,.55),vec3(.6,.25,1.),clamp(q.y*.25+.5,0.,1.))*a*uAurora*smoothstep(.02,.3,h)*1.3; }
   col+=vec3(.8,.85,1.)*uFlash*.6;
@@ -2417,10 +2430,12 @@ function program(vs,fs,defs){ const pre=defs?('#define '+defs.join(NL+'#define '
 const PL=program(VS_LIT,FS_LIT), PLI=program(VS_LIT,FS_LIT,['INST']), PS=program(VS_LIT,FS_SHADOW,['SHADOW']), PSI=program(VS_LIT,FS_SHADOW,['SHADOW','INST']);
 /* ---------- v71: real skinned 3D models (Quaternius Bestiary), loaded from play/models/ ---------- */
 const FS_SKIN=FS_LIT.replace('#version 300 es','#version 300 es'+NL+'#define SKIN');
-let PKL=null, PKS=null; try{ PKL=program(VS_LIT,FS_SKIN,['SKIN']); PKS=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN']); }catch(e){ console.warn('skinned shaders unavailable',e); }
+let PKL=null, PKS=null, PKL48=null, PKS48=null; try{ PKL=program(VS_LIT,FS_SKIN,['SKIN']); PKS=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN']); }catch(e){ console.warn('skinned shaders unavailable',e); }
+try{ PKL48=program(VS_LIT,FS_SKIN,['SKIN','NBONE 48']); PKS48=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN','NBONE 48']); }catch(e){ console.warn('large-rig shaders unavailable',e); }
 /* which mobs wear which model: h = height in world units, arm = how far the arms drop from the T-pose, pv = hip height share */
-const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6} };
+const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6}, wyrm:{f:'ork',h:4.4,ws:.42,big:1,ork:1} };
 const SKM={}, SKQ=[];
+/* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 const SK=(()=>{
   const qmul=(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
@@ -2435,24 +2450,25 @@ const SK=(()=>{
       gl.texImage2D(gl.TEXTURE_2D,0,srgb===false?gl.RGBA8:gl.SRGB8_ALPHA8,gl.RGBA,gl.UNSIGNED_BYTE,im); gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
       const an=gl.getExtension('EXT_texture_filter_anisotropic'); if(an) gl.texParameterf(gl.TEXTURE_2D,an.TEXTURE_MAX_ANISOTROPY_EXT,4);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT); return t; }).catch(()=>null); }
-  function anims(){ if(Aready) return Aready; Aready=Promise.all([fetch(ROOT+'anims.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(ROOT+'anims.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })])
-      .then(([m,b])=>{ A=m; A.buf=b; A.dv=new DataView(b); A.bi={}; A.bones.forEach((n,i)=>A.bi[n]=i); A.rp=Math.hypot(...A.restPelvis); return A; }).catch(()=>null); return Aready; }
+  const AS={};
+  function anims(name){ name=name||'anims'; if(AS[name]) return AS[name]; AS[name]=Promise.all([fetch(ROOT+name+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(ROOT+name+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })])
+      .then(([m,b])=>{ const X=m; X.buf=b; X.dv=new DataView(b); X.bi={}; X.bones.forEach((n,i)=>X.bi[n]=i); X.rp=Math.hypot(...X.restPelvis); X.TQ=X.bones.map(()=>[0,0,0,0]); X.TP=X.bones.map(()=>[0,0,0]); if(name==='anims') A=X; return X; }).catch(()=>null); return AS[name]; }
   async function load(gl,name,root){ GL=gl; if(root) ROOT=root; const base=ROOT+name;
-    const [meta,bin]=await Promise.all([fetch(base+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(base+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]); await anims();
-    const VS=40, ib=new Uint16Array(bin,meta.v*VS,meta.i), io=meta.v*VS+meta.i*2, nb=meta.bones.length, ibm=new Float32Array(bin.slice(io,io+nb*64));
+    const [meta,bin]=await Promise.all([fetch(base+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(base+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]); const AN=await anims(meta.anims);
+    const VS=40, ib=meta.u32?new Uint32Array(bin,meta.v*VS,meta.i):new Uint16Array(bin,meta.v*VS,meta.i), io=meta.v*VS+meta.i*(meta.u32?4:2), nb=meta.bones.length, ibm=new Float32Array(bin.slice(io,io+nb*64));
     const vao=gl.createVertexArray(); gl.bindVertexArray(vao); const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Uint8Array(bin,0,meta.v*VS),gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,VS,0); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,VS,12); gl.disableVertexAttribArray(2);
     gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3,2,gl.FLOAT,false,VS,24); gl.enableVertexAttribArray(4); gl.vertexAttribIPointer(4,4,gl.UNSIGNED_BYTE,VS,32);
     gl.enableVertexAttribArray(5); gl.vertexAttribPointer(5,4,gl.UNSIGNED_BYTE,true,VS,36);
     const e=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,e); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,ib.slice(),gl.STATIC_DRAW); gl.bindVertexArray(null);
-    const M={meta,vao,n:meta.i,ibm,B:meta.bones,H:meta.max[1]-Math.min(0,meta.min[1]),tex:await tex(base+'.jpg'),emi:(await tex(base+'_e.jpg'))||black()};
+    const M={meta,vao,n:meta.i,u32:!!meta.u32,A:AN,ibm,B:meta.bones,H:meta.max[1]-Math.min(0,meta.min[1]),tex:await tex(base+'.jpg'),emi:(await tex(base+'_e.jpg'))||black()};
     if(!M.tex) throw new Error('texture');
     let pre=new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]), preR=[0,0,0,1];
     for(const p of meta.pre){ pre=mm(m4(p.t,p.r,p.s),pre); preR=qmul(p.r,preR); }
     M.pre=pre; M.G=[]; M.B.forEach((x,i)=>{ M.G[i]=qmul(x.p<0?preR:M.G[x.p],x.r); }); M.g=[]; M.jm=new Float32Array(16*nb); M.L=new Float32Array(16);
-    M.map=A?M.B.map(x=>A.bi[x.n]??-1):null; const pi=M.B.findIndex(x=>x.n==='pelvis'); M.pk=A&&pi>=0?Math.hypot(...M.B[pi].t)/A.rp:1; return M; }
+    M.map=AN?M.B.map(x=>AN.bi[x.n]??-1):null; const pi=M.B.findIndex(x=>x.n==='pelvis'); M.pk=AN&&!AN.allT&&pi>=0?Math.hypot(...M.B[pi].t)/AN.rp:1; return M; }
   /* sample one clip at time t (seconds) into q (array of quats per anim-bone) and p (pelvis) */
-  function sample(c,t,loop,outQ,outP,w){ const C=A.clips[c]; if(!C) return 0; const n=C.n; let f=t*A.fps; f=loop?((f%(n-1))+(n-1))%(n-1):Math.min(Math.max(f,0),n-1);
+  function sample(A,c,t,loop,outQ,outP,w){ const C=A.clips[c]; if(!C) return 0; const n=C.n; let f=t*A.fps; f=loop?((f%(n-1))+(n-1))%(n-1):Math.min(Math.max(f,0),n-1);
     const f0=Math.floor(f), f1=Math.min(f0+1,n-1), u=f-f0, dv=A.dv, nb=A.bones.length, S=A.stride;
     for(let k=0;k<nb;k++){ const o0=C.off+f0*S+k*8, o1=C.off+f1*S+k*8; const q=outQ[k];
       let a0=dv.getInt16(o0,true)/32767,a1=dv.getInt16(o0+2,true)/32767,a2=dv.getInt16(o0+4,true)/32767,a3=dv.getInt16(o0+6,true)/32767;
@@ -2460,24 +2476,25 @@ const SK=(()=>{
       if(a0*b0+a1*b1+a2*b2+a3*b3<0){ b0=-b0;b1=-b1;b2=-b2;b3=-b3; }
       let x=a0+(b0-a0)*u, y=a1+(b1-a1)*u, z=a2+(b2-a2)*u, ww=a3+(b3-a3)*u; if(q[0]*x+q[1]*y+q[2]*z+q[3]*ww<0&&q.w>0){ x=-x;y=-y;z=-z;ww=-ww; }
       q[0]+=x*w; q[1]+=y*w; q[2]+=z*w; q[3]+=ww*w; q.w=(q.w||0)+w; }
-    const po0=C.off+f0*S+nb*8, po1=C.off+f1*S+nb*8; for(let i=0;i<3;i++){ const a=dv.getFloat32(po0+i*4,true), b=dv.getFloat32(po1+i*4,true); outP[i]+=(a+(b-a)*u)*w; } return 1; }
-  let TQ=null, TP=[0,0,0];
+    if(A.allT){ for(let k=0;k<nb;k++){ const p0=C.off+f0*S+nb*8+k*12, p1=C.off+f1*S+nb*8+k*12, o=outP[k]; for(let i=0;i<3;i++){ const a=dv.getFloat32(p0+i*4,true), b=dv.getFloat32(p1+i*4,true); o[i]+=(a+(b-a)*u)*w; } } }
+    else { const po0=C.off+f0*S+nb*8, po1=C.off+f1*S+nb*8, o=outP[A.bi.pelvis??0]; for(let i=0;i<3;i++){ const a=dv.getFloat32(po0+i*4,true), b=dv.getFloat32(po1+i*4,true); o[i]+=(a+(b-a)*u)*w; } }
+    return 1; }
   /* layers: [{c:clip,t:time,loop:bool,w:weight}], R: extra model-space turns {bone:[[ax,ay,az,ang],...]}, off: hip offset */
-  function pose(M,layers,R,off){ const B=M.B, g=M.g; let useA=!!(A&&M.map&&layers&&layers.length);
-    if(useA){ const nb=A.bones.length; if(!TQ) TQ=A.bones.map(()=>[0,0,0,0]); for(const q of TQ){ q[0]=q[1]=q[2]=q[3]=0; q.w=0; } TP[0]=TP[1]=TP[2]=0; let tw=0;
-      for(const L of layers) if(L.w>0.001) tw+=sample(L.c,L.t,L.loop,TQ,TP,L.w)*L.w; if(tw<=0) useA=false; else { TP[0]/=tw; TP[1]/=tw; TP[2]/=tw; } }
+  function pose(M,layers,R,off){ const B=M.B, g=M.g, A=M.A; let useA=!!(A&&M.map&&layers&&layers.length), TQ, TP;
+    if(useA){ TQ=A.TQ; TP=A.TP; for(const q of TQ){ q[0]=q[1]=q[2]=q[3]=0; q.w=0; } for(const p of TP){ p[0]=p[1]=p[2]=0; } let tw=0;
+      for(const L of layers) if(L.w>0.001) tw+=sample(A,L.c,L.t,L.loop,TQ,TP,L.w)*L.w; if(tw<=0) useA=false; else for(const p of TP){ p[0]/=tw; p[1]/=tw; p[2]/=tw; } }
     for(let i=0;i<B.length;i++){ const x=B[i]; let r=x.r, t=x.t;
-      if(useA){ const k=M.map[i]; if(k>=0){ const q=TQ[k], l=Math.hypot(q[0],q[1],q[2],q[3]); if(l>1e-6) r=[q[0]/l,q[1]/l,q[2]/l,q[3]/l]; if(x.n==='pelvis') t=[TP[0]*M.pk,TP[1]*M.pk,TP[2]*M.pk]; } }
+      if(useA){ const k=M.map[i]; if(k>=0){ const q=TQ[k], l=Math.hypot(q[0],q[1],q[2],q[3]); if(l>1e-6) r=[q[0]/l,q[1]/l,q[2]/l,q[3]/l]; if(A.allT) t=TP[k]; else if(x.n==='pelvis') t=[TP[k][0]*M.pk,TP[k][1]*M.pk,TP[k][2]*M.pk]; } }
       const Lr=R&&R[x.n]; if(Lr){ let w=[0,0,0,1]; for(const q of Lr) w=qmul(qax(q[0],q[1],q[2],q[3]),w); const G=M.G[i]; r=qmul(r,qmul(qmul(qinv(G),w),G)); }
       g[i]=mm(x.p<0?M.pre:g[x.p],m4(t,r,x.s,M.L),g[i]);
       if(off&&x.n==='pelvis'){ g[i][12]+=off[0]; g[i][13]+=off[1]; g[i][14]+=off[2]; }
       mm(g[i],M.ibm.subarray(i*16,i*16+16),M.jm.subarray(i*16,i*16+16)); }
     return M.jm; }
-  const clipLen=c=>A&&A.clips[c]?A.clips[c].len:1, hasAnims=()=>!!A, setGL=g=>{ GL=g; };
+  const clipLen=(c,M)=>{ const X=M&&M.A||A; return X&&X.clips[c]?X.clips[c].len:1; }, hasAnims=()=>!!A, setGL=g=>{ GL=g; };
   return {load,pose,clipLen,hasAnims,tex,anims,setGL};
 })();
 
-function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
+function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||f==='ork'&&!PKL48||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
   SKM[f]={M:null}; SK.load(gl,f).then(M=>{ SKM[f].M=M; }).catch(e=>{ SKM[f].err=String(e&&e.message||e); console.warn('model '+f+' not found, using the classic look'); }); return null; }
 /* animation: idle and walk blend by speed, alternating weapon swings (a throw for ranged mobs), a flinch when hit, knocked flat on death */
 const SKATK=[['atkA',0,.43],['atkB',0,.53],['atkC',0,.47]], SKTHROW=['throw',.3,1.0];
@@ -2488,18 +2505,37 @@ function skAnim(S,M,b,m,mt){ const t=now(), id=(m.id||0)%11, L=[], mv=clamp(b.mv
   L.push({c:'idle',t:t*.9+id*.37,loop:true,w:(1-mv)*(1-aw*.6)+.0001});
   const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5) L.push({c:'hit',t:.05+fl*.06,loop:false,w:fl*.9});
   return {L}; }
+/* v72: per-model animation sets: the Cinder Warlord (an orc with his own skeleton and 12 clips) */
+function skAnimOrk(S,M,b,m){ const t=now(), L=[], mv=clamp(b.mv||0,0,1), cl=c=>SK.clipLen(c,M);
+  if(b.dead>=0){ L.push({c:'die',t:Math.min(b.dead*1.5,cl('die')-.05),loop:false,w:1}); return {L}; }
+  let aw=0; if(b.swing>=0){ const p=b.swing; aw=p<.06?p/.06:p>.9?(1-p)/.1:1; L.push({c:'atkA',t:p*cl('atkA'),loop:false,w:aw*5}); }
+  if(b.roar>0&&aw<.5) L.push({c:'roar',t:(1-b.roar)*2.2+.4,loop:false,w:3});
+  L.push({c:mv>.7?'run':'walk',t:(b.walk||0)/(2*Math.PI)*cl('walk')*(S.ws||.5),loop:true,w:mv*(1-aw*.7)+.0001});
+  L.push({c:'idle',t:t*.8,loop:true,w:(1-mv)*(1-aw*.7)+.0001});
+  const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5) L.push({c:'hit',t:.12+fl*.2,loop:false,w:fl*1.4});
+  return {L}; }
 function skDrawMob(m,mt,b){ const S=SKMOB[mt.key]; if(!S) return false; const M=skGet(S.f); if(!M) return false;
-  const A=skAnim(S,M,b,m,mt); mreset(); mtr(b.x,b.y,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
+  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); mreset(); mtr(b.x,b.y,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
   SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L,null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
   if(HOVE) addLight(b.x,b.y+S.h*.6,b.z,2.2,[1,.95,.8]);
   return true; }
-function drawSkinQ(pr,shadow){ if(!SKQ.length||!pr) return; setFrameUniforms(pr,shadow); const u=pr.u;
+/* ---------- v72: painted skies (day, sunset, twilight, clear and cloudy night) blended by the time of day ---------- */
+const SKYT={on:false,ready:false,T:{},names:['sky_day','sky_dusk','sky_twilight','sky_night','sky_nightcloud']};
+function skyLoad(){ if(SKYT.on||GFX.q==='low') return; SKYT.on=true; SK.setGL(gl);
+  Promise.all(SKYT.names.map(n=>SK.tex('models/sky/'+n+'.jpg',true).then(t=>{ if(!t) throw new Error(n); SKYT.T[n]=t; gl.bindTexture(gl.TEXTURE_2D,t); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); })))
+    .then(()=>{ SKYT.ready=true; }).catch(e=>console.warn('skies not found, keeping the classic sky',e)); }
+function skyBind(u){ const on=SKYT.ready&&!(me&&/^(vault|crypt|raid)$/.test(zoneAtPx(me.x,me.y)||''));
+  gl.uniform1f(u.uSkyOn,on?1:0); if(!on) return;
+  SKYT.names.forEach((n,i)=>{ gl.activeTexture(gl.TEXTURE6+i); gl.bindTexture(gl.TEXTURE_2D,SKYT.T[n]); gl.uniform1i(u['uSky'+i],6+i); }); gl.activeTexture(gl.TEXTURE0); }
+setTimeout(()=>{ try{ skyLoad(); }catch(e){} },1500);
+
+function drawSkinQ(pr,shadow,big){ if(!SKQ.length||!pr) return; if(!SKQ.some(q=>(q.M.B.length>24)===!!big)) return; setFrameUniforms(pr,shadow); const u=pr.u;
   if(!shadow){ gl.uniform1i(u.uTex,4); gl.uniform1i(u.uETex,5); if(u.uSpec) gl.uniform1f(u.uSpec,.2); }
   gl.uniform3f(u.uInvS2,1,1,1); gl.vertexAttrib4f(2,1,1,1,0);
-  for(const q of SKQ){ gl.uniformMatrix4fv(u.uM,false,q.m); gl.uniformMatrix4fv(u.uJ,false,q.j);
+  for(const q of SKQ){ if((q.M.B.length>24)!==!!big) continue; gl.uniformMatrix4fv(u.uM,false,q.m); gl.uniformMatrix4fv(u.uJ,false,q.j);
     if(!shadow){ gl.uniform3f(u.uTint,1.05,1.05,1.05); gl.uniform1f(u.uEmis,q.e); gl.uniform1f(u.uAlpha,1);
       gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D,q.M.tex); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,q.M.emi); gl.activeTexture(gl.TEXTURE0); }
-    gl.bindVertexArray(q.M.vao); gl.drawElements(gl.TRIANGLES,q.M.n,gl.UNSIGNED_SHORT,0); }
+    gl.bindVertexArray(q.M.vao); gl.drawElements(gl.TRIANGLES,q.M.n,q.M.u32?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,0); }
   gl.bindVertexArray(null); }
 /* fetch the models as soon as the game starts so the mobs swap in quickly */
 setTimeout(()=>{ for(const k in SKMOB) skGet(SKMOB[k].f); },500);
@@ -2532,11 +2568,11 @@ NAT.KINDS={
   reed:[['grass_wispy_tall',.75]] };
 NAT.DECO=new Set(['bush','fern','plant','flower','shroom','reed']);
 NAT.KINDS.prop=[]; NAT.PROPDIR=new Set(['barrel','barrel_apples','crate_wooden','crate_metal','farmcrate_apple','farmcrate_carrot','bench','bucket_wooden_1','bag','pot_1','prop_wagon','prop_crate','chest_wood','barrel_holder','workbench','table_large','stool','cauldron','anvil_log','weaponstand','stall_empty','shield_wooden']);
-const natDir=n=>NAT.PROPDIR.has(n)||/^t_(trim|woodtrim|metalorn)/.test(n)?'models/props/':'models/nat/';
+const natDir=n=>NAT.PROPDIR.has(n)||/^t_(trim|woodtrim|metalorn)/.test(n)?'models/props/':/^(wall_|corner_|door_|window_|roof_|prop_chimney|floor_|overhang_|t_(plaster|roundtiles|unevenbrick|rocktrim|brick|redbrick))/.test(n)?'models/town/':'models/nat/';
 /* town clutter: little groups of barrels, crates, sacks and benches set against house walls, away from the middle of each wall where the doors are */
 function natProps(){ const out=[], R=mulberry32(7272);
   const ok=(x,y)=>{ const t=tAt(x,y); return t===T.COBBLE||t===T.PATH||t===T.GRASS; };
-  const blds=[]; for(const h of houses) blds.push({x:h.x,y:h.y,w:h.w,h:h.h,town:'e',kind:h.kind||'house'}); if(PORT&&PORT.B) for(const b of PORT.B) blds.push({x:b.x,y:b.y,w:b.w,h:b.h,town:'p',kind:b.k,door:b.door});
+  const blds=[]; for(const h of houses) blds.push({x:h.x,y:h.y,w:h.w,h:h.h,town:'e',kind:h.kind||'house',door:h.door}); if(PORT&&PORT.B) for(const b of PORT.B) blds.push({x:b.x,y:b.y,w:b.w,h:b.h,town:'p',kind:b.k,door:b.door});
   const SETS=[[['barrel',0,0],['barrel',.75,.1],['crate_wooden',1.55,0]],[['crate_wooden',0,0],['crate_metal',.95,0],['bag',1.7,.1]],[['barrel_apples',0,0],['farmcrate_apple',.8,.05],['bucket_wooden_1',1.4,.15]],
     [['bench',0,.05]],[['prop_crate',0,0],['barrel',1.0,.1]],[['farmcrate_carrot',0,0],['bag',.75,.05],['pot_1',1.3,.1]],[['barrel_holder',0,0]],[['chest_wood',0,.05]],[['stool',0,.3],['table_large',1.6,.55]]];
   for(const b of blds){ if(b.kind==='temple'||b.kind==='chapel'||b.kind==='hall') continue; if(b.town==='e'&&Math.hypot(b.x+b.w/2-TOWN.x,b.y+b.h/2-TOWN.y)<8) continue;
@@ -2551,6 +2587,7 @@ function natProps(){ const out=[], R=mulberry32(7272);
   /* a few carts and wagons by the town gates and the harbour */
   if(PORT&&PORT.B){ out.push(['prop',['prop_wagon',1],PORT.x0-3.2,hgt(PORT.x0-3.2,PORT.cy+3.5),PORT.cy+3.5,.2,1,1,1,0,1,1,1]); }
   return out; }
+let NAT_W=null; function natWhite(){ if(NAT_W) return NAT_W; NAT_W=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,NAT_W); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255])); return NAT_W; }
 NAT.TP=[]; function natTex(n){ if(NAT.T[n]!==undefined) return NAT.T[n]; NAT.T[n]=null; NAT.TP.push(SK.tex(natDir(n)+n+(NAT.PNG.has(n)?'.png':'.jpg'),true).then(t=>{ NAT.T[n]=t; if(!t) throw new Error('texture '+n); })); return null; }
 NAT.PK={}; const natPack=d=>NAT.PK[d]||(NAT.PK[d]=Promise.all([fetch(d+d.split('/').slice(-2)[0]+'_pack.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(d+d.split('/').slice(-2)[0]+'_pack.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]));
 async function natMesh(n){ const [idx,all]=await natPack(natDir(n)); const meta=idx[n]; if(!meta) throw new Error('mesh '+n); const bin=all.slice(meta.off,meta.off+meta.len);
@@ -2582,19 +2619,20 @@ function natBuild(){ const L=[]; const raw=INST.RAW; if(!raw) return L; const cs
   for(const [arr,k0] of [[raw.trees[0],'broad'],[raw.trees[1],'pine'],[raw.rocks,'rock']]) for(let o=0,i=0;o<arr.length;o+=11,i++){ const z=zAt(arr[o],arr[o+2]); let k=k0;
       if(k0==='broad') k=z==='ash'||z==='lair'?'dead':z==='swamp'?'twist':'broad'; if(k0==='rock'&&(z==='ash'||z==='lair')) k='rockd'; add(k,i,arr,o); }
   try{ for(const d of natProps()) L.push(d); }catch(e){ console.warn('props',e); }
+  for(const e of TKIT_LIST) L.push(['town',[e[0],1],e[1],e[2],e[3],e[4],e[5],e[6],e[7],0,e[8],e[9],e[10]]);
   for(const d of natScatter()){ const vs=NAT.KINDS[d[0]], v=vs[Math.floor(d[4]*97)%vs.length]; L.push([d[0],v,...d.slice(1)]); }
   /* group: mesh -> chunk -> instances (11 floats: pos, yaw, scale xyz, sway, tint) */
   const G=new Map(); for(const e of L){ const [kind,v,x,y,z,ry,sx,sy,sz,sw,cr,cg,cb]=e, mesh=v[0], k=v[1], tex=v[2]||'', key=mesh+'|'+tex;
-    let g=G.get(key); if(!g){ g={mesh,tex,deco:NAT.DECO.has(kind),rock:kind==='rock'||kind==='rockd',prop:kind==='prop',ch:new Map()}; G.set(key,g); }
+    let g=G.get(key); if(!g){ g={mesh,tex,deco:NAT.DECO.has(kind),rock:kind==='rock'||kind==='rockd',prop:kind==='prop',town:kind==='town',ch:new Map()}; G.set(key,g); }
     const ck=Math.floor(x/cs)*1000+Math.floor(z/cs); let a=g.ch.get(ck); if(!a){ a=[]; g.ch.set(ck,a); }
-    const tint=g.rock||g.prop?[cr,cg,cb]:[lerp(1,cr,.45),lerp(1,cg,.45),lerp(1,cb,.45)];
-    a.push(x,y,z,ry,sx*k,sy*k,sz*k,g.rock||g.prop?0:(g.deco?.05:.0035),tint[0],tint[1],tint[2]); }
+    const tint=g.rock||g.prop||g.town?[cr,cg,cb]:[lerp(1,cr,.45),lerp(1,cg,.45),lerp(1,cb,.45)];
+    a.push(x,y,z,ry,sx*k,sy*k,sz*k,g.rock||g.prop||g.town?0:(g.deco?.05:.0035),tint[0],tint[1],tint[2]); }
   return G; }
 async function natInit(){ if(!PTL||GFX.q==='low'||NAT.on) return; NAT.on=true;
   try{ const G=natBuild(); const names=new Set([...G.values()].map(g=>g.mesh)); SK.setGL(gl);
     await Promise.all([...names].map(async n=>{ NAT.M[n]=await natMesh(n); })); natTex('rocks_desert_diffuse'); await Promise.all(NAT.TP);
     for(const [key,g] of G){ const m=NAT.M[g.mesh]; for(const [ck,a] of g.ch){ const v=natVAO(m,a); NAT.V.push({m,g,cx:(Math.floor(ck/1000)+.5)*NAT.CS,cz:(ck%1000+.5)*NAT.CS,vao:v.vao,count:v.count}); } }
-    NAT.ready=true; }
+    NAT.town=TKIT_LIST.length>0; NAT.ready=true; }
   catch(e){ console.warn('nature models not found, keeping the classic trees',e); NAT.ready=false; } }
 /* chunks of the classic trees and rocks that the new models have taken over */
 function natCovers(c){ if(!NAT.ready) return false; const dx=c.cx-CAM.tx, dz=c.cz-CAM.tz, R=NAT.near(); return dx*dx+dz*dz<R*R; }
@@ -2602,11 +2640,12 @@ function drawNat(shadow){ if(!NAT.ready) return; const pr=shadow?PTS:PTL; if(!pr
   const cull=gl.isEnabled(gl.CULL_FACE); gl.disable(gl.CULL_FACE); gl.uniform1i(u.uTex,4); gl.uniform3f(u.uTint,1,1,1); gl.uniform1f(u.uEmis,0); gl.uniform1f(u.uAlpha,1); if(u.uFol) gl.uniform1f(u.uFol,0); if(u.uMat) gl.uniform1f(u.uMat,0);
   const R=NAT.near(), D=NAT.decoR(), SR=shadow?52:1e9, tx=CAM.tx, tz=CAM.tz, half=NAT.CS*.71;
   gl.activeTexture(gl.TEXTURE4);
-  for(const c of NAT.V){ const dx=c.cx-tx, dz=c.cz-tz, d2=dx*dx+dz*dz, lim=Math.min(c.g.deco?D+half:c.g.prop?Math.min(R,48)+half:R, SR); if(d2>lim*lim) continue;
-    if(!shadow&&!c.g.deco&&!c.g.rock&&!c.g.prop&&u.uFade) fadeOn(u,true); else if(u.uFade) fadeOn(u,false);
+  for(const c of NAT.V){ const dx=c.cx-tx, dz=c.cz-tz, d2=dx*dx+dz*dz, lim=Math.min(c.g.deco?D+half:c.g.prop?Math.min(R,48)+half:c.g.town?160:R, SR); if(d2>lim*lim) continue;
+    if(!shadow&&!c.g.deco&&!c.g.rock&&(!c.g.prop||c.g.town)&&u.uFade) fadeOn(u,true); else if(u.uFade) fadeOn(u,false);
     if(shadow&&c.g.deco&&d2>(20*20)) continue;
     gl.bindVertexArray(c.vao);
-    for(const p of c.m.meta.parts){ const tn=(c.g.tex||p.t||'').toLowerCase(), t=tn?NAT.T[tn]:null; if(tn&&!t) continue; const alpha=NAT.PNG.has(tn)?1:0;
+    for(const p of c.m.meta.parts){ const tn=(c.g.tex||p.t||'').toLowerCase(); let t=tn?NAT.T[tn]:natWhite(); if(tn&&!t) continue; const alpha=NAT.PNG.has(tn)?1:0;
+      if(!shadow){ if(!tn){ const pc=p.c||[1,1,1]; gl.uniform3f(u.uTint,pc[0]*.62,pc[1]*.72,pc[2]*.8); } else gl.uniform3f(u.uTint,1,1,1); }
       if(shadow&&!alpha&&c.g.deco) continue;
       gl.bindTexture(gl.TEXTURE_2D,t); gl.uniform1f(u.uAlphaT,alpha); if(!shadow){ gl.uniform1f(u.uLeaf,NAT.LEAF.has(tn)?.5:0); if(u.uSpec) gl.uniform1f(u.uSpec,c.g.prop?.16:c.g.rock?.1:alpha?.05:.08); }
       gl.drawElementsInstanced(gl.TRIANGLES,p.n,c.m.u32?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,p.i0*(c.m.u32?4:2),c.count); } }
@@ -2865,11 +2904,62 @@ function addTownDistricts(d,box,C){ const {wood,dark,stone,iron}=C, y0=.55, R=mu
   // --- lamps all along the new ring street
   for(let i=0;i<28;i++){ const a=i/28*Math.PI*2+.05, x=TOWN.x+.5+Math.cos(a)*18.4, z=TOWN.y+.5+Math.sin(a)*18.4; if(Math.abs(z-TOWN.y-.5)<2.6) continue; const t=tAt(Math.floor(x),Math.floor(z)); if(SOLID.has(t)||t===T.HOUSE) continue; lamp(x,z); }
 }
+/* ---------- v72: houses assembled from the Medieval Village kit (Quaternius) ----------
+   kitHouse(h) turns a house footprint {x,y,w,h,door,st,style} (tiles) into a list of module instances:
+   [mesh, x, y, z, yaw, sx, sy, sz, r, g, b]. Kit modules are 2 m wide, walls 3.12 m tall, exterior on +z. */
+const KIT={ ROOFS:{4:[4,6,8],6:[6,8,10],8:[8,10]} };
+function kitHash(a,b,s){ let h=(a*374761393+b*668265263+s*1442695041)|0; h=(h^(h>>>13))*1274126177|0; return ((h^(h>>>16))>>>0)/4294967296; }
+function kitHouse(hs,base){ const out=[], x0=hs.x, z0=hs.y, w=hs.w, d=hs.h, cx=x0+w/2, cz=z0+d/2, y0=base==null?.55:base, hv=kitHash(x0,z0,7);
+  /* module counts: the short side sets the roof width (4, 6 or 8 m), the long side its length */
+  let nx=Math.max(2,Math.round(w/1.75)), nz=Math.max(2,Math.round(d/1.75)); const longX=nx>=nz;
+  let ns=Math.min(4,longX?nz:nx), nl=longX?nx:nz; ns=Math.max(2,ns); const RL=KIT.ROOFS[ns*2]; nl=Math.max(ns,Math.min(nl,RL[RL.length-1]/2)); if(!RL.includes(nl*2)) nl=RL.reduce((a,v)=>Math.abs(v/2-nl)<Math.abs(a/2-nl)?v:a,RL[0])/2;
+  if(longX){ nx=nl; nz=ns; } else { nx=ns; nz=nl; }
+  const sx=w/(2*nx), sz=d/(2*nz), sy=clamp((sx+sz)/2,.78,1), H=3.12*sy, st=hs.st||((w*d>=24&&hv<.85)||hs.big?2:1);
+  const style=hs.style!=null?hs.style:Math.floor(kitHash(z0,x0,11)*3);   /* 0: stone ground floor, 1: all plaster, 2: timber-framed */
+  const pt=[[1,.97,.9],[.98,.93,.84],[1,.95,.82],[.94,.92,.9],[1,.9,.78]][Math.floor(kitHash(x0,z0,13)*5)];
+  const push=(m,x,y,z,yaw,a,b,c,t)=>out.push([m,x,y,z,yaw,a,b,c,...(t||[1,1,1])]);
+  const door=hs.door||'s';
+  /* sides: start point, direction along the side, outward normal, module count, module scale */
+  const sides={ s:{ax:x0,az:z0+d,dx:1,dz:0,n:nx,s:sx,yaw:0}, n:{ax:x0+w,az:z0,dx:-1,dz:0,n:nx,s:sx,yaw:Math.PI},
+                e:{ax:x0+w,az:z0+d,dx:0,dz:-1,n:nz,s:sz,yaw:Math.PI/2}, w:{ax:x0,az:z0,dx:0,dz:1,n:nz,s:sz,yaw:-Math.PI/2} };
+  const inset=.09;
+  for(let f=0;f<st;f++){ const y=y0+f*H, ground=f===0;
+    for(const k of ['s','n','e','w']){ const S=sides[k], nX=Math.sin(S.yaw), nZ=Math.cos(S.yaw);
+      for(let i=0;i<S.n;i++){ const t=(i+.5)*2*S.s, x=S.ax+S.dx*t-nX*inset, z=S.az+S.dz*t-nZ*inset, mid=i===Math.floor(S.n/2);
+        const stone=ground&&style===0, timber=!ground&&style!==1||style===2&&!ground;
+        let m, win=null;
+        if(ground&&k===door&&mid){ m=stone?'wall_unevenbrick_door_round':'wall_plaster_door_round';
+          push(m,x,y,z,S.yaw,S.s,sy,1,stone?null:pt); push(hv<.5?'door_1_round':'door_4_round',x-S.dx*.53*S.s,y,z-S.dz*.53*S.s,S.yaw,S.s,sy,1); continue; }
+        const wantWin=(i+f+(k==='e'||k==='w'?1:0))%2===0||S.n===2&&i===0&&f>0;
+        if(wantWin){ m=stone?'wall_unevenbrick_window_wide_round':'wall_plaster_window_wide_round'; win='window_wide_round1'; }
+        else m=stone?'wall_unevenbrick_straight':timber?'wall_plaster_woodgrid':'wall_plaster_straight';
+        push(m,x,y,z,S.yaw,S.s,sy,1,stone?null:pt); if(win) push(win,x,y,z,S.yaw,S.s,sy,1);
+        if(win&&ground&&typeof STAT_LIGHTS!=='undefined') STAT_LIGHTS.push({x:x+nX*.6,y:y+1.6*sy,z:z+nZ*.6,r:3.2,c:[1,.62,.3],night:true}); } }
+    /* corner posts */
+    for(const [px,pz] of [[x0,z0],[x0+w,z0],[x0,z0+d],[x0+w,z0+d]]) push(ground&&style===0?'corner_exterior_brick':'corner_exterior_wood',px,y,pz,Math.atan2(px-cx,pz-cz)-Math.PI/4,1,sy,1);
+    /* a beam between the storeys */
+    if(f>0) for(const k of ['s','n','e','w']){ const S=sides[k], nX=Math.sin(S.yaw), nZ=Math.cos(S.yaw); for(let i=0;i<S.n;i++){ const t=(i+.5)*2*S.s; push('wall_bottomcover',S.ax+S.dx*t-nX*inset,y,S.az+S.dz*t-nZ*inset,S.yaw,S.s,1,1); } } }
+  /* roof: ridge along the long side, gables at both ends, a chimney */
+  const top=y0+st*H, W=ns*2, L=nl*2, ss=longX?sz:sx, sl=longX?sx:sz, ryaw=longX?Math.PI/2:0;
+  push('roof_roundtiles_'+W+'x'+L,cx,top,cz,ryaw,ss,sy,sl);
+  for(const q of [-1,1]){ const ex=longX?cx+q*(w/2-inset):cx, ez=longX?cz:cz+q*(d/2-inset); push('roof_front_brick'+W,ex,top,ez,longX?(q>0?Math.PI/2:-Math.PI/2):(q>0?0:Math.PI),ss,sy,1,pt); }
+  { const rh=(W===4?3.7:W===6?4.9:6)*sy, q=hv<.5?-1:1, along=(L/2-1.1)*sl, off=W/4*ss*.9; const chx=longX?cx+q*along:cx+off, chz=longX?cz+off:cz+q*along;
+    push('prop_chimney',chx,top+rh*.42,chz,0,ss*.9,sy,ss*.9); if(typeof CHIMNEYS!=='undefined') CHIMNEYS.push({x:chx,y:top+rh*.42+3.1*sy,z:chz}); }
+  out.top=top+(W===4?3.7:W===6?4.9:6)*sy; return out; }
+
+/* ---------- v72: Emberwatch rebuilt with village-kit houses ---------- */
+const TKIT=GFX.q!=='low';
+let HOLD_D=TKIT?G0():null, HOLD=null, TKIT_LIST=[];
+function occBox(x0,z0,x1,z1,y1){ if(!OCC) OCC=new Float32Array(MW*OCC_R*MH*OCC_R); const W=MW*OCC_R;
+  for(let gz=Math.max(0,Math.ceil(z0*OCC_R-.5));gz<=Math.min(MH*OCC_R-1,Math.floor(z1*OCC_R-.5));gz++) for(let gx=Math.max(0,Math.ceil(x0*OCC_R-.5));gx<=Math.min(W-1,Math.floor(x1*OCC_R-.5));gx++){ const k=gz*W+gx; if(OCC[k]<y1) OCC[k]=y1; } }
+function buildKitTown(){ if(!TKIT) return; for(const hs of houses){ if(hs.kind||hs.port) continue; const L=kitHouse(hs,.55); for(const e of L) TKIT_LIST.push(e); occBox(hs.x,hs.y,hs.x+hs.w,hs.y+hs.h,L.top); } }
+
 const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
   const wood=[.32,.21,.12], dark=[.2,.13,.08], stone=[.55,.53,.5], plaster=[.86,.8,.66], roof=[.55,.2,.13], iron=[.12,.11,.1];
   const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
   // houses
-  for(const hs of houses){ if(hs.kind) continue; const x0=hs.x, z0=hs.y, w=hs.w, h=hs.h, cx=x0+w/2, cz=z0+h/2, y0=.55, hv=hash2(x0,z0,17);
+  buildKitTown();
+  for(const hs of houses){ if(hs.kind) continue; const d=TKIT?HOLD_D:STATIC_D, box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e); const x0=hs.x, z0=hs.y, w=hs.w, h=hs.h, cx=x0+w/2, cz=z0+h/2, y0=.55, hv=hash2(x0,z0,17);
     const roof=[[.55,.2,.13],[.34,.37,.44],[.45,.27,.16],[.62,.3,.16],[.3,.38,.24]][Math.floor(hv*5)], plaster=[[.86,.8,.66],[.92,.9,.84],[.8,.72,.55],[.74,.73,.7],[.88,.78,.6]][Math.floor(hash2(z0,x0,23)*5)];
     box(cx,y0+.15,cz,w+.1,.3,h+.1,stone);
     box(cx,y0+.3+1.05,cz,w-.2,2.1,h-.2,plaster);
@@ -2877,11 +2967,11 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     for(const fx of [x0+.1,x0+w-.1]) box(fx,y0+1.35,cz,.14,2.1,h-.2,dark);
     gAdd(d,RP,cx,y0+2.4,cz,Math.PI/2,h+.8,1.7,w+.7,roof);
     box(cx,y0+4.12,cz,w+.75,.14,.22,[.4,.14,.1]);
-    box(x0+w-1.1,y0+3.6,z0+.8,.55,1.9,.55,[.45,.42,.4]); box(x0+w-1.1,y0+4.6,z0+.8,.7,.15,.7,[.3,.28,.26]); CHIMNEYS.push({x:x0+w-1.1,y:y0+4.8,z:z0+.8});
+    box(x0+w-1.1,y0+3.6,z0+.8,.55,1.9,.55,[.45,.42,.4]); box(x0+w-1.1,y0+4.6,z0+.8,.7,.15,.7,[.3,.28,.26]); if(!TKIT) CHIMNEYS.push({x:x0+w-1.1,y:y0+4.8,z:z0+.8});
     box(cx,y0+1.05,z0+h-.06,.95,1.5,.12,wood); box(cx,y0+1.85,z0+h-.04,1.15,.14,.16,dark); box(cx+.3,y0+1.0,z0+h+.02,.08,.08,.06,[.8,.65,.3]);
     for(const [wx,wz] of [[x0+1.1,z0+h-.08],[x0+w-1.1,z0+h-.08],[x0+1.1,z0+.08],[x0+w-1.1,z0+.08]]){ box(wx,y0+1.55,wz,.7,.6,.08,[1,.72,.38],0,1.6); box(wx,y0+1.55,wz+(wz>cz?.03:-.03),.08,.6,.1,dark); box(wx,y0+1.2,wz+(wz>cz?.12:-.12),.85,.14,.22,[.4,.26,.14]);
       for(let k=0;k<3;k++) gAdd(d,RS,wx-.25+k*.25,y0+1.33,wz+(wz>cz?.12:-.12),0,.16,.14,.16,[[.9,.3,.4],[.95,.85,.3],[.8,.5,.9]][k]);
-      STAT_LIGHTS.push({x:wx,y:y0+1.5,z:wz+(wz>cz?.6:-.6),r:3.2,c:[1,.62,.3],night:true}); }
+      if(!TKIT) STAT_LIGHTS.push({x:wx,y:y0+1.5,z:wz+(wz>cz?.6:-.6),r:3.2,c:[1,.62,.3],night:true}); }
     for(let k=0;k<3;k++){ const bx=x0-.35+R()*.2, bz=z0+.5+k*.7; if(R()<.6) gAdd(d,RFR,bx,y0,bz,0,.5,.75,.5,[.42,.28,.15]); else box(bx,y0+.3,bz,.6,.6,.6,[.5,.36,.2],R()); } }
   addTownDistricts(d,box,{wood,dark,stone,iron});
   // town walls
@@ -2948,6 +3038,7 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
   addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); addPort(d); addCoastSites(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
+  if(TKIT&&HOLD_D.i.length) HOLD=mkVAO(HOLD_D);
   const V=mkVAO(d); V.chunks=[...SCH.values()].filter(c=>c.d.i.length).map(c=>{ const v=mkVAO(c.d); v.cx=c.cx; v.cz=c.cz; return v; }); SCH.clear(); STATIC_D=null; return V; })();
 if(EDITOR_MODE){ window.__EF={MW,MH,OWH,TS,T:{...T},map:Array.from(map.subarray(0,MW*OWH)),zmap:zmap.slice(0,MW*OWH),zones:Object.fromEntries(Object.entries(ZONES).map(([k,v])=>[k,v.name])),
     npcs:NPCS.filter(n=>n.y<OWH*TS).map(n=>({id:n.id,name:n.name,title:n.title,x:Math.floor(n.x/TS),y:Math.floor(n.y/TS)})),pois:POIS.filter(p=>p.y<OWH).map(p=>({name:p.name,x:p.x,y:p.y,r:p.r})),
@@ -3245,7 +3336,14 @@ function HILT(grip,metal,gw){ P(GEO.cyl,.042,.2,.042,grip,0,0,-.1,0); for(let k=
 const WUP=new Set(['trident','staff','crystal','solace','lantern','spear','staffplain','rod','skullstaff']), WBLADE=new Set(['sword','rustsword','greatsword','spellblade','dawnwarden','dagger','nightfang']), WHAFT=new Set(['wand','cinderheart','hammer','axe','club','morningstar','greataxe']);
 function drawFist(c,e,s){ P(GEO.box,.084,.1,.078,c,e,0,0,0); for(let k=0;k<4;k++) P(GEO.sph,.03,.027,.03,c,e,.016,(k-1.5)*.024,s*.036);
   mpush(); mtr(-.008,.038,-s*.034); mrx(-s*.4); P(GEO.limb,.03,.062,.028,c,e); mtr(0,-.062,0); P(GEO.sph,.028,.028,.026,c,e); mpop(); }
-function drawWeapon(L,o,t){ const md=MATD; MATD=0; try{ return drawWeapon0(L,o,t); } finally{ MATD=md; } }
+const FIREAXE_J=new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+function drawFireAxe(L,o,t){ const M=skGet('fireaxe'); if(!M) return false; const pul=.7+.3*Math.sin(t*3.3+(o.x||0)*.01);
+  SKQ.push({M,m:Float32Array.from(CUR),j:FIREAXE_J,e:.05*pul}); const m=CUR, at=(x,y,z)=>[m[0]*x+m[4]*y+m[8]*z+m[12],m[1]*x+m[5]*y+m[9]*z+m[13],m[2]*x+m[6]*y+m[10]*z+m[14]];
+  const [X,Y,Z]=at(.2,.85,0); addLight(X,Y,Z,2.8,[1*.7*pul,.4*.7*pul,.12*.7*pul]);
+  if(Math.random()<.35){ const k=Math.random(); const [px,py,pz]=at(.05+k*.4,.55+k*.5,0); P3(px,py,pz,(Math.random()-.5)*.15,.3+Math.random()*.3,(Math.random()-.5)*.15,.6,.06,Math.random()<.5?'#ff8a1a':'#ffd36a',{glow:true,drag:.9}); }
+  if((o.swing??-1)>=0) for(let k=0;k<2;k++) emitTip('#ff8a1a',.2,.7+k*.15,0);
+  return true; }
+function drawWeapon(L,o,t){ if(L.weapon==='fireaxe'){ if(drawFireAxe(L,o,t)) return; L=Object.assign({},L,{weapon:'greataxe'}); } const md=MATD; MATD=0; try{ return drawWeapon0(L,o,t); } finally{ MATD=md; } }
 function drawWeapon0(L,o,t){
   const w=L.weapon; const rar=o.wr||0;
   if(rar>=4){ const lc=w==='staff'?[1,.86,.45]:w==='wand'?[1,.45,.12]:(w==='dagger'||w==='nightfang')?[.45,1,.6]:w==='axe'?[1,.4,.15]:[1,.78,.35], m=CUR, pul=.75+.25*Math.sin(t*3.1+(o.x||0));
@@ -3740,7 +3838,7 @@ function drawCmd(pr,c){ const u=pr.u; gl.uniformMatrix4fv(u.uM,false,c.m); gl.un
   gl.bindVertexArray(c.g.vao); gl.drawElements(gl.TRIANGLES,c.g.n,gl.UNSIGNED_INT,0); }
 function drawStatic(pr,terrain){ const u=pr.u; if(u.uSpec) gl.uniform1f(u.uSpec,.12); if(u.uMat) gl.uniform1f(u.uMat,0); gl.uniformMatrix4fv(u.uM,false,IDM); gl.uniform3f(u.uInvS2,1,1,1);
   if(terrain!==false){ if(u.uTerrain) gl.uniform1f(u.uTerrain,1); drawTerrain(); if(u.uTerrain) gl.uniform1f(u.uTerrain,0); }
-  if(u.uFade&&terrain!==true) fadeOn(u,1); gl.bindVertexArray(STATIC.vao); gl.drawElements(gl.TRIANGLES,STATIC.n,gl.UNSIGNED_INT,0); drawStaticChunks(); if(u.uFade) fadeOn(u,0); }
+  if(u.uFade&&terrain!==true) fadeOn(u,1); gl.bindVertexArray(STATIC.vao); gl.drawElements(gl.TRIANGLES,STATIC.n,gl.UNSIGNED_INT,0); drawStaticChunks(); if(HOLD&&!(typeof NAT!=='undefined'&&NAT.ready&&NAT.town)){ gl.bindVertexArray(HOLD.vao); gl.drawElements(gl.TRIANGLES,HOLD.n,gl.UNSIGNED_INT,0); } if(u.uFade) fadeOn(u,0); }
 function fadeOn(u,on){ if(on&&me&&!me.dead) gl.uniform4f(u.uFade,me.x/TS,standY(me.x,me.y)+1.1,me.y/TS,1); else gl.uniform4f(u.uFade,0,0,0,0); }
 const GPUSH=new Float32Array(24); let GPUSHT=-1;
 /* who is pushing the grass this frame: you, then the nearest players and monsters to the camera */
@@ -3819,7 +3917,7 @@ const GEAR_TH={fire:[.72,.2,.07],mire:[.24,.42,.2],dawn:[.92,.8,.45],wolf:[.46,.
 const GEAR_GLOW={fire:[1,.48,.1],mire:[.5,1,.3],dawn:[1,.88,.45],wolf:[.8,.88,1],ghost:[.5,.95,1],arcane:[.8,.5,1]};
 const RAR_GLOW=[[.7,.7,.7],[.3,1,.2],[.3,.6,1],[.75,.4,1],[1,.55,.12]];
 /* compact description of an item's looks, sent to other players: base|rarity|theme|upgrade */
-function gearVis(it){ if(!it) return ''; const n=String(it.name||''); const base=it.leg?'L'+it.leg:(BASES[it.slot]||[]).find(b=>n.includes(b))||'';
+function gearVis(it){ if(!it) return ''; const n=String(it.name||''); const base=it.leg?'L'+it.leg:/Emberfang/.test(n)?'FireAxe':(BASES[it.slot]||[]).find(b=>n.includes(b))||'';
   const th=/Cinder|Ember|Wyrm/.test(n)?'fire':/Mire/.test(n)?'mire':/Dawn/.test(n)?'dawn':/Wolf/.test(n)?'wolf':/Hollow|Moonlit/.test(n)?'ghost':/Runed|Vaelborn/.test(n)?'arcane':'';
   return base+'|'+(it.rar|0)+'|'+th+'|'+(it.up|0); }
 function myGearVis(){ const e=me.c.eq; return [gearVis(e.weapon),gearVis(e.armor),gearVis(e.trinket)]; }
@@ -3847,9 +3945,9 @@ function playerLook(cls,u,gv){ const B=LOOK[cls]||LOOK.warden; if(!gv||!(gv[0]||
     L.trim=trim; L.hood=cloth.map(v=>v*.9); if(L.head==='hat') L.hat=dark; if(L.head==='helm'&&!L.metal) L.metal=metal;
     if(A.r>=2&&!L.cape) L.cape=tc.map(v=>v*.7); if(A.r>=2) L.gem=GEAR_GLOW[A.th]||cc; L.crest=GEAR_GLOW[A.th]||cc.map(v=>v*.85);
     if(A.r>=3){ L.rune=GEAR_GLOW[A.th]||cc; L.spikes=!!L.pauld; const rg=L.rune; L.aura='#'+rg.map(v=>Math.round(Math.min(1,v)*255).toString(16).padStart(2,'0')).join(''); }  if(L.metal) METALS.add(L.metal); if(L.pauld&&L.metal) METALS.add(L.pauld); if(L.gloves&&L.metal) METALS.add(L.gloves); }
-  if(W){ const map={Longsword:'sword',Warstaff:'staff',Spellblade:'spellblade',Morningstar:'morningstar',Wand:'wand',Greataxe:'greataxe',Daggers:'dagger',Dirks:'dagger','Hand Axe':'axe',Warspear:'spear','Longbow':'bow','Recurve Bow':'bow',Lbard:'axe',Lbarbarian:'greataxe',Lhunter:'bow',Lwarden:'dawnwarden',Lmender:'solace',Larcanist:'cinderheart',Lassassin:'nightfang'};
+  if(W){ const map={Longsword:'sword',Warstaff:'staff',Spellblade:'spellblade',Morningstar:'morningstar',Wand:'wand',Greataxe:'greataxe',FireAxe:'fireaxe',Daggers:'dagger',Dirks:'dagger','Hand Axe':'axe',Warspear:'spear','Longbow':'bow','Recurve Bow':'bow',Lbard:'axe',Lbarbarian:'greataxe',Lhunter:'bow',Lwarden:'dawnwarden',Lmender:'solace',Larcanist:'cinderheart',Lassassin:'nightfang'};
     L.weapon=map[W.b]||L.weapon; L.wcol=GEAR_METAL[W.r]; L.wglow=GEAR_GLOW[W.th]||(W.r>=2?RAR_GLOW[W.r]:null); L.wup=W.up;
-    if(['greataxe','staff','solace'].includes(L.weapon)&&L.off) L.off=null; else if(L.weapon==='nightfang') L.off='nightfang'; else if(L.weapon==='dagger') L.off='dagger';
+    if(['greataxe','fireaxe','staff','solace'].includes(L.weapon)&&L.off) L.off=null; else if(L.weapon==='nightfang') L.off='nightfang'; else if(L.weapon==='dagger') L.off='dagger';
     else if(cls==='warden'&&!L.off&&['sword','spellblade','morningstar','dawnwarden'].includes(L.weapon)) L.off='shield';
     if(L.orbs&&L.weapon!=='wand'&&L.weapon!=='cinderheart') L.orbs=L.weapon==='spellblade'; }
   if(cls==='bard'){ L.off=null; L.horn=true; }
@@ -4117,17 +4215,17 @@ function render(dt){
   gl.bindFramebuffer(gl.FRAMEBUFFER,SM.fb); gl.viewport(0,0,SM_SIZE,SM_SIZE); gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.clear(gl.DEPTH_BUFFER_BIT); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
   gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(2,4);
   setFrameUniforms(PS,true); drawStatic(PS,true); for(const c of cmds) if(c.sh) drawCmd(PS,c);
-  setFrameUniforms(PSI,true); drawInst(PSI,true); try{ drawNat(true); }catch(e){} try{ drawSkinQ(PKS,true); }catch(e){}
+  setFrameUniforms(PSI,true); drawInst(PSI,true); try{ drawNat(true); }catch(e){} try{ drawSkinQ(PKS,true); drawSkinQ(PKS48,true,true); }catch(e){}
   gl.disable(gl.POLYGON_OFFSET_FILL);
   // main pass
   const usePost=ensurePost(); gl.bindFramebuffer(gl.FRAMEBUFFER,usePost?POST.ms:null); gl.viewport(0,0,cv.width,cv.height); gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(PSK.p); gl.uniformMatrix4fv(PSK.u.uInvVP,false,INVVP); gl.uniform3fv(PSK.u.uSunDir,SKY.dir); gl.uniform3fv(PSK.u.uRealSun,SKY.realSun); gl.uniform3fv(PSK.u.uZen,SKY.zen); gl.uniform3fv(PSK.u.uHor,SKY.hor);
-  gl.uniform3fv(PSK.u.uSunCol,SKY.realSun[1]>-.05?SKY.sunCol:[0,0,0]); gl.uniform1f(PSK.u.uNight,SKY.night); gl.uniform1f(PSK.u.uCloud,SKY.cloud||.45); gl.uniform1f(PSK.u.uStorm,SKY.storm||0); gl.uniform1f(PSK.u.uFlash,flash); gl.uniform1f(PSK.u.uAurora,SKY.aurora||0); gl.uniform1f(PSK.u.uTime,t);
+  gl.uniform3fv(PSK.u.uSunCol,SKY.realSun[1]>-.05?SKY.sunCol:[0,0,0]); gl.uniform1f(PSK.u.uNight,SKY.night); gl.uniform1f(PSK.u.uCloud,SKY.cloud||.45); gl.uniform1f(PSK.u.uStorm,SKY.storm||0); gl.uniform1f(PSK.u.uFlash,flash); gl.uniform1f(PSK.u.uAurora,SKY.aurora||0); gl.uniform1f(PSK.u.uTime,t); try{ skyBind(PSK.u); }catch(e){ gl.uniform1f(PSK.u.uSkyOn,0); }
   gl.depthMask(false); gl.bindVertexArray(SKYVAO); gl.drawArrays(gl.TRIANGLES,0,3); gl.depthMask(true);
   setFrameUniforms(PL,false); drawStatic(PL); for(const c of cmds) drawCmd(PL,c);
   setFrameUniforms(PLI,false); drawInst(PLI,false); if(PLI.u.uFol) gl.uniform1f(PLI.u.uFol,0); if(PLI.u.uFade) fadeOn(PLI.u,0);
   try{ drawNat(false); }catch(e){}
-  try{ drawSkinQ(PKL,false); }catch(e){}
+  try{ drawSkinQ(PKL,false); drawSkinQ(PKL48,false,true); }catch(e){}
   // liquids
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
   gl.useProgram(PQ.p); const q=PQ.u; gl.uniformMatrix4fv(q.uVP,false,VP); gl.uniform1f(q.uTime,t); gl.uniform2f(q.uMap,HN/HR,HNZ/HR); gl.uniform3f(q.uCam,CAM.ex,CAM.ey,CAM.ez);
@@ -5052,7 +5150,7 @@ Object.assign(MATS,{
   thickhide:{name:'Thick Hide',icon:'🟤',col:'#7a5030',kind:'leather',val:2},
   scaledhide:{name:'Scaled Hide',icon:'🦎',col:'#5a8a5a',kind:'leather',val:4},
   frostpelt:{name:'Frost Pelt',icon:'🐾',col:'#e8f0ff',kind:'leather',val:6},
-  wyrmscale:{name:'Wyrmscale',icon:'🐉',col:'#ff6a2a',kind:'leather',val:20},
+  wyrmscale:{name:'Cinderhide',icon:'🐉',col:'#ff6a2a',kind:'leather',val:20},
   amberperch:{name:'Amber Perch',icon:'🐟',col:'#e8b05a',kind:'fish',val:1},
   mireeel:{name:'Mire Eel',icon:'🐍',col:'#6a8a4a',kind:'fish',val:2},
   silverfin:{name:'Silverfin',icon:'🐠',col:'#c8d8e8',kind:'fish',val:4},
@@ -5155,7 +5253,7 @@ function startSkin(m){ if(!me||me.dead||me.cast) return; const rq=skinReq(m); if
   me.face=Math.atan2(m.dy-me.y,m.dx-me.x); me.cast={ab:{id:'skin',name:'Skinning'},t0:now(),dur:1.8,fin:()=>finishSkin(m),tick:()=>{ if(Math.random()<.15){ const [X,Y,Z]=ph3(m.dx,m.dy,.4); burst3(X,Y,Z,'#8a1a1a',2,1); } }}; }
 function finishSkin(m){ if(m.skinned||!m.dead) return; m.skinned=true; const k=skinMat(m); const n=1;
   me.c.mats[k]=(me.c.mats[k]||0)+n; chatLine(`You skin ${n} ${MATS[k].name}.`,'c-loot'); try{ snd('slash'); }catch(e){}
-  if(m.t.key==='wyrm'){ if(Math.random()<.6){ me.c.mats.wyrmscale=(me.c.mats.wyrmscale||0)+1; chatLine('You peel a Wyrmscale from the great beast!','c-loot t3'); } }
+  if(m.t.key==='wyrm'){ if(Math.random()<.6){ me.c.mats.wyrmscale=(me.c.mats.wyrmscale||0)+1; chatLine('You cut a strip of scorched Cinderhide from the warlord!','c-loot t3'); } }
   profUp('skinning',skinReq(m)); gainXp(4+2*me.c.lvl); renderInv(); persist(); }
 /* ---- fishing ---- */
 let FISH=null;
@@ -5225,7 +5323,7 @@ ORE.forEach((o,i)=>R2({prof:'jewelcrafting',id:'jc_pro'+i,req:i*75+20,tier:i,pro
 R2({prof:'blacksmithing',id:'bs_e1',req:285,tier:3,gear:{slot:'weapon',base:'Greataxe',lv:15,rar:3,name:'Frostforged Greataxe'},mats:{mithril:12,obsidian:4,frostdiamond:2}});
 R2({prof:'blacksmithing',id:'bs_e2',req:290,tier:3,gear:{slot:'weapon',base:'Longsword',lv:15,rar:3,name:'Frostforged Longsword'},mats:{mithril:12,obsidian:4,frostdiamond:2}});
 R2({prof:'blacksmithing',id:'bs_e3',req:295,tier:3,gear:{slot:'armor',base:'Warplate',lv:15,rar:3,at:'plate',name:'Frostforged Warplate'},mats:{mithril:14,frostpelt:4,frostdiamond:2}});
-R2({prof:'leatherworking',id:'lw_e1',req:285,tier:3,gear:{slot:'armor',base:'Brigandine',lv:15,rar:3,at:'leather',name:'Wyrmscale Brigandine'},mats:{frostpelt:10,wyrmscale:2,mithril:2}});
+R2({prof:'leatherworking',id:'lw_e1',req:285,tier:3,gear:{slot:'armor',base:'Brigandine',lv:15,rar:3,at:'leather',name:'Cinderhide Brigandine'},mats:{frostpelt:10,wyrmscale:2,mithril:2}});
 R2({prof:'leatherworking',id:'lw_e2',req:290,tier:3,gear:{slot:'weapon',base:'Recurve Bow',lv:15,rar:3,name:'Wyrmstring Recurve Bow'},mats:{frostpelt:8,wyrmscale:2,mithril:4}});
 R2({prof:'jewelcrafting',id:'jc_e1',req:285,tier:3,gear:{slot:'trinket',base:'Locket',lv:15,rar:3,name:'Heart of Frost Locket'},mats:{frostdiamond:3,mithril:4,fireopal:1}});
 R2({prof:'jewelcrafting',id:'jc_e2',req:290,tier:3,gear:{slot:'weapon',base:'Wand',lv:15,rar:3,name:'Starfire Wand'},mats:{frostdiamond:2,fireopal:2,starleaf:1}});
@@ -5324,7 +5422,7 @@ function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c
   else if(PSEL==='fishing'){ const T=FISH?[]:null; right+=`<button id="pfFish" class="gold">🎣 Cast a line</button><p style="font-size:13px;margin-top:8px">Face open water and press <kbd>F</kbd> (or this button, or type <b>/fish</b>). When the bobber dips and splashes, press <kbd>F</kbd> or click the bobber within a second.</p><div style="font-size:13px;color:var(--dim)"><div>🐟 Amber Perch: any water</div><div>🐍 Mire Eel: Gloamfen and Thornwood (75+)</div><div>🐠 Silverfin: Mirrowmere and Vael (130+)</div><div>🐡 Icefin Cod: Frostpeak and the Caldera (200+)</div><div>🎏 Golden Koi: very rare, anywhere (150+)</div><div>Sometimes a chest of treasure.</div></div>`; }
   else if(PSEL==='mining'||PSEL==='herbalism'){ const ok=PSEL==='mining'?['copper','iron','obsidian','mithril']:['sunpetal','thornbloom','mireroot','ghostcap','emberlily','frostbloom'];
     right+=`<div style="font-size:13px">${ok.map(k=>`<div><span class="pc-${pcol(P.s,nodeReq(k))}">${MATS[k].icon} ${MATS[k].name} (${nodeReq(k)})</span> <span style="color:var(--dim)">${MATS[k].zones.map(z=>ZONES[z]?ZONES[z].name:z).join(', ')}</span></div>`).join('')}</div><p style="font-size:13px;color:var(--dim);margin-top:8px">With the profession you gather faster and find ${PSEL==='mining'?'gems':'Starleaf'}. Every node gives one material. Large glittering <b>rich</b> ${PSEL==='mining'?'veins':'patches'} appear on your map once your skill is high enough.</p>`; }
-  else if(PSEL==='skinning'){ right+=`<p style="font-size:13px">Kill a beast, loot it, then press <kbd>F</kbd> or click its body to skin it. Bodies stay for 35 seconds.</p><div style="font-size:13px;color:var(--dim)"><div>🟫 Light Leather: boars, wolves (1+)</div><div>🟤 Thick Hide: crabs, lurkers, Fangmaw (66+)</div><div>🦎 Scaled Hide: silt crawlers, the Cinder Wyrm (176+)</div><div>🐾 Frost Pelt: frost wolves, yetis (198+)</div><div>🐉 Wyrmscale: only from the Cinder Wyrm</div></div>`; }
+  else if(PSEL==='skinning'){ right+=`<p style="font-size:13px">Kill a beast, loot it, then press <kbd>F</kbd> or click its body to skin it. Bodies stay for 35 seconds.</p><div style="font-size:13px;color:var(--dim)"><div>🟫 Light Leather: boars, wolves (1+)</div><div>🟤 Thick Hide: crabs, lurkers, Fangmaw (66+)</div><div>🦎 Scaled Hide: silt crawlers, the Cinderlord (176+)</div><div>🐾 Frost Pelt: frost wolves, yetis (198+)</div><div>🐉 Cinderhide: only from Gorrakh the Cinderlord</div></div>`; }
   el.innerHTML=`<div class="pfl">${list}</div><div class="pfr">${right}</div>`;
   el.querySelectorAll('[data-pf]').forEach(b=>b.onclick=()=>{ PSEL=b.dataset.pf; renderProf(); });
   const q=$('pfQ'); if(q){ q.oninput=()=>{ PFILT=q.value; const pos=q.selectionStart; renderProf(); const q2=$('pfQ'); q2.focus(); q2.setSelectionRange(pos,pos); }; q.onkeydown=e=>e.stopPropagation(); }
@@ -5728,7 +5826,7 @@ const BOSSY={
   oldtusk:{title:'Terror of Amberfield',pull:'*Old Tusk paws the ground and lets out a furious squeal!*',p50:'*Old Tusk goes into a frenzy!*',die:'*Old Tusk collapses with a final grunt.*'},
   fangmaw:{title:'Alpha of Thornwood',pull:'*Fangmaw howls, and the forest howls back.*',p50:'*Fangmaw\'s eyes burn red!*',die:'*The great wolf falls silent.*'},
   hking:{title:'Lord of Fallen Vael',pull:'"Who dares disturb the court of Vael? Kneel before your king!"',p50:'"My kingdom was ash before you were born!"',p20:'"I... will not... fall again!"',die:'"At last... the crown... is free..."'},
-  wyrm:{title:'Scourge of the Caldera',pull:'"Little embers... I will add your bones to my hoard of ash!"',p50:'"You only feed the flame!"',p20:'"BURN! ALL OF YOU, BURN!"',die:'"The fire... goes... out..."'},
+  wyrm:{title:'Warlord of the Caldera',pull:'"Fresh skulls for my axes! Come, little ones!"',p50:'"Is that all? I was chained for a hundred years for MORE than this!"',p20:'"BURN! ALL OF YOU, BURN!"',die:'"The fire... goes... out..."'},
   frostgiant:{title:'Jarl of the Ice',pull:'"Southern worms! Hrimgar will crush you flat!"',p50:'"The mountain does not break!"',p20:'"RAAAAGH! HRIMGAR SMASH!"',die:'"The ice... takes me home..."'},
   lich:{title:'Master of Hollowdeep',pull:'"The living trespass in my halls. Kneel, and be preserved forever."',p50:'"Rise, my servants! Rise and feast!"',p20:'"Death is only the beginning!"',die:'"This... is not... the end..."'}};
 const TELNAME={1:'Ground Slam',2:'Crushing Blow',3:'Flame Breath',4:'Meteor',5:'Shadow Nova',6:'Frost Orb',7:'Death Nova'};
@@ -6369,7 +6467,7 @@ NPCGREET.ysolde='"Emberwatch holds, for now. Something beneath this caldera is w
 NPCGREET.fenwick='"Keep low, keep moving, and never fight a Colossus on its own ground. That\'s scouting, the short version."';
 NPCGREET.ilsa='"Potions, bandages, rations. Everything costs double out here, and I\'m being generous."';
 QUESTS.push(
-  {id:'reachgo',giver:'oriel',title:'Smoke in the East',type:'explore',pois:['emberwatch'],n:1,xp:3000,gold:30,lvl:15,text:'Since Morvath fell, black smoke has been rising over the eastern Cinder Caldera. Commander Ysolde built an outpost out there called Emberwatch. Take the Cinderhold road east from the Wyrm\'s Lair and report to her.'},
+  {id:'reachgo',giver:'oriel',title:'Smoke in the East',type:'explore',pois:['emberwatch'],n:1,xp:3000,gold:30,lvl:15,text:'Since Morvath fell, black smoke has been rising over the eastern Cinder Caldera. Commander Ysolde built an outpost out there called Emberwatch. Take the Cinderhold road east from the Warlord\'s Lair and report to her.'},
   {id:'reach1',giver:'ysolde',title:'Ash on the Wind',type:'kill',mob:'ravager',n:10,xp:7000,gold:40,lvl:15,text:'Ashen Ravagers raid our supply carts from the dunes. Show them that Emberwatch bites back. Ten of them.'},
   {id:'reach2',giver:'fenwick',title:'Crushing the Crushers',type:'kill',mob:'crusher',n:8,xp:7000,gold:40,lvl:15,text:'Cinderback Crushers charge anything that moves, wagons included. Their hides are like iron. Bring down eight of them.'},
   {id:'reach3',giver:'ilsa',title:'Black Glass',type:'gather',mat:'obsidian',n:6,xp:6000,gold:35,lvl:15,text:'Our smith can turn obsidian into arrowheads that cut through anything. The purple shards grow all over the caldera. Bring me six.'},
@@ -7028,14 +7126,14 @@ function addPort(d){ const P=PORT; if(!P.B||!P.B.length) return; const y0=.55;
     if(b.st===2) box(cx,y0+.36+H*.5,cz,w-.04,.13,h-.04,o.band||TIM);
     const rx=w>=h, rw=(rx?h:w)+.55, rl=(rx?w:h)+.5, rh=Math.min(2.5,rw*.66);
     box(cx,top+.06,cz,w+.32,.12,h+.32,TIM); gAdd(d,RP,cx,top+.1,cz,rx?Math.PI/2:0,rw,rh,rl,roof); box(cx,top+.12+rh,cz,rx?rl:.18,.1,rx?.18:rl,DST);
-    if(!o.noChim){ const chx=rx?x0+w-.75:cx+(rw/2-.6)*.5, chz=rx?cz+.35:z0+h-.75, ct=top+rh+.55; box(chx,(top+ct)/2,chz,.55,ct-top,.55,STONE); box(chx,ct+.06,chz,.68,.13,.68,DST); CHIMNEYS.push({x:chx,y:ct+.2,z:chz}); }
+    if(!o.noChim){ const chx=rx?x0+w-.75:cx+(rw/2-.6)*.5, chz=rx?cz+.35:z0+h-.75, ct=top+rh+.55; box(chx,(top+ct)/2,chz,.55,ct-top,.55,STONE); box(chx,ct+.06,chz,.68,.13,.68,DST); (d!==HOLD_D&&CHIMNEYS.push({x:chx,y:ct+.2,z:chz})); }
     const dside=b.door||'s'; door(b,dside,o.doorC||[[.2,.34,.4],[.36,.22,.14],[.46,.16,.12]][Math.floor(hv*3)]);
     for(const side of ['n','s','e','w']){ windows(b,side,y0+.36+1.25,side===dside,null,shut); if(b.st===2) windows(b,side,y0+.36+H*.5+1.05,false,null,shut); }
     /* flower boxes and a barrel by the door */
     { const [bx,bz]=facePt(b,dside,faceLen(b,dside)/2+.95,.45); gAdd(d,RFR,bx,y0,bz,0,.5,.72,.5,[.42,.28,.15]); }
     return {top,rh}; };
   for(const b of P.B){ const x0=b.x, z0=b.y, w=b.w, h=b.h, cx=x0+w/2, cz=z0+h/2;
-    if(b.k==='house') house(b);
+    if(b.k==='house'){ if(TKIT){ const d0=d; d=HOLD_D; house(b); d=d0; const L=kitHouse({x:b.x,y:b.y,w:b.w,h:b.h,door:b.door||'s',st:b.st||1,style:hash2(b.x,b.y,71)<.5?1:0},.55); for(const e of L) TKIT_LIST.push(e); occBox(b.x,b.y,b.x+b.w,b.y+b.h,L.top); } else house(b); }
     else if(b.k==='hut'){ /* fishermen's huts: weathered planks on a stone footing, thatch, nets and a drying rack */
       const H=2.2, top=y0+.3+H, gy=Math.max(y0,hgt(cx,cz))-.02, wood=[.44,.36,.27];
       box(cx,gy+.15,cz,w+.1,.3,h+.1,DST); box(cx,gy+.3+H/2,cz,w-.14,H,h-.14,wood);
@@ -7599,7 +7697,7 @@ const ACH=[
   {id:"boss_oldtusk",n:"Tusk Breaker",d:"Defeat Old Tusk",ic:"\ud83d\udc17",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.oldtusk||0)>0},
   {id:"boss_fangmaw",n:"Alpha Slayer",d:"Defeat Fangmaw",ic:"\ud83d\udc3a",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.fangmaw||0)>0},
   {id:"boss_hking",n:"Kingslayer",d:"Defeat the Hollow King",ic:"\ud83d\udddd\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.hking||0)>0},
-  {id:"boss_wyrm",n:"Wyrmbane",d:"Defeat the Cinder Wyrm",ic:"\ud83d\udc09",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.wyrm||0)>0},
+  {id:"boss_wyrm",n:"Warlord-Breaker",d:"Defeat Gorrakh the Cinderlord",ic:"\ud83d\udc09",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.wyrm||0)>0},
   {id:"boss_frostgiant",n:"Giant Felled",d:"Defeat Hrimgar the Frost Giant",ic:"\ud83e\uddca",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.frostgiant||0)>0},
   {id:"boss_lich",n:"Deathless",d:"Defeat Morvath the Lich",ic:"\u2620\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.lich||0)>0},
   {id:"explore5",n:"Wanderer",d:"Discover 5 landmarks",ic:"\ud83e\udded",f:(c,S,QDONE,EPICALL,FORGE5)=>c.disc.length>=5},

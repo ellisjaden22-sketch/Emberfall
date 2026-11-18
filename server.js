@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION = 'v0.71';
+const SERVER_VERSION = 'v0.72';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
@@ -174,7 +174,7 @@ const server = http.createServer((req, res) => {
   if (name === 'editor' || name === 'editor.html') { res.writeHead(302, { Location: '/play/editor.html' }); return res.end(); }
   if (/^(play\/)?music\/[\w .()-]+\.mp3$/i.test(name)) return sendMusic(req, res, path.join(ROOT, 'music', name.split('/').pop()));
   // 3D models: play/models/NAME.(bin|json|jpg), found in models/ or, if the folder got flattened on upload, next to server.js
-  if (/^(play\/)?models\/((nat|props)\/)?[a-z0-9_]+\.(bin|json|jpg|png)$/i.test(name)) { const base = path.basename(name), sub = (name.match(/models\/(nat|props)\//i) || [, ''])[1];
+  if (/^(play\/)?models\/((nat|props|town|sky)\/)?[a-z0-9_]+\.(bin|json|jpg|png)$/i.test(name)) { const base = path.basename(name), sub = (name.match(/models\/(nat|props|town|sky)\//i) || [, ''])[1];
     const f = [path.join(ROOT, 'models', sub, base), path.join(ROOT, 'play', 'models', sub, base), path.join(ROOT, 'models', base), path.join(ROOT, sub, base), path.join(ROOT, base)].find(x => { try { return fs.statSync(x).isFile(); } catch (e) { return false; } });
     if (!f) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, f, { 'Cache-Control': 'public, max-age=86400' }); }
   if (name.startsWith('play/')) { let g = name.slice(5) || 'index.html'; if (!GAME_FILES.has(g)) { res.writeHead(404); return res.end('Not found'); } return sendFile(res, path.join(ROOT, g)); }
