@@ -1244,7 +1244,7 @@ function hostSim(dt){
       if(mt.key==='lich'){ if(!m.summoned&&m.hp<m.mhp*.66){ m.summoned=true; summonAdds(m); } if(!m.summoned2&&m.hp<m.mhp*.33){ m.summoned2=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.15) m.enr=true; }
     } else {
       m.wT-=dt;
-      if(m.wT<=0){ m.wT=3+Math.random()*5; const a=Math.random()*6.28, r=Math.random()*(mt.boss?40:70); m.wx=m.sx+Math.cos(a)*r; m.wy=m.sy+Math.sin(a)*r; }
+      if(m.wT<=0){ m.wT=3+Math.random()*5; const a=Math.random()*6.28, r=mt.key==='vyrathos'?0:Math.random()*(mt.boss?40:70); m.wx=m.sx+Math.cos(a)*r; m.wy=m.sy+Math.sin(a)*r; }
       const d=dist(m.x,m.y,m.wx,m.wy); if(d>4){ mobSteer(m,m.wx,m.wy,mt.spd*.35*Math.min(1,.35+d/40),dt,d,false); } else m.cs=Math.max(0,(m.cs||0)-dt*4);
     }
   }
@@ -1877,7 +1877,12 @@ const FS_SKIN=FS_LIT.replace('#version 300 es','#version 300 es'+NL+'#define SKI
 let PKL=null, PKS=null, PKL48=null, PKS48=null; try{ PKL=program(VS_LIT,FS_SKIN,['SKIN']); PKS=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN']); }catch(e){ console.warn('skinned shaders unavailable',e); }
 try{ PKL48=program(VS_LIT,FS_SKIN,['SKIN','NBONE 48']); PKS48=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN','NBONE 48']); }catch(e){ console.warn('large-rig shaders unavailable',e); }
 /* which mobs wear which model: h = height in world units, arm = how far the arms drop from the T-pose, pv = hip height share */
-const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6}, wyrm:{f:'ork',h:4.4,ws:.42,big:1,ork:1}, tidecaller:{f:'magus',h:2.2,statue:1,hover:.1}, bogwitch:{f:'oracle',h:2.05,statue:1,hover:.05}, vyrathos:{f:'dragon',h:7,big:1,dragon:1} };
+const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6}, wyrm:{f:'ork',h:4.4,ws:.42,big:1,ork:1}, tidecaller:{f:'magus',h:2.2,statue:1,hover:.1}, bogwitch:{f:'oracle',h:2.05,statue:1,hover:.05}, vyrathos:{f:'dragon',h:3.6,big:1,dragon:1}, crusher:{f:'raven',h:2.7,statue:1,beast:1},
+ moth:{f:'moth',h:1.1,hover:.8,crt:1,rig:{root:'body',wings:1,fall:1.2,spine:['body'],lunge:.8}},
+ oldtusk:{f:'tusk',h:1.3,statue:1,beast:1},
+ drowned:{f:'sailor',h:2.05,crt:1,rig:{root:'_rootJoint',spine:['DEF-spine.002_07','DEF-spine.003_08'],head:'DEF-spine.006_011',thighs:['DEF-thigh.L_073','DEF-thigh.R_091'],shins:['DEF-shin.L_075','DEF-shin.R_093'],arms:['DEF-upper_arm.L_0142','DEF-upper_arm.R_0171']}},
+ murkcrab:{f:'crab',h:1.85,crt:1,ws:.5,rig:{root:'_rootJoint'}},
+ grimmaw:{f:'void',h:3.2,crt:1,rig:{root:'_rootJoint',spine:['BackSpine1_01','BackSpine4_08'],head:'HeadTop_043',jaw:['LeftJawBase_059','RightJawBase_082'],lunge:1.3,fall:.9,legs:['LeftFrontThighLeg_057','RightMiddleThighLeg_088','LeftBackThighLeg_053','RightFrontThighLeg_080','LeftMiddleThighLeg_065','RightBackThighLeg_076'],legSide:[-1,1,-1,1,-1,1]}} };
 const SKM={}, SKQ=[];
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
@@ -1939,7 +1944,7 @@ const SK=(()=>{
   return {load,pose,clipLen,hasAnims,tex,anims,setGL};
 })();
 
-function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||(f==='ork'||f==='dragon')&&!PKL48||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
+function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||/^(ork|dragon|crab|sailor|void)$/.test(f)&&!PKL48||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
   SKM[f]={M:null}; SK.load(gl,f).then(M=>{ SKM[f].M=M; }).catch(e=>{ SKM[f].err=String(e&&e.message||e); console.warn('model '+f+' not found, using the classic look'); }); return null; }
 /* animation: idle and walk blend by speed, alternating weapon swings (a throw for ranged mobs), a flinch when hit, knocked flat on death */
 const SKATK=[['atkA',0,.43],['atkB',0,.53],['atkC',0,.47]], SKTHROW=['throw',.3,1.0];
@@ -1964,7 +1969,7 @@ function skAnimStatue(S,M,b,m){ const t=now()+((m.id||0)%9)*.7, R={}, add=(n,x,y
   if(b.dead>=0){ const k=eO(clamp(b.dead/.9,0,1)); add('root',1,0,0,-1.42*k); add('spine',1,0,0,.35*k); add('head',1,0,0,.25*k); return {R}; }
   add('spine',1,0,0,.035*Math.sin(t*1.3)); add('spine',0,0,1,.03*Math.sin(t*.9)); add('head',0,1,0,.14*Math.sin(t*.5)); add('pelvis',0,0,1,.025*Math.sin(t*1.1));
   add('pelvis',1,0,0,.13*mv); add('pelvis',0,0,1,.07*mv*Math.sin(b.walk||0)); add('spine',0,1,0,.08*mv*Math.sin(b.walk||0));
-  if(b.swing>=0){ const p=b.swing, a=p<.35?-.28*eO(p/.35):p<.55?-.28+.62*eO((p-.35)/.2):.34*(1-eI((p-.55)/.45)); add('spine',1,0,0,a); add('head',1,0,0,-a*.35); add('pelvis',1,0,0,a*.25); }
+  if(b.swing>=0){ const p=b.swing, bk=S.beast?1.6:1, a=(p<.35?-.28*eO(p/.35):p<.55?-.28+.62*eO((p-.35)/.2):.34*(1-eI((p-.55)/.45)))*bk; add('spine',1,0,0,a); add('head',1,0,0,-a*.35); add('pelvis',1,0,0,a*.25); }
   const fl=b.pitch?b.pitch/.2:0; if(fl>.05) add('spine',1,0,0,-.32*fl);
   return {R}; }
 /* v73: Vyrathos as a true dragon: its own idle (breathing, wing beats), with bites, recoils and a fall layered on top */
@@ -1976,10 +1981,34 @@ function skAnimDragon(S,M,b,m){ const t=now(), R={}, add=(n,x,y,z,a)=>{ if(a) (R
   const fl=b.pitch?b.pitch/.2:0; if(fl>.05){ for(const n of DRG_NECK) add(n,1,0,0,-.12*fl); }
   if(mv>.05) add('_rootJoint',1,0,0,.05*mv);
   return {L,R}; }
+/* v73: five new creatures. The crab-thing (Murkshell) brings its own clips; the others get clips where they have them
+   and procedural limbs on top: legs that step, wings that beat, jaws that snap, and a fall on death. */
+function skAnimCrt(S,M,b,m){ const t=now()+((m.id||0)%7)*.83, R={}, L=[], add=(n,x,y,z,a)=>{ if(a&&n) (R[n]||(R[n]=[])).push([x,y,z,a]); },
+  mv=clamp(b.mv||0,0,1), C=M.A&&M.A.clips||{}, cl=c=>SK.clipLen(c,M), wp=b.walk||0, P=S.rig||{};
+  /* dying: a death clip when there is one, otherwise a roll onto the side */
+  if(b.dead>=0){ if(C.die){ L.push({c:'die',t:Math.min(b.dead*1.2,cl('die')-.05),loop:false,w:1}); return {L,R}; }
+    const k=eO(clamp(b.dead/1.1,0,1)); if(C.idle) L.push({c:'idle',t:.4,loop:true,w:1}); add(P.root,0,0,1,(P.fall||1.45)*k); if(P.wings){ add('wingL',0,0,1,-.9*k); add('wingR',0,0,1,.9*k); } return {L,R}; }
+  let aw=0; if(b.swing>=0){ const p=b.swing; aw=p<.07?p/.07:p>.88?(1-p)/.12:1;
+    const atk=C.atkB&&((b.swv||0)%2)?'atkB':C.atkA?'atkA':null; if(atk) L.push({c:atk,t:p*cl(atk)*(S.as||1),loop:false,w:aw*5});
+    else { const a=(p<.35?-.32*eO(p/.35):p<.55?-.32+.8*eO((p-.35)/.2):.48*(1-eI((p-.55)/.45)))*(P.lunge||1); for(const n of P.spine||[]) add(n,1,0,0,a/(P.spine.length||1)*1.4); add(P.head,1,0,0,a*.4);
+      for(const n of P.jaw||[]) add(n,1,0,0,-.5*Math.sin(Math.PI*clamp(p*1.6,0,1))); } }
+  if(b.roar>0&&C.roar&&aw<.5) L.push({c:'roar',t:(1-b.roar)*cl('roar'),loop:false,w:3});
+  if(C.walk) L.push({c:'walk',t:wp/(2*Math.PI)*cl('walk')*(S.ws||.5),loop:true,w:mv*(1-aw*.7)+.0001});
+  if(C.idle) L.push({c:'idle',t:t*(C.walk?1:1+mv*.5),loop:true,w:(C.walk?1-mv:1)*(1-aw*.7)+.0001});
+  if(!C.walk&&mv>.03){ /* procedural gait */
+    const s=Math.sin(wp), c2=Math.cos(wp);
+    if(P.legs) P.legs.forEach((n,i)=>{ const ph=i%2?-1:1, sd=(P.legSide&&P.legSide[i])||1; add(n,0,1,0,.32*mv*s*ph*sd); add(n,0,0,1,.18*mv*Math.max(0,c2*ph)*sd); });
+    if(P.thighs){ add(P.thighs[0],1,0,0,-.55*mv*s); add(P.thighs[1],1,0,0,.55*mv*s); }
+    if(P.shins){ add(P.shins[0],1,0,0,.7*mv*Math.max(0,-s)); add(P.shins[1],1,0,0,.7*mv*Math.max(0,s)); }
+    if(P.arms){ add(P.arms[0],1,0,0,.35*mv*s); add(P.arms[1],1,0,0,-.35*mv*s); }
+    add(P.root,1,0,0,(P.lean||.08)*mv); }
+  if(P.wings){ const f=Math.sin(t*(13+mv*4)), g=-.15+.62*f; add('wingL',0,0,1,-g); add('wingR',0,0,1,g); add(P.root,1,0,0,.04*Math.sin(t*13+1)); }
+  const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5){ if(C.hit) L.push({c:'hit',t:.1+fl*.25,loop:false,w:fl*1.6}); else for(const n of P.spine||[P.root]) add(n,1,0,0,-.3*fl/((P.spine||[1]).length)); }
+  return {L,R}; }
 function skDrawMob(m,mt,b){ const S=SKMOB[mt.key]; if(!S) return false; const M=skGet(S.f); if(!M) return false;
-  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.dragon?skAnimDragon(S,M,b,m):S.statue?skAnimStatue(S,M,b,m):S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); const hv=S.hover&&!(b.dead>=0)?S.hover*(1+.6*Math.sin(now()*1.7+(m.id||0))):0; mreset(); mtr(b.x,b.y+hv,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
+  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.crt?skAnimCrt(S,M,b,m):S.dragon?skAnimDragon(S,M,b,m):S.statue?skAnimStatue(S,M,b,m):S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); const hv=S.hover&&!(b.dead>=0)?S.hover*(1+.6*Math.sin(now()*1.7+(m.id||0))):0; mreset(); mtr(b.x,b.y+hv,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
   SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L||[],A.R||null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
-  if(HOVE) addLight(b.x,b.y+S.h*.6,b.z,2.2,[1,.95,.8]);
+  if(HOVE) addLight(b.x,b.y+S.h*.6,b.z,2.2,[1,.95,.8]); if(S.dragon&&!(b.dead>=0)){ const fl=.8+.2*Math.sin(now()*7); addLight(b.x,b.y+S.h*.55,b.z,11,[1.3*fl,.5*fl,.15*fl]); }
   return true; }
 /* ---------- v72: painted skies (day, sunset, twilight, clear and cloudy night) blended by the time of day ---------- */
 const SKYT={on:false,ready:false,T:{},names:['sky_day','sky_dusk','sky_twilight','sky_night','sky_nightcloud']};
