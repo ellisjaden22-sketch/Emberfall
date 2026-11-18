@@ -1,9 +1,9 @@
 {
- "version": "v0.74",
- "title": "Seven new heroes",
+ "version": "v0.75",
+ "title": "A calmer Amberfield",
  "date": "18 Nov 2026",
- "text": "Every class gets a detailed new hero model.\n\n✨ Bulwark: Bronthak, a spiked iron juggernaut with a skull shield and spear\n✨ Celestus: Seraphielle, a winged celestial knight in white and gold\n✨ Barbarian: the Last Conqueror, a scarred warlord in battered leather and plate\n✨ Arcanist: Vexmortis, a plague-masked alchemist in a tattered crimson coat\n✨ Shade: a hooded spectral assassin wrapped in chains and torn grey cloth\n✨ Hunter: a witch hunter in a long coat and wide-brimmed hat\n✨ Bard: Haldreon, a white-armoured knight crowned with a thorned halo\n⬆️ Heroes walk, run, ride, swim, sit, kneel, dance and bow, twist into their attacks, lean back to cast and fall when they die. Stealthed Shades turn see-through\n⬆️ The new heroes show their own sculpted weapons and armour, so your gear no longer changes how you look. To see your equipped gear on the classic figure again, turn off \"Detailed hero models\" in Esc > Settings",
+ "text": "Fewer, better-spread monsters around Amberfield and Mirrowmere, and new names that match their new looks.\n\n⬆️ About a third fewer monsters around Amberfield and Mirrowmere, spread further apart, so new players aren't swarmed the moment they leave town\n⬆️ Old Rendclaw (formerly Old Tusk) now prowls the open fields east of the lake instead of waiting at the town's east gate\n⬆️ Grimmaw now lurks on the north shore of Mirrowmere, away from the southern cliffs, and the other lake monsters keep their distance from it\n⬆️ The moths no longer gather by the east gate; they drift over the meadows south and west of the lake\n✨ New names to match the new models: Spindlewing Moth, Old Rendclaw, Murkmaw Ghoul, Chainbound Drowned, Hollow Magus and Grimmaw the Bonecrawler\n⬆️ Bram's quests are rewritten to match: Ghouls on the Shore, Drowned in Irons, The Hollow Magi and Grimmaw the Bonecrawler. Quests you already started carry on as before",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T12:41:54Z"
+ "time": "2026-11-18T12:51:31Z"
 }

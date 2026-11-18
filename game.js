@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 74;
+const VERSION = 75;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -369,16 +369,16 @@ const ABIL={
   ],
 };
 const MOBT=[
-  {key:'boar',name:'Thornback Boar',lv:[1,2],hp:58,hpL:18,dmg:4,dmgL:2,spd:72,rng:34,as:2.0,aggro:105,r:13,col:'#8a5a3b',zone:'meadow',n:8},
-  {key:'moth',name:'Glimmerwing Moth',lv:[1,2],hp:42,hpL:14,dmg:3,dmgL:1.6,spd:82,rng:32,as:1.6,aggro:90,r:11,col:'#d9c7ff',zone:'meadow',n:5,fly:true,light:'#cbb8ff'},
-  {key:'oldtusk',name:'Old Tusk',lv:[3,3],hp:420,hpL:0,dmg:9,dmgL:0,spd:80,rng:38,as:2.0,aggro:120,r:19,col:'#5e3a24',zone:'meadow',n:1,elite:true,resp:60,sp:{k:'leap',cd:9,r:62,delay:1.2,mul:1.6}},
+  {key:'boar',name:'Thornback Boar',lv:[1,2],hp:58,hpL:18,dmg:4,dmgL:2,spd:72,rng:34,as:2.0,aggro:105,r:13,col:'#8a5a3b',zone:'meadow',n:5},
+  {key:'moth',name:'Spindlewing Moth',lv:[1,2],hp:42,hpL:14,dmg:3,dmgL:1.6,spd:82,rng:32,as:1.6,aggro:90,r:11,col:'#d9c7ff',zone:'meadow',n:3,fly:true,light:'#cbb8ff'},
+  {key:'oldtusk',name:'Old Rendclaw',lv:[3,3],hp:420,hpL:0,dmg:9,dmgL:0,spd:80,rng:38,as:2.0,aggro:120,r:19,col:'#5e3a24',zone:'meadow',n:1,elite:true,resp:60,sp:{k:'leap',cd:9,r:62,delay:1.2,mul:1.6}},
   {key:'wolf',name:'Dusk Wolf',lv:[2,4],hp:72,hpL:20,dmg:5,dmgL:2.2,spd:96,rng:34,as:1.7,aggro:150,r:13,col:'#6d7280',zone:'forest',n:8},
   {key:'thornling',name:'Thornling',lv:[3,4],hp:95,hpL:21,dmg:5,dmgL:2,spd:58,rng:36,as:2.2,aggro:120,r:14,col:'#6b5232',zone:'forest',n:5,sp:{k:'root',cd:10,rng:220}},
   {key:'fangmaw',name:'Fangmaw the Alpha',lv:[5,5],hp:640,hpL:0,dmg:12,dmgL:0,spd:100,rng:36,as:1.6,aggro:170,r:18,col:'#2b2d36',zone:'forest',n:1,elite:true,resp:60,sp:{k:'leap',cd:8,r:66,delay:1.1,mul:1.5}},
-  {key:'murkcrab',name:'Murkshell Crab',lv:[4,6],hp:130,hpL:24,dmg:8,dmgL:2.4,spd:64,rng:34,as:2.0,aggro:120,r:15,col:'#3f6a7a',zone:'lake',n:8},
-  {key:'drowned',name:'Drowned Sailor',lv:[5,7],hp:160,hpL:26,dmg:10,dmgL:2.6,spd:70,rng:38,as:2.1,aggro:150,r:13,col:'#4a7a78',zone:'lake',n:6},
-  {key:'tidecaller',name:'Tidecaller',lv:[6,7],hp:130,hpL:23,dmg:10,dmgL:2.6,spd:62,rng:230,as:2.4,aggro:190,r:13,col:'#2a8aa0',zone:'lake',n:4,ranged:true,proj:'#7fe8ff'},
-  {key:'grimmaw',name:'Grimmaw of the Deep',lv:[8,8],hp:2600,hpL:0,dmg:19,dmgL:0,spd:78,rng:52,as:2.0,aggro:200,r:26,col:'#1f4a52',zone:'lake',n:1,elite:true,resp:240},
+  {key:'murkcrab',name:'Murkmaw Ghoul',lv:[4,6],hp:130,hpL:24,dmg:8,dmgL:2.4,spd:64,rng:34,as:2.0,aggro:120,r:15,col:'#3f6a7a',zone:'lake',n:5},
+  {key:'drowned',name:'Chainbound Drowned',lv:[5,7],hp:160,hpL:26,dmg:10,dmgL:2.6,spd:70,rng:38,as:2.1,aggro:150,r:13,col:'#4a7a78',zone:'lake',n:4},
+  {key:'tidecaller',name:'Hollow Magus',lv:[6,7],hp:130,hpL:23,dmg:10,dmgL:2.6,spd:62,rng:230,as:2.4,aggro:190,r:13,col:'#2a8aa0',zone:'lake',n:3,ranged:true,proj:'#7fe8ff'},
+  {key:'grimmaw',name:'Grimmaw the Bonecrawler',lv:[8,8],hp:2600,hpL:0,dmg:19,dmgL:0,spd:78,rng:52,as:2.0,aggro:200,r:26,col:'#1f4a52',zone:'lake',n:1,elite:true,resp:240},
   {key:'lurker',name:'Mire Lurker',lv:[3,5],hp:110,hpL:23,dmg:7,dmgL:2.3,spd:62,rng:38,as:2.2,aggro:120,r:16,col:'#4f7a46',zone:'swamp',n:6},
   {key:'bogwitch',name:'Bog Witch',lv:[4,5],hp:100,hpL:21,dmg:6,dmgL:2.2,spd:60,rng:220,as:2.4,aggro:170,r:13,col:'#3d5c3a',zone:'swamp',n:4,ranged:true,proj:14,light:'#9dff6a',sp:{k:'poison',cd:9}},
   {key:'sentinel',name:'Hollow Sentinel',lv:[5,7],hp:150,hpL:26,dmg:9,dmgL:2.5,spd:72,rng:36,as:2.0,aggro:140,r:14,col:'#d8d2bf',zone:'ruins',n:7},
@@ -445,7 +445,7 @@ const NPCGREET={oriel:'"Hearthmere stands because people like you stand for it. 
   doran:'"Bring me ore and coin, and I\'ll make that blade of yours sing."',hilde:'"Every adventurer needs four good legs under them. Have a look at my beauties."',
   sylas:'"Quiet. The forest is listening. Something has the wolves and the thornlings stirred up."',marla:'"Mind the mud, dearie. The fen gives, and the fen takes."',
   ithren:'"Do you know how old these stones are? Older than the Cinderlord\'s chains. Older than fire, maybe."',vok:'"Nothing comes through this gate without my say. Nothing good, anyway."',
-  bram:'"Fish aren\'t biting. Too many moths over the water, and that old boar keeps wrecking my nets."'};
+  bram:'"Fish aren\'t biting. Too many moths over the water, and that old clawed brute keeps wrecking my nets."'};
 const QUESTS=[
   {id:'boar',giver:'oriel',title:'Boar Trouble',type:'kill',mob:'boar',n:6,xp:140,gold:4,lvl:1,text:'Thornback boars have been tearing up the fields of Amberfield, just north of town. Thin their numbers.'},
   {id:'explore',giver:'oriel',title:'Lay of the Land',type:'explore',pois:['windmill','dock','watchtower'],n:3,xp:260,gold:5,lvl:1,text:'Before you go hunting, learn the land. Find the Amberfield Mill, the dock at Mirrowmere and the old watchtower in Thornwood.'},
@@ -456,12 +456,12 @@ const QUESTS=[
   {id:'cultist',giver:'oriel',pre:'hking',title:'The Ashbound',type:'kill',mob:'cultist',n:6,xp:1000,gold:16,lvl:7,text:'Cultists gather in the Cinder Caldera, chanting to something beneath the lava. Silence them.'},
   {id:'wyrm',giver:'oriel',pre:'cultist',title:'Heart of the Caldera',type:'kill',mob:'wyrm',n:1,xp:2400,gold:40,lvl:9,epic:true,text:'The Ashbound have freed Gorrakh the Cinderlord, an orc warlord their fathers chained beneath the lava. He swings two skull-axes, calls fire down from the sky and summons his ember-spawn when wounded. Gather a party.'},
   {id:'sunpetal',giver:'mira',title:'Petals for Potions',type:'gather',mat:'sunpetal',n:5,xp:130,gold:3,lvl:1,text:'Sunpetals grow wild in Amberfield. Walk up to the glowing yellow flowers and press F to pick them.'},
-  {id:'moths',giver:'bram',title:'Lights on the Water',type:'kill',mob:'moth',n:6,xp:160,gold:3,lvl:1,text:'Glimmerwing moths swarm the meadows at dusk and scare the fish. Swat a few for me.'},
-  {id:'crabs',giver:'bram',pre:'tusk',title:'Shells on the Shore',type:'kill',mob:'murkcrab',n:10,xp:700,gold:12,lvl:4,text:'Murkshell crabs have crawled up out of Mirrowmere and they cut through my nets like paper. Clear ten of them off the shore. Mind the claws.'},
-  {id:'drowned',giver:'bram',pre:'crabs',title:'The Drowned Crew',type:'kill',mob:'drowned',n:8,xp:1000,gold:16,lvl:5,text:'A ship sank in the deep part of the lake years ago. Its crew have started walking out of the water at night. Put eight of them back to rest.'},
-  {id:'tidecallers',giver:'bram',pre:'drowned',title:'Callers of the Tide',type:'kill',mob:'tidecaller',n:6,xp:1300,gold:20,lvl:6,text:'Someone is raising them: Tidecallers, singing from the reeds and throwing cold water like knives. Silence six of them. They hit hard from range, so close in fast.'},
-  {id:'grimmaw',giver:'bram',pre:'tidecallers',title:'Grimmaw of the Deep',type:'kill',mob:'grimmaw',n:1,xp:2200,gold:35,lvl:8,item:3,epic:true,text:'The Tidecallers were singing for something. Grimmaw, the thing in the deep, has come up to feed. I have never been so afraid on my own lake. Take friends. Take all of them.'},
-  {id:'tusk',giver:'bram',pre:'moths',title:'Old Tusk',type:'kill',mob:'oldtusk',n:1,xp:420,gold:8,lvl:3,item:2,text:'That scarred old boar has wrecked my nets three times. He roams the fields just west of the lake. Bring a friend, he leaps.'},
+  {id:'moths',giver:'bram',title:'Lights on the Water',type:'kill',mob:'moth',n:6,xp:160,gold:3,lvl:1,text:'Spindlewing moths drift out of the meadows at dusk, big as dogs and stalking about on long spindly legs. They scare the fish half to death. Swat a few for me.'},
+  {id:'crabs',giver:'bram',pre:'tusk',title:'Ghouls on the Shore',type:'kill',mob:'murkcrab',n:10,xp:700,gold:12,lvl:4,text:'Murkmaw ghouls have crawled up out of Mirrowmere: pale, hunched things with mouths full of teeth, and they tear through my nets like paper. Clear ten of them off the shore. Mind the claws.'},
+  {id:'drowned',giver:'bram',pre:'crabs',title:'Drowned in Irons',type:'kill',mob:'drowned',n:8,xp:1000,gold:16,lvl:5,text:'A prison barge sank in the deep part of the lake years ago, its convicts still in their chains. They have started walking out of the water at night, irons and all. Put eight of them back to rest.'},
+  {id:'tidecallers',giver:'bram',pre:'drowned',title:'The Hollow Magi',type:'kill',mob:'tidecaller',n:6,xp:1300,gold:20,lvl:6,text:'Someone is raising them: the Hollow Magi, dead sorcerers in rotted hoods who float above the reeds and throw cold water like knives. Silence six of them. They hit hard from range, so close in fast.'},
+  {id:'grimmaw',giver:'bram',pre:'tidecallers',title:'Grimmaw the Bonecrawler',type:'kill',mob:'grimmaw',n:1,xp:2200,gold:35,lvl:8,item:3,epic:true,text:'The Hollow Magi were chanting for something. Grimmaw, a six-legged thing of bone and gristle from the deep, has crawled up onto the north shore to feed. I have never been so afraid on my own lake. Take friends. Take all of them.'},
+  {id:'tusk',giver:'bram',pre:'moths',title:'Old Rendclaw',type:'kill',mob:'oldtusk',n:1,xp:420,gold:8,lvl:3,item:2,text:'Old Rendclaw, a scarred, clawed brute with a tail like a whip, has wrecked my nets three times. He prowls the open fields east of the lake. Bring a friend, he pounces.'},
   {id:'thorn',giver:'sylas',title:'Thornling Menace',type:'kill',mob:'thornling',n:5,xp:300,gold:5,lvl:2,text:'Walking trees with a grudge. Thornlings root anyone who comes close. Cut them down.'},
   {id:'copper',giver:'sylas',title:'Arrowheads',type:'gather',mat:'copper',n:4,xp:260,gold:4,lvl:2,text:'I\'m low on arrowheads. Copper veins glint orange in the rocks around Thornwood and Amberfield.'},
   {id:'fangmaw',giver:'sylas',pre:'thorn',title:'Hunt the Alpha',type:'kill',mob:'fangmaw',n:1,xp:650,gold:10,lvl:4,item:2,text:'Fangmaw leads the pack. Kill the alpha and the wolves will scatter.'},
@@ -832,8 +832,12 @@ const mobs=[], mobById={};
       /* keep the shore around Bram safe for new players: lake monsters spawn a little further along the shore */
       for(const m of mobs){ if(m.t.zone!=='lake'||m.t.boss||m.t.pos||m.t.spots||dist(m.sx,m.sy,B.x,B.y)>=16*TS) continue;
         for(let k=0;k<4000;k++){ const a=R()*6.283, rr=17+R()*70, x=B.x+Math.cos(a)*rr*TS, y=B.y+Math.sin(a)*rr*TS, tx=x/TS|0, ty=y/TS|0; if(tx<3||ty<3||tx>MW-4||ty>OWH-4) continue; const dd=dist(x,y,B.x,B.y)/TS; if(dd<17||zmap[ty*MW+tx]!=='lake'||blocked(x,y,22)||isWaterAt(x,y)) continue; if(mobs.some(o=>o!==m&&dist(o.sx,o.sy,x,y)<110)) continue; put(m,[x,y]); break; } }
-      const ot=mobs.find(m=>m.t.key==='oldtusk'); if(ot){ const p=spot(13,20); if(p) put(ot,p); }
-      const ms=mobs.filter(m=>m.t.key==='moth'); for(let i=0;i<Math.min(6,ms.length);i++){ const p=spot(5,14); if(p) put(ms[i],p); } } }
+      const near=(cx,cy,minGap)=>{ for(let r=0;r<12;r+=.5) for(let k=0;k<24;k++){ const a=k/24*6.283, x=(cx+.5+Math.cos(a)*r)*TS, y=(cy+.5+Math.sin(a)*r)*TS; if(blocked(x,y,26)||isWaterAt(x,y)||inTown(x,y)) continue; if(mobs.some(o=>dist(o.sx,o.sy,x,y)<minGap)) continue; return [x,y]; } return null; };
+      const gateE=[(TOWN.x+TOWN.r+1)*TS,TOWN.y*TS];
+      const ot=mobs.find(m=>m.t.key==='oldtusk'); if(ot){ const p=near(Math.round(B.x/TS)+50,Math.round(B.y/TS)-36,0); if(p) put(ot,p); }
+      const gw=mobs.find(m=>m.t.key==='grimmaw'); if(gw){ const p=near(Math.round(B.x/TS)+36,Math.round(B.y/TS)-23,0); if(p) put(gw,p); }
+      for(const m of mobs){ if(m===ot||m===gw||!/^(murkcrab|drowned|tidecaller)$/.test(m.t.key)) continue; if(dist(m.sx,m.sy,gw?gw.sx:-1e9,gw?gw.sy:-1e9)<7*TS){ const a=R()*6.283; const p=near(Math.round(m.sx/TS+Math.cos(a)*9),Math.round(m.sy/TS+Math.sin(a)*9),110); if(p&&dist(p[0],p[1],gw.sx,gw.sy)>=7*TS) put(m,p); } }
+      const ms=mobs.filter(m=>m.t.key==='moth'); for(let i=0;i<Math.min(6,ms.length);i++){ let p=null; for(let k=0;k<40&&!p;k++){ const q=spot(7,24); if(q&&dist(q[0],q[1],gateE[0],gateE[1])>10*TS&&!ms.some((o,j)=>j<i&&dist(o.sx,o.sy,q[0],q[1])<5*TS)) p=q; } if(p) put(ms[i],p); } } }
   { const Y=TOWN.yard, DT={key:'dummy',name:'Training Dummy',lv:[1,1],hp:100000,hpL:0,dmg:0,dmgL:0,spd:0,rng:0,as:999,aggro:0,r:14,col:'#c8a868',zone:'town',n:0,dummy:true,resp:5};
     if(WE&&Array.isArray(WE.spawns)) for(const sp of WE.spawns){ const mt=MOBT.find(q=>q.key===sp.mob); if(!mt||mt.boss||mt.summon) continue; const n=clamp(sp.n|0||1,1,12);
       for(let k=0;k<n;k++){ const a=k/n*6.283, rr=n>1?1.5+R()*1.5:0, x=(sp.x+.5+Math.cos(a)*rr)*TS, y=(sp.y+.5+Math.sin(a)*rr)*TS; if(blocked(x,y,8)) continue; const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
@@ -3276,7 +3280,7 @@ const MOBMAT={boar:'flesh',oldtusk:'flesh',wolf:'flesh',fangmaw:'flesh',frostwol
   cultist:'flesh',bogwitch:'flesh',tidecaller:'flesh',drowned:'rot',dacolyte:'rot',cryptmage:'rot',
   sentinel:'bone',hking:'bone',thrall:'bone',deathguard:'bone',lich:'bone',vaelith:'rot',
   vsentry:'metal',ossric:'metal',magma:'rock',emberling:'rock',wyrm:'scale',
-  murkcrab:'shell',crawler:'shell',siltling:'shell',siltmother:'slime',
+  murkcrab:'flesh',crawler:'shell',siltling:'shell',siltmother:'slime',
   wraith:'ghost',icewraith:'ghost',tidewraith:'ghost',drownedshade:'ghost',moth:'dust',thornling:'wood',dummy:'wood'};
 const MATFX={flesh:{c:['#7a0a0e','#a8141a','#5a0608'],n:9,grav:-9,snd:'imp_flesh'},rot:{c:['#3a4a2a','#5a2a20','#2a3a30'],n:8,grav:-8,snd:'imp_flesh'},
   bone:{c:['#e8e0c8','#c8c0a8','#a8a090'],n:9,grav:-10,chip:1,snd:'imp_bone'},metal:{c:['#fff2a0','#ffd060','#ffffff'],n:12,grav:-7,glow:1,snd:'imp_metal'},
@@ -4964,7 +4968,7 @@ function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c
   else if(PSEL==='fishing'){ const T=FISH?[]:null; right+=`<button id="pfFish" class="gold">🎣 Cast a line</button><p style="font-size:13px;margin-top:8px">Face open water and press <kbd>F</kbd> (or this button, or type <b>/fish</b>). When the bobber dips and splashes, press <kbd>F</kbd> or click the bobber within a second.</p><div style="font-size:13px;color:var(--dim)"><div>🐟 Amber Perch: any water</div><div>🐍 Mire Eel: Gloamfen and Thornwood (75+)</div><div>🐠 Silverfin: Mirrowmere and Vael (130+)</div><div>🐡 Icefin Cod: Frostpeak and the Caldera (200+)</div><div>🎏 Golden Koi: very rare, anywhere (150+)</div><div>Sometimes a chest of treasure.</div></div>`; }
   else if(PSEL==='mining'||PSEL==='herbalism'){ const ok=PSEL==='mining'?['copper','iron','obsidian','mithril']:['sunpetal','thornbloom','mireroot','ghostcap','emberlily','frostbloom'];
     right+=`<div style="font-size:13px">${ok.map(k=>`<div><span class="pc-${pcol(P.s,nodeReq(k))}">${MATS[k].icon} ${MATS[k].name} (${nodeReq(k)})</span> <span style="color:var(--dim)">${MATS[k].zones.map(z=>ZONES[z]?ZONES[z].name:z).join(', ')}</span></div>`).join('')}</div><p style="font-size:13px;color:var(--dim);margin-top:8px">With the profession you gather faster and find ${PSEL==='mining'?'gems':'Starleaf'}. Every node gives one material. Large glittering <b>rich</b> ${PSEL==='mining'?'veins':'patches'} appear on your map once your skill is high enough.</p>`; }
-  else if(PSEL==='skinning'){ right+=`<p style="font-size:13px">Kill a beast, loot it, then press <kbd>F</kbd> or click its body to skin it. Bodies stay for 35 seconds.</p><div style="font-size:13px;color:var(--dim)"><div>🟫 Light Leather: boars, wolves (1+)</div><div>🟤 Thick Hide: crabs, lurkers, Fangmaw (66+)</div><div>🦎 Scaled Hide: silt crawlers, the Cinderlord (176+)</div><div>🐾 Frost Pelt: frost wolves, yetis (198+)</div><div>🐉 Cinderhide: only from Gorrakh the Cinderlord</div></div>`; }
+  else if(PSEL==='skinning'){ right+=`<p style="font-size:13px">Kill a beast, loot it, then press <kbd>F</kbd> or click its body to skin it. Bodies stay for 35 seconds.</p><div style="font-size:13px;color:var(--dim)"><div>🟫 Light Leather: boars, wolves (1+)</div><div>🟤 Thick Hide: ghouls, lurkers, Fangmaw (66+)</div><div>🦎 Scaled Hide: silt crawlers, the Cinderlord (176+)</div><div>🐾 Frost Pelt: frost wolves, yetis (198+)</div><div>🐉 Cinderhide: only from Gorrakh the Cinderlord</div></div>`; }
   el.innerHTML=`<div class="pfl">${list}</div><div class="pfr">${right}</div>`;
   el.querySelectorAll('[data-pf]').forEach(b=>b.onclick=()=>{ PSEL=b.dataset.pf; renderProf(); });
   const q=$('pfQ'); if(q){ q.oninput=()=>{ PFILT=q.value; const pos=q.selectionStart; renderProf(); const q2=$('pfQ'); q2.focus(); q2.setSelectionRange(pos,pos); }; q.onkeydown=e=>e.stopPropagation(); }
@@ -5365,7 +5369,7 @@ function drawLootBags(near,t){ for(let i=LOOTS.length-1;i>=0;i--){ const L=LOOTS
     addLight(X,y+.8,Z,3.2,col.map(v=>v*1.2)); if(Math.random()<.12) P3(X+(Math.random()-.5)*.5,y+.6,Z+(Math.random()-.5)*.5,0,.7,0,1,.07,'#'+col.map(v=>Math.round(Math.min(1,v)*255).toString(16).padStart(2,'0')).join(''),{glow:true}); } }
 /* ---------- boss encounters ---------- */
 const BOSSY={
-  oldtusk:{title:'Terror of Amberfield',pull:'*Old Tusk paws the ground and lets out a furious squeal!*',p50:'*Old Tusk goes into a frenzy!*',die:'*Old Tusk collapses with a final grunt.*'},
+  oldtusk:{title:'Terror of Amberfield',pull:'*Old Rendclaw rakes the earth and lets out a furious shriek!*',p50:'*Old Rendclaw lashes its tail and goes into a frenzy!*',die:'*Old Rendclaw collapses with a final rattling hiss.*'},
   fangmaw:{title:'Alpha of Thornwood',pull:'*Fangmaw howls, and the forest howls back.*',p50:'*Fangmaw\'s eyes burn red!*',die:'*The great wolf falls silent.*'},
   hking:{title:'Lord of Fallen Vael',pull:'"Who dares disturb the court of Vael? Kneel before your king!"',p50:'"My kingdom was ash before you were born!"',p20:'"I... will not... fall again!"',die:'"At last... the crown... is free..."'},
   wyrm:{title:'Warlord of the Caldera',pull:'"Fresh skulls for my axes! Come, little ones!"',p50:'"Is that all? I was chained for a hundred years for MORE than this!"',p20:'"BURN! ALL OF YOU, BURN!"',die:'"The fire... goes... out..."'},
@@ -5834,7 +5838,7 @@ function snd(k,x,y,mul){ if(!AUD.on||!AUD.ctx) return; const [v,pan]=x==null?[1,
     case 'howl': sForm(t,330,520,1.1,.18,D,[[700,4,1],[1300,6,.4]]); sForm(t+1.1,520,300,.9,.16,D,[[700,4,1],[1300,6,.4]]); break;
     case 'frog': for(let i=0;i<2;i++) sOsc(t+i*.18,'square',180,120,.09,.05,D); break;
   } }
-const MOBVOICE={murkcrab:'slime',grimmaw:'beast',drowned:'undead',tidecaller:'undead',wolf:'wolf',frostwolf:'wolf',fangmaw:'wolf',boar:'boar',oldtusk:'boar',yeti:'beast',moth:'moth',thornling:'plant',lurker:'slime',siltmother:'slime',siltling:'bug',crawler:'bug',
+const MOBVOICE={murkcrab:'slime',grimmaw:'beast',drowned:'undead',tidecaller:'undead',wolf:'wolf',frostwolf:'wolf',fangmaw:'wolf',boar:'boar',oldtusk:'beast',yeti:'beast',moth:'moth',thornling:'plant',lurker:'slime',siltmother:'slime',siltling:'bug',crawler:'bug',
   bogwitch:'caster',cultist:'caster',cryptmage:'caster',dacolyte:'caster',sentinel:'armor',vsentry:'armor',deathguard:'armor',ossric:'armor',wraith:'ghost',icewraith:'ghost',tidewraith:'ghost',drownedshade:'ghost',
   hking:'undead',thrall:'undead',lich:'undead',vaelith:'undead',magma:'fireMob',emberling:'fireMob',wyrm:'roar',frostgiant:'roar'};
 function mobSnd(m,ev){ if(!m||!m.t) return; const k=MOBVOICE[m.t.key]||'beast', big=m.t.boss?1.25:1;
@@ -6585,7 +6589,7 @@ for(let i=0;i<6;i++) LOOK['bguard'+i]={torso:[.6,.62,.66],legs:[.28,.3,.34],arms
 QLOOK.brinehound={...QLOOK.wolf,col:[.34,.38,.4],dark:[.16,.2,.24],eyes:[.5,1,.9],eyeE:1.8,mane:true,scale:1.12};
 LPAL.shellback=[[.46,.16,.1],[.64,.24,.13],[.86,.55,.36],[1,.75,.4],1.0];
 Object.assign(MOBH,{shellback:1,brinehound:1.35,cutthroat:2,slinger:2,deepcaller:2.4,brineshade:2.2,blackwake:3.4,thalassor:MOBH.wyrm||6.2});
-Object.assign(MOBMAT,{shellback:MOBMAT.murkcrab||'shell',brinehound:'flesh',brineshade:MOBMAT.tidewraith||'spirit',thalassor:MOBMAT.wyrm||'flesh'});
+Object.assign(MOBMAT,{shellback:'shell',brinehound:'flesh',brineshade:MOBMAT.tidewraith||'spirit',thalassor:MOBMAT.wyrm||'flesh'});
 Object.assign(MOBVOICE,{shellback:MOBVOICE.murkcrab,brinehound:MOBVOICE.wolf,cutthroat:MOBVOICE.cultist,slinger:MOBVOICE.cultist,deepcaller:MOBVOICE.tidecaller,brineshade:MOBVOICE.tidewraith,thalassor:MOBVOICE.wyrm});
 for(const k in MOBVOICE) if(MOBVOICE[k]===undefined) delete MOBVOICE[k];
 SKINK.shellback=1; SKINK.brinehound=1; MEATK.shellback='crabmeat'; MEATK.brinehound='gamemeat';
@@ -7236,7 +7240,7 @@ const ACH=[
   {id:"kill1",n:"First Blood",d:"Defeat your first monster",ic:"\ud83d\udde1\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>S.kills>=1},
   {id:"kill100",n:"Monster Hunter",d:"Defeat 100 monsters",ic:"\u2694\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>S.kills>=100},
   {id:"kill1000",n:"Scourge of Beasts",d:"Defeat 1,000 monsters",ic:"\ud83d\udc80",f:(c,S,QDONE,EPICALL,FORGE5)=>S.kills>=1000},
-  {id:"boss_oldtusk",n:"Tusk Breaker",d:"Defeat Old Tusk",ic:"\ud83d\udc17",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.oldtusk||0)>0},
+  {id:"boss_oldtusk",n:"Claw Breaker",d:"Defeat Old Rendclaw",ic:"\ud83d\udc3e",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.oldtusk||0)>0},
   {id:"boss_fangmaw",n:"Alpha Slayer",d:"Defeat Fangmaw",ic:"\ud83d\udc3a",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.fangmaw||0)>0},
   {id:"boss_hking",n:"Kingslayer",d:"Defeat the Hollow King",ic:"\ud83d\udddd\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.hking||0)>0},
   {id:"boss_wyrm",n:"Warlord-Breaker",d:"Defeat Gorrakh the Cinderlord",ic:"\ud83d\udc09",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.bosses.wyrm||0)>0},
