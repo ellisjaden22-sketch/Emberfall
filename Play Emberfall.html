@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.78</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.79</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 78;
+const VERSION = 79;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1094,8 +1094,8 @@ ABIL.assassin=[
   {id:'sinister',lvl:1,name:'Sinister Strike',icon:'🗡',cost:40,cd:0,rng:50,hostile:true,melee:true,dmg:[11,3.9],cp:1,desc:'A vicious stab. Adds 1 combo point.'},
   {id:'evis',lvl:1,name:'Eviscerate',icon:'✂',cost:35,cd:0,rng:50,hostile:true,melee:true,dmg:[7,2.6],finisher:true,desc:'Finisher: tear into the target. Damage grows with every combo point (up to 5).'},
   {id:'stealth',lvl:2,name:'Stealth',icon:'👁',cost:0,cd:4,self:true,stealth:true,noGcd:true,desc:'Melt into the shadows. Monsters only notice you up close. You move a little slower. Attacking or taking damage reveals you.'},
-  {id:'ambush',lvl:3,name:'Ambush',icon:'☾',cost:55,cd:0,rng:50,hostile:true,melee:true,dmg:[20,6.5],cp:2,stealthOnly:true,alwaysCrit:true,desc:'Only from stealth: a brutal strike that always lands as a critical hit. Adds 2 combo points.'},
-  {id:'fan',lvl:4,name:'Fan of Knives',icon:'✷',cost:45,cd:5,self:true,radius:100,aoeDmg:[9,3.1],cp:1,vis:28,desc:'Hurl knives at every enemy around you. Adds 1 combo point.'},
+  {id:'ambush',lvl:3,name:'Ambush',icon:'☾',cost:35,cd:0,rng:50,hostile:true,melee:true,dmg:[20,6.5],cp:3,stealthOnly:true,alwaysCrit:true,desc:'Only from stealth: a brutal strike that always lands as a critical hit. Adds 3 combo points.'},
+  {id:'fan',lvl:4,name:'Fan of Knives',icon:'✷',cost:35,cd:0,self:true,radius:100,aoeDmg:[9,3.1],cpPerHit:1,vis:28,desc:'Hurl knives at every enemy around you. Adds 1 combo point for each enemy hit.'},
   {id:'shadowstep',lvl:6,name:'Shadowstep',icon:'➷',cost:20,cd:18,rng:300,hostile:true,shadowstep:true,noGcd:true,desc:'Step through the shadows to appear behind your target. Your next attack within 3s deals 30% more damage.'},
   {id:'evasion',lvl:8,name:'Evasion',icon:'💨',cost:0,cd:40,self:true,buff:'evasion',dur:6,noGcd:true,desc:'For 6s you dodge half of all attacks.'},
   {id:'vanish',lvl:11,name:'Vanish',icon:'🌫',cost:0,cd:60,self:true,vanish:true,noGcd:true,desc:'Vanish in a puff of smoke: enter stealth even in combat and make every monster forget you.'},
@@ -2044,9 +2044,10 @@ function execAbility(ab,tgt){
     if(ab.vis===10){ me.swingT=t; }
     pushAct(6,0,R,v,cx,cy); areaFx(v,cx,cy,R);
     const d0=scaleV(ab.aoeDmg);
-    const apply=()=>{ if(!me||me.dead) return;
-      for(const m of mobs) if(!m.dead && dist(m.rx,m.ry,cx,cy)<R+m.t.r){ hitMob(m,d0,0); if(ab.root) pushAct(5,m.id,ab.root*1000,0); }
-      for(const o of others.values()) if(pvpFoe(o)&&dist(o.rx,o.ry,cx,cy)<R+12){ const c=Math.random()<critCh; hitPlayer(o,Math.round(d0*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)),0,c); if(ab.root) pushAct(13,o.u,ab.root*1000,0); }
+    const apply=()=>{ if(!me||me.dead) return; let nh=0;
+      for(const m of mobs) if(!m.dead && dist(m.rx,m.ry,cx,cy)<R+m.t.r){ hitMob(m,d0,0); nh++; if(ab.root) pushAct(5,m.id,ab.root*1000,0); }
+      for(const o of others.values()) if(pvpFoe(o)&&dist(o.rx,o.ry,cx,cy)<R+12){ const c=Math.random()<critCh; hitPlayer(o,Math.round(d0*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)),0,c); nh++; if(ab.root) pushAct(13,o.u,ab.root*1000,0); }
+      if(ab.cpPerHit&&nh){ me.cp=Math.min(5,(me.cp||0)+nh*ab.cpPerHit); }
       if(ab.aoeHealAlly){ const h=Math.round(scaleV(ab.aoeHealAlly)); if(dist(me.x,me.y,cx,cy)<R) healMe(h);
         for(const o of others.values()) if(!o.d&&canHelp(o)&&dist(o.rx,o.ry,cx,cy)<R){ pushAct(1,o.u,h,0); fct(o.rx,o.ry-30,'+'+h,'#6dff7a'); } } };
     if(ab.ticks){ for(let k=0;k<ab.ticks;k++) setTimeout(apply,k*700+250); } else if(v===13) setTimeout(apply,550); else apply(); }

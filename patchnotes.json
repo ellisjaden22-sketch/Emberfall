@@ -1,9 +1,9 @@
 {
- "version": "v0.78",
- "title": "Fair fights",
+ "version": "v0.79",
+ "title": "Sharper Shades",
  "date": "18 Nov 2026",
- "text": "Combat fixes for tanks, Shades and PvP, and an auto-attack switch.\n\n⬆️ Challenge (Bulwark) now taunts every enemy within 10 yards of you, not just your target, so you can grab a whole pack\n• Ambush hits less hard: lower base damage, it no longer stacks the 25% from-stealth bonus on top of its guaranteed critical, and it deals 15% less to players\n🔧 Tab now targets enemy players in PvP areas (they come first, up to 40 yards in front of you, and whoever just hit you), as well as monsters. Monsters only count as 'attacking you' within 40 yards\n🔧 Stealthed Shades are now invisible to enemies in the arena unless right beside you; if your target vanishes into stealth, your target is cleared\n🔧 Shadowstep puts you behind your target (the side it's facing away from), turns you and your camera to face it, and keeps you stealthed. Monsters don't notice you for 2 seconds after you step in, so you can open with Ambush\n🔧 The Bulwark's Charge on a player no longer gets stuck: you rush to them and stun them for 1 second\n✨ Auto-attack switch: press T to turn auto-attack on or off, and Esc > Settings has an option to stop abilities from starting it automatically",
+ "text": "Ambush and Fan of Knives reworked.\n\n• Ambush now adds 3 combo points (was 2) and costs 35 energy (was 55)\n• Fan of Knives has no cooldown and costs 35 energy (was 45, with a 5 second cooldown)\n✨ Fan of Knives adds a combo point for every enemy it hits: hit three players and you get three combo points (up to the usual 5)",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T16:50:01Z"
+ "time": "2026-11-18T17:15:25Z"
 }

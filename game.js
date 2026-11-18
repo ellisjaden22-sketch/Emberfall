@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 78;
+const VERSION = 79;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -538,8 +538,8 @@ ABIL.assassin=[
   {id:'sinister',lvl:1,name:'Sinister Strike',icon:'🗡',cost:40,cd:0,rng:50,hostile:true,melee:true,dmg:[11,3.9],cp:1,desc:'A vicious stab. Adds 1 combo point.'},
   {id:'evis',lvl:1,name:'Eviscerate',icon:'✂',cost:35,cd:0,rng:50,hostile:true,melee:true,dmg:[7,2.6],finisher:true,desc:'Finisher: tear into the target. Damage grows with every combo point (up to 5).'},
   {id:'stealth',lvl:2,name:'Stealth',icon:'👁',cost:0,cd:4,self:true,stealth:true,noGcd:true,desc:'Melt into the shadows. Monsters only notice you up close. You move a little slower. Attacking or taking damage reveals you.'},
-  {id:'ambush',lvl:3,name:'Ambush',icon:'☾',cost:55,cd:0,rng:50,hostile:true,melee:true,dmg:[20,6.5],cp:2,stealthOnly:true,alwaysCrit:true,desc:'Only from stealth: a brutal strike that always lands as a critical hit. Adds 2 combo points.'},
-  {id:'fan',lvl:4,name:'Fan of Knives',icon:'✷',cost:45,cd:5,self:true,radius:100,aoeDmg:[9,3.1],cp:1,vis:28,desc:'Hurl knives at every enemy around you. Adds 1 combo point.'},
+  {id:'ambush',lvl:3,name:'Ambush',icon:'☾',cost:35,cd:0,rng:50,hostile:true,melee:true,dmg:[20,6.5],cp:3,stealthOnly:true,alwaysCrit:true,desc:'Only from stealth: a brutal strike that always lands as a critical hit. Adds 3 combo points.'},
+  {id:'fan',lvl:4,name:'Fan of Knives',icon:'✷',cost:35,cd:0,self:true,radius:100,aoeDmg:[9,3.1],cpPerHit:1,vis:28,desc:'Hurl knives at every enemy around you. Adds 1 combo point for each enemy hit.'},
   {id:'shadowstep',lvl:6,name:'Shadowstep',icon:'➷',cost:20,cd:18,rng:300,hostile:true,shadowstep:true,noGcd:true,desc:'Step through the shadows to appear behind your target. Your next attack within 3s deals 30% more damage.'},
   {id:'evasion',lvl:8,name:'Evasion',icon:'💨',cost:0,cd:40,self:true,buff:'evasion',dur:6,noGcd:true,desc:'For 6s you dodge half of all attacks.'},
   {id:'vanish',lvl:11,name:'Vanish',icon:'🌫',cost:0,cd:60,self:true,vanish:true,noGcd:true,desc:'Vanish in a puff of smoke: enter stealth even in combat and make every monster forget you.'},
@@ -1488,9 +1488,10 @@ function execAbility(ab,tgt){
     if(ab.vis===10){ me.swingT=t; }
     pushAct(6,0,R,v,cx,cy); areaFx(v,cx,cy,R);
     const d0=scaleV(ab.aoeDmg);
-    const apply=()=>{ if(!me||me.dead) return;
-      for(const m of mobs) if(!m.dead && dist(m.rx,m.ry,cx,cy)<R+m.t.r){ hitMob(m,d0,0); if(ab.root) pushAct(5,m.id,ab.root*1000,0); }
-      for(const o of others.values()) if(pvpFoe(o)&&dist(o.rx,o.ry,cx,cy)<R+12){ const c=Math.random()<critCh; hitPlayer(o,Math.round(d0*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)),0,c); if(ab.root) pushAct(13,o.u,ab.root*1000,0); }
+    const apply=()=>{ if(!me||me.dead) return; let nh=0;
+      for(const m of mobs) if(!m.dead && dist(m.rx,m.ry,cx,cy)<R+m.t.r){ hitMob(m,d0,0); nh++; if(ab.root) pushAct(5,m.id,ab.root*1000,0); }
+      for(const o of others.values()) if(pvpFoe(o)&&dist(o.rx,o.ry,cx,cy)<R+12){ const c=Math.random()<critCh; hitPlayer(o,Math.round(d0*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)),0,c); nh++; if(ab.root) pushAct(13,o.u,ab.root*1000,0); }
+      if(ab.cpPerHit&&nh){ me.cp=Math.min(5,(me.cp||0)+nh*ab.cpPerHit); }
       if(ab.aoeHealAlly){ const h=Math.round(scaleV(ab.aoeHealAlly)); if(dist(me.x,me.y,cx,cy)<R) healMe(h);
         for(const o of others.values()) if(!o.d&&canHelp(o)&&dist(o.rx,o.ry,cx,cy)<R){ pushAct(1,o.u,h,0); fct(o.rx,o.ry-30,'+'+h,'#6dff7a'); } } };
     if(ab.ticks){ for(let k=0;k<ab.ticks;k++) setTimeout(apply,k*700+250); } else if(v===13) setTimeout(apply,550); else apply(); }
