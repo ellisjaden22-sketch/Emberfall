@@ -1,9 +1,9 @@
 {
- "version": "v0.77",
- "title": "Cleaner, truer heroes",
+ "version": "v0.78",
+ "title": "Fair fights",
  "date": "18 Nov 2026",
- "text": "No more stretching or smearing on the hero models, swords carried at the side, and a more upright, natural stride.\n\n🔧 No more dragging or smearing when heroes move their arms: arms, hands, weapons and wings are now cut free of the body wherever they touched it, so they move cleanly instead of stretching the skin\n🔧 Legs move cleanly too: boots stay on the feet, and coats and robes no longer smear between the legs when running\n⬆️ The Celestus and the Bard now carry their swords at their right side, the blade hanging naturally, with the other arm relaxed, instead of holding them out in front with both hands\n✨ The Celestus and the Bard fight one-handed: a forehand cut, a backhand return and an overhead chop, with the free hand balancing\n✨ Heroes have wrists: weapons turn in the hand as they swing, and stay pointing the right way while running\n⬆️ A more upright, natural stance and stride: heroes no longer lean far forward when moving, only a few degrees into a run, with the head held level\n⬆️ Each blow now steps into the strike, and the arms move freely with the body in every attack, cast and emote",
+ "text": "Combat fixes for tanks, Shades and PvP, and an auto-attack switch.\n\n⬆️ Challenge (Bulwark) now taunts every enemy within 10 yards of you, not just your target, so you can grab a whole pack\n• Ambush hits less hard: lower base damage, it no longer stacks the 25% from-stealth bonus on top of its guaranteed critical, and it deals 15% less to players\n🔧 Tab now targets enemy players in PvP areas (they come first, up to 40 yards in front of you, and whoever just hit you), as well as monsters. Monsters only count as 'attacking you' within 40 yards\n🔧 Stealthed Shades are now invisible to enemies in the arena unless right beside you; if your target vanishes into stealth, your target is cleared\n🔧 Shadowstep puts you behind your target (the side it's facing away from), turns you and your camera to face it, and keeps you stealthed. Monsters don't notice you for 2 seconds after you step in, so you can open with Ambush\n🔧 The Bulwark's Charge on a player no longer gets stuck: you rush to them and stun them for 1 second\n✨ Auto-attack switch: press T to turn auto-attack on or off, and Esc > Settings has an option to stop abilities from starting it automatically",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T14:02:39Z"
+ "time": "2026-11-18T16:50:01Z"
 }
