@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.79</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.82</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 79;
+const VERSION = 82;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1072,7 +1072,7 @@ MOBT.push(
   {key:'frostgiant',name:'Hrimgar the Frost Giant',lv:[13,13],hp:3400,hpL:0,dmg:30,dmgL:0,spd:70,rng:70,as:2.4,aggro:210,r:30,col:'#8fb4d8',zone:'frost',n:1,elite:true,resp:120,pos:[146,56],sp:{k:'slam',cd:8,r:150,delay:1.6,mul:1.5}},
   {key:'cryptmage',name:'Crypt Necromancer',lv:[12,13],hp:320,hpL:26,dmg:19,dmgL:2,spd:66,rng:230,as:2.4,aggro:200,r:14,col:'#3a2a4a',zone:'crypt',n:5,ranged:true,proj:16,light:'#9dff6a',sp:{k:'poison',cd:8}},
   {key:'deathguard',name:'Deathguard',lv:[13,14],hp:560,hpL:30,dmg:23,dmgL:2,spd:70,rng:48,as:2.1,aggro:180,r:16,col:'#bcb6a6',zone:'crypt',n:5},
-  {key:'lich',name:'Morvath the Lich',lv:[15,15],hp:9500,hpL:0,dmg:34,dmgL:0,spd:62,rng:230,as:2.6,aggro:240,r:28,col:'#7ef0ff',zone:'crypt',n:1,boss:true,resp:180,pos:[140,13],ranged:true,proj:15,light:'#7ef0ff',sp:{k:'lich'}},
+  {key:'lich',name:'Morvath the Lich',lv:[15,15],hp:15000,hpL:0,dmg:48,dmgL:0,spd:62,rng:230,as:2.6,aggro:240,r:28,col:'#7ef0ff',zone:'crypt',n:1,boss:true,resp:180,pos:[140,13],ranged:true,proj:15,light:'#7ef0ff',sp:{k:'lich'}},
   {key:'thrall',name:'Risen Thrall',lv:[13,13],hp:300,hpL:0,dmg:16,dmgL:0,spd:90,rng:36,as:1.6,aggro:400,r:13,col:'#9a9484',zone:'crypt',n:4,summon:true,owner:'lich',pos:[140,13]}
 );
 ABIL.warden.push(
@@ -1299,10 +1299,10 @@ const SLOTICON={weapon:'🗡',armor:'🥋',trinket:'💍'};
     spots:W([[63,5],[64,7],[62,7],[63,15],[65,16],[78,15],[77,17],[79,16]])},
   {key:'tidewraith',name:'Tide Wraith',lv:[10,10],hp:200,hpL:22,dmg:12,dmgL:2.4,spd:84,rng:40,as:1.9,aggro:150,r:14,col:'#4ad8c8',zone:'vault',vault:1,resp:1e8,fly:true,light:'#4affd8',sp:{k:'drain',cd:8},
     spots:W([[68,10],[77,5],[104,29],[105,33]])},
-  {key:'ossric',name:'Gatekeeper Ossric',lv:[10,10],hp:4200,hpL:0,dmg:26,dmgL:0,spd:72,rng:62,as:2.3,aggro:230,r:28,col:'#6a8a86',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[56,125],light:'#4affd8',sp:{k:'ossric'},xp:1400},
-  {key:'siltmother',name:'Mother Silt',lv:[10,10],hp:5200,hpL:0,dmg:24,dmgL:0,spd:60,rng:76,as:2.4,aggro:240,r:36,col:'#4a4232',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[89,146],sp:{k:'silt'},xp:1700},
+  {key:'ossric',name:'Gatekeeper Ossric',lv:[10,10],hp:6800,hpL:0,dmg:36,dmgL:0,spd:72,rng:62,as:2.3,aggro:230,r:28,col:'#6a8a86',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[56,125],light:'#4affd8',sp:{k:'ossric'},xp:1400},
+  {key:'siltmother',name:'Mother Silt',lv:[10,10],hp:8400,hpL:0,dmg:34,dmgL:0,spd:60,rng:76,as:2.4,aggro:240,r:36,col:'#4a4232',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[89,146],sp:{k:'silt'},xp:1700},
   {key:'siltling',name:'Siltling',lv:[10,10],hp:150,hpL:0,dmg:13,dmgL:0,spd:104,rng:32,as:1.5,aggro:520,r:11,col:'#6a5e44',zone:'vault',vault:1,n:4,summon:true,owner:'siltmother',pos:[89,146]},
-  {key:'vaelith',name:'Vaelith, the Drowned King',lv:[10,10],hp:7600,hpL:0,dmg:30,dmgL:0,spd:66,rng:66,as:2.4,aggro:260,r:30,col:'#4affd8',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[140,146],light:'#4affd8',sp:{k:'vaelith'},xp:3000},
+  {key:'vaelith',name:'Vaelith, the Drowned King',lv:[10,10],hp:12000,hpL:0,dmg:42,dmgL:0,spd:66,rng:66,as:2.4,aggro:260,r:30,col:'#4affd8',zone:'vault',vault:1,n:1,boss:true,resp:1e8,pos:[140,146],light:'#4affd8',sp:{k:'vaelith'},xp:3000},
   {key:'drownedshade',name:'Drowned Shade',lv:[10,10],hp:260,hpL:0,dmg:16,dmgL:0,spd:88,rng:40,as:1.8,aggro:520,r:14,col:'#4ad8c8',zone:'vault',vault:1,n:3,summon:true,owner:'vaelith',pos:[140,146],fly:true});
   for(const mt of MOBT) if(mt.spots) mt.n=mt.spots.length; }
 /* ---------- v57: Cinderhold (world tiles = local + (RX0, OWH)) ---------- */
@@ -1608,7 +1608,7 @@ function syncPeers(){
     if(o.cSeq===null){ let mx=-1; for(const c of ch) mx=Math.max(mx,c[0]|0); o.cSeq=mx; }
     else for(const c of ch){ if(!Array.isArray(c)||(c[0]|0)<=o.cSeq) continue; o.cSeq=c[0]|0;
       const party=c[1]===1, txt=clean(c[2]).slice(0,120); if(!txt) continue; if(c[1]===3){ if(me&&me.party&&o.pt===me.party) vaultEvent(o,txt); continue; }
-      if(c[1]===4){ if(me&&inRaid(me.x,me.y)) raidWarnShow(txt); continue; }
+      if(c[1]===4){ if(me&&(inRaid(me.x,me.y)||inDung(me.x,me.y))) raidWarnShow(txt); continue; }
       if(c[1]===2&&o.gm){ const art=room&&typeof room.emit==='function'; if(!art||(lastGrant&&lastGrant.pids.includes(o.pid+':'+o.n.toLowerCase()))) gmAnnounceShow(o.n,txt,art?'gm':(o.own?'owner':'gm')); continue; }
       if(party && (!me||!me.party||o.pt!==me.party)) continue;
       chatLine(txt, party?'c-party':'c-say', party?'[Party] ':'', {n:o.n,col:nameCol(o),gm:o.gm&&isGM}); o.bubble=txt; o.bubbleT=t+6; }
@@ -1697,7 +1697,7 @@ function summonAdds(boss){ let i=0; for(const a of mobs) if(a.t.summon&&a.t.owne
   a.x=a.rx=a.sx=boss.x+Math.cos(an)*80; a.y=a.ry=a.sy=boss.y+Math.sin(an)*80; a.threat={...boss.threat}; a.tag=boss.tag; }
   pushTg(boss.x,boss.y,110,.6,5); }
 const hostTels=[];
-const mobDmg=m=>(m.t.dmg+m.t.dmgL*(m.lv-1))*(m.t.critter?1:1.2)*(m.t.vault?(m.t.boss?1.5:1.35):1)*(m.t.raid?RAIDD.deal*(m.bers?1.75:1)*(m.emp?1.3:1):1);
+const mobDmg=m=>(m.t.dmg+m.t.dmgL*(m.lv-1))*(m.t.critter?1:1.2)*(m.t.vault?(m.t.boss?1.5:1.35):1)*(m.t.raid?RAIDD.deal*(RAIDD.dsc||1)*(m.bers?1.75:1)*(m.emp?1.3:1):1);
 function hostTel(m,x,y,r,delay,mul,kind,after){ pushTg(x,y,r,delay,kind); hostTels.push({m,x,y,r,at:now()+delay,dmg:mobDmg(m)*mul,after}); }
 function mobSpecial(m,p,players,dt,t){
   const sp=m.t.sp; if(!sp) return;
@@ -1712,27 +1712,39 @@ function mobSpecial(m,p,players,dt,t){
     case 'root': if(d<sp.rng){ m.spT=sp.cd; pushMd(p.u,mobDmg(m)*.5,m.id,5); } else m.spT=1; break;
     case 'poison': if(d<260){ m.spT=sp.cd; pushMd(p.u,mobDmg(m)*.6,m.id,6); } else m.spT=1; break;
     case 'drain': if(d<m.t.rng+12){ m.spT=sp.cd; const dm=mobDmg(m)*1.2; pushMd(p.u,dm,m.id,8); m.hp=Math.min(m.mhp,m.hp+dm); } else m.spT=1; break;
-    case 'lich': { m.phase=(m.phase||0)+1; m.spT=m.enr?4.5:6.5; const pick=m.phase%3;
-      if(pick===1){ for(const q of players) if(dist(q.x,q.y,m.x,m.y)<650) hostTel(m,q.x,q.y,80,1.6,1.0,6); }
-      else if(pick===2){ m.chanU=t+1.8; hostTel(m,m.x,m.y,175,1.8,1.3,7); }
-      else { const q=players[Math.floor(Math.random()*players.length)]; if(q) pushMd(q.u,mobDmg(m)*.7,m.id,5); }
+    case 'lich': { m.phase=(m.phase||0)+1; m.spT=m.enr?3.8:5.2; const pick=m.phase%6; const rnd=(R0,R1)=>{ const a=Math.random()*6.283, r=R0+Math.random()*(R1-R0); return [m.x+Math.cos(a)*r,m.y+Math.sin(a)*r]; }, nearP=players.filter(q=>dist(q.x,q.y,m.x,m.y)<650);
+      if(pick===1){ for(const q of nearP) hostTel(m,q.x,q.y,82,1.6,1.2,6); }                                                     // Frost Grasp on everyone
+      else if(pick===2){ m.chanU=t+1.8; hostTel(m,m.x,m.y,180,1.8,1.5,7); dWarn('Morvath gathers a DEATH NOVA: get away from him!'); }
+      else if(pick===3){ for(let i=0;i<9;i++){ const [x,y]=rnd(60,380); hostTel(m,x,y,72,2.0,1.15,4); } dWarn('Bone Storm! Watch your feet.'); }
+      else if(pick===4){ m.chanU=t+1.4; const a0=Math.random()*1.57; for(let d=0;d<4;d++){ const a=a0+d*1.5708; for(let k=0;k<3;k++) hostTel(m,m.x+Math.cos(a)*(90+k*95),m.y+Math.sin(a)*(90+k*95),82,1.3+k*.35,1.3,3); } dWarn('Soul Rend tears the crypt in four directions!'); }
+      else if(pick===5){ const pool=players.filter(q=>q.u!==p.u&&dist(q.x,q.y,m.x,m.y)<650), q=pool.length?pool[Math.floor(Math.random()*pool.length)]:p; pushMd(q.u,mobDmg(m)*1.1,m.id,5); dWarn('Morvath hurls a Frost Tomb!'); }
+      else { const q=players[Math.floor(Math.random()*players.length)]; if(q) pushMd(q.u,mobDmg(m)*.9,m.id,5); }
       break; }
-    case 'ossric': { m.phase=(m.phase||0)+1; m.spT=m.enr?4.6:6.5; const pick=m.phase%3;
-      if(pick===1){ const a=Math.atan2(p.y-m.y,p.x-m.x); m.face=a; m.chanU=t+1.4; hostTel(m,m.x+Math.cos(a)*105,m.y+Math.sin(a)*105,115,1.4,1.5,3); }
-      else if(pick===2){ m.chanU=t+1.6; hostTel(m,m.x,m.y,155,1.6,1.25,2); }
-      else { let far=p,fd=0; for(const q of players){ const dq=dist(q.x,q.y,m.x,m.y); if(dq>fd&&dq<520){ fd=dq; far=q; } } const tx=far.x,ty=far.y; m.chanU=t+1.2;
-        hostTel(m,tx,ty,80,1.2,1.35,1,()=>{ if(!m.dead&&!m.evade&&!blocked(tx,ty,m.t.r*.7)){ m.x=tx; m.y=ty; } }); }
+    case 'ossric': { m.phase=(m.phase||0)+1; m.spT=m.enr?3.6:5.2; const pick=m.phase%6; const rnd=(R0,R1)=>{ const a=Math.random()*6.283, r=R0+Math.random()*(R1-R0); return [m.x+Math.cos(a)*r,m.y+Math.sin(a)*r]; }, nearP=players.filter(q=>dist(q.x,q.y,m.x,m.y)<650);
+      if(pick===1){ const a=Math.atan2(p.y-m.y,p.x-m.x); m.face=a; m.chanU=t+1.4; hostTel(m,m.x+Math.cos(a)*105,m.y+Math.sin(a)*105,115,1.4,1.7,3); }                 // Gate Cleave
+      else if(pick===2){ m.chanU=t+1.6; hostTel(m,m.x,m.y,155,1.6,1.4,2); if(m.hp<m.mhp*.5) hostTel(m,m.x,m.y,240,2.7,1.0,2); }                                    // Shockwave (and an aftershock below half health)
+      else if(pick===3){ const a=Math.atan2(p.y-m.y,p.x-m.x); m.face=a; m.chanU=t+1.2; for(let k=0;k<4;k++) hostTel(m,m.x+Math.cos(a)*(90+k*90),m.y+Math.sin(a)*(90+k*90),85,1.2+k*.3,1.3,3); dWarn('Ossric drives stone spikes through the floor!'); }
+      else if(pick===4){ let far=p,fd=0; for(const q of players){ const dq=dist(q.x,q.y,m.x,m.y); if(dq>fd&&dq<520){ fd=dq; far=q; } } const tx=far.x,ty=far.y; m.chanU=t+1.2;
+        hostTel(m,tx,ty,85,1.2,1.5,1,()=>{ if(!m.dead&&!m.evade&&!blocked(tx,ty,m.t.r*.7)){ m.x=tx; m.y=ty; } }); }                                                   // Gate Leap at the farthest hero
+      else if(pick===5){ for(let i=0;i<6;i++){ const [x,y]=rnd(70,320); hostTel(m,x,y,80,1.8,1.2,4); } dWarn('The vault quakes!'); }
+      else { pushMd(p.u,mobDmg(m)*1.3,m.id,5); dWarn('Ossric crushes his target in a stone grip!'); }
       break; }
-    case 'silt': { m.phase=(m.phase||0)+1; m.spT=m.enr?5:7; const pick=m.phase%3;
-      if(pick===1){ for(const q of players) if(dist(q.x,q.y,m.x,m.y)<600) hostTel(m,q.x,q.y,78,1.7,.9,6); }
-      else if(pick===2){ m.chanU=t+1.5; hostTel(m,m.x,m.y,145,1.5,1.2,2); }
-      else { const q=players[Math.floor(Math.random()*players.length)]; if(q) pushMd(q.u,mobDmg(m)*.55,m.id,5); }
+    case 'silt': { m.phase=(m.phase||0)+1; m.spT=m.enr?4:5.6; const pick=m.phase%5; const rnd=(R0,R1)=>{ const a=Math.random()*6.283, r=R0+Math.random()*(R1-R0); return [m.x+Math.cos(a)*r,m.y+Math.sin(a)*r]; }, nearP=players.filter(q=>dist(q.x,q.y,m.x,m.y)<650);
+      if(pick===1){ for(const q of nearP) hostTel(m,q.x,q.y,80,1.7,1.1,6); }                                                                                          // Silt Bolts on everyone
+      else if(pick===2){ m.chanU=t+1.5; hostTel(m,m.x,m.y,150,1.5,1.4,2); }                                                                                          // Thrash
+      else if(pick===3){ const q=nearP.length?nearP[Math.floor(Math.random()*nearP.length)]:p; const tx=q.x,ty=q.y; m.chanU=t+1.6;
+        hostTel(m,tx,ty,110,1.6,1.6,1,()=>{ if(!m.dead&&!m.evade&&!blocked(tx,ty,m.t.r*.7)){ m.x=tx; m.y=ty; } }); dWarn('Mother Silt burrows beneath you!'); }
+      else if(pick===4){ for(let i=0;i<7;i++){ const [x,y]=rnd(60,360); hostTel(m,x,y,70,2.0,1.2,6); } dWarn('Acid pools bubble up from the silt!'); }
+      else { const q=players[Math.floor(Math.random()*players.length)]; if(q) pushMd(q.u,mobDmg(m)*.9,m.id,5); }                                                     // Venom Spit
       break; }
-    case 'vaelith': { m.phase=(m.phase||0)+1; m.spT=m.enr?4.4:6.2; const pick=m.phase%4;
-      if(pick===1){ const a=Math.atan2(p.y-m.y,p.x-m.x); m.face=a; m.chanU=t+1.3; for(let k=0;k<3;k++) hostTel(m,m.x+Math.cos(a)*(95+k*105),m.y+Math.sin(a)*(95+k*105),95,1.4+k*.45,1.3,3); }
-      else if(pick===2){ for(const q of players) if(dist(q.x,q.y,m.x,m.y)<650) hostTel(m,q.x,q.y,88,1.6,1.0,6); }
-      else if(pick===3){ m.chanU=t+2; hostTel(m,m.x,m.y,175,2.0,1.35,7); }
-      else { const q=players[Math.floor(Math.random()*players.length)]; if(q) pushMd(q.u,mobDmg(m)*.6,m.id,5); }
+    case 'vaelith': { m.phase=(m.phase||0)+1; m.spT=m.enr?3.6:5; const pick=m.phase%7; const rnd=(R0,R1)=>{ const a=Math.random()*6.283, r=R0+Math.random()*(R1-R0); return [m.x+Math.cos(a)*r,m.y+Math.sin(a)*r]; }, nearP=players.filter(q=>dist(q.x,q.y,m.x,m.y)<650);
+      if(pick===1){ const a=Math.atan2(p.y-m.y,p.x-m.x); m.face=a; m.chanU=t+1.3; for(let k=0;k<3;k++) hostTel(m,m.x+Math.cos(a)*(95+k*105),m.y+Math.sin(a)*(95+k*105),95,1.4+k*.45,1.5,3); }   // Tidal Wave
+      else if(pick===2){ for(const q of nearP) hostTel(m,q.x,q.y,88,1.6,1.2,6); }                                                                                    // Drown
+      else if(pick===3){ m.chanU=t+2; hostTel(m,m.x,m.y,175,2.0,1.6,7); dWarn('Vaelith calls the MAELSTROM: run!'); }
+      else if(pick===4){ const a=Math.atan2(p.y-m.y,p.x-m.x); m.face=a; m.chanU=t+1.4; for(const da of [-.75,0,.75]) for(let k=0;k<3;k++) hostTel(m,m.x+Math.cos(a+da)*(95+k*100),m.y+Math.sin(a+da)*(95+k*100),85,1.4+k*.4,1.3,3); dWarn('Crashing Tides!'); }
+      else if(pick===5){ for(const q of nearP){ hostTel(m,q.x,q.y,85,1.5,.9,6); hostTel(m,q.x,q.y,120,2.9,.9,6); } dWarn('The Undertow pulls twice: keep moving!'); }
+      else if(pick===6){ pushMd(p.u,mobDmg(m)*1.35,m.id,5); dWarn('Vaelith drags his target under!'); }
+      else { const q=players[Math.floor(Math.random()*players.length)]; if(q) pushMd(q.u,mobDmg(m)*.8,m.id,5); }                                                     // Cold Touch
       break; }
     case 'wyrm': {
       m.phase=(m.phase||0)+1; m.spT=m.enr?5:7; const pick=m.phase%3;
@@ -1798,10 +1810,10 @@ function hostSim(dt){
       }
       if(!stunned && !chan){ try{ mobSpecial(m,p,players,dt,t); }catch(e){ m.spT=3; console.error(e); } }
       if(mt.key==='wyrm'){ if(!m.summoned && m.hp<m.mhp*.5){ m.summoned=true; summonAdds(m); } if(!m.enr && m.hp<m.mhp*.25) m.enr=true; }
-      if(mt.key==='ossric'&&!m.enr&&m.hp<m.mhp*.2) m.enr=true;
-      if(mt.key==='siltmother'){ if(!m.summoned&&m.hp<m.mhp*.7){ m.summoned=true; summonAdds(m); } if(!m.summoned2&&m.hp<m.mhp*.35){ m.summoned2=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.15) m.enr=true; }
-      if(mt.key==='vaelith'){ if(!m.summoned&&m.hp<m.mhp*.5){ m.summoned=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.25) m.enr=true; }
-      if(mt.key==='lich'){ if(!m.summoned&&m.hp<m.mhp*.66){ m.summoned=true; summonAdds(m); } if(!m.summoned2&&m.hp<m.mhp*.33){ m.summoned2=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.15) m.enr=true; }
+      if(mt.key==='ossric'&&!m.enr&&m.hp<m.mhp*.3) m.enr=true;
+      if(mt.key==='siltmother'){ if(!m.summoned&&m.hp<m.mhp*.7){ m.summoned=true; summonAdds(m); } if(!m.summoned2&&m.hp<m.mhp*.35){ m.summoned2=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.2) m.enr=true; }
+      if(mt.key==='vaelith'){ if(!m.summoned&&m.hp<m.mhp*.5){ m.summoned=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.3) m.enr=true; }
+      if(mt.key==='lich'){ if(!m.summoned&&m.hp<m.mhp*.66){ m.summoned=true; summonAdds(m); } if(!m.summoned2&&m.hp<m.mhp*.33){ m.summoned2=true; summonAdds(m); } if(!m.enr&&m.hp<m.mhp*.2) m.enr=true; }
     } else {
       m.wT-=dt;
       if(m.wT<=0){ m.wT=3+Math.random()*5; const a=Math.random()*6.28, r=mt.key==='vyrathos'?0:Math.random()*(mt.boss?40:70); m.wx=m.sx+Math.cos(a)*r; m.wy=m.sy+Math.sin(a)*r; }
@@ -6822,6 +6834,8 @@ function raidName(u){ return u===MY_U?(me?me.c.name:'You'):((othersByU.get(u)||{
 
 /* ---------- warnings every raider sees (sent by the world host) ---------- */
 let RWLAST={};
+const inDung=(x,y)=>{ try{ const z=zoneOf(x/TS|0,y/TS|0); return z==='vault'||z==='crypt'; }catch(e){ return false; } };
+function dWarn(txt){ rWarn(txt); if(me&&inDung(me.x,me.y)&&!inRaid(me.x,me.y)) raidWarnShow(txt); }
 function rWarn(txt){ const T0=now(); if(RWLAST[txt]&&T0-RWLAST[txt]<3) return; RWLAST[txt]=T0; myChat.push([++chSeq,4,txt]); if(myChat.length>3) myChat.shift(); if(me&&inRaid(me.x,me.y)) raidWarnShow(txt); }
 function raidWarnShow(txt){ let el=$('raidWarn'); if(!el){ el=document.createElement('div'); el.id='raidWarn'; document.body.appendChild(el); }
   el.textContent=txt; el.classList.remove('rw-on'); void el.offsetWidth; el.classList.add('rw-on'); clearTimeout(raidWarnShow.t); raidWarnShow.t=setTimeout(()=>el.classList.remove('rw-on'),4200);
@@ -6899,7 +6913,7 @@ function raidHostTick(players,t,dt){
   const inside=(me&&inRaid(me.x,me.y))||[...others.values()].some(o=>inRaid(o.x,o.y));
   if(!inside){ if(!RAID.emptySince) RAID.emptySince=t; else if(t-RAID.emptySince>30){ if(mobs.some(m=>m.t.raid&&!m.t.summon&&(m.dead||m.hp<m.mhp||m.evade))) raidReset(false); RAID.emptySince=t; } return; }
   RAID.emptySince=0;
-  { const n=players.filter(q=>inRaid(q.x,q.y)).length; RAIDD.sc=clamp(7/Math.max(7,n),.33,1); }
+  { const n=players.filter(q=>inRaid(q.x,q.y)).length; RAIDD.sc=clamp(7/Math.max(15,n),.33,1); RAIDD.dsc=1.25; }
   /* packs fight together */
   if(!RTRASH) RTRASH=mobs.filter(m=>m.t.raid&&!m.t.boss&&!m.t.summon);
   for(const m of RTRASH){ if(m.dead||!m.tgt) continue; for(const o of RTRASH) if(o!==m&&!o.dead&&!o.tgt&&!o.evade&&dist(o.x,o.y,m.x,m.y)<165){ o.threat={}; for(const k in m.threat) o.threat[k]=1; } }
@@ -6950,7 +6964,6 @@ function raidHostTick(players,t,dt){
 /* ---------- entering and leaving ---------- */
 function raidNear(x,y){ return Math.hypot(x-RAID.gate.x,y-RAID.gate.y)<=RAID.range; }
 function raidReqs(all){ const out=[], n=all.length;
-  if(n<5) out.push(`Cinderhold is a raid for 5 to ${RAID_MAX} heroes. Your group has ${n}: invite more (a party holds ${PARTY_MAX}; the leader can turn it into a raid group of ${RAID_MAX}).`);
   const low=all.filter(a=>a.l<20); if(low.length) out.push(`Every hero must be level 20. Not yet: ${low.map(a=>a.n+' ('+a.l+')').join(', ')}.`);
   const has=r=>all.some(a=>CLS[a.c]&&CLS[a.c].role===r), miss=[];
   if(!has('Tank')) miss.push('a Tank (Bulwark)'); if(!has('Healer')) miss.push('a Healer (Mender)'); if(!has('Support')) miss.push('a Support (Bard)'); if(!has('Damage')) miss.push('Damage (Arcanist, Assassin, Barbarian or Hunter)');
@@ -7039,7 +7052,7 @@ const THALIA=(()=>{ const [tx,ty]=findOpen(165,26); return {id:'thalia',name:'Em
 NPCS.push({id:'brannoc',name:'Quartermaster Brannoc',title:"Tyrant's Ember trader",x:(RX0+6)*TS+16,y:(OWH+10)*TS+16,col:'#a87a3a'});
 NPCS.push({id:'herald',name:'Ashen Herald',title:'Leave Cinderhold',x:(RX0+21)*TS+16,y:(OWH+66)*TS+16,col:'#8a8a8a'});
 const RPOI={id:'cinderhold',name:'The Cinderhold Gate',x:170,y:24,r:5};
-NPCGREET.thalia='"Beneath the caldera lies Cinderhold, the forge-citadel of Vyrathos, the Ember Tyrant. Seven terrors stand between you and him. Bring at least five heroes, all level 20. I would bring a Bulwark to hold the line, a Mender to keep you breathing, a Bard to lift your arms, and blades to finish the work, but who you bring is your choice. Gather at the gate and type -e."';
+NPCGREET.thalia='"Beneath the caldera lies Cinderhold, the forge-citadel of Vyrathos, the Ember Tyrant. Seven terrors stand between you and him. It is built for a host of ten to twenty heroes, all level 20. A smaller band may enter to look around, but the servants of the Tyrant will not go easy on them. I would bring a Bulwark to hold the line, a Mender to keep you breathing, a Bard to lift your arms, and blades to finish the work, but who you bring is your choice. Gather at the gate and type -e."';
 NPCGREET.brannoc='"Embers! Every Tyrant\'s Ember you bring me is a shard of his fire. Six of them and I\'ll forge you something worthy of this place."';
 NPCGREET.herald='"The fire remembers those who walk out alive. Shall I lead you back to the sky?"';
 const RSVC={ilsa:[['shop','Browse goods'],['sethome','🏠 Make Emberwatch your home']],hakon:[['sethome','🏠 Make this camp your home']],oriel:[['sethome','🏠 Make Hearthmere your home']],thalia:[['rinfo','📜 About Cinderhold']],brannoc:[['rembers',"🔥 Trade Tyrant's Embers"],['rout','Return to the surface']],herald:[['rout','Return to the surface']]};
@@ -7054,7 +7067,7 @@ function openEmbers(n){ const c=me.c, e=c.embers||0;
   $('bk').onclick=()=>talk(n);
   document.querySelectorAll('#dlg [data-em]').forEach(b=>b.onclick=()=>{ if((c.embers||0)<EMBER_COST) return; if(c.inv.length>=BAGMAX) return err('Bags are full'); const it=tyrantGear(b.dataset.em,c.cls); c.embers-=EMBER_COST; c.inv.push(it); renderInv(); persist();
     chatLine(`Brannoc forges you [${it.name}].`,'c-loot t3'); try{ const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',40,3,{glow:true}); sfx('quest'); }catch(e){} openEmbers(n); }); }
-QUESTS.push({id:'cinder1',giver:'thalia',title:'The Forgewarden',type:'kill',mob:'kragmor',n:1,xp:6000,gold:150,lvl:20,item:3,text:'Lead a raid into Cinderhold and silence Kragmor the Forgewarden, who keeps the Tyrant\'s great forge burning. You will need at least five heroes of level 20. A tank, a healer, a support and damage are recommended.'},
+QUESTS.push({id:'cinder1',giver:'thalia',title:'The Forgewarden',type:'kill',mob:'kragmor',n:1,xp:6000,gold:150,lvl:20,item:3,text:'Lead a raid into Cinderhold and silence Kragmor the Forgewarden, who keeps the Tyrant\'s great forge burning. Every hero must be level 20. Cinderhold is built for 10 to 20 heroes; smaller groups may enter, but the bosses stay at full strength. Several tanks, healers, supports and plenty of damage are recommended.'},
   {id:'cinder2',giver:'thalia',title:'Heart of the Tyrant',type:'kill',mob:'vyrathos',n:1,xp:20000,gold:500,lvl:20,pre:'cinder1',epic:true,text:'Fight through the twins, the hounds, the living flow, the pyromancer and the colossus, down to the Heart of Cinderhold. End Vyrathos, the Ember Tyrant, before his fire swallows Emberfall.'});
 Object.assign(BOSSY,{
   kragmor:{title:'Forgewarden of Cinderhold',pull:'The forge hungers. Feed it your bones!',p50:'Hotter! HOTTER!',p20:'The forge... overflows!',die:'The fires... go... cold...'},

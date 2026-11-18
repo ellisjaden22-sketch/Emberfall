@@ -1,9 +1,9 @@
 {
- "version": "v0.79",
- "title": "Sharper Shades",
+ "version": "v0.82",
+ "title": "A raid for an army",
  "date": "18 Nov 2026",
- "text": "Ambush and Fan of Knives reworked.\n\n• Ambush now adds 3 combo points (was 2) and costs 35 energy (was 55)\n• Fan of Knives has no cooldown and costs 35 energy (was 45, with a 5 second cooldown)\n✨ Fan of Knives adds a combo point for every enemy it hits: hit three players and you get three combo points (up to the usual 5)",
+ "text": "Cinderhold is now tuned for 10 to 20 heroes.\n\n• Cinderhold is built for 10 to 20 heroes: its bosses now last about twice as long as before and hit 25% harder. Smaller groups can still go in to explore, but the bosses no longer go easier on them\n• Groups of more than 15 heroes spread the fight further: the bosses take a little less damage per hero, so a full 20 still has to work for it",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T17:15:25Z"
+ "time": "2026-11-18T18:14:26Z"
 }
