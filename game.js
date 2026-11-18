@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 76;
+const VERSION = 77;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2012,15 +2012,19 @@ function skAnimCrt(S,M,b,m){ const t=now()+((m.id||0)%7)*.83, R={}, L=[], add=(n
 /* v73: hero models for the seven classes. Each is a sculpted statue given a simple rig (pelvis, spine, chest, head and two legs),
    animated here: legs that walk, run, sit a saddle and kick when swimming; the whole body twisting and lunging into attacks,
    leaning back to cast, emotes, and a fall on death. Turn off in Settings > Graphics to see the classic look with your gear. */
-const HEROM={warden:'hero2_warden',mender:'hero2_mender',barbarian:'hero2_barbarian',arcanist:'hero2_arcanist',assassin:'hero2_assassin',hunter:'hero2_hunter',bard:'hero2_bard'};
+const HEROM={warden:'hero3_warden',mender:'hero3_mender',barbarian:'hero3_barbarian',arcanist:'hero3_arcanist',assassin:'hero3_assassin',hunter:'hero3_hunter',bard:'hero3_bard'};
 const HERO_H={warden:1.95,barbarian:1.95,mender:1.9,arcanist:1.92,assassin:1.82,hunter:1.85,bard:1.9};
 /* v75: hero movement, all round. The seven hero models now have shoulders and elbows (weapons, shields and staves ride in the hands;
    the Celestus and the Bard hold their swords two-handed; the Celestus' wings have their own joints). Everything below is
    procedural, in model space (x = the hero's left, y = up, z = forward), and smoothed per hero so stances blend in and out. */
 /* how far each model's arms can move before its coat, cape, wings or shield start to stretch; the body twist makes up the rest */
-const HARMK={warden:{uarmR:.75,farmR:.8,uarmL:.35,farmL:.35,b:1.3},barbarian:{uarmR:.85,farmR:.9,uarmL:.5,farmL:.5,b:1.15},arcanist:{uarmR:.55,farmR:.6,uarmL:.45,farmL:.45,b:1.3},
-  assassin:{b:1},hunter:{uarmR:.38,farmR:.45,uarmL:.38,farmL:.45,b:1.45},mender:{grip:.5,wingL:.45,wingR:.45,b:1.4},bard:{grip:.5,b:1.4}};
-const HSTY={warden:{k:'spear'},barbarian:{k:'mace'},arcanist:{k:'staff'},assassin:{k:'dagger'},hunter:{k:'gun'},mender:{k:'two',wings:1},bard:{k:'two'}};
+const HARMK={warden:{uarmR:.9,farmR:.9,uarmL:.6,farmL:.6,b:1.15},barbarian:{b:1.05},arcanist:{uarmR:.8,farmR:.85,uarmL:.75,farmL:.75,b:1.15},
+  assassin:{b:1},hunter:{uarmR:.75,farmR:.8,uarmL:.75,farmL:.8,b:1.15},mender:{uarmR:.85,farmR:.9,uarmL:.85,farmL:.9,wingL:.6,wingR:.6,b:1.1},bard:{uarmR:.9,farmR:.9,uarmL:.9,farmL:.9,b:1.1}};
+/* the Celestus and the Bard were sculpted with both hands on the hilt in front of them; this rest pose lowers their arms and carries
+   the sword at the right side, the wrist turning back so the blade hangs naturally, tip a little forward */
+const HREST={mender:{uarmR:[[0,0,1,-.1]],farmR:[[1,0,0,.95],[0,1,0,-1.0]],handR:[[1,0,0,-.32],[0,1,0,1.0],[1,0,0,-.95]],uarmL:[[0,0,1,.08]],farmL:[[1,0,0,1.5],[0,1,0,.75]],handL:[[0,1,0,-.6],[1,0,0,-.4]]},
+  bard:{uarmR:[[0,0,1,-.12]],farmR:[[1,0,0,.95],[0,1,0,-1.0]],handR:[[1,0,0,-.32],[0,1,0,1.0],[1,0,0,-.95]],uarmL:[[0,0,1,.1]],farmL:[[1,0,0,1.5],[0,1,0,.75]],handL:[[0,1,0,-.6],[1,0,0,-.4]]}};
+const HSTY={warden:{k:'spear'},barbarian:{k:'mace'},arcanist:{k:'staff'},assassin:{k:'dagger'},hunter:{k:'gun'},mender:{k:'blade',wings:1},bard:{k:'blade'}};
 function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z,a)=>{ if(AK[n]!=null) a*=AK[n]; if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, st=o.an||{}, Y=HSTY[cls]||{k:'gun'}, two=Y.k==='two';
   /* per-hero smoothing */
   const dt=clamp(t-(st._hT||t),0,.1); st._hT=t; const ease=(k,v,r)=>{ st[k]=(st[k]??v)+(v-(st[k]??v))*Math.min(1,dt*r); return st[k]; };
@@ -2033,13 +2037,13 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
   const arms=(uR,fR,uL,fL)=>{ if(two){ add('grip',1,0,0,(uR+uL)/2+(fR+fL)/4); return; } add('uarmR',1,0,0,uR); add('farmR',1,0,0,fR); add('uarmL',1,0,0,uL); add('farmL',1,0,0,fL); };
   const out=(aR,aL)=>{ if(two) return; add('uarmR',0,0,1,-aR); add('uarmL',0,0,1,aL); };   /* raise arms out to the sides */
   const wing=(open,beat)=>{ if(!Y.wings) return; add('wingL',0,1,0,-open); add('wingR',0,1,0,open); add('wingL',0,0,1,beat); add('wingR',0,0,1,-beat); };
-  let dy=0;
+  let dy=0, fw=0; { const RS=HREST[cls]; if(RS) for(const n in RS) for(const q of RS[n]) (R[n]||(R[n]=[])).push(q.slice()); }
   /* ---------- death: three ways to fall, picked when it happens ---------- */
   if(o.dead>=0){ if(st._hDv==null) st._hDv=Math.floor(Math.random()*3); const k=eO(clamp(o.dead/.85,0,1)), kn=eO(clamp(o.dead/.35,0,1)), v=st._hDv;
     if(v===0){ add('root',1,0,0,-1.5*k); add('thighL',1,0,0,-.35*k); add('thighR',1,0,0,-.2*k); add('shinL',1,0,0,.5*k); add('chest',1,0,0,.2*k); arms(.5*k,-.3*k,.7*k,-.2*k); out(.6*k,.8*k); dy=.12*k; }
     else if(v===1){ add('thighL',1,0,0,-1.3*kn); add('thighR',1,0,0,-1.2*kn); add('shinL',1,0,0,1.6*kn); add('shinR',1,0,0,1.6*kn); add('root',1,0,0,1.45*eO(clamp((o.dead-.25)/.6,0,1))); arms(-.9*k,-.4*k,-.8*k,-.4*k); dy=-.45*kn+.25*k; }
     else { add('root',0,0,1,1.45*k); add('chest',0,1,0,.4*k); add('thighR',0,0,1,-.4*k); add('shinL',1,0,0,.6*k); arms(.3*k,-.5*k,-.2*k,-.2*k); out(.4*k,1.1*k); dy=.1*k; }
-    wing(.4*k,-.3*k); add('head',1,0,0,.25*k); return {R,dy}; }
+    wing(.4*k,-.3*k); add('head',1,0,0,.25*k); return {R,dy,fw}; }
   st._hDv=null;
   const EM=o.emote&&o.emote.k, et=o.emote?t-(o.emote.t0||0):0;
   /* ---------- the legs and body ---------- */
@@ -2071,7 +2075,7 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
     const yaw=.11*(gl.th-gr.th)/Math.max(.2,A0)*mv, roll=.05*mv*(gl.st&&!gr.st?1:gr.st&&!gl.st?-1:0)*Math.sin(Math.PI*(gl.st?gl.u:gr.u));
     add('pelvis',0,1,0,yaw); add('pelvis',0,0,1,roll); add('spine',0,1,0,-yaw*.75); add('chest',0,1,0,-yaw*.55); add('spine',0,0,1,-roll*.6); add('head',0,1,0,yaw*.3); add('head',0,0,1,-roll*.4);
     /* lean into speed and acceleration, bank into turns; the head lifts a little against the lean */
-    const lean=(.05+.17*run)*mv+clamp(acc,-1,2)*.035; add('root',1,0,0,lean); add('head',1,0,0,-lean*.35); add('root',0,0,1,clamp(-turn*.035*mv,-.14,.14)); add('head',0,0,1,clamp(turn*.02*mv,-.06,.06));
+    const lean=(.015+.075*run)*mv+clamp(acc,-1,2)*.018; add('root',1,0,0,lean); add('chest',1,0,0,.03*run*mv); add('head',1,0,0,-lean*.6); add('root',0,0,1,clamp(-turn*.035*mv,-.14,.14)); add('head',0,0,1,clamp(turn*.02*mv,-.06,.06));
     /* bob: walking vaults over the planted leg; running sinks into each landing and floats between steps */
     const sL=gl.st?gl:gr.st?gr:null, wB=sL?-(1-Math.cos(sL.th))*Lg*.85:0, rB=sL?-.055*Math.sin(Math.PI*sL.u):.045*Math.sin(Math.PI*clamp(((P0%.5)-duty*.5)/(.5-duty*.5),0,1));
     dy=(wB*(1-run)+rB*run)*clamp(mv*2,0,1)-.015*run;
@@ -2079,7 +2083,7 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
     const k=Y.k, swR=k==='spear'||k==='staff'?.4:1, swL=k==='spear'?.45:1, aK=(.85+.35*run)*(1-rdy*.6)*(1-cst);
     if(two){ add('grip',0,1,0,-yaw*.5); add('grip',1,0,0,.05*Math.abs(gl.th-gr.th)-.12*run); }
     else { const fR=gl.th*aK*swR, fL=gr.th*aK*swL; add('uarmR',1,0,0,-fR); add('uarmL',1,0,0,-fL);
-      add('farmR',1,0,0,-((.12+.95*run)*mv+.25*Math.max(0,fR))*(k==='spear'||k==='staff'?.35:1)); add('farmL',1,0,0,-((.12+.95*run)*mv+.25*Math.max(0,fL))*(k==='spear'?.5:1)); out(.07*run,.07*run); }
+      const bR=-((.12+.95*run)*mv+.25*Math.max(0,fR))*(k==='spear'||k==='staff'?.35:k==='blade'?.55:1); add('farmR',1,0,0,bR); if(k==='blade') add('handR',1,0,0,-bR+fR*.9+.25*run*mv); add('farmL',1,0,0,-((.12+.95*run)*mv+.25*Math.max(0,fL))*(k==='spear'?.5:1)); out(.07*run,.07*run); }
     wing(.08*mv+.05*run,.05*mv*Math.sin(P0*TAU*2)+.02);
     /* standing still: breathing, a slow shift of weight from foot to foot, the odd look around */
     const id=1-mv, br=Math.sin(t*1.6+(o.x||0)), ws=Math.sin(t*.42+(o.z||0)*.7);
@@ -2095,9 +2099,10 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
       else if(k==='dagger'){ arms(-.55*r,-.8*r,-.6*r,-.8*r); out(-.15*r,-.15*r); }
       else if(k==='staff'){ arms(-.4*r,-.25*r,-.45*r,-.6*r); }
       else if(k==='gun'){ arms(-.5*r,-.7*r,-.5*r,-.7*r); }
+      else if(k==='blade'){ arms(-.55*r,-.5*r,-.35*r,-.55*r); add('handR',1,0,0,-.35*r); }
       else add('grip',1,0,0,-.9*r);
       wing(.25*r,.05*r); }
-    if(stl>.01){ add('thighL',1,0,0,-.35*stl); add('thighR',1,0,0,-.3*stl); add('shinL',1,0,0,.65*stl); add('shinR',1,0,0,.6*stl); add('root',1,0,0,.14*stl); add('chest',1,0,0,.14*stl); add('head',1,0,0,-.12*stl); arms(-.35*stl,-.6*stl,-.35*stl,-.6*stl); dy-=.12*stl; }
+    if(stl>.01){ add('thighL',1,0,0,-.35*stl); add('thighR',1,0,0,-.3*stl); add('shinL',1,0,0,.65*stl); add('shinR',1,0,0,.6*stl); add('root',1,0,0,.08*stl); add('chest',1,0,0,.12*stl); add('head',1,0,0,-.12*stl); arms(-.35*stl,-.6*stl,-.35*stl,-.6*stl); dy-=.12*stl; }
     if(land>0){ const L=Math.sin(land*Math.PI*.9); add('thighL',1,0,0,-.45*L); add('thighR',1,0,0,-.45*L); add('shinL',1,0,0,.9*L); add('shinR',1,0,0,.9*L); add('root',1,0,0,.18*L); add('chest',1,0,0,.12*L); out(.25*L,.25*L); arms(-.2*L,-.3*L,-.2*L,-.3*L); dy-=.13*L; }
     /* emotes */
     if(EM==='dance'){ const d=Math.sin(et*7), d2=Math.sin(et*3.5); add('spine',0,0,1,.18*d); add('chest',0,1,0,.35*d2); add('thighL',1,0,0,-.4*Math.max(0,d)); add('thighR',1,0,0,-.4*Math.max(0,-d)); add('shinL',1,0,0,.6*Math.max(0,d)); add('shinR',1,0,0,.6*Math.max(0,-d)); dy-=.04*Math.abs(d);
@@ -2111,7 +2116,7 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
   if(o.swing>=0&&!o.ride){ const p=o.swing, v=o.swv||0, W=p<.3?eO(p/.3):1, Hh=p<.3?0:p<.48?eO((p-.3)/.18):1, B=p>.58?eI((p-.58)/.42):0, on=1-B, k=Y.k;
     const wind=W*(1-Hh), hit=Hh*on;   /* wind up, then the blow, then recover */
     const body=(tw,lean)=>{ tw*=AK.b||1; lean*=AK.b||1; add('chest',0,1,0,tw*.5); add('spine',0,1,0,tw*.3); add('root',0,1,0,tw*.2); add('chest',1,0,0,lean); };
-    const lunge=a=>{ add('thighL',1,0,0,-.35*a); add('shinL',1,0,0,.35*a); add('thighR',1,0,0,.25*a); add('root',1,0,0,.1*a); dy-=.04*a; };
+    const lunge=a=>{ add('thighL',1,0,0,-.32*a); add('shinL',1,0,0,.4*a); add('thighR',1,0,0,.22*a); add('shinR',1,0,0,.12*a); add('root',1,0,0,.05*a); dy-=.045*a; fw+=.22*a; };
     if(k==='spear'){ if(v===1){ /* shield bash */ arms(-.2*hit,-.3*hit,(.3*wind-1.15*hit),(-.6*wind+.3*hit)); body(-.35*wind+.5*hit,.12*hit); lunge(hit); }
       else if(v===2){ /* overhead spear strike */ arms((-1.45*wind-.55*hit),(-.9*wind+.5*hit),-.45*on,-.45*on); body(.2*wind-.25*hit,-.1*wind+.25*hit); lunge(hit*.7); }
       else { /* thrust */ arms((.35*wind-1.25*hit),(-1.3*wind+.2*hit),-.5*on,-.55*on); body(.45*wind-.55*hit,.1*hit); lunge(hit); } }
@@ -2121,6 +2126,11 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
     else if(k==='staff'){ /* staff thrust and a thrown hand */ arms(v===1?(-1.4*wind-.5*hit):(.2*wind-1.05*hit),v===1?(-.4*wind+.3*hit):(-.8*wind+.1*hit),(-.5*wind-1.15*hit),(-.9*wind+.2*hit)); body(.3*wind-.4*hit,.08*hit); }
     else if(k==='gun'){ /* aim and loose: the off hand reaches out, the near hand draws back to the cheek, then snaps open */ const aim=Math.max(W,1-B), snap=Hh*on*(1-Hh*.5);
       add('uarmL',1,0,0,-1.45*aim); add('farmL',1,0,0,-.1*aim); add('uarmR',1,0,0,-1.35*aim+.35*snap); add('farmR',1,0,0,-1.7*aim*(1-Hh)+(-.4)*Hh*on); add('uarmR',0,0,1,-.25*aim); add('uarmL',0,0,1,-.15*aim); body(-.5*aim,-.04*aim); add('head',0,1,0,.35*aim); }
+    else if(k==='blade'){ /* one-handed sword: a forehand cut across, a backhand return, an overhead chop; the free hand balances */
+      if(v===0){ arms(-1.0*wind-.55*hit,-.5*wind+.35*hit,-.3*on,-.4*on); add('uarmR',0,1,0,.7*wind-.9*hit); add('uarmR',0,0,1,-.35*wind); add('handR',0,0,1,.4*wind-.5*hit); body(.6*wind-.8*hit,.1*hit); }
+      else if(v===1){ arms(-.9*wind-.6*hit,-.9*wind+.4*hit,-.35*on,-.45*on); add('uarmR',0,1,0,-.6*wind+.8*hit); add('handR',0,0,1,-.4*wind+.5*hit); body(-.6*wind+.75*hit,.1*hit); }
+      else { arms(-1.45*wind-.4*hit,-.9*wind+.7*hit,-.4*on,-.5*on); add('handR',1,0,0,-.5*wind+.6*hit); body(.15*wind-.2*hit,-.1*wind+.25*hit); }
+      lunge(hit); wing(.22*(wind+hit),.15*wind-.1*hit); }
     else { /* two-handed sword: a chop, a rising cut, a thrust */ const g=v===0?(-1.9*wind-.4*hit):v===1?(.3*wind-1.9*hit):(-.8*wind-1.45*hit); add('grip',1,0,0,g); if(v===1) add('grip',0,1,0,.6*wind-.5*hit); body(v===1?.5*wind-.6*hit:.15*wind-.2*hit,-.1*wind+.22*hit); lunge(hit); wing(.22*(wind+hit),.15*wind-.1*hit); }
   }
   /* ---------- casting: each class has its own channel pose; a flick when the spell lets go ---------- */
@@ -2131,16 +2141,17 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
     else if(k==='mace'){ out(.9*q,.9*q); arms(-.3*q,-.6*q,-.3*q,-.6*q); add('chest',1,0,0,-.12*q); }
     else if(k==='dagger'){ arms(-.9*q,-1.4*q,-.9*q,-1.4*q); add('root',1,0,0,.12*q); }
     else if(k==='gun'){ arms(-1.3*q,-.3*q,-.5*q,-.9*q); }
+    else if(k==='blade'){ arms(-.55*q,-.75*q,-1.2*q,-.3*q); out(0,.25*q); wing(.45*q,.15*w*q); }
     else { add('grip',1,0,0,-1.3*q-.05*w*q); wing(.45*q,.15*w*q); }
   }
   if(o.rel>=0&&o.rel<1&&!o.ride){ const r=Math.sin(o.rel*Math.PI); add('chest',1,0,0,.22*r); add('spine',1,0,0,.1*r); arms(-.6*r,.2*r,-.8*r,.2*r); wing(.3*r,-.2*r); }
   /* ---------- a flinch when struck ---------- */
   const hk=ease('_hHit',o.hit?1:0,14); if(hk>.01){ add('chest',1,0,0,-.14*hk); add('head',1,0,0,-.12*hk); add('root',1,0,0,-.05*hk); arms(.2*hk,-.2*hk,.15*hk,-.2*hk); wing(.15*hk,0); }
-  return {R,dy}; }
+  return {R,dy,fw}; }
 
 function skDrawHero(o,cls){ if(OPT.heroModels===false||GFX.q==='low') return false; const f=HEROM[cls]; if(!f) return false; const M=skGet(f); if(!M) return false;
   const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc;
-  mreset(); mtr(o.x,o.y+(o.lift||0)+(A.dy||0)*sc,o.z); mry(-o.face); mry(Math.PI/2); msc(H/M.H);
+  const FW=(A.fw||0)*sc; mreset(); mtr(o.x+Math.cos(o.face||0)*FW,o.y+(o.lift||0)+(A.dy||0)*sc,o.z+Math.sin(o.face||0)*FW); mry(-o.face); mry(Math.PI/2); msc(H/M.H);
   SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,[],A.R,null).slice(),e:(o.hit?.45:0),a:typeof HALPHA==='number'?HALPHA:1});
   if(o.cast&&o.castCol) addLight(o.x+Math.cos(o.face)*.5,o.y+1.3*sc,o.z+Math.sin(o.face)*.5,3.2,o.castCol);
   return true; }
