@@ -1,9 +1,9 @@
 {
- "version": "v0.70",
- "title": "The Emberfall desktop app",
+ "version": "v0.71",
+ "title": "Real 3D models arrive",
  "date": "18 Nov 2026",
- "text": "Emberfall installs like a real PC game.\n\n✨ Windows: the downloaded Emberfall.exe now installs itself the first time you run it, with no administrator password: an Emberfall Online shortcut on your desktop and in the Start menu, and an entry in Settings > Apps so you can uninstall it like any other program\n✨ Linux: the app adds itself to your applications menu, with its icon, the first time it runs\n✨ The app checks for a newer version of itself each time it starts and tells you if there is one. The game inside it always updates automatically, as before",
+ "text": "The first real 3D models, animations and a whole new forest.\n\n✨ Thornlings are now true animated goblins and Ashen Ravagers are horned imps with spiked maces: real 3D models with real animations for walking, idling, sword swings, hit flinches and being knocked flat when they die\n✨ Brand-new trees across the world: leafy oaks and tall pines in the forest and meadows, twisted mossy trees in the swamp, bare dead trees in the Ash Reach, and new textured rocks everywhere\n✨ The wilds feel alive: bushes, ferns, wildflowers, reeds and mushrooms now grow through the forest, meadows and swamp\n✨ Emberwatch and Brinehaven are busier: barrels, crates, sacks, apple carts, benches and a wagon around the houses\n⬆️ Monster packs are spread out a little more, so you meet them in smaller groups\n⬆️ Trees fade out smoothly when they come right up against the camera\n⬆️ On the Low graphics setting (and most phones) the game keeps the classic look so it stays fast. 3D models by Quaternius.",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-17T23:39:43Z"
+ "time": "2026-11-18T02:51:50Z"
 }

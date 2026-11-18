@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 70;
+const VERSION = 71;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -816,7 +816,7 @@ const mobs=[], mobById={};
         if(ok&&mt.zone==='ash') ok = (mt.reg==='reach')===inReachT(tx,ty) && Math.hypot(tx-REACH.cx,ty-REACH.cy)>16 && Math.hypot(tx-192,ty-11)>10 && Math.hypot(tx-212,ty-47)>8 && (!mt.rx||(tx>=mt.rx[0]&&tx<=mt.rx[1]));
         if(ok&&mt.zone==='coast'&&mt.cb) ok=mt.cb(tx,ty);
         if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
-        if(ok){ const gap=tries<1500?112:tries<3000?96:70; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
+        if(ok){ const gap=tries<1500?150:tries<3000?124:96; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
       const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
       const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1));
@@ -1637,13 +1637,26 @@ vec3 tone(vec3 c){ c=max(c*1.32,vec3(0.)); vec3 a=acesF(c); float m=max(c.r,max(
 const VS_LIT=`#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPos; layout(location=1) in vec3 aNor; layout(location=2) in vec4 aCol;
+#ifdef SKIN
+layout(location=3) in vec2 aUV; layout(location=4) in uvec4 aJ; layout(location=5) in vec4 aWt; uniform mat4 uJ[24];
+#endif
+#ifdef TEX
+layout(location=6) in vec2 aUVt;
+#endif
+out vec2 vUV;
 #ifdef INST
 layout(location=3) in vec4 iA; layout(location=4) in vec4 iB; layout(location=5) in vec3 iC;
 #endif
 uniform mat4 uVP; uniform mat4 uM; uniform mat4 uLVP; uniform vec3 uInvS2; uniform float uTime; uniform vec3 uCam; uniform float uGrassD; uniform vec4 uPush[6];
 out vec3 vW; out vec3 vN; out vec4 vC; out vec4 vS; out vec3 vL;
 void main(){
-  vec3 p=aPos, n=aNor; vec4 c=aCol; vec3 w;
+  vec3 p=aPos, n=aNor; vec4 c=aCol; vec3 w; vUV=vec2(0.);
+#ifdef SKIN
+  { vec4 ww=aWt/max(dot(aWt,vec4(1.)),1e-4); mat4 sk=uJ[aJ.x]*ww.x+uJ[aJ.y]*ww.y+uJ[aJ.z]*ww.z+uJ[aJ.w]*ww.w; p=(sk*vec4(p,1.)).xyz; n=mat3(sk)*n; vUV=aUV; }
+#endif
+#ifdef TEX
+  vUV=aUVt;
+#endif
 #ifdef INST
   p*=iB.xyz; n/=iB.xyz; float s=sin(iA.w), k=cos(iA.w);
   p=vec3(p.x*k+p.z*s,p.y,-p.x*s+p.z*k); n=vec3(n.x*k+n.z*s,n.y,-n.x*s+n.z*k);
@@ -1666,7 +1679,16 @@ precision highp float;
 void main(){}`;
 const FS_LIT=`#version 300 es
 precision highp float;
-in vec3 vW; in vec3 vN; in vec4 vC; in vec4 vS; in vec3 vL;
+in vec3 vW; in vec3 vN; in vec4 vC; in vec4 vS; in vec3 vL; in vec2 vUV;
+#if defined(SKIN)||defined(TEX)
+uniform sampler2D uTex;
+#endif
+#ifdef SKIN
+uniform sampler2D uETex;
+#endif
+#ifdef TEX
+uniform float uAlphaT; uniform float uLeaf;
+#endif
 uniform float uMat;
 uniform vec3 uTint; uniform float uEmis; uniform float uAlpha; uniform float uWet; uniform float uTerrain; uniform float uSpec; uniform float uFol; uniform vec4 uFade;
 uniform vec3 uSunDir; uniform vec3 uSunCol; uniform vec3 uSky; uniform vec3 uGnd; uniform vec3 uFog; uniform vec3 uCam;
@@ -1685,6 +1707,12 @@ void main(){
     float nz=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715)))); if(nz<k*.86) discard; }
   vec3 N=normalize(vN); if(!gl_FrontFacing&&uFol<2.5) N=-N;
   vec3 base=vC.rgb*uTint; float trans=0.;
+#ifdef SKIN
+  base=texture(uTex,vUV).rgb*uTint;
+#endif
+#ifdef TEX
+  { vec4 tx=texture(uTex,vUV); if(uAlphaT>.5&&tx.a<.42) discard; if(uLeaf>.01){ float cd=length(vW-uCam); if(cd<2.6) discard; if(cd<4.2&&fract(52.9829*fract(dot(gl_FragCoord.xy,vec2(.06711,.00584))))<(4.2-cd)/1.6) discard; } base=tx.rgb*vC.rgb*uTint; trans=uLeaf; }
+#endif
   if(uFol>.5&&uFol<1.5&&vC.g>vC.r*1.12){ float l1=vn(vW.xz*3.1+vW.y*2.3), l2=vn(vW.xz*8.7-vW.y*5.1), l3=vn(vW.zx*19.+vW.y*13.);
     base*=.62+.42*l1+.28*l2+.12*l3; N=normalize(N+vec3(l2-.5,l3-.5,l1-.5)*.9); trans=.55; }
   else if(uFol>.5&&uFol<1.5&&vC.r>vC.b*1.3){ float bk=vn(vec2(atan(vW.x,vW.z)*3.,vW.y*9.)); base*=.75+.4*bk; }
@@ -1724,6 +1752,9 @@ void main(){
   for(int i=0;i<16;i++){ if(i>=uNL) break; vec3 L=uLP[i].xyz-vW; float d=length(L); float a=clamp(1.-d/uLP[i].w,0.,1.); a*=a;
     col+=base*uLC[i]*a*(max(dot(N,L/max(d,.001)),0.)*.75+.25); }
   col+=vC.rgb*uTint*vC.a+uTint*uEmis;
+#ifdef SKIN
+  col+=texture(uETex,vUV).rgb*1.6;
+#endif
   if(uTerrain>.5){ for(int i=0;i<12;i++){ if(i>=uND) break; vec4 D=uDec[i]; vec4 Cc=uDecC[i]; float d=length(vW.xz-D.xy);
       if(Cc.a<0.){ col*=1.-(-Cc.a)*.75*smoothstep(D.z,D.z*.15,d); }
       else if(D.w<-1.5){ float rot=(-D.w-2.)*6.2831; vec2 q=vW.xz-D.xy; float an=atan(q.y,q.x); float a1=an+rot, a2=an-rot*1.5;
@@ -1828,6 +1859,203 @@ function program(vs,fs,defs){ const pre=defs?('#define '+defs.join(NL+'#define '
   const u={}; const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS); for(let i=0;i<n;i++){ const inf=gl.getActiveUniform(p,i); u[inf.name.replace(/\[0\]$/,'')]=gl.getUniformLocation(p,inf.name); }
   return {p,u}; }
 const PL=program(VS_LIT,FS_LIT), PLI=program(VS_LIT,FS_LIT,['INST']), PS=program(VS_LIT,FS_SHADOW,['SHADOW']), PSI=program(VS_LIT,FS_SHADOW,['SHADOW','INST']);
+/* ---------- v71: real skinned 3D models (Quaternius Bestiary), loaded from play/models/ ---------- */
+const FS_SKIN=FS_LIT.replace('#version 300 es','#version 300 es'+NL+'#define SKIN');
+let PKL=null, PKS=null; try{ PKL=program(VS_LIT,FS_SKIN,['SKIN']); PKS=program(VS_LIT,FS_SHADOW,['SHADOW','SKIN']); }catch(e){ console.warn('skinned shaders unavailable',e); }
+/* which mobs wear which model: h = height in world units, arm = how far the arms drop from the T-pose, pv = hip height share */
+const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6} };
+const SKM={}, SKQ=[];
+/* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
+const SK=(()=>{
+  const qmul=(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
+  const qinv=a=>[-a[0],-a[1],-a[2],a[3]], qax=(x,y,z,an)=>{ const s=Math.sin(an/2); return [x*s,y*s,z*s,Math.cos(an/2)]; };
+  function m4(t,r,s,o){ const [x,y,z,w]=r,x2=x+x,y2=y+y,z2=z+z,xx=x*x2,xy=x*y2,xz=x*z2,yy=y*y2,yz=y*z2,zz=z*z2,wx=w*x2,wy=w*y2,wz=w*z2;
+    o=o||new Float32Array(16); o[0]=(1-(yy+zz))*s[0];o[1]=(xy+wz)*s[0];o[2]=(xz-wy)*s[0];o[3]=0;o[4]=(xy-wz)*s[1];o[5]=(1-(xx+zz))*s[1];o[6]=(yz+wx)*s[1];o[7]=0;
+    o[8]=(xz+wy)*s[2];o[9]=(yz-wx)*s[2];o[10]=(1-(xx+yy))*s[2];o[11]=0;o[12]=t[0];o[13]=t[1];o[14]=t[2];o[15]=1; return o; }
+  function mm(a,b,o){ o=o||new Float32Array(16); for(let i=0;i<4;i++)for(let j=0;j<4;j++){ let s=0; for(let k=0;k<4;k++) s+=a[k*4+j]*b[i*4+k]; o[i*4+j]=s; } return o; }
+  let GL=null, ROOT='models/', BLACK=null, A=null, Aq=null, Ap=null, Aready=null;
+  const black=()=>{ if(BLACK) return BLACK; BLACK=GL.createTexture(); GL.bindTexture(GL.TEXTURE_2D,BLACK); GL.texImage2D(GL.TEXTURE_2D,0,GL.RGBA,1,1,0,GL.RGBA,GL.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); return BLACK; };
+  function tex(url,srgb){ const gl=GL; return fetch(url).then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>createImageBitmap(b)).then(im=>{ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t);
+      gl.texImage2D(gl.TEXTURE_2D,0,srgb===false?gl.RGBA8:gl.SRGB8_ALPHA8,gl.RGBA,gl.UNSIGNED_BYTE,im); gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+      const an=gl.getExtension('EXT_texture_filter_anisotropic'); if(an) gl.texParameterf(gl.TEXTURE_2D,an.TEXTURE_MAX_ANISOTROPY_EXT,4);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT); return t; }).catch(()=>null); }
+  function anims(){ if(Aready) return Aready; Aready=Promise.all([fetch(ROOT+'anims.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(ROOT+'anims.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })])
+      .then(([m,b])=>{ A=m; A.buf=b; A.dv=new DataView(b); A.bi={}; A.bones.forEach((n,i)=>A.bi[n]=i); A.rp=Math.hypot(...A.restPelvis); return A; }).catch(()=>null); return Aready; }
+  async function load(gl,name,root){ GL=gl; if(root) ROOT=root; const base=ROOT+name;
+    const [meta,bin]=await Promise.all([fetch(base+'.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(base+'.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]); await anims();
+    const VS=40, ib=new Uint16Array(bin,meta.v*VS,meta.i), io=meta.v*VS+meta.i*2, nb=meta.bones.length, ibm=new Float32Array(bin.slice(io,io+nb*64));
+    const vao=gl.createVertexArray(); gl.bindVertexArray(vao); const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Uint8Array(bin,0,meta.v*VS),gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,VS,0); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,VS,12); gl.disableVertexAttribArray(2);
+    gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3,2,gl.FLOAT,false,VS,24); gl.enableVertexAttribArray(4); gl.vertexAttribIPointer(4,4,gl.UNSIGNED_BYTE,VS,32);
+    gl.enableVertexAttribArray(5); gl.vertexAttribPointer(5,4,gl.UNSIGNED_BYTE,true,VS,36);
+    const e=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,e); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,ib.slice(),gl.STATIC_DRAW); gl.bindVertexArray(null);
+    const M={meta,vao,n:meta.i,ibm,B:meta.bones,H:meta.max[1]-Math.min(0,meta.min[1]),tex:await tex(base+'.jpg'),emi:(await tex(base+'_e.jpg'))||black()};
+    if(!M.tex) throw new Error('texture');
+    let pre=new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]), preR=[0,0,0,1];
+    for(const p of meta.pre){ pre=mm(m4(p.t,p.r,p.s),pre); preR=qmul(p.r,preR); }
+    M.pre=pre; M.G=[]; M.B.forEach((x,i)=>{ M.G[i]=qmul(x.p<0?preR:M.G[x.p],x.r); }); M.g=[]; M.jm=new Float32Array(16*nb); M.L=new Float32Array(16);
+    M.map=A?M.B.map(x=>A.bi[x.n]??-1):null; const pi=M.B.findIndex(x=>x.n==='pelvis'); M.pk=A&&pi>=0?Math.hypot(...M.B[pi].t)/A.rp:1; return M; }
+  /* sample one clip at time t (seconds) into q (array of quats per anim-bone) and p (pelvis) */
+  function sample(c,t,loop,outQ,outP,w){ const C=A.clips[c]; if(!C) return 0; const n=C.n; let f=t*A.fps; f=loop?((f%(n-1))+(n-1))%(n-1):Math.min(Math.max(f,0),n-1);
+    const f0=Math.floor(f), f1=Math.min(f0+1,n-1), u=f-f0, dv=A.dv, nb=A.bones.length, S=A.stride;
+    for(let k=0;k<nb;k++){ const o0=C.off+f0*S+k*8, o1=C.off+f1*S+k*8; const q=outQ[k];
+      let a0=dv.getInt16(o0,true)/32767,a1=dv.getInt16(o0+2,true)/32767,a2=dv.getInt16(o0+4,true)/32767,a3=dv.getInt16(o0+6,true)/32767;
+      let b0=dv.getInt16(o1,true)/32767,b1=dv.getInt16(o1+2,true)/32767,b2=dv.getInt16(o1+4,true)/32767,b3=dv.getInt16(o1+6,true)/32767;
+      if(a0*b0+a1*b1+a2*b2+a3*b3<0){ b0=-b0;b1=-b1;b2=-b2;b3=-b3; }
+      let x=a0+(b0-a0)*u, y=a1+(b1-a1)*u, z=a2+(b2-a2)*u, ww=a3+(b3-a3)*u; if(q[0]*x+q[1]*y+q[2]*z+q[3]*ww<0&&q.w>0){ x=-x;y=-y;z=-z;ww=-ww; }
+      q[0]+=x*w; q[1]+=y*w; q[2]+=z*w; q[3]+=ww*w; q.w=(q.w||0)+w; }
+    const po0=C.off+f0*S+nb*8, po1=C.off+f1*S+nb*8; for(let i=0;i<3;i++){ const a=dv.getFloat32(po0+i*4,true), b=dv.getFloat32(po1+i*4,true); outP[i]+=(a+(b-a)*u)*w; } return 1; }
+  let TQ=null, TP=[0,0,0];
+  /* layers: [{c:clip,t:time,loop:bool,w:weight}], R: extra model-space turns {bone:[[ax,ay,az,ang],...]}, off: hip offset */
+  function pose(M,layers,R,off){ const B=M.B, g=M.g; let useA=!!(A&&M.map&&layers&&layers.length);
+    if(useA){ const nb=A.bones.length; if(!TQ) TQ=A.bones.map(()=>[0,0,0,0]); for(const q of TQ){ q[0]=q[1]=q[2]=q[3]=0; q.w=0; } TP[0]=TP[1]=TP[2]=0; let tw=0;
+      for(const L of layers) if(L.w>0.001) tw+=sample(L.c,L.t,L.loop,TQ,TP,L.w)*L.w; if(tw<=0) useA=false; else { TP[0]/=tw; TP[1]/=tw; TP[2]/=tw; } }
+    for(let i=0;i<B.length;i++){ const x=B[i]; let r=x.r, t=x.t;
+      if(useA){ const k=M.map[i]; if(k>=0){ const q=TQ[k], l=Math.hypot(q[0],q[1],q[2],q[3]); if(l>1e-6) r=[q[0]/l,q[1]/l,q[2]/l,q[3]/l]; if(x.n==='pelvis') t=[TP[0]*M.pk,TP[1]*M.pk,TP[2]*M.pk]; } }
+      const Lr=R&&R[x.n]; if(Lr){ let w=[0,0,0,1]; for(const q of Lr) w=qmul(qax(q[0],q[1],q[2],q[3]),w); const G=M.G[i]; r=qmul(r,qmul(qmul(qinv(G),w),G)); }
+      g[i]=mm(x.p<0?M.pre:g[x.p],m4(t,r,x.s,M.L),g[i]);
+      if(off&&x.n==='pelvis'){ g[i][12]+=off[0]; g[i][13]+=off[1]; g[i][14]+=off[2]; }
+      mm(g[i],M.ibm.subarray(i*16,i*16+16),M.jm.subarray(i*16,i*16+16)); }
+    return M.jm; }
+  const clipLen=c=>A&&A.clips[c]?A.clips[c].len:1, hasAnims=()=>!!A, setGL=g=>{ GL=g; };
+  return {load,pose,clipLen,hasAnims,tex,anims,setGL};
+})();
+
+function skGet(f){ const s=SKM[f]; if(s) return s.M||null; if(!PKL||/^file:/.test(location.protocol)&&!window.__skFile) { SKM[f]={M:null}; return null; }
+  SKM[f]={M:null}; SK.load(gl,f).then(M=>{ SKM[f].M=M; }).catch(e=>{ SKM[f].err=String(e&&e.message||e); console.warn('model '+f+' not found, using the classic look'); }); return null; }
+/* animation: idle and walk blend by speed, alternating weapon swings (a throw for ranged mobs), a flinch when hit, knocked flat on death */
+const SKATK=[['atkA',0,.43],['atkB',0,.53],['atkC',0,.47]], SKTHROW=['throw',.3,1.0];
+function skAnim(S,M,b,m,mt){ const t=now(), id=(m.id||0)%11, L=[], mv=clamp(b.mv||0,0,1);
+  if(b.dead>=0){ L.push({c:'hit',t:Math.min(b.dead*1.05,.83),loop:false,w:1}); return {L}; }
+  let aw=0; if(b.swing>=0){ const p=b.swing; aw=p<.08?p/.08:p>.86?(1-p)/.14:1; const A=mt.ranged?SKTHROW:SKATK[(b.swv||0)%3]; L.push({c:A[0],t:A[1]+p*(A[2]-A[1]),loop:false,w:aw*4}); }
+  const wl=SK.clipLen('walk'); L.push({c:'walk',t:(b.walk||0)/(2*Math.PI)*wl*(S.ws||.6),loop:true,w:mv*(1-aw*.6)+.0001});
+  L.push({c:'idle',t:t*.9+id*.37,loop:true,w:(1-mv)*(1-aw*.6)+.0001});
+  const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5) L.push({c:'hit',t:.05+fl*.06,loop:false,w:fl*.9});
+  return {L}; }
+function skDrawMob(m,mt,b){ const S=SKMOB[mt.key]; if(!S) return false; const M=skGet(S.f); if(!M) return false;
+  const A=skAnim(S,M,b,m,mt); mreset(); mtr(b.x,b.y,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
+  SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L,null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
+  if(HOVE) addLight(b.x,b.y+S.h*.6,b.z,2.2,[1,.95,.8]);
+  return true; }
+function drawSkinQ(pr,shadow){ if(!SKQ.length||!pr) return; setFrameUniforms(pr,shadow); const u=pr.u;
+  if(!shadow){ gl.uniform1i(u.uTex,4); gl.uniform1i(u.uETex,5); if(u.uSpec) gl.uniform1f(u.uSpec,.2); }
+  gl.uniform3f(u.uInvS2,1,1,1); gl.vertexAttrib4f(2,1,1,1,0);
+  for(const q of SKQ){ gl.uniformMatrix4fv(u.uM,false,q.m); gl.uniformMatrix4fv(u.uJ,false,q.j);
+    if(!shadow){ gl.uniform3f(u.uTint,1.05,1.05,1.05); gl.uniform1f(u.uEmis,q.e); gl.uniform1f(u.uAlpha,1);
+      gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D,q.M.tex); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,q.M.emi); gl.activeTexture(gl.TEXTURE0); }
+    gl.bindVertexArray(q.M.vao); gl.drawElements(gl.TRIANGLES,q.M.n,gl.UNSIGNED_SHORT,0); }
+  gl.bindVertexArray(null); }
+/* fetch the models as soon as the game starts so the mobs swap in quickly */
+setTimeout(()=>{ for(const k in SKMOB) skGet(SKMOB[k].f); },500);
+
+/* ---------- v71: Stylized Nature models (Quaternius, CC0): textured trees, rocks and undergrowth near the camera ---------- */
+const FS_TEXL=FS_LIT.replace('#version 300 es','#version 300 es'+NL+'#define TEX');
+const FS_TEXS=`#version 300 es
+precision highp float;
+in vec2 vUV; uniform sampler2D uTex; uniform float uAlphaT;
+void main(){ if(uAlphaT>.5&&texture(uTex,vUV).a<.42) discard; }`;
+let PTL=null, PTS=null; try{ PTL=program(VS_LIT,FS_TEXL,['INST','TEX']); PTS=program(VS_LIT,FS_TEXS,['SHADOW','INST','TEX']); }catch(e){ console.warn('nature shaders unavailable',e); }
+const NAT={on:false, ready:false, M:{}, T:{}, V:[], CS:24,
+  /* which textures carry a cut-out alpha (saved as png), the rest are jpg */
+  PNG:new Set(['leaves_normaltree_c','leaf_pine_c','leaves_twistedtree_c','leaves','flowers']),
+  LEAF:new Set(['leaves_normaltree_c','leaf_pine_c','leaves_twistedtree_c','leaves','flowers']),
+  near:()=>GFX.q==='ultra'?84:GFX.q==='high'?60:40, decoR:()=>GFX.q==='ultra'?44:GFX.q==='high'?34:24 };
+/* variants: mesh, scale per instance unit, sway, texture overrides, tint strength */
+NAT.KINDS={
+  broad:[['commontree_1',.6],['commontree_2',.6],['commontree_3',.52],['commontree_5',.64]],
+  pine:[['pine_1',.62],['pine_2',.62],['pine_4',.5],['pine_5',.58]],
+  dead:[['deadtree_1',.4],['deadtree_2',.36],['deadtree_3',.33]],
+  twist:[['twistedtree_2',.27],['twistedtree_4',.26]],
+  rock:[['rock_medium_1',.72],['rock_medium_2',.78],['rock_medium_3',.66]],
+  rockd:[['rock_medium_1',.72,'rocks_desert_diffuse'],['rock_medium_2',.78,'rocks_desert_diffuse'],['rock_medium_3',.66,'rocks_desert_diffuse']],
+  bush:[['bush_common',.8],['bush_common_flowers',.8]],
+  fern:[['fern_1',.28],['plant_1_big',.42]],
+  plant:[['plant_1',.7],['plant_7_big',1.1],['clover_2',.6]],
+  flower:[['flower_3_group',.5],['flower_4_group',.45]],
+  shroom:[['mushroom_common',1.4],['mushroom_laetiporus',.9]],
+  reed:[['grass_wispy_tall',.75]] };
+NAT.DECO=new Set(['bush','fern','plant','flower','shroom','reed']);
+NAT.KINDS.prop=[]; NAT.PROPDIR=new Set(['barrel','barrel_apples','crate_wooden','crate_metal','farmcrate_apple','farmcrate_carrot','bench','bucket_wooden_1','bag','pot_1','prop_wagon','prop_crate','chest_wood','barrel_holder','workbench','table_large','stool','cauldron','anvil_log','weaponstand','stall_empty','shield_wooden']);
+const natDir=n=>NAT.PROPDIR.has(n)||/^t_(trim|woodtrim|metalorn)/.test(n)?'models/props/':'models/nat/';
+/* town clutter: little groups of barrels, crates, sacks and benches set against house walls, away from the middle of each wall where the doors are */
+function natProps(){ const out=[], R=mulberry32(7272);
+  const ok=(x,y)=>{ const t=tAt(x,y); return t===T.COBBLE||t===T.PATH||t===T.GRASS; };
+  const blds=[]; for(const h of houses) blds.push({x:h.x,y:h.y,w:h.w,h:h.h,town:'e',kind:h.kind||'house'}); if(PORT&&PORT.B) for(const b of PORT.B) blds.push({x:b.x,y:b.y,w:b.w,h:b.h,town:'p',kind:b.k,door:b.door});
+  const SETS=[[['barrel',0,0],['barrel',.75,.1],['crate_wooden',1.55,0]],[['crate_wooden',0,0],['crate_metal',.95,0],['bag',1.7,.1]],[['barrel_apples',0,0],['farmcrate_apple',.8,.05],['bucket_wooden_1',1.4,.15]],
+    [['bench',0,.05]],[['prop_crate',0,0],['barrel',1.0,.1]],[['farmcrate_carrot',0,0],['bag',.75,.05],['pot_1',1.3,.1]],[['barrel_holder',0,0]],[['chest_wood',0,.05]],[['stool',0,.3],['table_large',1.6,.55]]];
+  for(const b of blds){ if(b.kind==='temple'||b.kind==='chapel'||b.kind==='hall') continue; if(b.town==='e'&&Math.hypot(b.x+b.w/2-TOWN.x,b.y+b.h/2-TOWN.y)<8) continue;
+    const sides=[{n:[0,-1],len:b.w,o:(k)=>[b.x+k,b.y-1],d:'n'},{n:[0,1],len:b.w,o:(k)=>[b.x+k,b.y+b.h],d:'s'},{n:[-1,0],len:b.h,o:(k)=>[b.x-1,b.y+k],d:'w'},{n:[1,0],len:b.h,o:(k)=>[b.x+b.w,b.y+k],d:'e'}];
+    for(const S of sides){ if(R()>.42||S.len<2||b.door===S.d) continue; const set=SETS[Math.floor(R()*SETS.length)], span=set.reduce((a,p)=>Math.max(a,p[1]),0)+1;
+      if(set[0][0]==='bench'&&S.len<4) continue; if(span>S.len*.45+.6) continue;
+      const end=R()<.5, k0=end?.35:S.len-.35-span; const [tx,ty]=S.o(Math.floor(k0+span/2)); let good=true;
+      for(let k=Math.floor(k0);k<=Math.ceil(k0+span)&&good;k++){ const [x,y]=S.o(Math.max(0,Math.min(S.len-1,k))); if(!ok(x,y)||!ok(x+S.n[0],y+S.n[1])) good=false; } if(!good) continue;
+      const along=S.n[0]===0?[1,0]:[0,1], yaw=Math.atan2(S.n[0],S.n[1]);
+      for(const [m,dk,dn] of set){ const k=k0+dk; let X,Z; if(S.n[1]!==0){ X=b.x+k+.3; Z=S.n[1]<0?b.y-.45-dn:b.y+b.h+.45+dn; } else { Z=b.y+k+.3; X=S.n[0]<0?b.x-.45-dn:b.x+b.w+.45+dn; }
+        out.push(['prop',[m,1],X,hgt(X,Z),Z,yaw+(R()-.5)*.25,1,1,1,0,1,1,1]); } } }
+  /* a few carts and wagons by the town gates and the harbour */
+  if(PORT&&PORT.B){ out.push(['prop',['prop_wagon',1],PORT.x0-3.2,hgt(PORT.x0-3.2,PORT.cy+3.5),PORT.cy+3.5,.2,1,1,1,0,1,1,1]); }
+  return out; }
+NAT.TP=[]; function natTex(n){ if(NAT.T[n]!==undefined) return NAT.T[n]; NAT.T[n]=null; NAT.TP.push(SK.tex(natDir(n)+n+(NAT.PNG.has(n)?'.png':'.jpg'),true).then(t=>{ NAT.T[n]=t; if(!t) throw new Error('texture '+n); })); return null; }
+NAT.PK={}; const natPack=d=>NAT.PK[d]||(NAT.PK[d]=Promise.all([fetch(d+d.split('/').slice(-2)[0]+'_pack.json').then(r=>{ if(!r.ok) throw 0; return r.json(); }),fetch(d+d.split('/').slice(-2)[0]+'_pack.bin').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })]));
+async function natMesh(n){ const [idx,all]=await natPack(natDir(n)); const meta=idx[n]; if(!meta) throw new Error('mesh '+n); const bin=all.slice(meta.off,meta.off+meta.len);
+  const VS=36, vb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vb); gl.bufferData(gl.ARRAY_BUFFER,new Uint8Array(bin,0,meta.v*VS),gl.STATIC_DRAW);
+  const ib=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,meta.u32?new Uint32Array(bin,meta.v*VS,meta.i):new Uint16Array(bin,meta.v*VS,meta.i),gl.STATIC_DRAW);
+  for(const p of meta.parts) if(p.t) natTex(p.t.toLowerCase());
+  return {meta,vb,ib,u32:meta.u32}; }
+/* one VAO per (mesh, chunk): the mesh's vertices plus that chunk's instance list */
+function natVAO(m,inst){ const vao=gl.createVertexArray(); gl.bindVertexArray(vao); const VS=36;
+  gl.bindBuffer(gl.ARRAY_BUFFER,m.vb); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,VS,0); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,VS,12);
+  gl.enableVertexAttribArray(6); gl.vertexAttribPointer(6,2,gl.FLOAT,false,VS,24); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2,4,gl.UNSIGNED_BYTE,true,VS,32);
+  const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(inst),gl.STATIC_DRAW);
+  for(const [loc,size,off] of [[3,4,0],[4,4,16],[5,3,32]]){ gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,size,gl.FLOAT,false,44,off); gl.vertexAttribDivisor(loc,1); }
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,m.ib); gl.bindVertexArray(null); return {vao,count:inst.length/11}; }
+/* the undergrowth: bushes, ferns, flowers and mushrooms scattered through the wild zones (decoration only, nothing collides) */
+function natScatter(){ const R=mulberry32(7171), out=[]; const ok=new Set(['forest','meadow','lake','swamp','coast','ruins']);
+  for(let ty=2;ty<OWH-2;ty++)for(let tx=2;tx<MW-2;tx++){ const t=map[ty*MW+tx], z=zmap[ty*MW+tx]; const r=R(), r2=R(), r3=R(), r4=R();
+    if(!ok.has(z)||(t!==T.GRASS&&t!==T.FOREST&&t!==T.SWAMP)) continue; if(wallDist(tx,ty)<2.5) continue;
+    let bad=false; for(let dy=-1;dy<=1&&!bad;dy++)for(let dx=-1;dx<=1;dx++){ const u=tAt(tx+dx,ty+dy); if(u===T.PATH||u===T.COBBLE||u===T.BRIDGE||u===T.WATER){ bad=true; break; } } if(bad) continue;
+    const forest=t===T.FOREST||z==='forest', swamp=z==='swamp'||t===T.SWAMP; let kind=null;
+    if(swamp){ if(r<.05) kind='reed'; else if(r<.07) kind='fern'; else if(r<.08) kind='shroom'; }
+    else if(forest){ if(r<.035) kind='fern'; else if(r<.06) kind='bush'; else if(r<.08) kind='plant'; else if(r<.095) kind='shroom'; else if(r<.105) kind='flower'; }
+    else { if(r<.018) kind='bush'; else if(r<.04) kind='flower'; else if(r<.06) kind='plant'; else if(r<.064) kind='fern'; }
+    if(!kind) continue; const X=tx+.2+r2*.6, Z=ty+.2+r3*.6, y=hgt(X,Z); if(y<.08) continue; const s=.75+r4*.5;
+    out.push([kind,X,y-.03,Z,R()*6.283,s,s*(.85+R()*.3),s,kind==='shroom'?0:.03,1,1,1]); }
+  return out; }
+function natBuild(){ const L=[]; const raw=INST.RAW; if(!raw) return L; const cs=NAT.CS; const zAt=(x,z)=>zmap[Math.floor(z)*MW+Math.floor(x)];
+  const add=(kind,i,a,o)=>{ const vs=NAT.KINDS[kind], v=vs[((i*2654435761)>>>0)%vs.length]; L.push([kind,v,a[o],a[o+1],a[o+2],a[o+3],a[o+4],a[o+5],a[o+6],a[o+7],a[o+8],a[o+9],a[o+10]]); };
+  for(const [arr,k0] of [[raw.trees[0],'broad'],[raw.trees[1],'pine'],[raw.rocks,'rock']]) for(let o=0,i=0;o<arr.length;o+=11,i++){ const z=zAt(arr[o],arr[o+2]); let k=k0;
+      if(k0==='broad') k=z==='ash'||z==='lair'?'dead':z==='swamp'?'twist':'broad'; if(k0==='rock'&&(z==='ash'||z==='lair')) k='rockd'; add(k,i,arr,o); }
+  try{ for(const d of natProps()) L.push(d); }catch(e){ console.warn('props',e); }
+  for(const d of natScatter()){ const vs=NAT.KINDS[d[0]], v=vs[Math.floor(d[4]*97)%vs.length]; L.push([d[0],v,...d.slice(1)]); }
+  /* group: mesh -> chunk -> instances (11 floats: pos, yaw, scale xyz, sway, tint) */
+  const G=new Map(); for(const e of L){ const [kind,v,x,y,z,ry,sx,sy,sz,sw,cr,cg,cb]=e, mesh=v[0], k=v[1], tex=v[2]||'', key=mesh+'|'+tex;
+    let g=G.get(key); if(!g){ g={mesh,tex,deco:NAT.DECO.has(kind),rock:kind==='rock'||kind==='rockd',prop:kind==='prop',ch:new Map()}; G.set(key,g); }
+    const ck=Math.floor(x/cs)*1000+Math.floor(z/cs); let a=g.ch.get(ck); if(!a){ a=[]; g.ch.set(ck,a); }
+    const tint=g.rock||g.prop?[cr,cg,cb]:[lerp(1,cr,.45),lerp(1,cg,.45),lerp(1,cb,.45)];
+    a.push(x,y,z,ry,sx*k,sy*k,sz*k,g.rock||g.prop?0:(g.deco?.05:.0035),tint[0],tint[1],tint[2]); }
+  return G; }
+async function natInit(){ if(!PTL||GFX.q==='low'||NAT.on) return; NAT.on=true;
+  try{ const G=natBuild(); const names=new Set([...G.values()].map(g=>g.mesh)); SK.setGL(gl);
+    await Promise.all([...names].map(async n=>{ NAT.M[n]=await natMesh(n); })); natTex('rocks_desert_diffuse'); await Promise.all(NAT.TP);
+    for(const [key,g] of G){ const m=NAT.M[g.mesh]; for(const [ck,a] of g.ch){ const v=natVAO(m,a); NAT.V.push({m,g,cx:(Math.floor(ck/1000)+.5)*NAT.CS,cz:(ck%1000+.5)*NAT.CS,vao:v.vao,count:v.count}); } }
+    NAT.ready=true; }
+  catch(e){ console.warn('nature models not found, keeping the classic trees',e); NAT.ready=false; } }
+/* chunks of the classic trees and rocks that the new models have taken over */
+function natCovers(c){ if(!NAT.ready) return false; const dx=c.cx-CAM.tx, dz=c.cz-CAM.tz, R=NAT.near(); return dx*dx+dz*dz<R*R; }
+function drawNat(shadow){ if(!NAT.ready) return; const pr=shadow?PTS:PTL; if(!pr) return; setFrameUniforms(pr,shadow); const u=pr.u;
+  const cull=gl.isEnabled(gl.CULL_FACE); gl.disable(gl.CULL_FACE); gl.uniform1i(u.uTex,4); gl.uniform3f(u.uTint,1,1,1); gl.uniform1f(u.uEmis,0); gl.uniform1f(u.uAlpha,1); if(u.uFol) gl.uniform1f(u.uFol,0); if(u.uMat) gl.uniform1f(u.uMat,0);
+  const R=NAT.near(), D=NAT.decoR(), SR=shadow?52:1e9, tx=CAM.tx, tz=CAM.tz, half=NAT.CS*.71;
+  gl.activeTexture(gl.TEXTURE4);
+  for(const c of NAT.V){ const dx=c.cx-tx, dz=c.cz-tz, d2=dx*dx+dz*dz, lim=Math.min(c.g.deco?D+half:c.g.prop?Math.min(R,48)+half:R, SR); if(d2>lim*lim) continue;
+    if(!shadow&&!c.g.deco&&!c.g.rock&&!c.g.prop&&u.uFade) fadeOn(u,true); else if(u.uFade) fadeOn(u,false);
+    if(shadow&&c.g.deco&&d2>(20*20)) continue;
+    gl.bindVertexArray(c.vao);
+    for(const p of c.m.meta.parts){ const tn=(c.g.tex||p.t||'').toLowerCase(), t=tn?NAT.T[tn]:null; if(tn&&!t) continue; const alpha=NAT.PNG.has(tn)?1:0;
+      if(shadow&&!alpha&&c.g.deco) continue;
+      gl.bindTexture(gl.TEXTURE_2D,t); gl.uniform1f(u.uAlphaT,alpha); if(!shadow){ gl.uniform1f(u.uLeaf,NAT.LEAF.has(tn)?.5:0); if(u.uSpec) gl.uniform1f(u.uSpec,c.g.prop?.16:c.g.rock?.1:alpha?.05:.08); }
+      gl.drawElementsInstanced(gl.TRIANGLES,p.n,c.m.u32?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,p.i0*(c.m.u32?4:2),c.count); } }
+  gl.activeTexture(gl.TEXTURE0); gl.bindVertexArray(null); if(cull) gl.enable(gl.CULL_FACE); if(u.uFade) fadeOn(u,false); }
+setTimeout(()=>{ try{ natInit(); }catch(e){} },1200);
 const PQ=program(VS_LIQ,FS_LIQ), PSK=program(VS_SKY,FS_SKY), PP=program(VS_PART,FS_PART);
 
 /* ---------- raw geometry ---------- */
@@ -2200,7 +2428,7 @@ const INST=(function(){ const R=mulberry32(9090); const trees=[[],[],[]], rocks=
     push(grass,X,y,Z,R()*6.28,s*1.3,s*(ct===T.SWAMP?.95:.55),s*1.3,.12,c);
     if(ct===T.GRASS&&R()<.035) push(flowers,X+.1,y,Z,R()*6.28,.3,.4+R()*.2,.3,.03,[[1,.85,.3],[.95,.5,.7],[1,1,1],[.7,.55,1],[1,.45,.3]][Math.floor(R()*5)]);
     if(ct===T.FOREST&&R()<.02) push(flowers,X,y,Z,R()*6.28,.5,.3,.5,0,[.9,.25,.2]); }
-  return {snow:mkVAO(treeGeo(2),trees[2]),broad:mkVAO(treeGeo(0),trees[0]), pine:mkVAO(treeGeo(1),trees[1]), rocks:mkVAO(ROCKG,rocks), grass:chunkInst(GFX.q==='low'?gTuft():gTuft2(),grass,12), flowers:chunkInst(gFlower(),flowers,12)}; })();
+  return {RAW:{trees,rocks},snow:chunkInst(treeGeo(2),trees[2],24),broad:chunkInst(treeGeo(0),trees[0],24), pine:chunkInst(treeGeo(1),trees[1],24), rocks:chunkInst(ROCKG,rocks,24), grass:chunkInst(GFX.q==='low'?gTuft():gTuft2(),grass,12), flowers:chunkInst(gFlower(),flowers,12)}; })();
 
 /* ---------- shadow map ---------- */
 const SM_SIZE=GFX.sm; const SM=(function(){ const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
@@ -2630,6 +2858,7 @@ function drawMob3_(m,dead){
   const kA=m.kbA??(fF+Math.PI), kK=(m.kbK||.6)*(mt.boss?.35:1); const base={x:X+Math.cos(kA)*fl*.2*kK,y:gy,z:Z+Math.sin(kA)*fl*.2*kK,face:smoothFace(m,m.face||0),mv,walk:ph,swing,swv:(m.swingN||0)%3,dead:dd,hit,sc,an:m,rdy:(m.tgt&&!dead)?1:0,look:dead?0:lookYaw(m),pitch:fl*.2};
   if(dead&&m.kbA!=null&&!mt.boss&&dd>=0){ const k=eO(clamp(dd/.4,0,1))*.55*(m.kbK||.6); base.x+=Math.cos(m.kbA)*k; base.z+=Math.sin(m.kbA)*k; }
   if(dead && dd>.9 && !(m.skinU>t&&!m.skinned)){ base.y-=(dd-.9)*1.2; if(!m._puff&&GFX.q!=='low'){ m._puff=1; const F=MATFX[MOBMAT[mt.key]||'flesh'], sz=Math.max(.8,(mt.r||14)/14); for(let i=0;i<12;i++){ const a=Math.random()*6.283; P3(X+Math.cos(a)*.35*sz,gy+.3,Z+Math.sin(a)*.35*sz,Math.cos(a)*.35,.5+Math.random()*.6,Math.sin(a)*.35,1.2,.3*sz,i%3?'#8a8478':F.c[0],{big:true,drag:.95}); } } }
+  if(SKMOB[mt.key]&&skDrawMob(m,mt,base)) return;
   if(LOOK[mt.key]){ drawHumanoid({...base,L:LOOK[mt.key]}); if((mt.key==='vaelith'||mt.key==='ossric')&&dd<0){ mreset(); mtr(X,gy+.04,Z); mry(t*.15); const R=mt.key==='vaelith'?2.1:1.7; P(GEO.cyl,R,.012,R,[.2,.8,.7],1.1,0,0,0,.35);
     for(let k=0;k<16;k++){ const an=k/16*6.283; P(GEO.box,.22,.012,.05,[.4,1,.85],2,Math.cos(an)*R*.86,.01,Math.sin(an)*R*.86,.7); }
     addLight(X,gy+2.8,Z,mt.key==='vaelith'?10:8,[.3,1,.85]); if(Math.random()<.3) P3(X+(Math.random()-.5)*1.4,gy+2.4+Math.random()*.8,Z+(Math.random()-.5)*1.4,0,-2,0,.6,.06,'#9ff6ea',{glow:true}); }
@@ -2965,6 +3194,7 @@ function grassPushers(){ const t=now(); if(GPUSHT===t) return GPUSH; GPUSHT=t; G
   for(const m of mobs) if(!m.dead&&!m.t.fly){ const d=Math.hypot(m.rx/TS-CAM.tx,m.ry/TS-CAM.tz); if(d<22) L.push([m.rx,m.ry,Math.min(2.4,(m.t.r||14)/TS*1.9+.3),d]); }
   L.sort((a,b)=>a[3]-b[3]); for(let i=0;i<Math.min(6,L.length);i++){ GPUSH[i*4]=L[i][0]/TS; GPUSH[i*4+1]=0; GPUSH[i*4+2]=L[i][1]/TS; GPUSH[i*4+3]=L[i][2]; } return GPUSH; }
 function drawInst(pr,shadow){ if(pr.u.uSpec) gl.uniform1f(pr.u.uSpec,.08); if(pr.u.uMat) gl.uniform1f(pr.u.uMat,0); for(const k of shadow?['broad','pine','snow','rocks']:['broad','pine','snow','rocks','grass','flowers']){ const I=INST[k]; if(!I.count) continue; if(pr.u.uFol) gl.uniform1f(pr.u.uFol,k==='rocks'?2:k==='grass'?3:k==='flowers'?0:1); if(pr.u.uFade) fadeOn(pr.u,!shadow&&(k==='broad'||k==='pine'||k==='snow'));
+    if(I.chunks&&(k==='broad'||k==='pine'||k==='snow'||k==='rocks')){ const far=shadow?70:190; for(const c of I.chunks){ const dx=c.cx-CAM.tx, dz=c.cz-CAM.tz; if(dx*dx+dz*dz>far*far) continue; if(k!=='snow'&&natCovers(c)) continue; gl.bindVertexArray(c.vao); gl.drawElementsInstanced(gl.TRIANGLES,c.n,gl.UNSIGNED_INT,0,c.count); } continue; }
     if(I.chunks){ const D=GFX.gd; if(pr.u.uGrassD) gl.uniform1f(pr.u.uGrassD,D); if(pr.u.uPush) gl.uniform4fv(pr.u.uPush,grassPushers()); for(const c of I.chunks){ const dx=c.cx-CAM.tx, dz=c.cz-CAM.tz; if(dx*dx+dz*dz>(D+9)*(D+9)) continue; gl.bindVertexArray(c.vao); gl.drawElementsInstanced(gl.TRIANGLES,c.n,gl.UNSIGNED_INT,0,c.count); } if(pr.u.uGrassD) gl.uniform1f(pr.u.uGrassD,0); continue; }
     gl.bindVertexArray(I.vao); gl.drawElementsInstanced(gl.TRIANGLES,I.n,gl.UNSIGNED_INT,0,I.count); } }
 function updateCamera(dt){
@@ -3123,7 +3353,7 @@ function drawGearWeapon0(w,L,o,t){ const c=L.wcol||[.75,.78,.84], gl=L.wglow, ge
   return false; }
 
 function buildScene(dt){
-  const t=now(); cmds.length=0; tcmds.length=0; L3.length=0;
+  const t=now(); cmds.length=0; tcmds.length=0; L3.length=0; SKQ.length=0;
   const near=(px,py,r)=>{ const d=Math.hypot(px/TS-CAM.tx,py/TS-CAM.tz); LOD_FAR=d>(GFX.q==='ultra'?26:20); LOD_MID=d>(GFX.q==='low'?3:GFX.q==='ultra'?12:8); CAST_SH=d<30; return d<r; };
   if(me&&me.pet&&me.petOn&&!me.dead) drawPetAt(me.pet.x,me.pet.y,me.pet.face,me.pet.mv,me.pet.swingT,me.pet.st,dt);
   for(const o of others.values()) if(o.pe&&!o.d&&seenO(o)){ o.peSt=o.peSt||{}; o.peX=lerp(o.peX??o.pe[0],o.pe[0],.25); o.peY=lerp(o.peY??o.pe[1],o.pe[1],.25); drawPetAt(o.peX,o.peY,o.pe[2],!!o.pe[3],o.peSw,o.peSt,dt); }
@@ -3331,7 +3561,7 @@ function render(dt){
   gl.bindFramebuffer(gl.FRAMEBUFFER,SM.fb); gl.viewport(0,0,SM_SIZE,SM_SIZE); gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.clear(gl.DEPTH_BUFFER_BIT); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
   gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(2,4);
   setFrameUniforms(PS,true); drawStatic(PS,true); for(const c of cmds) if(c.sh) drawCmd(PS,c);
-  setFrameUniforms(PSI,true); drawInst(PSI,true);
+  setFrameUniforms(PSI,true); drawInst(PSI,true); try{ drawNat(true); }catch(e){} try{ drawSkinQ(PKS,true); }catch(e){}
   gl.disable(gl.POLYGON_OFFSET_FILL);
   // main pass
   const usePost=ensurePost(); gl.bindFramebuffer(gl.FRAMEBUFFER,usePost?POST.ms:null); gl.viewport(0,0,cv.width,cv.height); gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -3340,6 +3570,8 @@ function render(dt){
   gl.depthMask(false); gl.bindVertexArray(SKYVAO); gl.drawArrays(gl.TRIANGLES,0,3); gl.depthMask(true);
   setFrameUniforms(PL,false); drawStatic(PL); for(const c of cmds) drawCmd(PL,c);
   setFrameUniforms(PLI,false); drawInst(PLI,false); if(PLI.u.uFol) gl.uniform1f(PLI.u.uFol,0); if(PLI.u.uFade) fadeOn(PLI.u,0);
+  try{ drawNat(false); }catch(e){}
+  try{ drawSkinQ(PKL,false); }catch(e){}
   // liquids
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
   gl.useProgram(PQ.p); const q=PQ.u; gl.uniformMatrix4fv(q.uVP,false,VP); gl.uniform1f(q.uTime,t); gl.uniform2f(q.uMap,HN/HR,HNZ/HR); gl.uniform3f(q.uCam,CAM.ex,CAM.ey,CAM.ez);
