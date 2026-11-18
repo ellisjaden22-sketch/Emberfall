@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION = 'v0.83';
+const SERVER_VERSION = 'v0.84';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();

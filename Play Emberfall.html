@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.83</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.84</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 83;
+const VERSION = 84;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1052,10 +1052,10 @@ const RECIPES=[
 ];
 const BUFFNAME={might:['Might','💪'],fort:['Fortitude','❤️'],ward:['Emberward','🔥']};
 const MOUNTS=[null,
-  {name:'Chestnut Steed',col:[.45,.27,.14],mane:[.12,.08,.05],cost:20,speed:1.7,lvl:10},
+  {name:'Black Stallion',col:[.07,.06,.07],mane:[.03,.03,.03],cost:20,speed:1.7,lvl:10,credit:'Model: Black Stallion by Pigcraft (Sketchfab, CC BY 4.0)'},
   {name:'Midnight Charger',col:[.08,.08,.1],mane:[.78,.78,.82],cost:60,speed:1.85,lvl:12,armor:true},
   {name:'Emberhorn Elk',col:[.52,.36,.22],mane:[.92,.86,.76],cost:120,speed:2.0,lvl:14,elk:true},
-  {name:'Celestial Steed',col:[.55,.78,1],mane:[.9,.95,1],cost:500,speed:2.3,lvl:16,celestial:true}];
+  {name:'Celestial Steed',col:[.55,.78,1],mane:[.9,.95,1],cost:500,speed:2.3,lvl:16,celestial:true,credit:'Model: Celestara, the Crowned Sky Steed by Ar3Designer (Sketchfab, CC BY 4.0)'}];
 const EMOTES={dance:'bursts into dance!',wave:'waves.',sit:'sits down.',cheer:'cheers!',bow:'bows gracefully.',kneel:'kneels.'};
 const CRITTERS=[]; (function(){ const R=mulberry32(4321); for(const [k,zs,n] of [['deer',['meadow','forest','frost'],15],['rabbit',['meadow','lake','town'],14],['frog',['swamp'],10]]){ let c=0,tries=0;
   while(c<n&&tries<5000){ tries++; const tx=4+Math.floor(R()*(MW-8)), ty=4+Math.floor(R()*(OWH-8)); if(!zs.includes(zmap[ty*MW+tx])) continue; const t=tAt(tx,ty); if(SOLID.has(t)||t===T.WATER) continue;
@@ -4921,7 +4921,44 @@ function addLandmarks(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,r
 function steedMotion(walk,mv,cel){ const t=now(), ph=walk*.45; return {ph, y:.1*mv*(.5+.5*Math.sin(ph+1.0))+(cel?.1+Math.sin(t*2)*.05:0), p:.065*mv*Math.sin(ph+2.6)}; }
 function drawCelestial(o){ return drawHorse(o); }
 const STEED_LEATHER=[.3,.17,.08], STEED_METAL=[.56,.6,.68]; LEATHERS.add(STEED_LEATHER); METALS.add(STEED_METAL);
-function drawHorse(o){ const md=MATD; MATD=6; const M0=MOUNTS[o.m]||MOUNTS[1]; if(M0.mane) HAIRS.add(M0.mane); try{ return drawHorse0(o); } finally{ MATD=md; } }
+/* v84: the Black Stallion (formerly the Chestnut Steed) and Celestara, the Celestial Steed, are sculpted models with their own legs,
+   neck, head and tail (and Celestara's wings). Models: Black Stallion by Pigcraft, Celestara by Ar3Designer, both Sketchfab, CC BY 4.0. Gallop timing follows the classic steed (steedMotion), so the rider moves with it. */
+const SKSTEED={1:{f:'stallion',h:2.36,eyes:1},4:{f:'celestara',h:2.75,wings:1,cel:1}};
+function skAnimSteed(o,S){ S=S||{}; const t=now(), R={}, add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, mv=o.mv||0, idle=1-mv, free=!!o.free;
+  const SM=steedMotion(o.walk||0,mv,!!S.cel), ph=SM.ph;
+  /* transverse gallop: hind-right, hind-left, fore-right, fore-left, like the classic steed */
+  for(const [k,fr,of] of [['FL',1,.54],['FR',1,.42],['HL',0,.12],['HR',0,0]]){ const th=ph-of*6.283, A1=Math.sin(th)*(fr?.62:.5)*mv, lift=Math.max(0,Math.cos(th))*mv;
+    add('up'+k,1,0,0,-A1+(fr?-.03:.04)*mv);
+    add('lo'+k,1,0,0,fr?lift*1.45:lift*.95+.05*mv); }
+  /* at rest one hind hoof is cocked; a free horse paws now and then */
+  const cock=idle*Math.pow(Math.max(0,Math.sin(t*.35+(o.x||0))),2); add('loHL',1,0,0,.35*cock); add('upHL',1,0,0,.05*cock);
+  const paw=free?idle*Math.pow(Math.max(0,Math.sin(t*.8+(o.z||0)*2)),8):0; add('upFL',1,0,0,-.55*paw); add('loFL',1,0,0,1.1*paw);
+  /* body: pitch with the stride, breathing */
+  add('body',1,0,0,-SM.p*.8+.01*Math.sin(t*1.6)*idle);
+  /* neck and head nod with the gallop; a free horse grazes */
+  const graze=free?Math.pow(Math.max(0,Math.sin(t*.22+(o.x||0)*1.3)),3):0, nod=Math.sin(ph*2+.5)*.07*mv+Math.sin(t*1.1+(o.x||0))*.03*idle;
+  add('neck',1,0,0,nod+graze*1.05+.08*mv); add('head',1,0,0,-nod*.6+graze*.35-.05*mv); add('head',0,1,0,.12*Math.sin(t*.5+(o.z||0))*idle*(1-graze));
+  /* tail streams out at the gallop and swishes at rest */
+  add('tail',1,0,0,.12+.75*mv+.08*Math.sin(ph*2)*mv); add('tail',0,1,0,.35*Math.sin(t*1.3+(o.x||0))*idle+.08*Math.sin(t*3)*mv);
+  /* Celestara's wings: slow beats at rest, strong strokes at speed */
+  if(S.wings){ const wb=Math.sin(t*(1.4+mv*4.5)+(o.x||0)), a=(.08+.3*mv)*wb-.06*idle; add('wingL',0,0,1,a); add('wingR',0,0,1,-a); add('wingL',0,1,0,-.1*mv); add('wingR',0,1,0,.1*mv); }
+  return {R,SM}; }
+function skDrawSteed(o){ const S=SKSTEED[o.m]; if(!S||OPT.heroModels===false||GFX.q==='low') return false; const M=skGet(S.f); if(!M) return false;
+  const A=skAnimSteed(o,S), SM=A.SM;
+  mreset(); mtr(o.x,o.y+SM.y,o.z); mry(-o.face); mry(Math.PI/2); msc(S.h/M.H);
+  SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,[],A.R,null).slice(),e:0,a:typeof HALPHA==='number'?HALPHA:1});
+  if(o.an===me&&(o.mv||0)>.3){ const hb=Math.floor(SM.ph/1.5708); if(me._hb!==hb){ me._hb=hb; try{ snd('hoof',null,null,.55); }catch(e){} } }
+  /* saddle and blanket for the rider (riderless stable horses go bare) */
+  if(!o.free){ mreset(); mtr(o.x,o.y+SM.y,o.z); mry(-o.face); mrz(-SM.p*.8);
+    P(GEO.box,.66,.05,.6,[.32,.05,.06],0,-.06,1.6,0); P(GEO.box,.62,.02,.62,[.78,.62,.3],0,-.06,1.585,0);
+    P(GEO.sph,.36,.12,.3,STEED_LEATHER,0,-.05,1.67,0); P(GEO.sph,.12,.12,.16,STEED_LEATHER,0,.16,1.73,0); P(GEO.sph,.14,.1,.26,STEED_LEATHER,0,-.27,1.71,0);
+    for(const s of [-1,1]){ P(GEO.box,.03,.42,.035,STEED_LEATHER,0,-.05,1.38,s*.33); P(GEO.box,.1,.035,.06,STEED_METAL,0,-.05,1.16,s*.34); } }
+  if(S.eyes) addLight(o.x+Math.cos(o.face)*1.4,o.y+SM.y+2.05,o.z+Math.sin(o.face)*1.4,1.6,[1,.15,.08]);   /* the stallion's eyes glow */
+  if(S.cel){ addLight(o.x,o.y+SM.y+1.6,o.z,4.5,[.55,.7,1.2]); if(Math.random()<.25) try{ P3(o.x+(Math.random()-.5)*1.6,o.y+SM.y+.4+Math.random()*1.6,o.z+(Math.random()-.5)*1.6,0,.6,0,.9,.08,Math.random()<.5?'#cfe0ff':'#ffe3a0',{glow:true}); }catch(e){} }
+  return true; }
+setInterval(()=>{ try{ if(typeof me!=='undefined'&&me&&me.c&&OPT.heroModels!==false&&GFX.q!=='low'&&me.c.mounts){ if(me.c.mounts.includes(1)) skGet('stallion'); if(me.c.mounts.includes(4)) skGet('celestara'); } }catch(e){} },4000);
+
+function drawHorse(o){ if(skDrawSteed(o)) return; const md=MATD; MATD=6; const M0=MOUNTS[o.m]||MOUNTS[1]; if(M0.mane) HAIRS.add(M0.mane); try{ return drawHorse0(o); } finally{ MATD=md; } }
 function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial, t=now(), mv=o.mv||0, idle=1-mv, free=!!o.free;
   const SM=steedMotion(o.walk||0,mv,cel), ph=SM.ph, A=cel?.5:1, E=cel?.35:0; if(o.an===me&&mv>.3&&!cel){ const hb=Math.floor(ph/1.5708); if(me._hb!==hb){ me._hb=hb; try{ snd('hoof',null,null,.55); }catch(e){} } }
   const col=cel?[.42,.68,1]:M.col, deep=cel?[.3,.38,.9]:M.col.map(v=>v*.8), lt=cel?[.62,.82,1]:M.col.map(v=>Math.min(1,v*1.16+.03));
@@ -5277,7 +5314,7 @@ function openSmith(n){ const c=me.c;
     chatLine(`${n&&n.id==='garrick'?'Garrick':'Doran'} hammers your ${it.name} to rank ${it.up}: ${'★'.repeat(it.up)}`,'c-loot'); const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',30,3,{glow:true}); recalc(); persist(); renderInv(); openSmith(n); }); }
 function openStable(n){ const c=me.c;
   dlg(`<h2>Hilde's Stable</h2><p>"Press R to call your mount, and R again to hop off. They don't like fighting or deep water."</p>${MOUNTS.slice(1).map((m,i)=>{ const id=i+1, own=c.mounts.includes(id); if(m.ashborn&&!own&&!raidIsOpen()) return '';
-    return `<div class="shoprow"><span><b>${m.name}</b><br><span style="font-size:13px;color:var(--dim)">+${Math.round((m.speed-1)*100)}% speed · requires level ${m.lvl}</span></span>${own?`<button data-sel="${id}" ${c.mount===id?'disabled':''}>${c.mount===id?'Riding':'Choose'}</button>`:(m.drop?`<span style="font-size:12px;color:var(--gold);max-width:150px;text-align:right">Rare drop from ${m.drop}</span>`:`<button data-buy="${id}" ${c.gold>=m.cost&&c.lvl>=m.lvl?'':'disabled'}>Buy · ${m.cost} gold</button>`)}</div>`; }).join('')}
+    return `<div class="shoprow"><span><b>${m.name}</b><br><span style="font-size:13px;color:var(--dim)">+${Math.round((m.speed-1)*100)}% speed · requires level ${m.lvl}${m.credit?'<br><span style="font-size:11px">'+m.credit+'</span>':''}</span></span>${own?`<button data-sel="${id}" ${c.mount===id?'disabled':''}>${c.mount===id?'Riding':'Choose'}</button>`:(m.drop?`<span style="font-size:12px;color:var(--gold);max-width:150px;text-align:right">Rare drop from ${m.drop}</span>`:`<button data-buy="${id}" ${c.gold>=m.cost&&c.lvl>=m.lvl?'':'disabled'}>Buy · ${m.cost} gold</button>`)}</div>`; }).join('')}
     <div style="margin-top:10px;color:var(--gold)">Your gold: ${c.gold}</div><div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   $('bk').onclick=()=>talk(n);
   document.querySelectorAll('#dlg [data-buy]').forEach(b=>b.onclick=()=>{ const id=+b.dataset.buy, m=MOUNTS[id]; c.gold-=m.cost; c.mounts.push(id); c.mount=id; toast('New mount: '+m.name,'small'); sysMsg(`You bought the ${m.name}. Press R to ride.`); persist(); renderInv(); openStable(n); });
@@ -5348,7 +5385,7 @@ function startGather(n){ if(!me||me.dead||me.cast) return; if(me.mounted) dismou
 function finishGather(n){ if(n.resp>now()) return; const M=MATS[n.mat]; const pk=M.kind==='herb'?'herbalism':'mining', sk=profSkill(pk), rq=nodeReq(n.mat), pro=sk>0&&sk>=rq;
   const amt=1; me.c.mats[n.mat]=(me.c.mats[n.mat]||0)+amt; n.resp=now()+(n.rich?120:75);
   chatLine(`You gather ${amt} ${M.name}.`,'c-loot'); if(sk){ if(!pro) sysMsg(`Your ${PROF[pk].name} skill is too low for a bonus from ${M.name} (needs ${rq}).`); else { profUp(pk,rq); profRare(pk,n); } } const [X,Y,Z]=ph3(n.x,n.y,.4); burst3(X,Y,Z,M.col,22,2.5,{glow:true,up:1.5});
-  gainXp(8+4*me.c.lvl); questEvent('gather',n.mat,amt); stat('gathered',amt); renderInv(); persist(); }
+  gainXp(8+4*me.c.lvl); questEvent('gather',n.mat,amt); stat('gathered',amt); stat(M.kind==='herb'?'herbs':'mined',amt); renderInv(); persist(); }
 
 /* =====================================================================
    PROFESSIONS
@@ -7940,7 +7977,8 @@ const ACH=[
   {id:"legend",n:"Legend Born",d:"Obtain a legendary weapon",ic:"\ud83d\udd25",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.legendary||0)>=1},
   {id:"epicgear",n:"Clad in Glory",d:"Wear epic or better gear in every slot",ic:"\ud83d\udc9c",f:(c,S,QDONE,EPICALL,FORGE5)=>EPICALL},
   {id:"forge5",n:"Master of the Forge",d:"Upgrade an item to +5",ic:"\ud83d\udd28",f:(c,S,QDONE,EPICALL,FORGE5)=>FORGE5},
-  {id:"gather50",n:"Green Thumb",d:"Gather 50 herbs or ore",ic:"\ud83c\udf3f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.gathered||0)>=50},
+  {id:"gather50",n:"Green Thumb",d:"Gather 50 herbs",ic:"\ud83c\udf3f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.herbs||0)>=50},
+  {id:"mine50",n:"Stonebreaker",d:"Mine 50 ore",ic:"\u26cf\ufe0f",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.mined||0)>=50},
   {id:"party",n:"Better Together",d:"Join a party",ic:"\ud83e\udd1d",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.partied||0)>=1},
   {id:"deaths10",n:"Back from the Brink",d:"Die 10 times and keep going",ic:"\ud83e\udea6",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.deaths||0)>=10}
 ];
