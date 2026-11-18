@@ -1,9 +1,9 @@
 {
- "version": "v0.73",
- "title": "New faces for old foes",
+ "version": "v0.74",
+ "title": "Seven new heroes",
  "date": "18 Nov 2026",
- "text": "Nine monsters get brand-new 3D models, and Vyrathos is tamed down to size.\n\n✨ Vyrathos, the Ember Tyrant is now a black dragon with its own breathing, wing and tail animation. It snaps with its whole neck and rolls onto its side when it falls\n🔧 Vyrathos is now a sensible size and no longer wanders around its platform: it waits, breathing, until someone attacks, so it stops clipping through the arena\n✨ Tidecallers at Mirrowmere are now the Hollow Magus: a hooded skeletal sorcerer with a glowing skull, floating above the shore\n✨ Bog Witches in Gloamfen are now the Moonbound Oracle: a horned sorceress with a crescent-moon staff\n✨ Cinderback Crushers in the Scorched Reach are now hunched, spined beasts with long bladed tails that lunge at you\n✨ Glimmerwing Moths are now giant moths with beating wings and faintly glowing wing patterns\n✨ Old Tusk is now a scarred, clawed beast with a long tail that pounces at you\n✨ Drowned Sailors are now chained, rotting horrors that stagger toward you\n✨ Murkshell Crabs are now hunched lake ghouls with their own animations for prowling, biting, clawing, flinching and dying\n✨ Grimmaw of the Deep is now a towering six-legged bone-crawler that skitters on its legs and snaps its jaws",
+ "text": "Every class gets a detailed new hero model.\n\n✨ Bulwark: Bronthak, a spiked iron juggernaut with a skull shield and spear\n✨ Celestus: Seraphielle, a winged celestial knight in white and gold\n✨ Barbarian: the Last Conqueror, a scarred warlord in battered leather and plate\n✨ Arcanist: Vexmortis, a plague-masked alchemist in a tattered crimson coat\n✨ Shade: a hooded spectral assassin wrapped in chains and torn grey cloth\n✨ Hunter: a witch hunter in a long coat and wide-brimmed hat\n✨ Bard: Haldreon, a white-armoured knight crowned with a thorned halo\n⬆️ Heroes walk, run, ride, swim, sit, kneel, dance and bow, twist into their attacks, lean back to cast and fall when they die. Stealthed Shades turn see-through\n⬆️ The new heroes show their own sculpted weapons and armour, so your gear no longer changes how you look. To see your equipped gear on the classic figure again, turn off \"Detailed hero models\" in Esc > Settings",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T11:28:27Z"
+ "time": "2026-11-18T12:41:54Z"
 }

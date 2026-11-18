@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.73</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.74</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 73;
+const VERSION = 74;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2561,6 +2561,52 @@ function skAnimCrt(S,M,b,m){ const t=now()+((m.id||0)%7)*.83, R={}, L=[], add=(n
   if(P.wings){ const f=Math.sin(t*(13+mv*4)), g=-.15+.62*f; add('wingL',0,0,1,-g); add('wingR',0,0,1,g); add(P.root,1,0,0,.04*Math.sin(t*13+1)); }
   const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5){ if(C.hit) L.push({c:'hit',t:.1+fl*.25,loop:false,w:fl*1.6}); else for(const n of P.spine||[P.root]) add(n,1,0,0,-.3*fl/((P.spine||[1]).length)); }
   return {L,R}; }
+/* v73: hero models for the seven classes. Each is a sculpted statue given a simple rig (pelvis, spine, chest, head and two legs),
+   animated here: legs that walk, run, sit a saddle and kick when swimming; the whole body twisting and lunging into attacks,
+   leaning back to cast, emotes, and a fall on death. Turn off in Settings > Graphics to see the classic look with your gear. */
+const HEROM={warden:'hero_warden',mender:'hero_mender',barbarian:'hero_barbarian',arcanist:'hero_arcanist',assassin:'hero_assassin',hunter:'hero_hunter',bard:'hero_bard'};
+const HERO_H={warden:1.95,barbarian:1.95,mender:1.9,arcanist:1.92,assassin:1.82,hunter:1.85,bard:1.9};
+function skAnimHero(o,cls){ const t=now(), R={}, add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, mv=clamp(o.mv||0,0,1), ph=o.walk||0, s=Math.sin(ph), c=Math.cos(ph);
+  let dy=0;
+  if(o.dead>=0){ const k=eO(clamp(o.dead/.8,0,1)); add('root',1,0,0,-1.5*k); add('thighL',1,0,0,-.35*k); add('thighR',1,0,0,-.2*k); add('shinL',1,0,0,.5*k); add('chest',1,0,0,.2*k); return {R,dy:.12*k}; }
+  const EM=o.emote&&o.emote.k, et=o.emote?t-(o.emote.t0||0):0;
+  if(o.ride){ add('thighL',1,0,0,-1.25); add('thighL',0,0,1,.42); add('thighR',1,0,0,-1.25); add('thighR',0,0,1,-.42); add('shinL',1,0,0,1.3); add('shinR',1,0,0,1.3);
+    const rm=o.rmv||0; add('spine',1,0,0,.06*rm*Math.sin(ph*2)); add('chest',1,0,0,.05+(o.pitch||0)*.5); }
+  else if(o.swim){ add('root',1,0,0,(o.pitch||0)); add('thighL',1,0,0,.35*Math.sin(t*6)*(.3+mv)); add('thighR',1,0,0,-.35*Math.sin(t*6)*(.3+mv)); add('head',1,0,0,-.5*mv); }
+  else if(EM==='sit'){ add('thighL',1,0,0,-1.5); add('thighR',1,0,0,-1.5); add('thighL',0,0,1,.25); add('thighR',0,0,1,-.25); add('shinL',1,0,0,1.45); add('shinR',1,0,0,1.45); add('spine',1,0,0,.1); dy=-.42; }
+  else if(EM==='kneel'){ add('thighL',1,0,0,-1.45); add('shinL',1,0,0,1.5); add('thighR',1,0,0,.15); add('shinR',1,0,0,1.55); add('chest',1,0,0,.25); add('head',1,0,0,.25); dy=-.38; }
+  else if(o.air){ add('thighL',1,0,0,-.75); add('shinL',1,0,0,1.1); add('thighR',1,0,0,-.35); add('shinR',1,0,0,.8); }
+  else {
+    /* walking and running: thighs swing, knees bend on the way through, the hips bob and the shoulders counter-turn */
+    const run=clamp((mv-.55)/.45,0,1), A=(.42+.2*run)*mv;
+    add('thighL',1,0,0,-A*s); add('thighR',1,0,0,A*s);
+    add('shinL',1,0,0,(.25+.75*run)*mv*Math.max(0,c)+.15*mv); add('shinR',1,0,0,(.25+.75*run)*mv*Math.max(0,-c)+.15*mv);
+    add('root',1,0,0,(.04+.1*run)*mv); add('spine',0,1,0,.09*mv*s); add('chest',0,1,0,-.06*mv*s); dy=-.03*mv*Math.abs(c);
+    /* idle: breathing and a slow look around */
+    const id=1-mv; add('chest',1,0,0,.015*Math.sin(t*1.6)*id); add('head',0,1,0,.18*Math.sin(t*.37+(o.x||0))*id); add('spine',0,0,1,.02*Math.sin(t*.9)*id);
+    if(o.rdy&&mv<.3){ add('thighL',0,0,1,.07); add('thighR',0,0,1,-.07); add('chest',1,0,0,.06); }
+    if(o.stl){ add('root',1,0,0,.12); add('chest',1,0,0,.12); add('head',1,0,0,-.1); }
+    if(EM==='dance'){ add('spine',0,0,1,.18*Math.sin(et*7)); add('chest',0,1,0,.35*Math.sin(et*3.5)); add('thighL',1,0,0,-.4*Math.max(0,Math.sin(et*7))); add('thighR',1,0,0,-.4*Math.max(0,-Math.sin(et*7))); }
+    if(EM==='wave'||EM==='cheer'){ const k=Math.sin(Math.min(et,2)*Math.PI/2*(EM==='cheer'?2:1)); add('chest',1,0,0,-.18*Math.abs(k)); add('chest',0,0,1,.12*Math.sin(et*8)); }
+    if(EM==='bow'){ const k=Math.sin(Math.min(et/1.6,1)*Math.PI); add('spine',1,0,0,.45*k); add('chest',1,0,0,.35*k); add('head',1,0,0,.2*k); }
+  }
+  /* attacks: the whole figure twists and lunges into the blow, the chest leading; three alternating swings */
+  if(o.swing>=0&&!o.ride){ const p=o.swing, v=o.swv||0, wind=p<.28?eO(p/.28):1, hit=p<.28?0:p<.5?eO((p-.28)/.22):1, back=p>.55?eI((p-.55)/.45):0, k=wind-(wind+hit*0)*back;
+    if(v===1){ /* overhead chop */ const a=-.32*wind+.62*hit; const b=a*(1-back); add('chest',1,0,0,b*.6); add('spine',1,0,0,b*.35); add('root',1,0,0,b*.2); }
+    else { const sg=v===0?1:-1, a=(.55*wind-1.2*hit)*(1-back)*sg; add('chest',0,1,0,a*.45); add('spine',0,1,0,a*.3); add('root',0,1,0,a*.25); add('chest',1,0,0,.15*hit*(1-back)); add('thighL',1,0,0,-.2*hit*(1-back)); add('shinL',1,0,0,.25*hit*(1-back)); }
+    void k; }
+  if(o.cast&&!o.ride){ add('chest',1,0,0,-.1-.03*Math.sin(t*5)); add('head',1,0,0,-.08); }
+  if(o.rel>=0&&o.rel<1&&!o.ride){ const r=Math.sin(o.rel*Math.PI); add('chest',1,0,0,.22*r); add('spine',1,0,0,.1*r); }
+  const fl=o.hit?1:0; if(fl) add('chest',1,0,0,-.1);
+  return {R,dy}; }
+function skDrawHero(o,cls){ if(OPT.heroModels===false||GFX.q==='low') return false; const f=HEROM[cls]; if(!f) return false; const M=skGet(f); if(!M) return false;
+  const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc;
+  mreset(); mtr(o.x,o.y+(o.lift||0)+(A.dy||0)*sc,o.z); mry(-o.face); mry(Math.PI/2); msc(H/M.H);
+  SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,[],A.R,null).slice(),e:(o.hit?.45:0),a:typeof HALPHA==='number'?HALPHA:1});
+  if(o.cast&&o.castCol) addLight(o.x+Math.cos(o.face)*.5,o.y+1.3*sc,o.z+Math.sin(o.face)*.5,3.2,o.castCol);
+  return true; }
+/* fetch your own class's hero model as soon as you are in the world */
+setInterval(()=>{ try{ if(typeof me!=='undefined'&&me&&me.c&&OPT.heroModels!==false&&GFX.q!=='low'&&HEROM[me.c.cls]) skGet(HEROM[me.c.cls]); }catch(e){} },3000);
 function skDrawMob(m,mt,b){ const S=SKMOB[mt.key]; if(!S) return false; const M=skGet(S.f); if(!M) return false;
   if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.crt?skAnimCrt(S,M,b,m):S.dragon?skAnimDragon(S,M,b,m):S.statue?skAnimStatue(S,M,b,m):S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); const hv=S.hover&&!(b.dead>=0)?S.hover*(1+.6*Math.sin(now()*1.7+(m.id||0))):0; mreset(); mtr(b.x,b.y+hv,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
   SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L||[],A.R||null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
@@ -2579,10 +2625,15 @@ setTimeout(()=>{ try{ skyLoad(); }catch(e){} },1500);
 function drawSkinQ(pr,shadow,big){ if(!SKQ.length||!pr) return; if(!SKQ.some(q=>(q.M.B.length>24)===!!big)) return; setFrameUniforms(pr,shadow); const u=pr.u;
   if(!shadow){ gl.uniform1i(u.uTex,4); gl.uniform1i(u.uETex,5); if(u.uSpec) gl.uniform1f(u.uSpec,.2); }
   gl.uniform3f(u.uInvS2,1,1,1); gl.vertexAttrib4f(2,1,1,1,0);
-  for(const q of SKQ){ if((q.M.B.length>24)!==!!big) continue; gl.uniformMatrix4fv(u.uM,false,q.m); gl.uniformMatrix4fv(u.uJ,false,q.j);
+  let tr=0; for(const q of SKQ){ if((q.M.B.length>24)!==!!big) continue; if((q.a??1)<.99){ tr=1; if(shadow&&q.a<.5) continue; if(!shadow) continue; } gl.uniformMatrix4fv(u.uM,false,q.m); gl.uniformMatrix4fv(u.uJ,false,q.j);
     if(!shadow){ gl.uniform3f(u.uTint,1.05,1.05,1.05); gl.uniform1f(u.uEmis,q.e); gl.uniform1f(u.uAlpha,1);
       gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D,q.M.tex); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,q.M.emi); gl.activeTexture(gl.TEXTURE0); }
     gl.bindVertexArray(q.M.vao); gl.drawElements(gl.TRIANGLES,q.M.n,q.M.u32?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,0); }
+  if(tr&&!shadow){ gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+    for(const q of SKQ){ if((q.M.B.length>24)!==!!big||(q.a??1)>=.99) continue; gl.uniformMatrix4fv(u.uM,false,q.m); gl.uniformMatrix4fv(u.uJ,false,q.j); gl.uniform3f(u.uTint,1.05,1.05,1.05); gl.uniform1f(u.uEmis,q.e); gl.uniform1f(u.uAlpha,q.a);
+      gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D,q.M.tex); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,q.M.emi); gl.activeTexture(gl.TEXTURE0);
+      gl.bindVertexArray(q.M.vao); gl.drawElements(gl.TRIANGLES,q.M.n,q.M.u32?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,0); }
+    gl.depthMask(true); gl.disable(gl.BLEND); }
   gl.bindVertexArray(null); }
 /* fetch the models as soon as the game starts so the mobs swap in quickly */
 setTimeout(()=>{ for(const k in SKMOB) skGet(SKMOB[k].f); },500);
@@ -4079,8 +4130,8 @@ function buildScene(dt){
     const SMv=mt?steedMotion(st.walkP||0,st.mvS||0,!!(MOUNTS[mt]&&MOUNTS[mt].celestial)):null;
     if(mt) drawHorse({x:x/TS,y:Y0,z:y/TS,face,mv:st.mvS||0,walk:st.walkP||0,m:mt,an:st});
     HALPHA=(isMe?me.stealth:o.sl)?(isMe?.4:.22):1;
-    drawHumanoid({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?.72+SMv.y:(swim?.3*(st.mvS||0):0),pitch:mt?SMv.p:(swim?-1.08*(st.mvS||0):0),rmv:mt?(st.mvS||0):0,ride:!!mt,swim,emote:emo,an:st,swv:(st.swingN||0)%3,rel:(t-(st.relT||-9))/.38,rdy:isMe?(t-me.lastCombat<4?1:0):(t-(o.swingT||0)<4?1:0),stl:isMe?!!me.stealth:!!o.sl,air:isMe?(me.jumpH||0)>.08:0,
-      cast:isMe?!!me.cast:!!(o.b&4),castCol,dead:dead?t-st.deadAt:-1,L:playerLook(cls,u,isMe?myGearVis():o.gv),skin:SKIN[hashU(u)%SKIN.length],hair:HAIR[hashU(u)%HAIR.length],big:(isMe?me.avatarU>t:(o.b&64))?1.25:1,wr:isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0)});
+    const HO=({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?.72+SMv.y:(swim?.3*(st.mvS||0):0),pitch:mt?SMv.p:(swim?-1.08*(st.mvS||0):0),rmv:mt?(st.mvS||0):0,ride:!!mt,swim,emote:emo,an:st,swv:(st.swingN||0)%3,rel:(t-(st.relT||-9))/.38,rdy:isMe?(t-me.lastCombat<4?1:0):(t-(o.swingT||0)<4?1:0),stl:isMe?!!me.stealth:!!o.sl,air:isMe?(me.jumpH||0)>.08:0,
+      cast:isMe?!!me.cast:!!(o.b&4),castCol,dead:dead?t-st.deadAt:-1,L:playerLook(cls,u,isMe?myGearVis():o.gv),skin:SKIN[hashU(u)%SKIN.length],hair:HAIR[hashU(u)%HAIR.length],big:(isMe?me.avatarU>t:(o.b&64))?1.25:1,wr:isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0)}); if(!skDrawHero(HO,cls)) drawHumanoid(HO);
     HALPHA=1;
     { const au=isMe?(gm.aura&&isGM):o.au; if(au&&!dead) drawAura(x/TS,Y0,y/TS,t,'#ffb03a');
       const cb=isMe?cosBits():(o.cs|0); if(!dead&&(cb&2)&&!au) drawAura(x/TS,Y0,y/TS,t,'#ff7ad9'); if(!dead&&(cb&1)) drawCosWings(x/TS,Y0+(mt?.72:0),y/TS,face,t); }
@@ -7409,7 +7460,7 @@ const BIND_DEF={forward:'w',back:'s',left:'a',right:'d',jump:' ',interact:'f',lo
   ab1:'1',ab2:'2',ab3:'3',ab4:'4',ab5:'5',ab6:'6',ab7:'7',ab8:'8',character:'c',talents:'n',professions:'k',bags:'b',map:'m',quests:'l',party:'p',players:'o',help:'h'};
 const BIND_LABEL={forward:'Move forward',back:'Move backward',left:'Strafe left',right:'Strafe right',jump:'Jump',autorun:'Auto-run',interact:'Talk / loot / gather',lootall:'Take all loot',target:'Target enemy (attacking you or within 5 yd)',mount:'Mount / dismount',potion:'Drink potion',sit:'Sit',
   ab1:'Ability 1',ab2:'Ability 2',ab3:'Ability 3',ab4:'Ability 4',ab5:'Ability 5',ab6:'Ability 6',ab7:'Ability 7',ab8:'Ability 8',character:'Character panel',talents:'Talents',professions:'Professions',bags:'Bags',map:'World map',quests:'Quest log',party:'Party',players:'Players online',help:'Help'};
-const OPT=Object.assign({sens:1,invertY:false,camMax:30,questArrow:true,uiScale:innerWidth<760?.62:1,shake:true,names:true,gfx:'auto',fullscreen:true,autoLoot:false},saves.opts||{});
+const OPT=Object.assign({sens:1,invertY:false,camMax:30,questArrow:true,heroModels:true,uiScale:innerWidth<760?.62:1,shake:true,names:true,gfx:'auto',fullscreen:true,autoLoot:false},saves.opts||{});
 let BIND=Object.assign({},BIND_DEF,saves.binds||{}); let KEYMAP={}; function rebuildKeymap(){ KEYMAP={}; for(const a in BIND) if(BIND[a]) KEYMAP[BIND[a]]=a; } rebuildKeymap();
 function saveOpts(){ saves.opts=OPT; saves.binds=BIND; saveAll(saves); applyOpts(); }
 function applyOpts(){ document.documentElement.style.setProperty('--uis',OPT.uiScale); try{ setTimeout(hudLayout,30); }catch(e){} }
@@ -7480,7 +7531,7 @@ function renderOptions(){ const w=$('optWin'); if(w.classList.contains('hidden')
   if(optTab==='controls') h+=sl('sens','Mouse / touch look speed',.3,2.5,.1,v=>Math.round(v*100)+'%')+sl('camMax','Max camera zoom out',10,40,1,v=>v)+ck('invertY','Invert camera up/down')+ck('shake','Screen shake')+`<div class="onote">Movement: hold both mouse buttons to run forward, right-drag to steer, left-drag to look around, wheel to zoom. On touch screens use the joystick and drag the screen to look.</div>`;
   if(optTab==='keys'){ h+='<div class="okeys">'+Object.keys(BIND_DEF).map(a=>`<div class="okey"><span>${BIND_LABEL[a]}</span><button data-bind="${a}" class="${capBind===a?'cap':''}">${capBind===a?'Press a key…':(BIND[a]?keyName(BIND[a]):'—')}</button></div>`).join('')+'</div><div class="onote">Arrow keys always move too. Esc cancels. <button id="bindReset">Reset to defaults</button></div>'; }
   if(optTab==='gfx'){ const Q=[['auto','Auto'],['low','Low'],['medium','Medium'],['high','High'],['ultra','Ultra']];
-    h+=`<div class="sndrow"><span>Graphics quality</span><select id="gfxSel">${Q.map(([k,l])=>`<option value="${k}" ${OPT.gfx===k?'selected':''}>${l}</option>`).join('')}</select><b>${GFX.q}</b></div>`+ck('fullscreen','Start in full screen')+ck('borderless','Windowed borderless: let the mouse leave the game (multi-monitor)')+sl('curSpd','Game cursor speed (full screen)',.4,2.5,.05,v=>Math.round(v*100)+'%')+`<div class="onote"><button id="fsNow">${document.fullscreenElement?'Leave full screen':'Go full screen now'}</button> Quality changes apply after you press <button id="gfxReload">Restart the game</button> (your character is saved). Low is best for phones and older laptops; Ultra needs a gaming graphics card.</div>`; }
+    h+=`<div class="sndrow"><span>Graphics quality</span><select id="gfxSel">${Q.map(([k,l])=>`<option value="${k}" ${OPT.gfx===k?'selected':''}>${l}</option>`).join('')}</select><b>${GFX.q}</b></div>`+ck('heroModels','Detailed hero models for the seven classes (turn off to see your armour and weapons on the classic figure)')+ck('fullscreen','Start in full screen')+ck('borderless','Windowed borderless: let the mouse leave the game (multi-monitor)')+sl('curSpd','Game cursor speed (full screen)',.4,2.5,.05,v=>Math.round(v*100)+'%')+`<div class="onote"><button id="fsNow">${document.fullscreenElement?'Leave full screen':'Go full screen now'}</button> Quality changes apply after you press <button id="gfxReload">Restart the game</button> (your character is saved). Low is best for phones and older laptops; Ultra needs a gaming graphics card.</div>`; }
   if(optTab==='sound') h+='<div id="optSound"></div>';
   if(optTab==='ui') h+=sl('uiScale','Interface size',.5,1.3,.02,v=>Math.round(v*100)+'%')+ck('questArrow','Show quest direction arrow')+ck('names','Show player and monster names');
   w.querySelector('.obodywrap').innerHTML=h+'</div>';
