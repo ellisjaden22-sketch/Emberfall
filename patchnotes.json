@@ -1,9 +1,9 @@
 {
- "version": "v0.85",
- "title": "Feel and flow",
- "date": "18 Nov 2026",
- "text": "A polish pass on how moving, fighting and casting feel.\n\n• Movement: your hero now turns toward where you're heading instead of snapping, speeds up and slows down on smooth curves, and digs in harder when you reverse direction. Mounts feel heavier, with wider turns and longer glides to a stop\n• Running and walking animations now blend in and out with your real speed, so your legs ease into a run and settle as you brake rather than switching on and off\n• Melee combat: damage numbers, hit flashes, knockback, hit-stop, impact sparks and sounds now land on the swing's strike frame, not the instant you press the key. Damage and threat timing are unchanged\n✨ Spell casting: every cast now has a build-up, with a rune circle that grows under you, motes of light drawn into your hands and a glow that swells as the cast fills. When the spell lets go there is a flash, a shockwave and a spray of sparks\n🔧 Cast effects are drawn fresh each frame from the cast bar, so nothing lingers after a cast finishes, is interrupted or is cancelled. Other players' casts show the same effects",
+ "version": "v0.86",
+ "title": "Piggy Smallz",
+ "date": "19 Nov 2026",
+ "text": "A new mount trots into Hilde's stable.\n\n✨ Piggy Smallz: a stout pack pig with a plaid saddle blanket, a bedroll, lanterns and a ring in his snout. Sold by Hilde the Stable Master for 75 gold at level 10, with +80% speed\n✨ Piggy Smallz trots with short, bouncy strides, wags his curly tail, sniffs about when you stop, and his lanterns light up after dusk\n• Riders now sit at the right height for each mount, so you sit snugly on the pig's back",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T23:23:13Z"
+ "time": "2026-11-19T04:21:22Z"
 }
