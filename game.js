@@ -6,8 +6,8 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 87;
-const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
+const VERSION = 88;
+const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
 function WP(x,y){ const dx=x-TL.x, dy=y-TL.y, d=Math.hypot(dx,dy); if(d<=TL.r) return [TC.x+dx,TC.y+dy]; const f=(TL.r+(d-TL.r)*WS)/d; return [TC.x+dx*f,TC.y+dy*f]; }
@@ -208,7 +208,7 @@ function carveArena(){ const {x0,y0,w,h,cx,cy}=AR;
     for(let i=0;i<len;i++) setT(x+(vert?0:i),y+(vert?i:0),T.DWALL);
   for(const [x,y] of [[40,AR.cy-6],[40,AR.cy+5],[119,AR.cy-6],[119,AR.cy+5],[56,AR.cy],[103,AR.cy-1]]) { setT(x,y,T.COLUMN); setT(x+1,y,T.COLUMN); }
 }
-function edgeOf(tx,ty){ if(ty>=OWH) return Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); if(tx>=EX0) return Math.min(ty,OWH-1-ty,tx-EX0+.5); const L=WI(tx,ty); return Math.min(tx,ty,EX0-1-tx,OWH-1-ty,Math.max(0,Math.min(L[0],L[1],159-L[0],111-L[1]))*WS); }
+function edgeOf(tx,ty){ if(ty>=OWH) return Math.min(tx,ty-OWH,MW-1-tx,MH-1-ty); if(tx>=EX0) return Math.min(ty,OWH-1-ty,tx-EX0+.5); const L=WI(tx,ty); return Math.min(tx,ty,EX0-1-tx,OWH-1-ty,Math.max(0,Math.min(L[0],L[1],159-L[0],999-L[1]))*WS); }
 function ridgeL(tx,ty){ const L=WI(tx,ty); return L[0]>=109.5&&L[0]<=114.5&&!(L[1]>=56&&L[1]<=62); }
 const inVault=(px,py)=>py>=OWH*TS&&py<(AR.y0-3)*TS&&px<RX0*TS;
 const inArena=(px,py)=>py>=(AR.y0-3)*TS&&px<RX0*TS, arenaSafe=(px,py)=>AR.shr.some(([sx,sy])=>Math.hypot(px/TS-sx,py/TS-sy)<5.2), pvpOn=(px,py)=>inArena(px,py)&&!arenaSafe(px,py);
@@ -263,6 +263,40 @@ function addGateAreas(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,r
     { const a=Math.PI/2+.5, x=A.cx+Math.cos(a)*(A.r-1.2), z=A.cy+Math.sin(a)*(A.r-1.2), y0=hgt(x,z); box(x,y0+.9,z,.75,1.8,.35,[.42,.42,.4],-a); box(x,y0+1.25,z+.01,.5,.35,.37,emit,-a,1.6); } } }
 /* the banner and the hush of dungeon music as you step into a court */
 function gateAreaTick(){ if(!me||me.dead) return; const A=gateAreaAt(me.x,me.y); if(A&&ALIVE.gate!==A.id){ ZONES['gate_'+A.id]=ZONES['gate_'+A.id]||{name:A.name,sub:A.sub}; try{ zoneBanner('gate_'+A.id); }catch(e){} } ALIVE.gate=A?A.id:null; }
+
+/* ======================================================================================================
+   v87 The Southlands: the overworld runs 70 rows further south. Gloamfen roughly doubles, a wide stretch of
+   Amberfield farmland opens below Mirrowmere, and Frostpeak and the Stormwake Coast reach further south.
+   New roads lead from Hearthmere's east gate down to four new places to discover:
+     Amberfield Farmsteads, Southwatch Camp, the Sowing Stones and the Mirefall Shrine.
+   Starting monsters spread across the larger Amberfield instead of crowding the strip north of town,
+   and boar herds and wolf packs roam the far south.
+   ====================================================================================================== */
+const SOUTH_SITES=[
+  {id:'farmsteads',name:'Amberfield Farmsteads',x:152,y:246,r:7},
+  {id:'southwatch',name:'Southwatch Camp',x:203,y:268,r:6},
+  {id:'sowing',name:'The Sowing Stones',x:120,y:279,r:5},
+  {id:'mirefall',name:'Mirefall Shrine',x:52,y:262,r:6}];
+const SOUTH_PROPS=[];
+function carveSouth(carve){ const S=Object.fromEntries(SOUTH_SITES.map(s=>[s.id,s]));
+  /* roads: from the east gate past the west shore of Mirrowmere, then fanning out across the Southlands */
+  const gx=TOWN.x+TOWN.r+2, gy=TOWN.y, J=[136,214];
+  carve(gx,gy+1,J[0],J[1],61); carve(J[0],J[1],S.farmsteads.x-6,S.farmsteads.y,62); carve(S.farmsteads.x+6,S.farmsteads.y+1,S.southwatch.x-4,S.southwatch.y,63);
+  carve(S.farmsteads.x-2,S.farmsteads.y+6,S.sowing.x+3,S.sowing.y-4,64); carve(J[0],J[1],96,240,65); carve(96,240,S.mirefall.x+6,S.mirefall.y,66);
+  /* clear each site and stamp its solid props into the map */
+  for(const s of SOUTH_SITES) for(let y=Math.floor(s.y-s.r);y<=s.y+s.r;y++)for(let x=Math.floor(s.x-s.r);x<=s.x+s.r;x++){ if(Math.hypot(x-s.x,y-s.y)>s.r) continue; const t=tAt(x,y);
+    if(t===T.TREE||t===T.ROCK) setT(x,y,s.id==='mirefall'?T.SWAMP:T.GRASS); if(s.id==='mirefall'&&t===T.WATER&&Math.hypot(x-s.x,y-s.y)<s.r-1.5) setT(x,y,T.SWAMP); }
+  const add=(k,x,y,r,sc,name)=>{ const tx=Math.floor(x), ty=Math.floor(y), t=tAt(tx,ty); if(t===T.WATER||t===T.PATH||t===T.BRIDGE) return; SOUTH_PROPS.push({k,x,y,r:r||0,s:sc||1,name}); if(PROPK[k]&&PROPK[k].solid) setT(tx,ty,T.PROP); };
+  { const F=S.farmsteads; add('house',F.x-3,F.y-3,.2,1.1); add('house',F.x+3.5,F.y-2.5,-.3,.95); add('house',F.x+2,F.y+3.5,1.4,.9); add('well',F.x,F.y+.5); add('hay',F.x-4,F.y+2); add('hay',F.x-3,F.y+3.4,.6); add('cart',F.x+5,F.y+.8,.4);
+    add('barrel',F.x-.8,F.y-4.6); add('crate',F.x+.6,F.y-4.4); add('bench',F.x-1.6,F.y+1.8,1.57); add('flowers',F.x+1.2,F.y-1.4); add('sign',F.x-6.2,F.y+.6,0,1);
+    for(let k=0;k<9;k++){ add('fence',F.x-8+k*1.1,F.y-6.5,0); add('fence',F.x-8+k*1.1,F.y-11.5,0); } for(let k=0;k<5;k++){ add('fence',F.x-8.6,F.y-7.5-k,1.57); add('fence',F.x+1.3,F.y-7.5-k,1.57); }
+    for(let r=0;r<4;r++) for(let k=0;k<7;k++) add('bush',F.x-7.2+k*1.25,F.y-10.6+r*1.15,0,.45); }
+  { const C=S.southwatch; add('tower',C.x+2.5,C.y-2,0,1); add('tent',C.x-2.5,C.y-1.5,.5); add('tent',C.x-2,C.y+2.5,-.4); add('tent',C.x+1.5,C.y+3,2.6); add('banner',C.x,C.y-3.4); add('crate',C.x+3.6,C.y+1); add('crate',C.x+4.2,C.y+1.8,.5); add('barrel',C.x+3.4,C.y+2.6); add('torch',C.x-.8,C.y-3); add('torch',C.x+.8,C.y-3); }
+  { const T2=S.sowing; for(let k=0;k<9;k++){ const a=k/9*6.283; add('pillar',T2.x+Math.cos(a)*3.8,T2.y+Math.sin(a)*3.8,a,.8); } add('statue',T2.x,T2.y,0,.9); for(let k=0;k<6;k++){ const a=k/6*6.283+.3; add('flowers',T2.x+Math.cos(a)*2,T2.y+Math.sin(a)*2); } }
+  { const M=S.mirefall; add('statue',M.x,M.y,0,1.1); for(let k=0;k<6;k++){ const a=k/6*6.283; add('pillar',M.x+Math.cos(a)*3.4,M.y+Math.sin(a)*3.4,a,.75); } add('mushrooms',M.x-2,M.y+2.4); add('mushrooms',M.x+2.6,M.y-1.8); add('crystal',M.x+1.4,M.y+2.2,0,.7); add('grave',M.x-3,M.y-1.6,.4); add('grave',M.x-2.2,M.y-2.8,-.3); add('lamp',M.x+4.6,M.y+.6); }
+}
+/* the new landmarks are discovered like the old ones (and count for the Cartographer achievement) */
+function southPOIs(){ if(southPOIs.done) return; southPOIs.done=true; for(const s of SOUTH_SITES) if(!POIS.some(p=>p.id===s.id)) POIS.push({id:s.id,name:s.name,x:s.x,y:s.y,r:s.r+2}); }
 
 function genWorld(){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
@@ -341,7 +375,7 @@ function genWorld(){
     const inGate=a=>TOWN.gates.some(g=>Math.abs(Math.atan2(Math.sin(a-g.c),Math.cos(a-g.c)))<half);
     for(let y=TOWN.y-29;y<=TOWN.y+29;y++)for(let x=TOWN.x-29;x<=TOWN.x+29;x++){ const d=Math.hypot(x-TOWN.x,y-TOWN.y); if(d<R-.75||d>=R+.8) continue;
       if(Math.abs(y-TOWN.y)<=1&&inGate(Math.atan2(y-TOWN.y,x-TOWN.x))) continue; setT(x,y,T.TWALL); } }
-  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate(); carveReach(); carveCoast(); carveGateAreas();
+  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate(); carveReach(); carveCoast(); carveGateAreas(); carveSouth(carve);
 }
 /* the kinds of props the World Editor can place (solid ones block movement) */
 const PROPK={tree:{solid:1},pine:{solid:1},deadtree:{solid:1},rock:{solid:1},boulder:{solid:1},house:{solid:1},tent:{solid:1},well:{solid:1},statue:{solid:1},pillar:{solid:1},wall:{solid:1},tower:{solid:1},
@@ -844,6 +878,7 @@ const mobs=[], mobById={};
   {zone:C,key:'thalassor',name:'Thalassor, the Tidewyrm',lv:[15,15],hp:11000,hpL:0,dmg:42,dmgL:0,spd:80,rng:66,as:2.3,aggro:230,r:34,col:'#1a8a8a',n:1,boss:true,resp:240,spots:[[COAST.shrine.x,COAST.shrine.y-1]],light:'#4affd8',sp:{k:'slam',cd:7,r:160,delay:1.5,mul:1.5},xp:3200});
 }
 
+MOBT.push({...MOBT.find(m=>m.key==='boar'),lv:[2,3],n:4,south:true},{...MOBT.find(m=>m.key==='wolf'),zone:'meadow',lv:[3,4],n:3,south:true});
 (function genSpawns(){
   const R=mulberry32(1337); let id=1;
   for(let ti=0;ti<MOBT.length;ti++){const mt=MOBT[ti];
@@ -857,8 +892,8 @@ const mobs=[], mobById={};
         var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>13 && Math.hypot(tx-170,ty-23)>15 && (mt.zone==='crypt'||Math.hypot(tx-140-CRO[0],ty-27.5-CRO[1])>9) && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
         if(ok&&mt.zone==='ash') ok = (mt.reg==='reach')===inReachT(tx,ty) && Math.hypot(tx-REACH.cx,ty-REACH.cy)>16 && Math.hypot(tx-192,ty-11)>10 && Math.hypot(tx-212,ty-47)>8 && (!mt.rx||(tx>=mt.rx[0]&&tx<=mt.rx[1]));
         if(ok&&mt.zone==='coast'&&mt.cb) ok=mt.cb(tx,ty);
-        if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
-        if(ok){ const gap=tries<1500?150:tries<3000?124:96; for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
+        if(mt.zone==='meadow') ok = ok && (mt.south? ty>=232 : Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+44 && (ty<TOWN.y+6||Math.hypot(tx-TOWN.x,ty-TOWN.y)>TOWN.r+10));
+        if(ok){ const gap=(mt.zone==='meadow'&&tries<1500?190:0)||(tries<1500?150:tries<3000?124:96); for(const o of mobs) if(dist(o.sx,o.sy,x,y)<gap){ok=false;break} }
       }while(!ok && tries<4000);
       const lv=mt.lv[0]+Math.floor(R()*(mt.lv[1]-mt.lv[0]+1));
       const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)*instHp(mt));
@@ -2790,7 +2825,7 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     for(let k=0;k<7;k++){ const a=k/7*Math.PI*2; gAdd(d,RBL,x+Math.cos(a)*.55,y0+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); }
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
-  addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); try{ addGateAreas(d); }catch(e){ console.warn('gate courts',e); } addPort(d); addCoastSites(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
+  addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); try{ addGateAreas(d); }catch(e){ console.warn('gate courts',e); } addPort(d); addCoastSites(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d); addEditorProps(d,SOUTH_PROPS);
   if(TKIT&&HOLD_D.i.length) HOLD=mkVAO(HOLD_D);
   const V=mkVAO(d); V.chunks=[...SCH.values()].filter(c=>c.d.i.length).map(c=>{ const v=mkVAO(c.d); v.cx=c.cx; v.cz=c.cz; return v; }); SCH.clear(); STATIC_D=null; return V; })();
 if(EDITOR_MODE){ window.__EF={MW,MH,OWH,TS,T:{...T},map:Array.from(map.subarray(0,MW*OWH)),zmap:zmap.slice(0,MW*OWH),zones:Object.fromEntries(Object.entries(ZONES).map(([k,v])=>[k,v.name])),
@@ -4171,9 +4206,9 @@ function addWilds(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0
   // boulder fields
   place(48,(x,z,zn,R)=>{ const n=2+Math.floor(R()*4); for(let i=0;i<n;i++){ const px=x+(R()-.5)*3, pz=z+(R()-.5)*3, y0=hgt(px,pz), s=.5+R()*1.1; gAdd(d,RBL,px,y0+s*.3,pz,R()*6,s*1.2,s*.8,s,zn==='ash'?[.3,.26,.24]:zn==='frost'?[.72,.74,.78]:[.5,.48,.45]); } });
 }
-function addEditorProps(d){ if(!WE||!Array.isArray(WE.props)) return; const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
+function addEditorProps(d,LIST){ const PL=LIST||(WE&&Array.isArray(WE.props)?WE.props:null); if(!PL) return; const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e);
   const wood=[.34,.22,.12], dark=[.2,.13,.08], stone=[.55,.53,.5], iron=[.16,.16,.18];
-  for(const p of WE.props.slice(0,4000)){ try{ const x=+p.x, z=+p.y, r=(+p.r||0), S=clamp(+p.s||1,.3,4); if(!(x>0&&z>0&&x<MW&&z<OWH)) continue; const y0=hgt(x,z), R2=(a,b)=>[x+(a*Math.cos(r)-b*Math.sin(r))*S, z+(a*Math.sin(r)+b*Math.cos(r))*S];
+  for(const p of PL.slice(0,4000)){ try{ const x=+p.x, z=+p.y, r=(+p.r||0), S=clamp(+p.s||1,.3,4); if(!(x>0&&z>0&&x<MW&&z<OWH)) continue; const y0=hgt(x,z), R2=(a,b)=>[x+(a*Math.cos(r)-b*Math.sin(r))*S, z+(a*Math.sin(r)+b*Math.cos(r))*S];
     switch(p.k){
       case 'tree': gAdd(d,RFR,x,y0-.1,z,r,.5*S,2.4*S,.5*S,[.36,.24,.14]); gAdd(d,RBL,x,y0+2.9*S,z,r,2.6*S,2.2*S,2.6*S,[.24,.46,.2]); gAdd(d,RBL,x+.5*S,y0+3.6*S,z-.3*S,r,1.6*S,1.4*S,1.6*S,[.3,.54,.24]); break;
       case 'pine': gAdd(d,RC,x,y0-.1,z,0,.36*S,1.2*S,.36*S,[.32,.22,.14]); for(let k=0;k<3;k++) gAdd(d,RCN,x,y0+(1+k*1.1)*S,z,r,(2.4-k*.6)*S,1.8*S,(2.4-k*.6)*S,[.14,.34,.2]); break;
@@ -4852,7 +4887,7 @@ function openStable(n){ const c=me.c;
 
 /* ---------- world map ---------- */
 let mapBase=null; const MAPS=5;
-const ZCENT={}; (function(){ const acc={}; for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){ const z=zmap[y*MW+x]; (acc[z]=acc[z]||[0,0,0]); acc[z][0]+=x; acc[z][1]+=y; acc[z][2]++; } for(const z in acc) ZCENT[z]=[acc[z][0]/acc[z][2],acc[z][1]/acc[z][2]]; ZCENT.ash=WP(56,18); ZCENT.lake=WP(90,93); ZCENT.reach=[196,30]; ZCENT.coast=[364,182]; ZCENT.port=[PORT.cx,PORT.y0-4]; })();
+const ZCENT={}; (function(){ const acc={}; for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){ const z=zmap[y*MW+x]; (acc[z]=acc[z]||[0,0,0]); acc[z][0]+=x; acc[z][1]+=y; acc[z][2]++; } for(const z in acc) ZCENT[z]=[acc[z][0]/acc[z][2],acc[z][1]/acc[z][2]]; ZCENT.ash=WP(56,18); ZCENT.lake=WP(90,93); ZCENT.meadow=[160,231]; ZCENT.reach=[196,30]; ZCENT.coast=[364,182]; ZCENT.port=[PORT.cx,PORT.y0-4]; })();
 setInterval(drawWorldMap,50);
 function drawMini(){
   const mc=document.getElementById('miniC'), c=mc.getContext('2d'); const S=mc.width; c.clearRect(0,0,S,S);
@@ -7763,7 +7798,7 @@ const FOLK_TALK={day:['Lovely weather for it.','Mind the cart!','Fresh bread at 
   night:['Bit late to be wandering, isn’t it?','Keep to the lamplight.','Heard wolves earlier.','Good night, friend.','The stars are clear tonight.','Can’t sleep either?']};
 BUFFNAME.hearth=['Warmed by the Fire','🔥']; BUFFTIP.hearth='+5% maximum health';
 const aliveWalk=t=>t!==T.WATER&&t!==T.LAVA&&!SOLID.has(t)&&t!==T.PATH&&t!==T.BRIDGE&&t!==T.COBBLE&&t!==T.HOUSE&&t!==T.PROP&&t!==T.FOUNT&&t!==T.RUIN;
-function aliveInit(){ if(ALIVE.ready) return; ALIVE.ready=true; const R=mulberry32(8787), objs=[];
+function aliveInit(){ if(ALIVE.ready) return; ALIVE.ready=true; try{ southPOIs(); }catch(e){} const R=mulberry32(8787), objs=[];
   const near=(x,y,r,f)=>objs.some(o=>(!f||f(o))&&Math.hypot(o.tx-x,o.ty-y)<r);
   const around=(x,y,r,test)=>{ for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++) if(test(tAt(x+dx,y+dy))) return true; return false; };
   const npcNear=(x,y)=>NPCS.some(n=>Math.hypot(n.x/TS-x,n.y/TS-y)<8);
