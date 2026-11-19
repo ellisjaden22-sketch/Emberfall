@@ -1,9 +1,9 @@
 {
- "version": "v0.89",
- "title": "Honor and Conquest",
+ "version": "v0.90",
+ "title": "Hearthmere's gates",
  "date": "19 Nov 2026",
- "text": "PvP progression arrives: a battleground, two currencies and two sets of PvP gear.\n\n✨ Emberclash Fields, a new battleground: the Ember Legion and the Frost Vanguard fight over the Sunfall Shrine, the Ashen Forge and Thornfield Mill. Stand on a point to capture it; holding one, two or all three scores 1, 2 or 4 points a second, and the first team to 400 wins. It runs with as few as one player a side. Speak to Battlemaster Ysolde in Hearthmere (level 10+); type -o or click Leave to go home\n✨ Honor: earn 1 for every player you defeat in the arena or the battleground, 2 for capturing a point, 25 for winning a battle and 10 for losing one\n✨ Conquest: earn 3 for every kill in the Bloodsand Arena, and 5 more on a three-kill streak\n✨ The Emberguard set (Honor, from Battlemaster Ysolde) and the Ashen Champion set (Conquest, from Varro the Bloodsworn): a weapon, armour and a trinket for every class, requiring level 20. Emberguard is the second-strongest gear in Emberfall and Ashen Champion the strongest, and every piece adds PvP Toughness (less damage taken from players) and PvP Damage\n✨ Your Honor and Conquest are shown in your bags. Three new achievements: Battle-Tested, Honor Bound and Champion of the Sands",
+ "text": "The town wall is whole again, and its gateways have doors.\n\n🔧 Fixed a missing stretch of Hearthmere's wall south of the east gate, where the new Southlands road had cut through it. Roads can no longer break the town wall\n✨ Hearthmere's east and west gateways now have iron-bound oak gates. They swing open on their own when anyone comes within 5 yards and close again behind you",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-19T07:35:29Z"
+ "time": "2026-11-19T07:55:36Z"
 }

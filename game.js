@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 89;
+const VERSION = 90;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -456,7 +456,7 @@ function genWorld(){
       const cx=x0+(x1-x0)*t+nx*w, cy=y0+(y1-y0)*t+ny*w; if(!gRec&&Math.hypot(cx-TOWN.x,cy-TOWN.y)>=TOWN.wallR-4.05){ gRec=true; TOWN.gatePts.push([cx,cy]); }
       for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){const tx=Math.round(cx+ox),ty=Math.round(cy+oy);
         if(tx<3||ty<3||tx>=MW-3||ty>=MH-3) continue; const cur=tAt(tx,ty);
-        if(cur===T.COBBLE) continue; setT(tx,ty, cur===T.WATER||cur===T.LAVA ? T.BRIDGE : T.PATH);}}};
+        if(cur===T.COBBLE||cur===T.TWALL) continue; setT(tx,ty, cur===T.WATER||cur===T.LAVA ? T.BRIDGE : T.PATH);}}};
   const Q=WP, cv=(a,b,sd)=>carve(a[0],a[1],b[0],b[1],sd), ST=(x,y,o)=>[x+o[0],y+o[1]];
   { const gw=TOWN.x-TOWN.r-2, ge=TOWN.x+TOWN.r+2, gy=TOWN.y;
     carve(TOWN.x,gy,gw,gy,13); carve(TOWN.x,gy,ge,gy,14);
@@ -4732,7 +4732,7 @@ function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial,
 }
 /* ---------- dynamic world pieces ---------- */
 function drawExtras(near,t){
-  try{ aliveDraw(near,t); }catch(e){ frameErr&&frameErr(e,'living world'); } try{ bgDraw(near,t); }catch(e){}
+  try{ aliveDraw(near,t); }catch(e){ frameErr&&frameErr(e,'living world'); } try{ bgDraw(near,t); }catch(e){} try{ townGateDraw(near,t,Math.min(.05,t-(TGATES.lt||t))); TGATES.lt=t; }catch(e){}
   drawLootBags(near,t); drawVaultDyn(near,t); try{ drawRaidDyn(near,t); }catch(e){}
   if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,70)){ const hs=[[-3.6,-2.2,.3,1,0],[2.4,-1.6,2.6,7,0],[3.6,2,4,3,1],[-1.6,2.1,1,1,1],[.4,-.2,5.4,4,0]];
     hs.forEach(([dx,dz,f,m,walker],i)=>{ let X=STABLE.x+dx, Z=STABLE.z+dz, face=f+Math.sin(t*.3+dx)*.25, mv=0, walk=0;
@@ -8024,6 +8024,29 @@ function aliveOverlay(items,t){ if(!me||typeof VILL==='undefined') return; const
   if(!ALIVE.talk&&t>ALIVE.talkT){ ALIVE.talkT=t+10+Math.random()*14; const cand=VILL.filter((v,i)=>{ if(night&&i%2) return false; const p=villPos(v,tt); return Math.hypot(p.x-me.x/TS,p.z-me.y/TS)<16; });
     if(cand.length){ const L=night?FOLK_TALK.night:FOLK_TALK.day; ALIVE.talk={v:cand[Math.floor(Math.random()*cand.length)],txt:L[Math.floor(Math.random()*L.length)],until:t+4.5}; } }
   const T2=ALIVE.talk; if(T2){ if(t>T2.until){ ALIVE.talk=null; return; } const p=villPos(T2.v,tt), s=toScreen(p.x,groundY(p.x*TS,p.z*TS)+2.2,p.z); if(s&&s[2]<40) items.push({w:s[2],d:()=>bubble(s[0],s[1],T2.txt)}); } }
+
+/* ======================================================================================================
+   v90 Hearthmere's gates: a pair of iron-bound oak doors in the east and west gateways. They swing open
+   inward whenever any hero (you or anyone you can see) comes within 5 yards of the gateway, and close again
+   once the way is clear.
+   ====================================================================================================== */
+const TGATES={st:[0,0],snd:[0,0],R:5};
+function townGateDraw(near,t,dt){ if(!TOWN.gates||!TOWN.gates.length) return; const cx=TOWN.x+.5, cz=TOWN.y+.5, R=TOWN.wallR;
+  TOWN.gates.forEach((g,i)=>{ const gx=cx+Math.cos(g.c)*R, gz=cz+Math.sin(g.c)*R; if(!near(gx*TS,gz*TS,80)) return;
+    /* anyone within 5 yards opens it */
+    let want=0; const close=(px,py)=>Math.hypot(px/TS-gx,py/TS-gz)<TGATES.R;
+    if(me&&!me.dead&&close(me.x,me.y)) want=1; if(!want) for(const o of others.values()) if(!o.d&&close(o.rx,o.ry)){ want=1; break; }
+    const k=TGATES.st[i]; TGATES.st[i]=clamp(k+(want?1:-1)*dt/1.1,0,1); if((want?1:0)!==TGATES.snd[i]){ TGATES.snd[i]=want?1:0; try{ snd('armor',gx*TS,gz*TS,.35); }catch(e){} }
+    const e=TGATES.st[i], open=e*e*(3-2*e)*1.42, y0=Math.max(.55,hgt(gx,gz))-.02, hw=2.95, tx=-Math.sin(g.c), tz=Math.cos(g.c), nx=-Math.cos(g.c), nz=-Math.sin(g.c);
+    for(const s of [-1,1]){ const hx=gx+tx*hw*s, hz=gz+tz*hw*s;
+      /* closed, each leaf points from its hinge to the middle of the gateway; open, it swings in toward the town */
+      const cdir=Math.atan2(-tz*s,-tx*s), odir=Math.atan2(nz,nx); let d=odir-cdir; d=Math.atan2(Math.sin(d),Math.cos(d)); const a=cdir+d*(open/1.42);
+      mreset(); mtr(hx,y0,hz); mry(-a);
+      P(GEO.box,hw,3.3,.22,[.36,.23,.12],0,hw/2,1.65,0);
+      for(const yy of [.55,1.65,2.75]) P(GEO.box,hw-.1,.14,.26,[.17,.16,.16],0,hw/2,yy,0);
+      for(let k2=0;k2<3;k2++) P(GEO.box,.07,3.2,.24,[.27,.17,.09],0,.5+k2*(hw-.8)/2,1.6,0);
+      P(GEO.box,.12,.22,.3,[.2,.19,.18],0,.08,.55,0); P(GEO.box,.12,.22,.3,[.2,.19,.18],0,.08,2.75,0);
+      P(GEO.sph,.16,.16,.08,[.75,.6,.3],.3,hw-.35,1.5,s*.14); } }); }
 
 function update(dt){
   const t=now();
