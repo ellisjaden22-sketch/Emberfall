@@ -176,7 +176,7 @@ body.bardui #castbar{bottom:calc(150px*var(--uis,1))!important}
 .slot.queued{box-shadow:0 0 0 2px #fff,0 0 12px #9fd8ff!important}
 .buff.legbuff{border-color:#ff8a1a!important;box-shadow:0 0 10px rgba(255,138,26,.8);animation:legglow 1.6s ease-in-out infinite alternate}
 #dlg .dsel{outline:2px solid #ffd34a;outline-offset:1px;box-shadow:0 0 12px rgba(255,200,60,.55);border-radius:5px;position:relative}#dlg .qline.dsel{background:rgba(255,211,74,.14)}
-#dlg .dsel::after{content:'F';position:absolute;right:-9px;top:-9px;width:17px;height:17px;border-radius:4px;background:#ffd34a;color:#2a1604;font:800 11px/17px sans-serif;text-align:center;box-shadow:0 1px 3px #000;pointer-events:none}#dlg .dpress{filter:brightness(1.4)}.c-party{color:#8fc8ff}.c-sys{color:#f0d66a}.c-loot{color:#9fd18b}.c-xp{color:#c9a0f0}.c-err{color:#ff7a6a}.c-gm{color:#ff9a3a}.c-gm b,.gmtag{color:#ff9a3a;font-weight:800}.cname{font-weight:700}
+#dlg .dsel::after{content:'F';position:absolute;right:-9px;top:-9px;width:17px;height:17px;border-radius:4px;background:#ffd34a;color:#2a1604;font:800 11px/17px sans-serif;text-align:center;box-shadow:0 1px 3px #000;pointer-events:none}#dlg .dpress{filter:brightness(1.4)}.c-party{color:#8fc8ff}.c-wh{color:#ff8ad8}.c-sys{color:#f0d66a}.c-loot{color:#9fd18b}.c-xp{color:#c9a0f0}.c-err{color:#ff7a6a}.c-gm{color:#ff9a3a}.c-gm b,.gmtag{color:#ff9a3a;font-weight:800}.cname{font-weight:700}
 #gmWin{left:50%;top:50%;transform:translate(-50%,-50%);width:min(640px,94vw);max-height:86vh;overflow:auto;border-color:#ff9a3a}
 #gmWin h2{color:#ff9a3a}
 .gmsec{margin:8px 0 10px}.gmsec h4{font-family:Cinzel,serif;color:#ffd56a;font-size:13px;margin-bottom:5px}.gmsec h4 small{font-family:'Alegreya Sans',sans-serif;color:var(--dim);font-weight:400}
@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.92</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.93</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 92;
+const VERSION = 93;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1655,7 +1655,7 @@ function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_
   const finish=r=>{ if(!done){ done=true; resolve(r); } };
   const api={ maxP:15000, presence(patch){ for(const k in patch){ if(patch[k]===null) delete mine[k]; else mine[k]=patch[k]; } rebuild(); if(conn&&ws.readyState===1&&ws.bufferedAmount<262144) ws.send(JSON.stringify({t:'p',p:mine})); return Promise.resolve(); },
     peers:()=>snap, onPeers:()=>()=>{}, onConnection(fn){ connCbs.push(fn); setTimeout(()=>fn(conn),0); return ()=>{}; }, connected:()=>conn,
-    armory(data){ if(conn) ws.send(JSON.stringify({t:'arm',c:data})); }, gift(name,what){ if(conn) ws.send(JSON.stringify({t:'gift',name,what})); },
+    armory(data){ if(conn) ws.send(JSON.stringify({t:'arm',c:data})); }, gift(name,what){ if(conn) ws.send(JSON.stringify({t:'gift',name,what})); }, whisper(name,txt){ if(conn&&ws.readyState===1) ws.send(JSON.stringify({t:'wh',name:String(name).slice(0,24),txt:String(txt).slice(0,200)})); },
     bug(text){ if(conn) ws.send(JSON.stringify({t:'bug',text:String(text).slice(0,2000)})); }, ticket(o){ if(!conn||ws.readyState!==1) return false; ws.send(JSON.stringify({...o,t:'bug'})); return true; }, tk(op,o){ if(conn&&ws.readyState===1) ws.send(JSON.stringify({...(o||{}),t:'tk',op})); }, ah(op,o){ if(!conn||ws.readyState!==1) return false; ws.send(JSON.stringify({...(o||{}),t:'ah',op})); return true; }, admin(cmd,pid,name){ if(conn) ws.send(JSON.stringify({t:'admin',cmd,pid,name})); },
     master:false, gmGrant(pid,on){ if(conn) ws.send(JSON.stringify({t:'mkgm',pid,on:!!on})); }, raidOpen(on){ if(conn&&ws.readyState===1) ws.send(JSON.stringify({t:'ro',open:!!on})); },
     gmLogin(pw){ return new Promise(res=>{ if(!conn) return res(false); gmWait=res; ws.send(JSON.stringify({t:'gm',pw:String(pw).slice(0,200)})); setTimeout(()=>{ if(gmWait===res){ gmWait=null; res(false); } },5000); }); } };
@@ -1671,6 +1671,8 @@ function makeWsRoom(){ return new Promise(resolve=>{ const cfg=window.EMBERFALL_
         else if(d.granted&&!isGM){ setGM(true,'server'); sysMsg('The realm owner made you a Game Master. Type /gm for your tools.','c-gm'); }
         else if(d.revoked&&isGM){ setGM(false); gm.god=gm.nocd=gm.fly=gm.invis=false; gm.speed=1; sysMsg('Your Game Master powers were removed.','c-err'); sendPresence(true); } }
       else if(d.t==='gift'&&typeof d.what==='string'){ applyGift(d.what,d.from||'the Realm'); }
+      else if(d.t==='wh'){ try{ whisperIn(String(d.from||''),String(d.txt||'')); }catch(_){} }
+      else if(d.t==='whx'){ try{ whisperFail(String(d.name||'')); }catch(_){} }
       else if(/^tk/.test(d.t)){ try{ onTicketNet(d); }catch(_){} }
       else if(d.t==='ah'){ try{ onAhNet(d); }catch(_){} }
       else if(d.t==='sys'){ sysMsg(String(d.msg||'').slice(0,200),'c-err'); } };
@@ -1717,7 +1719,7 @@ function pushAct(kind,tgt,amt,vis,x,y){ if(kind===0||kind===1||kind===4||kind===
 function pushMd(u,amt,mobId,vis){ const a=[++mdSeq,u,Math.round(amt),mobId,vis||0]; myMd.push(a); if(myMd.length>32) myMd.shift();
   if(u===MY_U) mobHitsMe(a); else visualMobHit(mobById[mobId],u,vis); }
 function pushTg(x,y,r,dur,kind){ const a=[++tgSeq,Math.round(x),Math.round(y),Math.round(r),Math.round(dur*1000),kind]; myTg.push(a); if(myTg.length>16) myTg.shift(); addTel(a); return a; }
-function packMobs(){ const t=now(); const ps=[]; if(me) ps.push([me.x,me.y]); for(const o of others.values()) ps.push([o.x,o.y]);
+function packMobs(){ gmPoolInit(); const t=now(); const ps=[]; if(me) ps.push([me.x,me.y]); for(const o of others.values()) ps.push([o.x,o.y]);
   const out=[], vin=ps.some(p=>p[1]>=(OWH-6)*TS&&p[1]<(AR.y0-3)*TS&&p[0]<RX0*TS), rin=ps.some(p=>p[1]>=OWH*TS&&p[0]>=RX0*TS); for(const m of mobs){ if(!m.tgt&&!(m.t.vault&&vin)&&!(m.t.raid&&rin)&&!ps.some(p=>Math.abs(p[0]-m.x)<1700&&Math.abs(p[1]-m.y)<1700)) continue;
     if(m.dead){ out.push([m.id]); continue; } const fl=(m.stunU>t?2:0)|(m.rootU>t?4:0)|(m.evade?8:0)|(m.enr?16:0)|(m.pend&&m.pend.at>t?32:0)|(m.air?64:0);
     if(m.hp>=m.mhp && !fl && !m.tgt && !m.tag) out.push([m.id,Math.round(m.x),Math.round(m.y)]);
@@ -1787,7 +1789,7 @@ function syncPeers(){
     othersByU.set(o.u,o);
     if(o.last===pr) continue; o.last=pr;
     o.n=clean(pr.n).slice(0,14)||'Stranger'; o.c=CLS[pr.c]?pr.c:'warden'; o.l=clamp(pr.l|0,1,MAXLVL);
-    { const nx=+pr.x||0, ny=+pr.y||0, tn=now(), dtp=tn-(o.tr||0); if(o.tr&&dtp>.03&&dtp<1){ o.vx=clamp((nx-o.x)/dtp,-700,700); o.vy=clamp((ny-o.y)/dtp,-700,700); } else { o.vx=0; o.vy=0; } o.tr=tn; o.x=nx; o.y=ny; netSnap(o,nx,ny); }o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);o.d=!!pr.d;
+    { const nx=+pr.x||0, ny=+pr.y||0, tn=now(), dtp=tn-(o.tr||0); if(o.tr&&dtp>.03&&dtp<1){ o.vx=clamp((nx-o.x)/dtp,-700,700); o.vy=clamp((ny-o.y)/dtp,-700,700); } else { o.vx=0; o.vy=0; } o.tr=tn; o.x=nx; o.y=ny; netSnap(o,nx,ny); }o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);{ const nd=!!pr.d; if(nd&&!o.d){ o.diedAt=now(); if(me&&me.target&&me.target.kind==='p'&&me.target.id===o.u) me.cp=0; } o.d=nd; }
     o.sl=pr.sl|0; o.pe=Array.isArray(pr.pe)&&pr.pe.length>=4?pr.pe.map(Number):null; if(o.pe&&pr.pe[4]) o.peSw=now(); o.tr=pr.tr&&typeof pr.tr==='object'?pr.tr:null; if(Array.isArray(pr.ws)&&pr.gm&&p.gm!==false) applyWorldWs(pr.ws); o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,4); o.gv=parseGV(pr.gv); o.nc=clamp(pr.nc|0,0,12); o.sg=Array.isArray(pr.sg)?[clamp(pr.sg[0]|0,0,3),clamp(+pr.sg[1]||1,0,3)]:null; o.bn=Array.isArray(pr.bn)?{x:+pr.bn[0]||0,y:+pr.bn[1]||0,until:now()+clamp(+pr.bn[2]||0,0,25),song:clamp(pr.bn[3]|0,0,3),mult:clamp(+pr.bn[4]||1,0,3)}:null; if(Array.isArray(pr.ix)) o.ix=pr.ix.slice(0,3); o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.bt=pr.bt===1||pr.bt===2?pr.bt:0; if(+pr.ac>ACHEST.claimed&&+pr.ac<=achestCycle()){ ACHEST.claimed=+pr.ac; ACHEST.by=ACHEST.by||o.n; } o.bgS=Array.isArray(pr.bg)?pr.bg.slice(0,8):null; o.seenAt=t; o.dm=Array.isArray(pr.dm)&&pr.dm.length===4?pr.dm.map(v=>+v||0):null; if(o.gm) try{ raidNetIn(pr); }catch(e){}
     if(o.isNew){ o.isNew=false; o.rx=o.x; o.ry=o.y; if(me&&seenOnline(o)) sysMsg(`${o.n} the ${CLS[o.c].name} has entered Emberfall.`); }
     else if(o.wasVis!==undefined&&o.wasVis!==seenOnline(o)&&me) sysMsg(seenOnline(o)?`${o.n} the ${CLS[o.c].name} has entered Emberfall.`:`${o.n} has left the realm.`); o.wasVis=seenOnline(o);
@@ -1809,7 +1811,7 @@ function syncPeers(){
     const ch=Array.isArray(pr.ch)?pr.ch:[];
     if(o.cSeq===null){ let mx=-1; for(const c of ch) mx=Math.max(mx,c[0]|0); o.cSeq=mx; }
     else for(const c of ch){ if(!Array.isArray(c)||(c[0]|0)<=o.cSeq) continue; o.cSeq=c[0]|0;
-      const party=c[1]===1, txt=clean(c[2]).slice(0,120); if(!txt) continue; if(c[1]===3){ if(me&&me.party&&o.pt===me.party) vaultEvent(o,txt); continue; }
+      const party=c[1]===1, txt=clean(c[2]).slice(0,c[1]===5?200:120); if(!txt) continue; if(c[1]===5){ if(String(c[3])===String(MY_U)) whisperIn(o.n,txt); continue; } if(c[1]===3){ if(me&&me.party&&o.pt===me.party) vaultEvent(o,txt); continue; }
       if(c[1]===4){ if(me&&(inRaid(me.x,me.y)||inDung(me.x,me.y))) raidWarnShow(txt); continue; }
       if(c[1]===2&&o.gm){ const art=room&&typeof room.emit==='function'; if(!art||(lastGrant&&lastGrant.pids.includes(o.pid+':'+o.n.toLowerCase()))) gmAnnounceShow(o.n,txt,art?'gm':(o.own?'owner':'gm')); continue; }
       if(party && (!me||!me.party||o.pt!==me.party)) continue;
@@ -1823,8 +1825,9 @@ function handleRemoteAct(o,a){
   if(amHost && kind!==6 && kind!==7 && kind<12) hostApplyAct(o.u,o.c,a);
   if(kind===12){ o.swingT=vis===0?now():o.swingT; const tp=tgt===MY_U?null:othersByU.get(tgt); if(tp) spark(tp.rx,tp.ry,'#ffd0a0'); }
   if(kind===41){ try{ achestRemote(o,amt); }catch(e){} }
+  if(kind>=43&&kind<=45){ try{ gmRemoteAct(o,kind,a); }catch(e){} }
   if(kind===14&&me&&(inArena(me.x,me.y)||inBG(me.x,me.y))&&tgt!==MY_U){ const k=othersByU.get(tgt); sysMsg(`⚔ ${k?k.n:'Someone'} defeated ${o.n}.`,'c-yell'); }
-  if(me && tgt===MY_U && kind===14){ const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.k++; P.st=(P.st||0)+1; P.best=Math.max(P.best,P.st); stat('pvpKills',1); persist(); try{ pvpKillReward(o); }catch(e){}
+  if(me && tgt===MY_U && kind===14){ o.diedAt=now(); me.cp=0; const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.k++; P.st=(P.st||0)+1; P.best=Math.max(P.best,P.st); stat('pvpKills',1); persist(); try{ pvpKillReward(o); }catch(e){}
     toast(`You defeated ${o.n}!`); sysMsg(`⚔ You defeated ${o.n}! Kill streak: ${P.st}.`,'c-xp'); if(P.st>=3) banner(P.st>=5?'UNSTOPPABLE':'KILLING SPREE',`${P.st} kills in a row`,'win'); }
   if(me && !me.dead && tgt===MY_U && (kind===12||kind===13) && pvpOn(me.x,me.y) && pvpOn(o.rx,o.ry) && !(me.party&&o.pt===me.party) && !bgAlly(o)){
     if(kind===12&&amt>0){ me.pvpBy={u:o.u,n:o.n,t:now()}; takeDamage(Math.min(amt,5000)*PVP_MUL*(1-(me.resil||0)),null,vis); }
@@ -1856,7 +1859,7 @@ function netPos(o){ const b=o.sb; if(!b||!b.length) return null; const t=perform
   const ax=(B.x-P0.x)*sa, ay=(B.y-P0.y)*sa, bx=(P3.x-A.x)*sb, by=(P3.y-A.y)*sb;
   return [h00*A.x+h10*ax+h01*B.x+h11*bx, h00*A.y+h10*ay+h01*B.y+h11*by]; }
 function applySnapshot(w){
-  const t=now();
+  const t=now(); gmPoolInit();
   for(const s of w){ if(!Array.isArray(s)) continue; const m=mobById[s[0]]; if(!m) continue;
     const wasDead=m.dead;
     if(s.length===1){ if(!wasDead){ m.dead=true; m.tgt=''; onMobDeath(m); } continue; }
@@ -1892,10 +1895,10 @@ function hostApplyAct(u,cls,a){
     for(const m of mobs) if(!m.dead && (m.tgt===tgt || m.threat[tgt])) m.threat[u]=(m.threat[u]||0)+amt*.5;
   }
 }
-function killMob(m){ m.dead=true; m.resp=m.t.summon?Infinity:now()+(m.t.resp||(38+Math.random()*17)); m.tgt=''; m.threat={};
+function killMob(m){ m.dead=true; m.resp=m.t.summon||m.gmc?Infinity:now()+(m.t.resp||(38+Math.random()*17)); m.tgt=''; m.threat={};
   if(m.t.boss) despawnAdds(m.t.key); onMobDeath(m); }
 function despawnAdds(key){ for(const a of mobs) if(a.t.summon && !a.dead && (!key||a.t.owner===key)){ a.dead=true; a.resp=Infinity; a.tgt=''; a.threat={}; a.deathT=now(); a.dx=a.rx; a.dy=a.ry; } }
-function respawnMob(m){ m.kbA=null; m._puff=0; m.rs=null; m.air=false; m.bers=false; m.emp=false; m.dead=false; m.x=m.sx; m.y=m.sy; m.rx=m.x; m.ry=m.y; m.hp=m.mhp; m.tag=''; m.threat={}; m.tgt=''; m.evade=false; m.enr=false; m.summoned=false; m.summoned2=false; m.spT=null; m.chanU=0; m.spawnT=now(); }
+function respawnMob(m){ if(m.gmc&&!m.gmGo) return; m.kbA=null; m._puff=0; m.rs=null; m.air=false; m.bers=false; m.emp=false; m.dead=false; m.x=m.sx; m.y=m.sy; m.rx=m.x; m.ry=m.y; m.hp=m.mhp; m.tag=''; m.threat={}; m.tgt=''; m.evade=false; m.enr=false; m.summoned=false; m.summoned2=false; m.spT=null; m.chanU=0; m.spawnT=now(); }
 function summonAdds(boss){ let i=0; for(const a of mobs) if(a.t.summon&&a.t.owner===boss.t.key){ const an=i++*2.1; respawnMob(a);
   a.x=a.rx=a.sx=boss.x+Math.cos(an)*80; a.y=a.ry=a.sy=boss.y+Math.sin(an)*80; a.threat={...boss.threat}; a.tag=boss.tag; }
   pushTg(boss.x,boss.y,110,.6,5); }
@@ -1987,7 +1990,7 @@ function hostSim(dt){
     const mt=m.t;
     if(m.pend&&t>=m.pend.at){ const Pd=m.pend; m.pend=null; const q=pmap[Pd.u]; if(!m.dead&&!m.evade&&!(m.stunU>t)&&q&&dist(q.x,q.y,m.x,m.y)<=mt.rng+34) pushMd(Pd.u,Pd.dmg,m.id,Pd.vis); }
     if(m.pend&&(m.stunU>t||m.dead)) m.pend=null;
-    if(m.dead){ if(t>=m.resp) respawnMob(m); continue; }
+    if(m.dead){ if(t>=m.resp&&!m.gmc) respawnMob(m); continue; }
     if(mt.dummy){ m.tgt=''; m.threat={}; m.x=m.sx; m.y=m.sy; if(m.hp<m.mhp&&t-(m.hit||0)>5) m.hp=m.mhp; continue; }
     if(m.evade){ const d=dist(m.x,m.y,m.sx,m.sy); m.hp=Math.min(m.mhp,m.hp+m.mhp*dt*.5);
       if(d<8){ m.evade=false; m.hp=m.mhp; m.tag=''; m.enr=false; m.summoned=false; }
@@ -2083,8 +2086,8 @@ function takeDamage(amt,mob,vis){ if(me&&amt>0) me.hurtT=now(); try{ if(me&&amt>
 }
 function healMe(amt,from){ if(me.dead) return; const before=me.hp; me.hp=Math.min(me.mhp,me.hp+amt); const h=Math.round(me.hp-before);
   if(h>0) fct(me.x,me.y-30,'+'+h,'#6dff7a'); sparkle(me.x,me.y,'#9dffb0'); }
-function die(){ try{ snd('die'); }catch(e){} if(me&&me.pvpBy&&now()-me.pvpBy.t<10&&(inArena(me.x,me.y)||inBG(me.x,me.y))){ const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.d++; P.st=0; pushAct(14,me.pvpBy.u,0,0); sysMsg(`⚔ ${me.pvpBy.n} defeated you. Release to return to a shrine.`,'c-err'); } if(me) me.pvpBy=null; if(me){ me.song=0; me.banner=null; me.encoreU=0; } stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
-function release(){ me.dead=false; if(inBG(me.x,me.y)){ const q=bgSpawnPt(me.bgTeam||1); me.x=q[0]; me.y=q[1]; } else if(inArena(me.x,me.y)){ const [sx,sy]=AR.shr[Math.random()*2|0]; me.x=(sx+(Math.random()-.5)*2)*TS; me.y=(sy+(Math.random()-.5)*2)*TS; me.hp=me.mhp; } else if(inRaid(me.x,me.y)){ const q=raidCheckpoint(); me.x=q[0]; me.y=q[1]; } else if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { const g=restPoint(me.x,me.y); me.x=g.x; me.y=g.y; } me.rootU=0; me.hp=(inArena(me.x,me.y)||inBG(me.x,me.y))?me.mhp:Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
+function die(){ try{ snd('die'); }catch(e){} if(me&&me.pvpBy&&now()-me.pvpBy.t<10&&(inArena(me.x,me.y)||inBG(me.x,me.y))){ const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.d++; P.st=0; pushAct(14,me.pvpBy.u,0,0); sysMsg(`⚔ ${me.pvpBy.n} defeated you. Release to return to a shrine.`,'c-err'); } if(me) me.pvpBy=null; if(me){ me.song=0; me.banner=null; me.encoreU=0; } stat('deaths',1); me.dead=true; me.cast=null; me.mounted=0; me.emote=null; me.auto=false; me.hots=[]; me.dots=[]; me.dash=null; me.absorb=0; me.absorbU=0; me.cp=0; me.rootU=0; me.shoutU=me.rapidU=me.markU=me.avatarU=me.evasionU=me.stepU=me.stepHide=me.faceLockU=me.encoreU=me.bulwark=0; me.sanct=null; me.leap=null; try{ if(me.stealth) breakStealth(); }catch(e){} me.stealth=false; me.diedAt=now(); document.getElementById('deathWin').classList.remove('hidden'); sysMsg('You have died.','c-err'); sendPresence(true); }
+function release(){ me.dead=false; if(inBG(me.x,me.y)){ const q=bgSpawnPt(me.bgTeam||1); me.x=q[0]; me.y=q[1]; } else if(inArena(me.x,me.y)){ const [sx,sy]=AR.shr[Math.random()*2|0]; me.x=(sx+(Math.random()-.5)*2)*TS; me.y=(sy+(Math.random()-.5)*2)*TS; me.hp=me.mhp; } else if(inRaid(me.x,me.y)){ const q=raidCheckpoint(); me.x=q[0]; me.y=q[1]; } else if(me.y>=OWH*TS){ me.x=VAULT.start.x; me.y=VAULT.start.y; } else { const g=restPoint(me.x,me.y); me.x=g.x; me.y=g.y; } me.rootU=0; me.dots=[]; me.hots=[]; me.absorb=0; me.absorbU=0; me.cp=0; me.hp=(inArena(me.x,me.y)||inBG(me.x,me.y))?me.mhp:Math.round(me.mhp*.7); me.res=CLS[me.c.cls].res==='rage'?0:me.mres*.7; document.getElementById('deathWin').classList.add('hidden'); me.target=null; sparkle(me.x,me.y,'#fff3b0'); sendPresence(true); }
 function gainXp(n){
   const c=me.c; if(c.lvl>=MAXLVL){ return; }
   c.xp+=n; chatLine(`You gain ${n} experience.`,'c-xp');
@@ -2269,7 +2272,7 @@ function execAbility(ab,tgt){
     const d0=scaleV(ab.aoeDmg);
     const apply=()=>{ if(!me||me.dead) return; let nh=0;
       for(const m of mobs) if(!m.dead && dist(m.rx,m.ry,cx,cy)<R+m.t.r){ hitMob(m,d0,0); nh++; if(ab.root) pushAct(5,m.id,ab.root*1000,0); }
-      for(const o of others.values()) if(pvpFoe(o)&&dist(o.rx,o.ry,cx,cy)<R+12){ const c=Math.random()<critCh; hitPlayer(o,Math.round(d0*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)),0,c); nh++; if(ab.root) pushAct(13,o.u,ab.root*1000,0); }
+      for(const o of others.values()) if(pvpFoe(o)&&!((o.diedAt||0)>=t)&&dist(o.rx,o.ry,cx,cy)<R+12){ const c=Math.random()<critCh; hitPlayer(o,Math.round(d0*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)),0,c); nh++; if(ab.root) pushAct(13,o.u,ab.root*1000,0); }
       if(ab.cpPerHit&&nh){ me.cp=Math.min(5,(me.cp||0)+nh*ab.cpPerHit); }
       if(ab.aoeHealAlly){ const h=Math.round(scaleV(ab.aoeHealAlly)); if(dist(me.x,me.y,cx,cy)<R) healMe(h);
         for(const o of others.values()) if(!o.d&&canHelp(o)&&dist(o.rx,o.ry,cx,cy)<R){ pushAct(1,o.u,h,0); fct(o.rx,o.ry-30,'+'+h,'#6dff7a'); } } };
@@ -2301,7 +2304,7 @@ function enterStealth(vanish){ me.stealth=true; me.auto=false; const [X,Y,Z]=ph3
 function rogueAbility(ab,tgt,t,dm,critCh,critM){
   if(ab.finisher){ me.cp=TAL('refund')?1:0; }
   if(ab.cp&&(ab.hostile||ab.aoeDmg)) me.cp=Math.min(5,(me.cp||0)+ab.cp);
-  if(ab.id==='sinister'&&TAL('poison')&&tgt&&(tgt.kind==='m'||(tgt.kind==='p'&&pvpFoe(tgt.e)))){ const m=tgt.e, isP=tgt.kind==='p', pd=Math.max(1,Math.round(scaleV(ab.dmg)*dm*TAL('poison')/3)); for(let k=1;k<=3;k++) setTimeout(()=>{ if(!me||me.dead) return; if(isP){ if(!m.d&&pvpFoe(m)){ hitPlayer(m,pd,0,false); fct(m.rx,m.ry-40,'Poison','#7aff4a'); } } else if(!m.dead){ pushAct(0,m.id,pd,0); fct(m.rx,m.ry-26,pd,'#7aff4a'); } },k*2000); }
+  if(ab.id==='sinister'&&TAL('poison')&&tgt&&(tgt.kind==='m'||(tgt.kind==='p'&&pvpFoe(tgt.e)))){ const m=tgt.e, isP=tgt.kind==='p', pd=Math.max(1,Math.round(scaleV(ab.dmg)*dm*TAL('poison')/3)); for(let k=1;k<=3;k++) setTimeout(()=>{ if(!me||me.dead) return; if(isP){ if(!m.d&&pvpFoe(m)&&!((m.diedAt||0)>=t)){ hitPlayer(m,pd,0,false); fct(m.rx,m.ry-40,'Poison','#7aff4a'); } } else if(!m.dead){ pushAct(0,m.id,pd,0); fct(m.rx,m.ry-26,pd,'#7aff4a'); } },k*2000); }
   if(ab.stealth) enterStealth(false);
   if(ab.vanish) enterStealth(true);
   if(ab.buff==='evasion'){ me.evasionU=t+ab.dur; const [X,Y,Z]=ph3(me.x,me.y,1); burst3(X,Y,Z,'#bfffd8',16,1.6,{glow:true}); FXP({k:'wave',x:me.x,y:me.y,r:40,col:'#7affc0',dur:.4}); }
@@ -5555,15 +5558,15 @@ function openAlchemy(n){ const c=me.c;
   document.querySelectorAll('#dlg [data-r]').forEach(b=>b.onclick=()=>{ const r=RECIPES.find(x=>x.id===b.dataset.r); for(const [k,v] of Object.entries(r.need)) c.mats[k]-=v;
     if(r.give==='pots'){ c.pots+=2; chatLine('You brew 2 Healing Draughts.','c-loot'); } else { c.buffs[r.buff]=Date.now()+600000; chatLine(`You drink the ${r.name}.`,'c-loot'); sparkle(me.x,me.y,'#ffd34a'); recalc(); renderBuffs(); }
     persist(); renderInv(); openAlchemy(n); }); }
-function upCost(it){ const k=it.up||0; if(k>=7) return null; const mat=k<2?'copper':k<4?'iron':k<5?'obsidian':'mithril'; return {gold:5*(k+1)+it.lv,mat,n:k<2?2+k:k<4?k:3}; }
+function upCost(it){ if(it&&it.pset) return upCostPvp(it); const k=it.up||0; if(k>=7) return null; const mat=k<2?'copper':k<4?'iron':k<5?'obsidian':'mithril'; return {gold:5*(k+1)+it.lv,mat,n:k<2?2+k:k<4?k:3}; }
 function openSmith(n){ const c=me.c;
-  dlg(`<h2>${n&&n.id==='garrick'?'Garrick\'s Forge':'Doran\'s Forge'}</h2><p>"Each upgrade adds 15% to an item's power and stamina and earns it a gold star, up to seven stars (mithril from Frostpeak for the last two)."</p>${SLOTS.map(s=>{ const it=c.eq[s]; if(!it) return `<div class="shoprow"><span style="color:var(--dim)">No ${s} equipped</span></div>`;
-    const cost=upCost(it); const ok=cost&&c.gold>=cost.gold&&(c.mats[cost.mat]||0)>=cost.n;
+  dlg(`<h2>${n&&n.id==='garrick'?'Garrick\'s Forge':'Doran\'s Forge'}</h2><p>"Each upgrade adds 15% to an item's power and stamina and earns it a gold star, up to seven stars (mithril from Frostpeak for the last two). Emberguard gear is upgraded with Honor, and Ashen Champion's gear with Conquest."</p>${SLOTS.map(s=>{ const it=c.eq[s]; if(!it) return `<div class="shoprow"><span style="color:var(--dim)">No ${s} equipped</span></div>`;
+    const cost=upCost(it); const ok=cost&&upAfford(c,cost)===true;
     const P0=Math.round(it.pow*upMul(it)), S0=Math.round(it.sta*upMul(it)), P1=Math.round(it.pow*(upMul(it)+.15)), S1=Math.round(it.sta*(upMul(it)+.15)), pc=(a,b)=>a>0?Math.round((b-a)/a*100):0;
-    return `<div class="shoprow"><span><b class="t${it.rar}">${esc(it.name)}${upStars(it)}</b><br><span style="font-size:13px">${cost?`${cost.gold} gold · ${needTxt({[cost.mat]:cost.n})}`:'Fully upgraded'}</span>${cost?`<br><span style="font-size:13px;color:#8f8">Power ${P0} → ${P1} (+${pc(P0,P1)}%) · Stamina ${S0} → ${S1} (+${pc(S0,S1)}%)</span>`:''}</span><button data-u="${s}" class="${ok?'':'dim'}" ${cost?'':'disabled'}>Upgrade</button></div>`; }).join('')}
+    return `<div class="shoprow"><span><b class="t${it.rar}">${esc(it.name)}${upStars(it)}</b><br><span style="font-size:13px">${cost?upCostTxt(cost):'Fully upgraded'}</span>${cost?`<br><span style="font-size:13px;color:#8f8">Power ${P0} → ${P1} (+${pc(P0,P1)}%) · Stamina ${S0} → ${S1} (+${pc(S0,S1)}%)</span>`:''}</span><button data-u="${s}" class="${ok?'':'dim'}" ${cost?'':'disabled'}>Upgrade</button></div>`; }).join('')}
     <div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   $('bk').onclick=()=>talk(n);
-  document.querySelectorAll('#dlg [data-u]').forEach(b=>b.onclick=()=>{ const it=c.eq[b.dataset.u]; const cost=upCost(it); if(!cost) return; if(c.gold<cost.gold) return err(`Not enough gold: the upgrade costs ${cost.gold}`); if((c.mats[cost.mat]||0)<cost.n) return err(`You need ${cost.n} ${MATS[cost.mat].name} (you have ${c.mats[cost.mat]||0})`); c.gold-=cost.gold; c.mats[cost.mat]-=cost.n; it.up=(it.up||0)+1;
+  document.querySelectorAll('#dlg [data-u]').forEach(b=>b.onclick=()=>{ const it=c.eq[b.dataset.u]; const cost=upCost(it); if(!cost) return; { const why=upAfford(c,cost,true); if(why!==true) return err(why); } upPay(c,cost); it.up=(it.up||0)+1;
     chatLine(`${n&&n.id==='garrick'?'Garrick':'Doran'} hammers your ${it.name} to rank ${it.up}: ${'★'.repeat(it.up)}`,'c-loot'); const [X,Y,Z]=ph3(n.x,n.y,1); burst3(X,Y,Z,'#ffb03a',30,3,{glow:true}); recalc(); persist(); renderInv(); openSmith(n); }); }
 function openStable(n){ const c=me.c;
   dlg(`<h2>Hilde's Stable</h2><p>"Press R to call your mount, and R again to hop off. They don't like fighting or deep water."</p>${MOUNTS.slice(1).map((m,i)=>{ const id=i+1, own=c.mounts.includes(id); if(m.ashborn&&!own&&!raidIsOpen()) return '';
@@ -6057,6 +6060,7 @@ function sendChat(raw){
       let i=a==='off'||a==='class'||a==='default'||a==='0'?0:/^\d+$/.test(a)?+a:NAMECOLS.findIndex(c=>c&&c[0].toLowerCase()===a);
       if(!(i>=0&&i<=12)) return sysMsg('Unknown colour. Type /color to see all 12.','c-err');
       me.c.nc=i||undefined; persist(); sendPresence(true); $('party').dataset.sig=''; return i?chatLine('Your name is now '+NAMECOLS[i][0]+'.','c-sys','',{n:me.c.name,col:NAMECOLS[i][1]}):sysMsg('Your name is back to your class colour.'); }
+    if(cmd==='w'||cmd==='whisper'||cmd==='tell'||cmd==='msg'||cmd==='r'||cmd==='reply') return whisperCmd(cmd,arg);
     if(cmd==='fish') return fishStart();
     if(cmd==='hearth'||cmd==='home'||cmd==='recall') return hearthStart();
     if(cmd==='stuck'||cmd==='unstuck') return unstuck();
@@ -6077,7 +6081,7 @@ function sendChat(raw){
     if(cmd==='s'||cmd==='say') return sayChat(arg,0);
     if(cmd==='who') return toggleWin('whoWin',true);
     if(cmd==='help') return toggleWin('helpWin',true);
-    return sysMsg('Commands: /p msg · /invite name · /kick name · /party name · /leave · /who · /help · /dance /wave /sit /cheer /bow /kneel'+(isGM?' · GM: /gm':''),'c-err');
+    return sysMsg('Commands: /p msg · /w name msg (whisper) · /r msg (reply) · /invite name · /kick name · /party name · /leave · /who · /help · /dance /wave /sit /cheer /bow /kneel'+(isGM?' · GM: /gm':''),'c-err');
   }
   sayChat(txt,0);
 }
@@ -6177,7 +6181,7 @@ function applyWorldWs(ws){ if(!Array.isArray(ws)||!(+ws[2]>gm.wset)) return; con
   const changed=wx!==gm.wx||ph!==gm.tPh; gm.wset=+ws[2]; gm.wx=wx; gm.tPh=ph; gm.tOff=ph==null?null:ph*600-((gm.wset/1000)%600);
   }
 function setWorld(wx,ph){ gm.wset=Date.now(); gm.wx=wx; gm.tPh=ph; gm.tOff=ph==null?null:ph*600-((gm.wset/1000)%600); sendPresence(true); }
-const GMCMDS=new Set(['setlevel','givelevel','givelevels','tickets','ticket','gift','movegm','boot','ban','unban','aura','invis','makegm','removegm','gmlist','gm','gold','level','levelup','xp','god','nocd','fly','speed','tp','heal','revive','item','mats','mount','kill','time','weather','questdone','announce']);
+const GMCMDS=new Set(['setlevel','givelevel','givelevels','tickets','ticket','gift','movegm','boot','ban','unban','aura','invis','makegm','removegm','gmlist','gm','gold','level','levelup','xp','god','nocd','fly','speed','tp','heal','revive','item','mats','mount','kill','time','weather','questdone','announce','give','giveitem','spawn','despawn','summon','tpplayer','sendplayer']);
 let ownerOK=false, ownerSrc='';
 function gmCharId(){ const RL=rosterList(); if(!saves.gmChar||!RL.some(c=>c.id===saves.gmChar)){ const S=RL.slice().sort((a,b)=>(b.lvl||1)-(a.lvl||1)||(a.created||a.lastT||0)-(b.created||b.lastT||0)); if(S[0]){ saves.gmChar=S[0].id; saveAll(saves); } } return saves.gmChar; }
 function myGid(){ return me?MY_PID+':'+me.c.name.toLowerCase():''; }
@@ -6214,6 +6218,125 @@ function gmKill(arg){ const t=now(); let list=[];
   if(!list.length) return chatLine('Target a monster first (or /kill all for everything nearby).','c-err');
   for(const m of list){ pushAct(0,m.id,Math.max(1,m.hp)+50,0); fct(m.rx,m.ry-26,'GM kill','#c78bff',true); }
   me.lastCombat=t; gmOk(`Smote ${list.length} monster${list.length>1?'s':''}.`); }
+/* ======================================================================================================
+   v93 Game Master tools and whispers
+   - /give <player|me> <item>: any item to anyone (works for offline players too, through the realm server).
+       <item> is one of: common|uncommon|rare|epic [weapon|armor|trinket] [level] · legendary · tyrant [slot]
+       · emberguard|ashen [slot|set] · <herb or ore> [count] · gold <amount>
+   - /spawn <boss>: summons any boss or elite in front of you (/spawn list shows them all). /despawn [boss|all].
+       Each boss has one GM copy, created the same way on every client (ids 900000+), so the world host can
+       run it like any other monster and everyone sees it.
+   - /summon <player|all>: pulls players to you. /tpplayer <player> <place|me|player|x y> sends them anywhere.
+   - Whispers: /w <player> <message>, /r <message> to reply, or right-click a player's portrait.
+   - PvP gear is upgraded at the forge with Honor (Emberguard) or Conquest (Ashen Champion's) instead of gold
+     and ore.
+   ====================================================================================================== */
+/* ---------- PvP gear upgrades ---------- */
+const PVPUP={honor:k=>30+15*k, conq:k=>20+10*k};
+function upCostPvp(it){ const k=it.up||0; if(k>=7) return null; const cur=it.pset==='conq'?'conq':'honor'; return {pvp:cur,n:PVPUP[cur](k)}; }
+const pvpCurName=k=>k==='conq'?'Conquest':'Honor';
+function upCostTxt(q){ return q.pvp?`<span style="color:${q.pvp==='conq'?'#ff8a3a':'#ffd36a'}">${q.n} ${pvpCurName(q.pvp)}</span>`:`${q.gold} gold · ${needTxt({[q.mat]:q.n})}`; }
+function upAfford(ch,q,why){
+  if(q.pvp){ const have=ch[q.pvp]||0; return have>=q.n?true:why?`Not enough ${pvpCurName(q.pvp)}: the upgrade costs ${q.n} (you have ${have})`:false; }
+  if(ch.gold<q.gold) return why?`Not enough gold: the upgrade costs ${q.gold}`:false;
+  if((ch.mats[q.mat]||0)<q.n) return why?`You need ${q.n} ${MATS[q.mat].name} (you have ${ch.mats[q.mat]||0})`:false; return true; }
+function upPay(ch,q){ if(q.pvp) ch[q.pvp]=(ch[q.pvp]||0)-q.n; else { ch.gold-=q.gold; ch.mats[q.mat]-=q.n; } }
+
+/* ---------- whispers ---------- */
+const WH={last:''};
+function whisperStart(name){ const ci=$('chatin'); if(!ci) return; ci.classList.remove('hidden'); ci.value='/w '+name+' '; ci.focus(); try{ ci.setSelectionRange(ci.value.length,ci.value.length); }catch(e){} }
+function whisperSend(name,txt){ if(!me) return; txt=clean(txt||'').trim().slice(0,200); name=String(name||'').trim();
+  if(!name||!txt) return sysMsg('Usage: /w <player> <message> · /r <message> replies to the last whisper','c-err');
+  const o=findPlayer(name), nm=o?o.n:name; if(nm.toLowerCase()===me.c.name.toLowerCase()) return sysMsg('You cannot whisper yourself.','c-err');
+  if(room&&typeof room.whisper==='function'&&(!room.connected||room.connected())) room.whisper(nm,txt);
+  else { if(!o) return sysMsg(`No player called "${name}" is online.`,'c-err'); myChat.push([++chSeq,5,txt,String(o.u)]); if(myChat.length>3) myChat.shift(); sendPresence(true); }
+  WH.last=nm; chatLine(txt,'c-wh',`[To ${nm}] `); }
+function whisperIn(from,txt){ txt=clean(txt||'').slice(0,200); from=clean(from||'').slice(0,24); if(!txt||!from) return; WH.last=from;
+  chatLine(txt,'c-wh',`[${from} whispers] `); try{ sfx('accept'); }catch(e){} }
+function whisperFail(name){ sysMsg(`${clean(name||'That player')} is not online.`,'c-err'); }
+function whisperCmd(cmd,arg){ if(cmd==='r'||cmd==='reply'){ if(!WH.last) return sysMsg('Nobody has whispered you yet.','c-err'); return whisperSend(WH.last,arg); }
+  const m=String(arg||'').match(/^(\S+)\s+([\s\S]+)$/); if(!m) return sysMsg('Usage: /w <player> <message>','c-err'); return whisperSend(m[1],m[2]); }
+
+/* ---------- /give ---------- */
+const GSLOT={weapon:'weapon',weap:'weapon',w:'weapon',sword:'weapon',armor:'armor',armour:'armor',chest:'armor',a:'armor',trinket:'trinket',trink:'trinket',t:'trinket',ring:'trinket'};
+function giftSpec(spec,cls,lvl){ const tk=String(spec||'').toLowerCase().trim().split(/\s+/).filter(Boolean); if(!tk.length) return null;
+  const num=tk.map(Number).find(v=>isFinite(v)&&v>0), slot=tk.map(k=>GSLOT[k]).find(Boolean), w=tk[0];
+  const pvpK={emberguard:'honor',honor:'honor',ashen:'conq',champion:'conq',champions:'conq',conquest:'conq',conq:'conq'}[w];
+  if(pvpK) return (slot?[slot]:SLOTS).map(sl=>pvpItem(pvpK,sl,cls));
+  if(w==='legendary'||w==='leg') return [legendaryFor(cls)];
+  if(w==='tyrant') return [!slot||slot==='weapon'?tyrantWeapon(cls):tyrantGear(slot,cls)];
+  if(w==='gold') return [{gold:clamp(Math.round(num||100),1,1000000)}];
+  const r=['common','uncommon','rare','epic'].indexOf(w);
+  if(r>=0){ const lv=clamp(Math.round(num||lvl||1),1,30); let it=null; for(let i=0;i<80&&(!it||slot&&it.slot!==slot);i++) it=genItem(lv,r,cls);
+    if(slot&&it.slot!==slot) return null; return [it]; }
+  const mk=Object.keys(MATS).find(k=>k===w)||Object.keys(MATS).find(k=>MATS[k].name.toLowerCase().startsWith(w));
+  if(mk) return [{mat:mk,n:clamp(Math.round(num||10),1,500)}];
+  return null; }
+function gmGiftApply(spec,from){ if(!me) return; const L=giftSpec(spec,me.c.cls,me.c.lvl); if(!L) return; const why='🎁 '+(from?'From '+from:'A gift');
+  for(const it of L){ if(it.gold){ me.c.gold+=it.gold; chatLine(`${why}: +${it.gold} gold.`,'c-loot'); } else giveItem(it,why); }
+  renderInv(); persist(); try{ sfx('coin'); }catch(e){} toast('🎁 You received a gift','small'); }
+function gmGive(arg){ const m=String(arg||'').match(/^(\S+)\s+(.+)$/);
+  const usage='Usage: /give <player|me> <item>. Items: common|uncommon|rare|epic [weapon|armor|trinket] [level] · legendary · tyrant [slot] · emberguard [slot|set] · ashen [slot|set] · <herb or ore> [count] · gold <amount>';
+  if(!m) return chatLine(usage,'c-err'); const spec=m[2].trim().toLowerCase();
+  if(!giftSpec(spec,me.c.cls,me.c.lvl)) return chatLine(`Unknown item "${m[2]}". `+usage,'c-err');
+  const who=m[1], self=/^(me|self|myself)$/i.test(who)||who.toLowerCase()===me.c.name.toLowerCase();
+  if(self){ gmGiftApply(spec,'a Game Master'); return; }
+  if(spec.length>37) return chatLine('That item description is too long.','c-err');
+  const o=findPlayer(who), nm=o?o.n:who;
+  if(room&&typeof room.gift==='function'){ room.gift(nm,'gi:'+spec); return gmOk(`Sent "${spec}" to ${nm}.${o?'':' If they are offline they receive it the next time they log in.'}`); }
+  chatLine('Giving items to other players works on your online realm server.','c-err'); }
+
+/* ---------- /spawn ---------- */
+const GMPOOL={init:false,ids:{},keys:[]};
+function gmBossTypes(){ return MOBT.filter(t=>(t.boss||t.elite)&&!t.summon&&!t.critter&&!t.dummy); }
+function gmPoolInit(){ if(GMPOOL.init) return; GMPOOL.init=true; let id=900000;
+  for(const mt of gmBossTypes()){ const lv=Array.isArray(mt.lv)?mt.lv[1]:(mt.lv|0||1); let mhp=1000; try{ mhp=Math.max(1,Math.round(((mt.hp||100)+(mt.hpL||0)*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)*instHp(mt))); }catch(e){}
+    const m={id,ti:-1,t:mt,lv,sx:0,sy:0,x:0,y:0,rx:0,ry:0,hp:mhp,mhp,dead:true,resp:Infinity,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:0,wy:0,breath:6,face:0,flags:0,hit:0,gmc:1};
+    mobs.push(m); mobById[id]=m; GMPOOL.ids[mt.key]=id; GMPOOL.keys.push(mt.key); id++; } }
+function gmFindBoss(a){ gmPoolInit(); a=String(a||'').toLowerCase().trim(); if(!a) return null; const T=gmBossTypes();
+  return T.find(t=>t.key===a)||T.find(t=>t.name.toLowerCase()===a)||T.find(t=>t.name.toLowerCase().startsWith(a))||T.find(t=>t.name.toLowerCase().includes(a)); }
+function gmSpawnApply(id,x,y,u){ gmPoolInit(); const m=mobById[id]; if(!m||!m.gmc||!isFinite(x)||!isFinite(y)) return;
+  m.gmGo=1; respawnMob(m); m.gmGo=0; m.x=m.rx=m.sx=m.wx=x; m.y=m.ry=m.sy=m.wy=y; m.tag=''; m.threat={}; if(u) m.threat[u]=1; m.face=0; m.spawnT=now(); }
+function gmDespawnApply(id){ gmPoolInit(); for(const m of mobs){ if(!m.gmc||m.dead||(id&&m.id!==id)) continue; m.tag=''; m.threat={}; m.tgt=''; m.dead=true; m.resp=Infinity; if(amHost){ m.deathT=now(); m.dx=m.rx; m.dy=m.ry; try{ deathBurst(m); }catch(e){} } } }
+function gmSpawn(arg){ const a=String(arg||'').trim();
+  if(!a||/^list$/i.test(a)){ gmPoolInit(); return gmOk('Bosses you can spawn (/spawn <name>): '+gmBossTypes().map(t=>t.name+(t.boss?'':' (elite)')).join(' · ')); }
+  const mt=gmFindBoss(a); if(!mt) return chatLine(`No boss called "${a}". Type /spawn list to see them all.`,'c-err');
+  const d=70; let x=me.x+Math.cos(me.face)*d, y=me.y+Math.sin(me.face)*d; [x,y]=gmOpenSpot(x,y); const id=GMPOOL.ids[mt.key];
+  if(amHost) gmSpawnApply(id,x,y,MY_U); else pushAct(43,MY_U,id,0,x,y);
+  const [X,Y,Z]=ph3(x,y,.6); try{ burst3(X,Y,Z,'#b07cff',50,3.5,{glow:true}); }catch(e){} sendPresence(true); gmOk(`${mt.name} appears before you. /despawn removes it.`); }
+function gmDespawn(arg){ const a=String(arg||'').trim(); let id=0;
+  if(a&&!/^all$/i.test(a)){ const mt=gmFindBoss(a); if(!mt) return chatLine(`No boss called "${a}".`,'c-err'); id=GMPOOL.ids[mt.key]; }
+  gmDespawnApply(id); pushAct(44,0,id,0); sendPresence(true); gmOk(id?'Boss removed.':'All bosses you spawned are gone.'); }
+
+/* ---------- teleporting players ---------- */
+function gmOpenSpot(x,y){ x=clamp(x,24,MW*TS-24); y=clamp(y,24,MH*TS-24); if(!blockedP(x,y,10)) return [x,y];
+  for(let r=16;r<480;r+=16) for(let a=0;a<16;a++){ const X=x+Math.cos(a/16*Math.PI*2)*r, Y=y+Math.sin(a/16*Math.PI*2)*r; if(!blockedP(X,Y,10)) return [X,Y]; } return [x,y]; }
+function gmDest(arg){ const a=String(arg||'').trim().toLowerCase(); if(!a) return null;
+  if(a==='me'||a==='here') return {x:me.x+Math.cos(me.face)*40,y:me.y+Math.sin(me.face)*40,n:me.c.name};
+  const nums=a.split(/[\s,]+/).map(Number); if(nums.length===2&&nums.every(isFinite)) return {x:nums[0]*TS+16,y:nums[1]*TS+16,n:`${nums[0]}, ${nums[1]}`};
+  for(const o of others.values()) if(o.n.toLowerCase()===a||o.n.toLowerCase().startsWith(a)) return {x:o.rx+30,y:o.ry,n:o.n};
+  const pl=gmPlaces(); const hit=pl.find(p=>p.k.includes(a))||pl.find(p=>p.k.some(k=>k.includes(a))); if(hit) return {x:hit.x,y:hit.y,n:hit.n};
+  const z=Object.keys(ZONES).find(k=>k===a||ZONES[k].name.toLowerCase().includes(a));
+  if(z){ let sx=0,sy=0,n=0; for(let i=0;i<zmap.length;i+=7) if(zmap[i]===z){ sx+=i%MW; sy+=(i/MW|0); n++; } if(n) return {x:sx/n*TS,y:sy/n*TS,n:ZONES[z].name}; }
+  return null; }
+function gmSendPlayer(o,D){ const [x,y]=gmOpenSpot(D.x,D.y); pushAct(45,o.u,0,0,x,y); }
+function gmSummon(arg){ const a=String(arg||'').trim(); if(!a) return chatLine('Usage: /summon <player|all>','c-err');
+  const D={x:me.x+Math.cos(me.face)*40,y:me.y+Math.sin(me.face)*40,n:me.c.name};
+  if(/^all$/i.test(a)){ let k=0; for(const o of others.values()){ if(o.iv) continue; gmSendPlayer(o,{x:D.x+Math.cos(k)*30,y:D.y+Math.sin(k)*30}); k++; } sendPresence(true); return gmOk(k?`Summoning ${k} player${k>1?'s':''} to you.`:'Nobody else is online.'); }
+  const o=findPlayer(a); if(!o) return chatLine(`No player called "${a}" is online.`,'c-err'); gmSendPlayer(o,D); sendPresence(true); gmOk(`Summoning ${o.n} to you.`); }
+function gmTpPlayer(arg){ const m=String(arg||'').match(/^(\S+)\s+(.+)$/); if(!m) return chatLine('Usage: /tpplayer <player> <place, NPC, boss, player, me, or x y>','c-err');
+  const o=findPlayer(m[1]); if(!o) return chatLine(`No player called "${m[1]}" is online.`,'c-err');
+  const D=gmDest(m[2]); if(!D) return chatLine(`No place or player called "${m[2]}".`,'c-err'); gmSendPlayer(o,D); sendPresence(true); gmOk(`Sending ${o.n} to ${D.n}.`); }
+function gmPulled(o,x,y){ if(!me||!isFinite(x)||!isFinite(y)) return; x=clamp(x,24,MW*TS-24); y=clamp(y,24,MH*TS-24);
+  try{ const [X0,Y0,Z0]=ph3(me.x,me.y,.6); burst3(X0,Y0,Z0,'#b07cff',30,3,{glow:true}); }catch(e){}
+  me.x=x; me.y=y; me.dash=null; me.cast=null; me.target=null; me.auto=false; me.rootU=0; if(typeof CAM!=='undefined'){ CAM.tx=x/TS; CAM.tz=y/TS; }
+  try{ const [X,Y,Z]=ph3(x,y,.6); burst3(X,Y,Z,'#b07cff',40,3,{glow:true}); snd('holy'); }catch(e){}
+  sysMsg(`✨ ${o.n} (Game Master) teleported you.`,'c-gm'); sendPresence(true); }
+function gmRemoteAct(o,kind,a){ if(!o||!o.gm) return; const amt=a[3]|0;
+  if(kind===43&&amHost) gmSpawnApply(amt,+a[5],+a[6],o.u);
+  else if(kind===44) gmDespawnApply(amt);
+  else if(kind===45&&a[2]===MY_U) gmPulled(o,+a[5],+a[6]); }
+
 function gmCmd(cmd,arg){
   if(cmd==='gm'&&/^login\b/i.test(arg)) return gmLogin(arg.slice(5).trim());
   if(!isGM) return chatLine('You are not a Game Master.','c-err');
@@ -6262,6 +6385,11 @@ function gmCmd(cmd,arg){
     case 'makegm': if(!arg) return chatLine('Usage: /makegm <player name>','c-err'); return gmGrant(arg,true);
     case 'removegm': if(!arg) return chatLine('Usage: /removegm <player name>','c-err'); return gmGrant(arg,false);
     case 'gmlist': { const L=saves.gmGrants||[]; return gmOk(isRealmOwner()?(L.length?'Game Masters you appointed: '+L.map(g=>g.n).join(', '):'You have not appointed any Game Masters. Use /makegm <name>.'):'Only the realm owner manages the GM list.'); }
+    case 'give': case 'giveitem': return gmGive(arg);
+    case 'spawn': return gmSpawn(arg);
+    case 'despawn': return gmDespawn(arg);
+    case 'summon': return gmSummon(arg);
+    case 'tpplayer': case 'sendplayer': return gmTpPlayer(arg);
     case 'announce': if(!arg) return chatLine('Usage: /announce message','c-err'); return sayChat(arg,2);
   }
 }
@@ -6284,7 +6412,7 @@ function renderGMWin(){ const w=$('gmWin'); if(!w||w.classList.contains('hidden'
     <div class="gmrow">X <input id="gmTx" type="number" min="0" max="${MW-1}" value="${Math.round(me.x/TS)}"> Y <input id="gmTy" type="number" min="0" max="${MH-1}" value="${Math.round(me.y/TS)}"> <button id="gmTgo">Go</button></div></div>
   <div class="gmsec"><h4>Announce to everyone</h4><div class="gmrow"><input id="gmAnn" maxlength="120" placeholder="Server message…" style="flex:1"> <button id="gmAgo">Send</button></div></div>
   <div class="gmsec" style="font-size:13px;color:var(--dim)">Owner character on this device: <b style="color:#ff9a3a">${esc((rosterList().find(c=>c.id===saves.gmChar)||{}).name||'—')}</b>. Your other characters are normal players. Use <code>/movegm name</code> to move GM to another of your characters.</div>
-  <div class="gmsec gmcmds"><h4>Chat commands</h4><code>/gold n</code> add gold · <code>/level n</code> set level · <code>/levelup n</code> · <code>/setlevel name n</code> set a player's level · <code>/givelevel name n</code> give a player levels · <code>/xp n</code> · <code>/god</code> · <code>/nocd</code> · <code>/fly</code> noclip · <code>/speed 1–6</code> · <code>/tp x y</code> · <code>/tp town</code> · <code>/tp place|npc|boss|player</code> · <code>/heal</code> · <code>/revive</code> · <code>/item 0–3</code> · <code>/mats n</code> · <code>/mount</code> · <code>/kill</code> · <code>/kill all</code> · <code>/time day|dusk|night|dawn|auto</code> · <code>/weather clear|cloudy|rain|storm|auto</code> · <code>/questdone</code> · <code>/announce msg</code> · <code>/gift name wings|aura|steed|supporter|founder|title text</code> (donation rewards; works even if they are offline) · <code>/aura</code> glowing GM aura · <code>/invis</code> invisible · <code>/makegm name</code> · <code>/removegm name</code> · <code>/gmlist</code> · <code>/boot name</code> · <code>/ban name</code> · <code>/unban name</code> (owner only; boot/ban need your own server) · <code>/gm</code> this window<div style="margin-top:6px">Everything you do with these tools is private: other players never see a GM tag or GM effects, only the result (for example, a monster dying). Time and weather change on your screen only.</div></div>`;
+  <div class="gmsec gmcmds"><h4>Chat commands</h4><code>/gold n</code> add gold · <code>/level n</code> set level · <code>/levelup n</code> · <code>/setlevel name n</code> set a player's level · <code>/givelevel name n</code> give a player levels · <code>/xp n</code> · <code>/god</code> · <code>/nocd</code> · <code>/fly</code> noclip · <code>/speed 1–6</code> · <code>/tp x y</code> · <code>/tp town</code> · <code>/tp place|npc|boss|player</code> · <code>/heal</code> · <code>/revive</code> · <code>/item 0–3</code> · <code>/mats n</code> · <code>/mount</code> · <code>/kill</code> · <code>/kill all</code> · <code>/time day|dusk|night|dawn|auto</code> · <code>/weather clear|cloudy|rain|storm|auto</code> · <code>/questdone</code> · <code>/announce msg</code> · <code>/gift name wings|aura|steed|supporter|founder|title text</code> (donation rewards; works even if they are offline) · <code>/aura</code> glowing GM aura · <code>/invis</code> invisible · <code>/makegm name</code> · <code>/removegm name</code> · <code>/gmlist</code> · <code>/boot name</code> · <code>/ban name</code> · <code>/unban name</code> (owner only; boot/ban need your own server) · <code>/give name|me item</code> any item (common|uncommon|rare|epic [slot] [level], legendary, tyrant [slot], emberguard|ashen [slot|set], herb or ore [count], gold n) · <code>/spawn boss</code> a boss in front of you (<code>/spawn list</code>) · <code>/despawn [boss|all]</code> · <code>/summon name|all</code> pull players to you · <code>/tpplayer name place|me|player|x y</code> · <code>/gm</code> this window<div style="margin-top:6px">Everything you do with these tools is private: other players never see a GM tag or GM effects, only the result (for example, a monster dying). Time and weather change on your screen only.</div></div>`;
   w.querySelectorAll('[data-gm]').forEach(b=>b.onclick=()=>{ const [c,...r]=b.dataset.gm.split(' '); gmCmd(c,r.join(' ')); renderGMWin(); });
   const pl=gmPlaces(); w.querySelectorAll('[data-tpi]').forEach(b=>b.onclick=()=>{ const p=pl[+b.dataset.tpi]; gmTpTo(p.x,p.y,p.n); });
   w.querySelectorAll('[data-tpp]').forEach(b=>b.onclick=()=>{ const o=othersByU.get(b.dataset.tpp); if(o) gmTpTo(o.x+30,o.y,o.n); });
@@ -8044,7 +8172,7 @@ function portraitMenu(e,u){ e.preventDefault(); e.stopPropagation(); if(!me||!u)
   const add=(t,fn,cls)=>{ const b=document.createElement('button'); b.textContent=t; if(cls) b.className=cls; b.onclick=ev=>{ ev.stopPropagation(); m.remove(); fn(); }; m.appendChild(b); };
   const h=document.createElement('div'); h.className='pmH'; h.textContent=self?me.c.name:o.n; h.style.color=self?myNameCol():nameCol(o); m.appendChild(h);
   add('🔍 Inspect gear',()=>openInspect(u),'gold'); if(!self){ add('🎯 Target',()=>{ me.target={kind:'p',id:u}; });
-    add('🤝 Trade',()=>startTrade(o)); if(canInvite(o.pt)) add('➕ Invite to party',()=>inviteTo(o)); else if(me.party&&o.pt===me.party&&amLeader()) add('➖ Remove from party',()=>kickMember(o)); }
+    add('💬 Whisper',()=>whisperStart(o.n)); add('🤝 Trade',()=>startTrade(o)); if(canInvite(o.pt)) add('➕ Invite to party',()=>inviteTo(o)); else if(me.party&&o.pt===me.party&&amLeader()) add('➖ Remove from party',()=>kickMember(o)); }
   add('Close',()=>{});
   const x=Math.min(innerWidth-190,(e.touches?e.touches[0].clientX:e.clientX)||100), y=Math.min(innerHeight-200,(e.touches?e.touches[0].clientY:e.clientY)||100); m.style.left=x+'px'; m.style.top=y+'px';
   setTimeout(()=>addEventListener('pointerdown',function cl(ev){ if(!m.contains(ev.target)){ m.remove(); removeEventListener('pointerdown',cl,true); } },true),0); }
@@ -8287,6 +8415,7 @@ function cleanItem(it){ if(!it||typeof it!=='object') return null; const o={...i
 function giveItem(it,why){ const c=me.c; if(it&&typeof it==='object'&&it.mat){ const k=String(it.mat), n=clamp(it.n|0,1,500); if(!MATS[k]) return false; c.mats[k]=(c.mats[k]||0)+n; chatLine(`${why}: ${MATS[k].icon} ${MATS[k].name} ×${n}.`,'c-loot'); renderInv(); persist(); return true; } it=cleanItem(it); if(!it) return false; if(c.inv.length<BAGMAX){ c.inv.push(it); chatLine(`${why}: [${it.name}].`,'c-loot t'+it.rar); }
   else { (c.mail=c.mail||[]).push(it); chatLine(`${why}: [${it.name}]. Your bags are full, so it waits in your mailbox with Auctioneer Velma in Hearthmere.`,'c-loot'); } renderInv(); persist(); return true; }
 function applyGift(what,from){ if(!me) { (saves.pendingGifts=saves.pendingGifts||[]).push(what); saveAll(saves); return; } const C=cos(); const c=me.c; let label=GIFTS[what]||what;
+  if(what.startsWith('gi:')) return gmGiftApply(what.slice(3),from);
   if(what==='wings') C.wings=1; else if(what==='aura') C.aura=1; else if(what==='steed'){ if(!c.mounts.includes(4)) c.mounts.push(4); }
   else if(what==='supporter'){ C.aura=1; C.title=C.title||'Supporter'; C.titles=[...new Set([...(C.titles||[]),'Supporter'])]; }
   else if(what==='founder'){ C.aura=1; C.wings=1; if(!c.mounts.includes(4)) c.mounts.push(4); C.title='Founder'; C.titles=[...new Set([...(C.titles||[]),'Founder','Supporter'])]; }
@@ -8617,12 +8746,12 @@ function townGateDraw(near,t,dt){ if(!TOWN.gates||!TOWN.gates.length) return; co
 function shieldBubble(x,y,t,k){ const X=x/TS, Z=y/TS, Y=groundY(x,y); mreset(); mtr(X,Y+1.05,Z); mry(t*.6); P(GEO.sph,1.55,2.25,1.55,[.68,.62,1],1.5,0,0,0,(.12+.05*Math.sin(t*4+k))); addLight(X,Y+1.2,Z,2.5,[.4,.35,.8]); }
 function shieldDraw(near,t){ if(!me) return; if(!me.dead&&me.absorb>0&&me.absorbU>t) shieldBubble(me.x,me.y,t,0); for(const o of others.values()) if((o.b&8)&&!o.d&&seenO(o)&&near(o.rx,o.ry,50)) shieldBubble(o.rx,o.ry,t,o.rx); }
 /* ======================================================================================================
-   v92 The Bloodsand Chest: a war chest appears in the middle of the Bloodsand Arena every 3 minutes (on a
+   v92 The Bloodsand Chest: a war chest appears in the middle of the Bloodsand Arena every 30 minutes (v93; on a
    shared clock, so every player sees the same chest). Opening it takes 3 seconds of standing still, and any
    damage or movement breaks it, so it has to be fought over. The first hero to finish claims it for
    +50 Conquest and +75 Honor, and everyone in the arena is told who took it.
    ====================================================================================================== */
-const ACHEST={period:180,chan:3,claimed:-1,by:'',open:null,ann:-1,pos:null};
+const ACHEST={period:1800,chan:3,claimed:-1,by:'',open:null,ann:-1,pos:null};
 const achestCycle=()=>Math.floor(Date.now()/1000/ACHEST.period);
 const achestUp=()=>ACHEST.claimed!==achestCycle();
 function achestPos(){ if(!ACHEST.pos){ const [x,y]=findOpen(Math.floor(AR.cx),Math.floor(AR.cy)); ACHEST.pos={x:(x+.5)*TS,y:(y+.5)*TS}; } return ACHEST.pos; }

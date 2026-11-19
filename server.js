@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION='v0.92';
+const SERVER_VERSION='v0.93';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
@@ -264,6 +264,14 @@ function onMessage(c, text) {
     if (was !== raidOpen) { broadcast(null, { t: 'ro', open: raidOpen ? 1 : 0 }); log(`* Cinderhold ${raidOpen ? 'UNVEILED' : 'sealed'} by the realm owner`); }
   } else if (d && d.t === 'arm' && d.c) {
     storeArmory(c, d.c);
+  } else if (d && d.t === 'wh' && typeof d.name === 'string' && typeof d.txt === 'string' && c.p && c.p.n) {
+    // whispers go only to the player they are meant for
+    const tn = Date.now(); if (!c.whT || tn - c.whT > 5000) { c.whT = tn; c.whN = 0; }
+    if (++c.whN <= 8) {
+      const who = d.name.toLowerCase().slice(0, 24), txt = d.txt.slice(0, 200); let done = false;
+      for (const o of clients.values()) if (o !== c && o.p && String(o.p.n || '').toLowerCase() === who) { send(o, { t: 'wh', from: String(c.p.n).slice(0, 24), txt }); done = true; }
+      if (!done) send(c, { t: 'whx', name: d.name.slice(0, 24) });
+    }
   } else if (d && d.t === 'gift' && c.gm && typeof d.name === 'string' && typeof d.what === 'string') {
     const who = d.name.toLowerCase().slice(0, 20), what = d.what.slice(0, 40); let done = false;
     for (const o of clients.values()) if (o.p && String(o.p.n || '').toLowerCase() === who) { send(o, { t: 'gift', what, from: 'the Realm' }); done = true; }

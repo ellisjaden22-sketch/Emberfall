@@ -1,9 +1,9 @@
 {
- "version": "v0.92",
- "title": "The Bloodsand Chest",
+ "version": "v0.93",
+ "title": "Whispers and Game Master tools",
  "date": "19 Nov 2026",
- "text": "Something worth fighting over in the arena, and a round of PvP fixes.\n\n✨ The Bloodsand Chest: a war chest appears in the middle of the Bloodsand Arena every 3 minutes. Opening it takes 3 seconds of standing still, and any hit or step breaks it, so you will have to fight for it. Whoever opens it first gets +50 Conquest and +75 Honor. The arena panel shows when the next chest is due and who took the last one\n• Arcanist: Phoenix Flame is replaced by Arcane Barrier, a shield that absorbs damage equal to 40% of your maximum health for 12 seconds (30 second cooldown). Pyromancy now strengthens Meteor and Arcane Barrier\n✨ Absorb shields (Arcane Barrier, Celestus shields and rallying cries) now show as a shimmering bubble around the hero\n🔧 Vile Poisons now poisons enemy players too, in the arena and Emberclash Fields\n🔧 A Shade in stealth now stays hidden from enemies everywhere in the arena and the battleground, including from players standing in safe areas. Only party members and battleground teammates can see them\n🔧 Stealthing no longer makes the chat claim that a player has left or entered the realm\n✨ New achievement: Spoils of the Sands",
+ "text": "Private messages, PvP gear upgrades with Honor and Conquest, and a clean slate when you die.\n\n✨ Whispers: right-click a player's portrait and choose Whisper, or type /w name message. /r message replies to the last person who whispered you. Only the person you whisper can read it\n• PvP gear is upgraded at the forge with PvP currency instead of gold and ore: Emberguard gear costs Honor (30 for the first star, rising by 15 per star) and Ashen Champion's gear costs Conquest (20, rising by 10)\n• The Bloodsand Chest now appears every 30 minutes, so each one is worth fighting over\n🔧 Dying now clears every effect on you: poisons and bleeds, heals over time, shields, buffs such as shouts and evasion, roots and stealth. Combo points reset too\n🔧 A Shade's poison stops the moment its target dies, so you no longer keep bleeding after you respawn, and the Shade's combo points reset when their target dies\n✨ Game Master tools: /give gives any item to any player (or yourself), /spawn summons any boss in front of you (/despawn removes it), /summon pulls players to you, and /tpplayer sends a player anywhere",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-19T11:26:20Z"
+ "time": "2026-11-19T12:08:39Z"
 }
