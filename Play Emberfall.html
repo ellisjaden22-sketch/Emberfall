@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.84</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.85</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 84;
+const VERSION = 85;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2029,8 +2029,10 @@ function execAbility(ab,tgt){
   if(ab.melee) me.swingT=t;
   const hitMob=(m,base,v,from)=>{ const c=Math.random()<critCh; const d=Math.round(base*dmgMul/healMul*(.92+Math.random()*.16)*(c?critM:1)*shoutMul()*(me.markU>t&&me.markId===m.id?1.15:1));
     if(from!==undefined) pushAct(0,m.id,d,v,from,0); else pushAct(0,m.id,d,v);
-    fct(m.rx,m.ry-26,c?d+'!':d,c?'#ffb02e':'#ffe066',c); m.hit=t; if(c) shake(3); if(ab.melee||!ab.proj){ if(c){ hitStop(m,.075); camPunch(.5); } else if(d>m.mhp*.08) hitStop(m,.045); }
-    try{ const wk=ab.melee?weapKind(playerLook(me.c.cls,MY_U,myGearVis())):'magic'; impactFX(m,Math.atan2(m.ry-me.y,m.rx-me.x),wk,c,ab.melee?1:.6); impSnd(m,ab.melee?.85:.55); }catch(e){} m.kbA=Math.atan2(m.ry-me.y,m.rx-me.x); m.kbK=c?1:.55; meterAdd(m,ab.name,d,c); return d; };
+    meterAdd(m,ab.name,d,c);
+    const fb=()=>{ const ang=Math.atan2(m.ry-me.y,m.rx-me.x); fct(m.rx,m.ry-26,c?d+'!':d,c?'#ffb02e':'#ffe066',c); m.hit=now(); if(c) shake(3); if(ab.melee||!ab.proj){ if(c){ hitStop(m,.075); camPunch(.5); } else if(d>m.mhp*.08) hitStop(m,.045); }
+      try{ const wk=ab.melee?weapKind(playerLook(me.c.cls,MY_U,myGearVis())):'magic'; impactFX(m,ang,wk,c,ab.melee?1:.6); impSnd(m,ab.melee?.85:.55); }catch(e){} if(!m.dead){ m.kbA=ang; m.kbK=c?1:.55; } };
+    if(ab.melee) atImpact(fb,IMPACT_DELAY); else fb(); return d; };
   if(ab.dmg && tgt && tgt.kind==='m' && !ab.chain){ const m=tgt.e; if(m.dead) return;
     const d=hitMob(m,scaleV(ab.dmg)*(ab.finisher?Math.max(1,me.cp):1),vis);
     if(ab.threatMul){ if(amHost) m.threat[MY_U]=(m.threat[MY_U]||0)+d*(ab.threatMul-1)*2.4; else pushAct(3,m.id,0,0); }
@@ -2159,8 +2161,9 @@ function updateAuto(dt){
     const c=Math.random()<.08+(CLS[me.c.cls].crit||0)+TAL('crit'); const d=Math.round((a.dmg+a.dmgL*(me.c.lvl-1)+me.pow*.45)*(1+TAL('dmg'))*(1+songFx().dmg)*(.9+Math.random()*.2)*(c?1.7+TAL('critd'):1)*shoutMul()*(me.markU>now()&&te.kind==='m'&&me.markId===te.e.id?1.15:1)*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?1.1:1));
     const pv=a.proj==='arrow'?40:a.proj?4:0;
     if(te.kind==='p'){ hitPlayer(te.e,d,pv,c); if(!a.proj) me.swingT=now(); return; }
-    pushAct(0,te.e.id,d,pv); fct(te.x,te.y-26,c?d+'!':d,c?'#ffb02e':'#fff',c); te.e.hit=now(); if(!a.proj){ if(c){ hitStop(te.e,.07); camPunch(.4); } te.e.kbA=Math.atan2(te.y-me.y,te.x-me.x); te.e.kbK=c?.9:.5; }
-    try{ impactFX(te.e,Math.atan2(te.y-me.y,te.x-me.x),a.proj?'magic':weapKind(playerLook(me.c.cls,MY_U,myGearVis())),c,a.proj?.5:1); impSnd(te.e,a.proj?.5:.85); }catch(e){} te.e.atkT=now(); me.lastCombat=now(); meterAdd(te.e,'Auto attack',d,c);
+    pushAct(0,te.e.id,d,pv); te.e.atkT=now(); me.lastCombat=now(); meterAdd(te.e,'Auto attack',d,c);
+    { const m=te.e, fb=()=>{ if(!m) return; const ang=Math.atan2(m.ry-me.y,m.rx-me.x); fct(m.rx,m.ry-26,c?d+'!':d,c?'#ffb02e':'#fff',c); m.hit=now(); if(!a.proj&&!m.dead){ if(c){ hitStop(m,.07); camPunch(.4); } m.kbA=ang; m.kbK=c?.9:.5; }
+        try{ impactFX(m,ang,a.proj?'magic':weapKind(playerLook(me.c.cls,MY_U,myGearVis())),c,a.proj?.5:1); impSnd(m,a.proj?.5:.85); }catch(e){} }; if(a.proj) fb(); else atImpact(fb,IMPACT_DELAY); }
     if(!a.proj) me.swingT=now();
     if(CLS[me.c.cls].res==='rage') me.res=Math.min(100,me.res+10);
     visualAct({x:me.x,y:me.y,u:MY_U},[0,0,te.e.id,d,pv],true);
@@ -4094,7 +4097,7 @@ function updateCamera(dt){
 function toScreen(X,Y,Z){ const v=VP; const x=v[0]*X+v[4]*Y+v[8]*Z+v[12], y=v[1]*X+v[5]*Y+v[9]*Z+v[13], w=v[3]*X+v[7]*Y+v[11]*Z+v[15]; if(!(w>=.2)) return null; const sx=(x/w*.5+.5)*W, sy=(.5-y/w*.5)*H; if(!isFinite(sx)||!isFinite(sy)) return null; return [sx,sy,w]; }
 function smoothY(st,y,dt){ if(st._ys==null||Math.abs(y-st._ys)>2.5||!(dt>0)) st._ys=y; else st._ys+=(y-st._ys)*(1-Math.exp(-dt*11)); return st._ys; }
 function animState(o,dt,x,y,moving,scale){ const ox=o._ax??x, oy=o._ay??y; const dm=Math.hypot(x-ox,y-oy); o._ax=x; o._ay=y; o.walkP=(o.walkP||0)+dm/TS*3.6/(scale||1)*((dm>.2&&o.rf!=null&&Math.cos(Math.atan2(y-oy,x-ox)-o.rf)<-.35)?-1:1);
-  { const tg=(moving||dm>.3)?1:0; o.mvS=lerp(o.mvS||0,tg,Math.min(1,dt*(tg?9:7))); }
+  { let tg=(moving||dm>.3)?1:0; if(o===me&&me._spRef&&!me.dash){ const f=Math.hypot(me.vx||0,me.vy||0)/me._spRef; tg=f>.9?1:f<.04?0:f; } o.mvS=lerp(o.mvS||0,tg,Math.min(1,dt*(tg?9:7))); }
   const kk=Math.min(1,dt*6), sp=dt>0?Math.min(30,dm/TS/dt):0; o.spdS=lerp(o.spdS||0,sp,kk);
   if(dm>.25){ const hd=Math.atan2(y-oy,x-ox); if(o._hd!=null){ let d=hd-o._hd; d=Math.atan2(Math.sin(d),Math.cos(d)); o.bankS=lerp(o.bankS||0,clamp(d/Math.max(dt,.008)*.05,-.28,.28),kk); } o._hd=hd; } else o.bankS=lerp(o.bankS||0,0,kk); }
 const STKb=o=>{ const g=o.swing??-1; return g>=0?Math.sin(Math.PI*clamp((g-.25)/.55,0,1)):0; };
@@ -4274,7 +4277,7 @@ function buildScene(dt){
     const b=isMe?((me.bulwark>t?1:0)|(me.absorb>0&&me.absorbU>t?8:0)):o.b; const X=x/TS, Y=Y0+(mt?.72:0), Z=y/TS;
     if(b&1){ mreset(); mtr(X,Y+1,Z); mry(t); P(GEO.sph,1.6,2.2,1.6,[.5,.7,1],1.2,0,0,0,.18); }
     if(b&8){ mreset(); mtr(X,Y+1,Z); P(GEO.sph,1.5,2.1,1.5,[.75,.9,1],1.4,0,0,0,.2); }
-    if(isMe?me.cast:(o.b&4)) addLight(X,Y+1.4,Z,5,castCol);
+    { const cp=castProgress(isMe,o); if(cp!=null||st.relT) castFx(st,X,Y,Z,castCol,cp,face,Math.hypot(X-CAM.tx,Z-CAM.tz)<30); }
     if(isMe?me.avatarU>t:(o.b&64)){ addLight(X,Y+1.5,Z,7,[1.3,1.1,.5]); if(Math.random()<.4) burst3(X,Y+1,Z,'#ffd34a',1,.8,{glow:true,up:1}); }
     if(curDark>.4) addLight(X,Y+2.2,Z,isMe?7:5,[.55,.48,.38].map(v=>v*curDark)); };
   for(const o of others.values()) if(seenO(o)&&near(o.rx,o.ry,60)) try{ drawP(o,false); }catch(e){ HALPHA=1; frameErr(e,'player'); }
@@ -8112,6 +8115,65 @@ function updateDash(t){ const d=me.dash, m=d.m, isP=!m||!m.t; const k=Math.min(1
   if(k>=1){ me.dash=null; me.faceLockA=ang; me.faceLockU=t+.5;
     if(isP){ if(!m.d&&pvpFoe(m)){ pushAct(13,m.u,1000,0); spark(ex,ey,'#fff3a0'); burst(ex,ey,'#c8b48a',14,120,{h:.2}); shake(5); me.swingT=t; } }
     else if(!m.dead){ pushAct(2,m.id,1500,0); spark(m.rx,m.ry,'#fff3a0'); burst(m.rx,m.ry,'#c8b48a',14,120,{h:.2}); shake(5); me.swingT=t; } } }
+/* ======================================================================================================
+   v85 polish pass
+   1. Movement: facing turns at a limited rate instead of snapping; acceleration, braking and reversing
+      use separate curves (and a heavier, momentum-y feel when mounted).
+   2. Combat: melee feedback (damage number, hit flash, knockback, hit-stop, impact particles and sound)
+      lands on the swing's active frame instead of the instant the button is pressed.
+   3. Spells: every cast has a visible build-up (a rune circle that grows under the caster, motes drawn
+      into the hands, light that swells with progress) and a release (flash, shockwave, sparks); all of
+      it is drawn per frame from cast progress, so nothing lingers after the cast ends or is cancelled.
+   ====================================================================================================== */
+
+/* ---------- 1. movement helpers ---------- */
+const MOVE_TUNE={
+  turnFoot:15, turnMount:7.5,        /* how fast facing turns toward the move direction (radians per second) */
+  accFoot:11, accMount:5.5,          /* how quickly you reach running speed */
+  revFoot:17,                        /* reversing direction on foot bites harder than starting from rest */
+  stopFoot:15, stopMount:4.5         /* how quickly you come to a stop when you let go */
+};
+/* turn angle a toward b by at most step radians, along the short way round */
+function turnToward(a,b,step){ if(!isFinite(a)) return b; let d=Math.atan2(Math.sin(b-a),Math.cos(b-a)); if(Math.abs(d)<=step) return b; return a+Math.sign(d)*step; }
+/* acceleration rate for the current input, given the current and wanted velocity */
+function moveAccel(vx,vy,tx,ty){ if(me.mounted) return MOVE_TUNE.accMount; const vl=Math.hypot(vx,vy), tl=Math.hypot(tx,ty);
+  if(vl>20&&tl>0&&(vx*tx+vy*ty)/(vl*tl)<-.2) return MOVE_TUNE.revFoot; return MOVE_TUNE.accFoot; }
+
+/* ---------- 2. impact timing ---------- */
+const IMPACT_DELAY=.15;               /* seconds from the start of a melee swing to its active frame */
+const IMPQ=[];
+function atImpact(fn,delay){ IMPQ.push({t:now()+delay,fn}); }
+function runImpacts(){ if(!IMPQ.length) return; const t=now();
+  for(let i=IMPQ.length-1;i>=0;i--){ if(IMPQ[i].t<=t){ const q=IMPQ.splice(i,1)[0]; try{ q.fn(); }catch(e){} } } }
+
+/* ---------- 3. casting effects ---------- */
+const castHex=c=>'#'+c.map(v=>Math.round(clamp(v,0,1)*255).toString(16).padStart(2,'0')).join('');
+/* cast progress 0..1 for you or another hero, or null when not casting (gathering and crafting show no spell circle) */
+function castProgress(isMe,o){ const t=now();
+  if(isMe){ const c=me.cast; if(!c||c.node||c.fin||!c.ab||c.ab.id==='gather'||c.ab.id==='craft') return null; return clamp((t-c.t0)/Math.max(.05,c.dur),0,1); }
+  if(o&&o.cast&&(o.b&4)) return clamp(o.cast.p0/100+(t-o.cast.t0)/Math.max(.05,o.cast.dur),0,1);
+  return (o&&(o.b&4))?.5:null; }
+function castFx(st,X,Y,Z,col,p,face,near){ const t=now(), hex=castHex(col), lowQ=GFX.q==='low';
+  if(p!=null){ const e=1-(1-p)*(1-p), pulse=.85+.15*Math.sin(t*9);
+    /* rune circle on the ground: grows and brightens as the spell builds */
+    const R=.5+.65*e; mreset(); mtr(X,Y+.035,Z); mry(t*1.3);
+    P(GEO.cyl,R,.012,R,col,2.4,0,0,0,(.12+.2*e)*pulse);
+    P(GEO.cyl,R*.78,.014,R*.78,col.map(v=>v*.6),1.5,0,0,0,.1+.12*e);
+    for(let k=0;k<6;k++){ const a=k*1.0472; P(GEO.box,.16,.02,.045,col,4,Math.cos(a)*R*.9,.005,Math.sin(a)*R*.9,.35+.45*e); }
+    /* motes drawn in toward the hands */
+    const hx=X+Math.cos(face)*.42, hz=Z+Math.sin(face)*.42, hy=Y+1.25;
+    if(near&&!lowQ&&Math.random()<.35+.5*e){ const a=Math.random()*6.283, r=1+Math.random()*.6, sx=X+Math.cos(a)*r, sz=Z+Math.sin(a)*r, sy=Y+.3+Math.random()*1.4, life=.42;
+      P3(sx,sy,sz,(hx-sx)/life,(hy-sy)/life,(hz-sz)/life,life,.05+.04*e,hex,{glow:true}); }
+    /* light in the hands swells with progress */
+    addLight(hx,hy,hz,3+4.5*e,col.map(v=>v*(.6+1.2*e)*pulse));
+    st._castCol=col; st._castSeen=t; }
+  /* release: a flash, a shockwave and a spray of sparks the moment the spell lets go */
+  if(st.relT&&t-st.relT<.42&&st._castSeen&&st.relT-st._castSeen<1.5){ const k=1-(t-st.relT)/.42, c=st._castCol||col;
+    addLight(X,Y+1.3,Z,6+7*k,c.map(v=>v*2.2*k));
+    if(st._relFx!==st.relT){ st._relFx=st.relT;
+      if(near&&!lowQ){ burst3(X+Math.cos(face)*.45,Y+1.25,Z+Math.sin(face)*.45,castHex(c),16,3.2,{glow:true,up:1}); }
+      FXP({k:'wave',x:X*TS,y:Z*TS,r:55,col:castHex(c),dur:.32,h:.5}); } } }
+
 function update(dt){
   const t=now();
   syncPeers();
@@ -8124,12 +8186,12 @@ function update(dt){
     let mx=Math.cos(yaw)*f-Math.sin(yaw)*s, my=Math.sin(yaw)*f+Math.cos(yaw)*s;
     const back=f<0&&!s;
     me.moving=!!(mx||my)&&!rooted;
-    if(mx||my){ me.face=(me.faceLockU>t&&me.faceLockA!=null)?me.faceLockA:(back?yaw:Math.atan2(my,mx)); }
-    if(me.moving){ const l=Math.hypot(mx,my), swm=isSwimming(), wade=!swm&&!me.mounted&&isWaterAt(me.x,me.y), sp=(back?95:155)*(wade?.85:1)*(me.mounted?MOUNTS[me.mounted].speed:1)*(swm?.6:1)*(buffOn('swift')?1.2:1)*(gm.speed||1)*(1+TAL('spd'))*(1+songFx().spd)*(me.stealth?.82+TAL('stspd'):1)*dt; { const k=1-Math.exp(-dt*(me.mounted?8:18)), tx=mx/l*sp/dt, ty=my/l*sp/dt; me.vx=(me.vx||0)+(tx-(me.vx||0))*k; me.vy=(me.vy||0)+(ty-(me.vy||0))*k; movePlayer(me,me.vx*dt,me.vy*dt,10); } me.stepT-=dt; if(me.stepT<=0){ me.stepT=me.mounted?.15:.3; if(!swm) footDust(me.x,me.y); } }
-    else { if(!rooted&&!me.dead&&!me.dash&&Math.hypot(me.vx||0,me.vy||0)>8){ const k=Math.exp(-dt*(me.mounted?7:24)); me.vx*=k; me.vy*=k; movePlayer(me,me.vx*dt,me.vy*dt,10); } else { me.vx=0; me.vy=0; } }
+    if(mx||my){ const ft=(me.faceLockU>t&&me.faceLockA!=null)?me.faceLockA:(back?yaw:Math.atan2(my,mx)); me.face=me.faceLockU>t?ft:turnToward(me.face,ft,dt*(me.mounted?MOVE_TUNE.turnMount:MOVE_TUNE.turnFoot)); }
+    if(me.moving){ const l=Math.hypot(mx,my), swm=isSwimming(), wade=!swm&&!me.mounted&&isWaterAt(me.x,me.y), sp=(back?95:155)*(wade?.85:1)*(me.mounted?MOUNTS[me.mounted].speed:1)*(swm?.6:1)*(buffOn('swift')?1.2:1)*(gm.speed||1)*(1+TAL('spd'))*(1+songFx().spd)*(me.stealth?.82+TAL('stspd'):1)*dt; { me._spRef=sp/dt; const tx=mx/l*sp/dt, ty=my/l*sp/dt, k=1-Math.exp(-dt*moveAccel(me.vx||0,me.vy||0,tx,ty)); me.vx=(me.vx||0)+(tx-(me.vx||0))*k; me.vy=(me.vy||0)+(ty-(me.vy||0))*k; movePlayer(me,me.vx*dt,me.vy*dt,10); } me.stepT-=dt; if(me.stepT<=0){ me.stepT=me.mounted?.15:.3; if(!swm) footDust(me.x,me.y); } }
+    else { if(!rooted&&!me.dead&&!me.dash&&Math.hypot(me.vx||0,me.vy||0)>8){ const k=Math.exp(-dt*(me.mounted?MOVE_TUNE.stopMount:MOVE_TUNE.stopFoot)); me.vx*=k; me.vy*=k; movePlayer(me,me.vx*dt,me.vy*dt,10); } else { me.vx=0; me.vy=0; } }
     if(!me.moving&&!me.dash){ const te=targetEnt(); if(te&&te.kind!=='n'&&!te.self&&(me.cast||me.auto)) me.face=Math.atan2(te.y-me.y,te.x-me.x); }
     if(me.jumpV||me.jumpH>0){ me.jumpV=(me.jumpV||0)-15*dt; me.jumpH=Math.max(0,(me.jumpH||0)+me.jumpV*dt); if(me.jumpH<=0){ me.jumpH=0; me.jumpV=0; footDust(me.x,me.y); } }
-    if(me.dash) updateDash(t);
+    runImpacts(); if(me.dash) updateDash(t);
     if(!me.dead){
       updateCast(); updateAuto(dt);
       if(me.leap) updateLeap(t); updatePet(dt,t);

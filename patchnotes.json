@@ -1,9 +1,9 @@
 {
- "version": "v0.84",
- "title": "New steeds",
+ "version": "v0.85",
+ "title": "Feel and flow",
  "date": "18 Nov 2026",
- "text": "Two mounts get sculpted models, and gathering gets a second achievement.\n\n✨ The Chestnut Steed is now the Black Stallion: a sculpted black horse with glowing red eyes that gallops, nods, swishes its tail, cocks a hoof at rest and grazes at the stable. Same price, speed and level, and if you already own it, it's yours\n✨ The Celestial Steed is now Celestara, a crowned, winged sky steed: her wings beat as she runs, her mane and tail stream behind her, and she glows softly and sheds sparks\n✨ New achievement: Stonebreaker, for mining 50 ore. Green Thumb is now for gathering 50 herbs\n⬆️ On the Low graphics setting, or with Detailed hero models turned off, mounts keep their classic look\n⬆️ Models: Black Stallion by Pigcraft and Celestara, the Crowned Sky Steed by Ar3Designer, both on Sketchfab under CC BY 4.0",
+ "text": "A polish pass on how moving, fighting and casting feel.\n\n• Movement: your hero now turns toward where you're heading instead of snapping, speeds up and slows down on smooth curves, and digs in harder when you reverse direction. Mounts feel heavier, with wider turns and longer glides to a stop\n• Running and walking animations now blend in and out with your real speed, so your legs ease into a run and settle as you brake rather than switching on and off\n• Melee combat: damage numbers, hit flashes, knockback, hit-stop, impact sparks and sounds now land on the swing's strike frame, not the instant you press the key. Damage and threat timing are unchanged\n✨ Spell casting: every cast now has a build-up, with a rune circle that grows under you, motes of light drawn into your hands and a glow that swells as the cast fills. When the spell lets go there is a flash, a shockwave and a spray of sparks\n🔧 Cast effects are drawn fresh each frame from the cast bar, so nothing lingers after a cast finishes, is interrupted or is cancelled. Other players' casts show the same effects",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-18T21:14:01Z"
+ "time": "2026-11-18T23:23:13Z"
 }
