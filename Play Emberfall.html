@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.90</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.91</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 90;
+const VERSION = 91;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2329,14 +2329,14 @@ const shoutMul=()=>me&&me.shoutU>now()?1.1:1;
 /* the Hunter's wolf: follows you, runs at whatever you are fighting and bites it */
 function updatePet(dt,t){ if(!me||me.c.cls!=='hunter'){ me&&(me.pet=null,me.petOn=false); return; } if(!me.petOn||me.dead){ if(me.dead) me.pet=null; return; } if(!me.pet) me.pet={x:me.x-30,y:me.y+20,face:me.face,atkT:0,st:{}};
   const p=me.pet; let tx, ty, tgtM=null; const te=targetEnt();
-  if(te&&te.kind==='m'&&(me.auto||inCombat()||te.e.t.dummy)&&dist(me.x,me.y,te.x,te.y)<700) tgtM=te.e;
+  if(te&&te.kind==='m'&&(me.auto||inCombat()||te.e.t.dummy)&&dist(me.x,me.y,te.x,te.y)<700) tgtM=te.e; else if(te&&te.kind==='p'&&pvpFoe(te.e)&&(me.auto||inCombat())&&dist(me.x,me.y,te.x,te.y)<700) tgtM={rx:te.e.rx,ry:te.e.ry,t:{r:14},dead:!!te.e.d,id:'p:'+te.e.u,_p:te.e};
   if(tgtM){ const a=Math.atan2(p.y-tgtM.ry,p.x-tgtM.rx), R=(tgtM.t.r||14)+16; tx=tgtM.rx+Math.cos(a)*R; ty=tgtM.ry+Math.sin(a)*R; }
   else { const a=me.face+Math.PI*.75; tx=me.x+Math.cos(a)*42; ty=me.y+Math.sin(a)*42; }
   const d=Math.hypot(tx-p.x,ty-p.y); if(dist(p.x,p.y,me.x,me.y)>900){ p.x=me.x; p.y=me.y; }
   const sp=(me.mounted?330:me.moving||tgtM?220:150)*dt; p.mv=d>6; if(d>4){ const k=Math.min(1,sp/d), nx=p.x+(tx-p.x)*k, ny=p.y+(ty-p.y)*k; if(!blocked(nx,ny,8)||blocked(p.x,p.y,8)){ p.x=nx; p.y=ny; } else { p.x=nx; p.y=ny; } p.face=Math.atan2(ty-p.y,tx-p.x); }
   if(tgtM){ if(d<14) p.face=Math.atan2(tgtM.ry-p.y,tgtM.rx-p.x); p.atkT-=dt; if(d<18&&p.atkT<=0&&!tgtM.dead){ p.atkT=1.6; p.swingT=t;
       const lg=me.c.eq.weapon&&me.c.eq.weapon.leg==='hunter'?1.3:1, mk=me.markU>t&&me.markId===tgtM.id?1.15:1; const dm=Math.round((5+2.1*(me.c.lvl-1)+me.pow*.35)*.85*(1+TAL('pet'))*lg*mk*(.9+Math.random()*.2));
-      pushAct(0,tgtM.id,dm,0); fct(tgtM.rx,tgtM.ry-26,dm,'#d8e0ff'); tgtM.hit=t; meterAdd(tgtM,'Wolf companion',dm,false); } } }
+      if(tgtM._p){ if(pvpFoe(tgtM._p)) hitPlayer(tgtM._p,dm,0,false); } else { pushAct(0,tgtM.id,dm,0); fct(tgtM.rx,tgtM.ry-26,dm,'#d8e0ff'); tgtM.hit=t; meterAdd(tgtM,'Wolf companion',dm,false); } } } }
 function updateLeap(t){ const L=me.leap, k=Math.min(1,(t-L.t0)/L.dur); me.x=lerp(L.sx,L.ex,k); me.y=lerp(L.sy,L.ey,k); me.jumpH=Math.sin(k*Math.PI)*1.1; if(k>=1){ me.leap=null; me.jumpH=0; footDust(me.x,me.y); } }
 function drawPetAt(x,y,face,mv,swingT,st,dt){ if(Math.hypot(x/TS-CAM.tx,y/TS-CAM.tz)>70) return; const X=x/TS, Z=y/TS; animState(st,dt,x,y,mv,1); const sw=(now()-(swingT||-9))/.4;
   drawQuad({x:X,y:groundY(x,y),z:Z,face:smoothFace(st,face),mv:clamp(st.mvS||0,0,1),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,dead:-1,hit:false,sc:.95,Q:QLOOK.wolf}); }
@@ -2362,7 +2362,7 @@ function updateAuto(dt){
   if(me.autoT<=0 && dist(me.x,me.y,te.x,te.y)<=a.rng+(te.e.t?te.e.t.r:12)+(a.proj?0:MELEE_SLACK)&&!losBlocked(me.x,me.y,te.x,te.y)){ me.autoT=a.spd*(1-songFx().as)*(me.rapidU>now()?.5:1);
     const c=Math.random()<.08+(CLS[me.c.cls].crit||0)+TAL('crit'); const d=Math.round((a.dmg+a.dmgL*(me.c.lvl-1)+me.pow*.45)*(1+TAL('dmg'))*(1+songFx().dmg)*(.9+Math.random()*.2)*(c?1.7+TAL('critd'):1)*shoutMul()*(me.markU>now()&&te.kind==='m'&&me.markId===te.e.id?1.15:1)*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?1.1:1));
     const pv=a.proj==='arrow'?40:a.proj?4:0;
-    if(te.kind==='p'){ hitPlayer(te.e,d,pv,c); if(!a.proj) me.swingT=now(); return; }
+    if(te.kind==='p'){ hitPlayer(te.e,d,pv,c); if(!a.proj) me.swingT=now(); if(CLS[me.c.cls].res==='rage') me.res=Math.min(100,me.res+10); return; }
     pushAct(0,te.e.id,d,pv); te.e.atkT=now(); me.lastCombat=now(); meterAdd(te.e,'Auto attack',d,c);
     { const m=te.e, fb=()=>{ if(!m) return; const ang=Math.atan2(m.ry-me.y,m.rx-me.x); fct(m.rx,m.ry-26,c?d+'!':d,c?'#ffb02e':'#fff',c); m.hit=now(); if(!a.proj&&!m.dead){ if(c){ hitStop(m,.07); camPunch(.4); } m.kbA=ang; m.kbK=c?.9:.5; }
         try{ impactFX(m,ang,a.proj?'magic':weapKind(playerLook(me.c.cls,MY_U,myGearVis())),c,a.proj?.5:1); impSnd(m,a.proj?.5:.85); }catch(e){} }; if(a.proj) fb(); else atImpact(fb,IMPACT_DELAY); }
