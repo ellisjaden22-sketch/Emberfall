@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION='v0.93';
+const SERVER_VERSION='v0.94';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
@@ -196,6 +196,8 @@ function frame(str) {
   h[0] = 0x81; return Buffer.concat([h, p]);
 }
 function send(c, obj) { if (!c.dead) try { c.sock.write(frame(JSON.stringify(obj))); } catch (e) { drop(c); } }
+const CHEST_CD = 1800; let chestAt = 0, chestBy = '';   // the arena chest, shared by everyone
+const chestLeft = () => Math.max(0, Math.round(CHEST_CD - (Date.now() - chestAt) / 1000));
 function broadcast(from, obj, skippable) { const f = frame(JSON.stringify(obj)); for (const c of clients.values()) { if (c === from || c.dead) continue; const q = c.sock.writableLength || 0;
     if (q > 8 << 20) { log(`! ${c.id} could not keep up (${Math.round(q / 1048576)} MB queued) - reconnecting it`); drop(c); continue; }
     if (skippable && q > 256 << 10) { c.slow = (c.slow || 0) + 1; continue; } if (c.slow && q < 64 << 10) c.slow = 0;
@@ -215,7 +217,7 @@ server.on('upgrade', (req, sock) => {
   sock.setNoDelay(true); try { sock.setKeepAlive(true, 15000); } catch (e) {}
   const c = { id: 'p' + String(++seq).padStart(9, '0'), sock, buf: Buffer.alloc(0), p: {}, alive: true, dead: false, gm: false, master: false, gmTries: 0, ip, rate: 0, rateT: Date.now(), ownerIp: ownerByIp(req) };
   clients.set(c.id, c);
-  send(c, { t: 'hello', you: c.id, ws: worldWs, ro: raidOpen ? 1 : 0, peers: [...clients.values()].filter(o => o !== c && o.p.v).map(o => ({ peer: o.id, p: o.p, gm: o.gm ? 1 : 0 })) });
+  send(c, { t: 'hello', you: c.id, ws: worldWs, ro: raidOpen ? 1 : 0, ac: chestLeft() > 0 ? { left: chestLeft(), by: chestBy } : undefined, peers: [...clients.values()].filter(o => o !== c && o.p.v).map(o => ({ peer: o.id, p: o.p, gm: o.gm ? 1 : 0 })) });
   if (c.ownerIp) { c.gm = true; c.master = true; send(c, { t: 'gm', ok: true, master: 1, token: OWNER_TOKEN || undefined }); log(`* ${c.id} recognised as the realm owner (owner IP)`); }
   log(`+ ${c.id} joined (${clients.size} online)`);
   sock.on('data', d => { try { onData(c, d); } catch (e) { log(`! bad data from ${c.id}: ${e.message}`); } }); sock.on('close', () => drop(c)); sock.on('error', () => drop(c));
@@ -264,6 +266,10 @@ function onMessage(c, text) {
     if (was !== raidOpen) { broadcast(null, { t: 'ro', open: raidOpen ? 1 : 0 }); log(`* Cinderhold ${raidOpen ? 'UNVEILED' : 'sealed'} by the realm owner`); }
   } else if (d && d.t === 'arm' && d.c) {
     storeArmory(c, d.c);
+  } else if (d && d.t === 'ac' && c.p && c.p.n) {
+    // the Bloodsand Chest: the first player to finish opening it wins; it is gone for everyone for 30 minutes
+    if (chestLeft() > 0) send(c, { t: 'ac', left: chestLeft(), by: chestBy, win: 0 });
+    else { chestAt = Date.now(); chestBy = String(c.p.n).slice(0, 24); send(c, { t: 'ac', left: CHEST_CD, by: chestBy, win: 1 }); broadcast(c, { t: 'ac', left: CHEST_CD, by: chestBy }); log(`$ ${chestBy} looted the Bloodsand Chest`); }
   } else if (d && d.t === 'wh' && typeof d.name === 'string' && typeof d.txt === 'string' && c.p && c.p.n) {
     // whispers go only to the player they are meant for
     const tn = Date.now(); if (!c.whT || tn - c.whT > 5000) { c.whT = tn; c.whN = 0; }
