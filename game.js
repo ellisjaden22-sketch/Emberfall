@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 86;
+const VERSION = 87;
 const TS = 32, MW = 448, OWH = 222, MH = OWH+98;
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -225,6 +225,45 @@ function carveVaultGate(){
   for(let x=97;x<=101;x++){ setT(x,46,T.DGATE); setT(x,47,T.DGATE); }
 }
 
+/* ======================================================================================================
+   v87 Dungeon and raid approaches: each instance entrance stands in its own named court rather than a patch
+   of open field. The courts are carved into the map (paved ground, a ring of standing pillars, pools or lava
+   channels), dressed with braziers and banners, kept free of roaming spawns, announced with a banner when you
+   step in, and scored with the dungeon music.
+   - The Drowned Steps: a sunken temple court of pale stone and still pools around the Sunken Vault's doors.
+   - The Ember Gate: an obsidian forecourt between two lava channels before the gates of Cinderhold.
+   - Hollowdeep Barrow: a bone-lit yard outside the walled Hollowdeep Crypt.
+   ====================================================================================================== */
+const GATEAREAS=[
+  {id:'vault',name:'The Drowned Steps',sub:'Entrance to the Sunken Vault · Dungeon · Level 10',cx:99.5+VGO[0],cy:48.5+VGO[1],r:11,theme:'drowned'},
+  {id:'raid',name:'The Ember Gate',sub:'Entrance to Cinderhold · Raid · Level 20',cx:170,cy:23,r:12,theme:'ember'},
+  {id:'crypt',name:'Hollowdeep Barrow',sub:'Hollowdeep Crypt · Group dungeon · Level 13–15',cx:140+CRO[0],cy:27.5+CRO[1],r:6.5,theme:'barrow'}];
+function gateAreaAt(px,py){ const X=px/TS, Y=py/TS; for(const A of GATEAREAS) if(Math.hypot(X-A.cx,Y-A.cy)<A.r) return A; return null; }
+function carveGateAreas(){
+  const keep=t=>t===T.PATH||t===T.BRIDGE||t===T.DGATE||t===T.WALL||t===T.HOUSE||t===T.TWALL||t===T.PROP;
+  for(const A of GATEAREAS){ const {cx,cy,r}=A;
+    for(let y=Math.floor(cy-r-1);y<=cy+r+1;y++)for(let x=Math.floor(cx-r-1);x<=cx+r+1;x++){ const d=Math.hypot(x+.5-cx,y+.5-cy), t=tAt(x,y); if(d>r||keep(t)) continue;
+      if(A.theme==='drowned'){ const side=Math.abs(x+.5-cx)>6.2&&Math.abs(y+.5-cy)<2.6&&d<9.2; setT(x,y,side?T.WATER:T.RUIN); }
+      else if(A.theme==='ember'){ const ch=Math.abs(Math.abs(x+.5-cx)-8.3)<.9&&y+.5>cy-6&&y+.5<cy+7; setT(x,y,ch?T.LAVA:T.DFLOOR); }
+      else setT(x,y,t===T.WATER||t===T.LAVA?T.BRIDGE:T.RUIN); }
+    /* standing pillars around the rim, leaving the paths and the gate clear */
+    if(A.theme!=='barrow'){ const n=A.theme==='ember'?14:12; for(let k=0;k<n;k++){ const a=k/n*6.283+.13, x=Math.round(cx-.5+Math.cos(a)*(r-.8)), y=Math.round(cy-.5+Math.sin(a)*(r-.8)); let clear=true;
+        for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){ const q=tAt(x+dx,y+dy); if(q===T.PATH||q===T.BRIDGE||q===T.DGATE) clear=false; } if(clear) setT(x,y,T.WALL); } } } }
+/* braziers, banners and lights for the courts, built into the static scenery */
+function addGateAreas(d){ const box=(x,y,z,sx,sy,sz,col,ry,e)=>gAdd(d,RB,x,y,z,ry||0,sx,sy,sz,col,e), iron=[.14,.13,.13];
+  for(const A of GATEAREAS){ const fireCol=A.theme==='drowned'?[.35,1,.9]:A.theme==='barrow'?[.6,1,.55]:null, emit=A.theme==='drowned'?[.3,.95,.85]:A.theme==='barrow'?[.55,1,.5]:[1,.45,.1];
+    const bra=(x,z,s)=>{ const y0=hgt(x,z)-.05; gAdd(d,RC,x,y0,z,0,.22*s,1.25*s,.22*s,iron); gAdd(d,RFR,x,y0+1.25*s,z,0,.85*s,.4*s,.85*s,iron); gAdd(d,RS,x,y0+1.6*s,z,0,.62*s,.36*s,.62*s,emit,2.8);
+      STAT_LIGHTS.push({x,y:y0+2.1*s,z,r:8.5*s,c:fireCol?fireCol.map(v=>v*1.4):[1.5,.6,.2],fire:!fireCol}); };
+    const n=A.theme==='barrow'?4:8; for(let k=0;k<n;k++){ const a=k/n*6.283+(A.theme==='barrow'?.4:.39), x=A.cx+Math.cos(a)*(A.r-2.6), z=A.cy+Math.sin(a)*(A.r-2.6);
+      const t=tAt(Math.floor(x),Math.floor(z)); if(t===T.PATH||t===T.DGATE||t===T.WATER||t===T.LAVA||t===T.WALL) continue; bra(x,z,A.theme==='ember'?1.25:1); }
+    /* banners hung from the rim pillars, and a carved marker stone naming the place */
+    const banner=A.theme==='drowned'?[.12,.42,.45]:A.theme==='ember'?[.55,.08,.05]:[.3,.32,.28];
+    for(let ty=Math.floor(A.cy-A.r);ty<=A.cy+A.r;ty++)for(let tx=Math.floor(A.cx-A.r);tx<=A.cx+A.r;tx++){ if(tAt(tx,ty)!==T.WALL||Math.hypot(tx+.5-A.cx,ty+.5-A.cy)<A.r-2.2||Math.hypot(tx+.5-A.cx,ty+.5-A.cy)>A.r+.5) continue;
+      const x=tx+.5, z=ty+.5, y0=hgt(x,z), a=Math.atan2(z-A.cy,x-A.cx); box(x-Math.cos(a)*.52,y0+2.2,z-Math.sin(a)*.52,.06,1.6,.7,banner,-a); box(x-Math.cos(a)*.52,y0+3.05,z-Math.sin(a)*.52,.08,.1,.8,[.75,.6,.3],-a); }
+    { const a=Math.PI/2+.5, x=A.cx+Math.cos(a)*(A.r-1.2), z=A.cy+Math.sin(a)*(A.r-1.2), y0=hgt(x,z); box(x,y0+.9,z,.75,1.8,.35,[.42,.42,.4],-a); box(x,y0+1.25,z+.01,.5,.35,.37,emit,-a,1.6); } } }
+/* the banner and the hush of dungeon music as you step into a court */
+function gateAreaTick(){ if(!me||me.dead) return; const A=gateAreaAt(me.x,me.y); if(A&&ALIVE.gate!==A.id){ ZONES['gate_'+A.id]=ZONES['gate_'+A.id]||{name:A.name,sub:A.sub}; try{ zoneBanner('gate_'+A.id); }catch(e){} } ALIVE.gate=A?A.id:null; }
+
 function genWorld(){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
     const z=zoneOf(x,y); zmap[y*MW+x]=z; const LQ=WI(x,y), lx=LQ[0], ly=LQ[1];
@@ -302,7 +341,7 @@ function genWorld(){
     const inGate=a=>TOWN.gates.some(g=>Math.abs(Math.atan2(Math.sin(a-g.c),Math.cos(a-g.c)))<half);
     for(let y=TOWN.y-29;y<=TOWN.y+29;y++)for(let x=TOWN.x-29;x<=TOWN.x+29;x++){ const d=Math.hypot(x-TOWN.x,y-TOWN.y); if(d<R-.75||d>=R+.8) continue;
       if(Math.abs(y-TOWN.y)<=1&&inGate(Math.atan2(y-TOWN.y,x-TOWN.x))) continue; setT(x,y,T.TWALL); } }
-  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate(); carveReach(); carveCoast();
+  carveVault(); OFS(VGO); carveVaultGate(); OFS(STO); carveStable(); OFS(null); carveRaidGate(); carveReach(); carveCoast(); carveGateAreas();
 }
 /* the kinds of props the World Editor can place (solid ones block movement) */
 const PROPK={tree:{solid:1},pine:{solid:1},deadtree:{solid:1},rock:{solid:1},boulder:{solid:1},house:{solid:1},tent:{solid:1},well:{solid:1},statue:{solid:1},pillar:{solid:1},wall:{solid:1},tower:{solid:1},
@@ -785,7 +824,7 @@ const SLOTICON={weapon:'🗡',armor:'🥋',trinket:'💍'};
   {...A,key:'pyxwhelp',name:'Ember Fledgling',lv:[17,17],hp:900,hpL:0,dmg:22,dmgL:0,spd:100,rng:30,as:1.4,aggro:500,r:12,col:'#ff9a2a',fly:true,light:'#ffb03a',n:3,summon:true,owner:'pyraxis',spots:[[192,11],[192,11],[192,11]]});
   for(const mt of MOBT) if(mt.spots&&mt.reg) mt.n=mt.spots.length; }
 MOUNTS[6]={name:'Ashborn Nightmare',col:[.07,.06,.06],mane:[1,.42,.06],cost:0,speed:2.35,lvl:20,ashborn:true,drop:'Vyrathos, the Ember Tyrant (Cinderhold raid)'};
-MOUNTS[7]={name:'Piggy Smallz',col:[.5,.34,.28],mane:[.28,.19,.15],cost:75,speed:1.8,lvl:10,pig:true,lift:.5};   /* the rider sits lower on the pig than on a horse */
+MOUNTS[7]={name:'Piggy Smallz',col:[.5,.34,.28],mane:[.28,.19,.15],cost:1500,speed:1.8,lvl:10,pig:true,lift:.5};   /* the rider sits lower on the pig than on a horse */
 
 /* where a fixed-position monster stands on the bigger map */
 function posW(mt){ const [x,y]=mt.pos; if(y>=112) return [x,y+OWH-112]; const k=mt.key; if(k==='lich'||/^lich|crypt/.test(k)||(x>=130&&x<=150&&y>=8&&y<=24)) return [x+CRO[0],y+CRO[1]]; if(k==='hking') return [x+RUO[0],y+RUO[1]]; if(x===56&&y===9) return [LAIR.x,LAIR.y]; return WP(x,y); }
@@ -815,7 +854,7 @@ const mobs=[], mobById={};
       else if(mt.spots){x=mt.spots[k][0]*TS+16;y=mt.spots[k][1]*TS+16}
       else do{ x=(3+R()*(MW-6))*TS; y=(3+R()*(OWH-6))*TS; tries++;
         const tx=Math.floor(x/TS),ty=Math.floor(y/TS);
-        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>8 && Math.hypot(tx-170,ty-24)>13 && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
+        var ok=zmap[ty*MW+tx]===mt.zone && !blocked(x,y,22) && !blocked(x,y,12) && !blocked(x,y,4) && !inTown(x,y) && Math.hypot(tx-LAIR.x,ty-LAIR.y)>10 && Math.hypot(tx-99.5-VGO[0],ty-48-VGO[1])>13 && Math.hypot(tx-170,ty-23)>15 && (mt.zone==='crypt'||Math.hypot(tx-140-CRO[0],ty-27.5-CRO[1])>9) && Math.hypot(tx-91-STO[0],ty-72-STO[1])>11;
         if(ok&&mt.zone==='ash') ok = (mt.reg==='reach')===inReachT(tx,ty) && Math.hypot(tx-REACH.cx,ty-REACH.cy)>16 && Math.hypot(tx-192,ty-11)>10 && Math.hypot(tx-212,ty-47)>8 && (!mt.rx||(tx>=mt.rx[0]&&tx<=mt.rx[1]));
         if(ok&&mt.zone==='coast'&&mt.cb) ok=mt.cb(tx,ty);
         if(mt.zone==='meadow') ok = ok && Math.hypot(tx-TOWN.x,ty-TOWN.y)<30*WS && ty<TOWN.y+6;
@@ -1277,7 +1316,7 @@ function hostSim(dt){
 function gearStats(c){ let pow=0,sta=0; for(const s of SLOTS){const it=c.eq[s]; if(it){const u=1+.15*(it.up||0); pow+=Math.round(it.pow*u); sta+=Math.round(it.sta*u); if(it.gem){ pow+=it.gem.p|0; sta+=it.gem.s|0; }}} if(c===(me&&me.c)){ pow+=PFX('pow'); sta+=PFX('sta'); } return {pow,sta}; }
 function recalc(){ const c=me.c, cl=CLS[c.cls]; const g=gearStats(c);
   me.pow=g.pow; me.sta=g.sta;
-  me.mhp=Math.round((cl.hp+cl.hpL*(c.lvl-1)+g.sta*8)*(buffOn('fort')?1.25:1)*(1+TAL('hp')));
+  me.mhp=Math.round((cl.hp+cl.hpL*(c.lvl-1)+g.sta*8)*(buffOn('fort')?1.25:1)*(buffOn('hearth')?1.05:1)*(1+TAL('hp')));
   me.mres= cl.res!=='mana'?100:Math.round((100+22*(c.lvl-1)+g.sta*2)*(1+TAL('res')));
   { const ar=c.eq.armor, sh=c.eq.offhand; const AT={heavy:1.5,medium:1.15,light:.85}; me.armor=Math.round(c.lvl*6+(ar?(6+ar.rar*4)*(ar.lv||c.lvl)*(AT[armorType(ar)]||1)*upMul(ar):0)+(sh&&/Shield|Bulwark|Aegis/i.test(sh.name||'')?(4+sh.rar*3)*(sh.lv||c.lvl)*upMul(sh):0));
     me.armor=Math.round(me.armor*(1+PFX('armor'))); me.armorDR=Math.min(.3,me.armor/(me.armor+90+45*c.lvl)); me.sres=Math.min(.2,.04+c.lvl*.007+g.sta*.0006); me.resil=Math.min(.2,.06+c.lvl*.006); }
@@ -2041,7 +2080,7 @@ function skAnimCrt(S,M,b,m){ const t=now()+((m.id||0)%7)*.83, R={}, L=[], add=(n
 /* v73: hero models for the seven classes. Each is a sculpted statue given a simple rig (pelvis, spine, chest, head and two legs),
    animated here: legs that walk, run, sit a saddle and kick when swimming; the whole body twisting and lunging into attacks,
    leaning back to cast, emotes, and a fall on death. Turn off in Settings > Graphics to see the classic look with your gear. */
-const HEROM={warden:'hero3_warden',mender:'hero3_mender',barbarian:'hero3_barbarian',arcanist:'hero3_arcanist',assassin:'hero3_assassin',hunter:'hero3_hunter',bard:'hero3_bard'};
+const HEROM={warden:'hero4_warden',mender:'hero4_mender',barbarian:'hero4_barbarian',arcanist:'hero4_arcanist',assassin:'hero4_assassin',hunter:'hero4_hunter',bard:'hero4_bard'};
 const HERO_H={warden:1.95,barbarian:1.95,mender:1.9,arcanist:1.92,assassin:1.82,hunter:1.85,bard:1.9};
 /* v75: hero movement, all round. The seven hero models now have shoulders and elbows (weapons, shields and staves ride in the hands;
    the Celestus and the Bard hold their swords two-handed; the Celestus' wings have their own joints). Everything below is
@@ -2054,14 +2093,14 @@ const HARMK={warden:{uarmR:.9,farmR:.9,uarmL:.6,farmL:.6,b:1.15},barbarian:{b:1.
 const HREST={mender:{uarmR:[[0,0,1,-.1]],farmR:[[1,0,0,.95],[0,1,0,-1.0]],handR:[[1,0,0,-.32],[0,1,0,1.0],[1,0,0,-.95]],uarmL:[[0,0,1,.08]],farmL:[[1,0,0,1.5],[0,1,0,.75]],handL:[[0,1,0,-.6],[1,0,0,-.4]]},
   bard:{uarmR:[[0,0,1,-.12]],farmR:[[1,0,0,.95],[0,1,0,-1.0]],handR:[[1,0,0,-.32],[0,1,0,1.0],[1,0,0,-.95]],uarmL:[[0,0,1,.1]],farmL:[[1,0,0,1.5],[0,1,0,.75]],handL:[[0,1,0,-.6],[1,0,0,-.4]]}};
 const HSTY={warden:{k:'spear'},barbarian:{k:'mace'},arcanist:{k:'staff'},assassin:{k:'dagger'},hunter:{k:'gun'},mender:{k:'blade',wings:1},bard:{k:'blade'}};
-function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z,a)=>{ if(AK[n]!=null) a*=AK[n]; if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, st=o.an||{}, Y=HSTY[cls]||{k:'gun'}, two=Y.k==='two';
+function skAnimHero0(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z,a)=>{ if(AK[n]!=null) a*=AK[n]; if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, st=o.an||{}, Y=HSTY[cls]||{k:'gun'}, two=Y.k==='two';
   /* per-hero smoothing */
   const dt=clamp(t-(st._hT||t),0,.1); st._hT=t; const ease=(k,v,r)=>{ st[k]=(st[k]??v)+(v-(st[k]??v))*Math.min(1,dt*r); return st[k]; };
-  const mv=ease('_hMv',clamp(o.mv||0,0,1),8), ph=o.walk||0, s=Math.sin(ph), c=Math.cos(ph), run=clamp((mv-.55)/.45,0,1);
+  const mv=ease('_hMv',clamp(o.mv||0,0,1),22), ph=o.walk||0, s=Math.sin(ph), c=Math.cos(ph), run=clamp((mv-.55)/.45,0,1);
   const rdy=ease('_hRdy',o.rdy&&!o.ride&&!o.swim?1:0,5), cst=ease('_hCast',o.cast&&!o.ride?1:0,7), stl=ease('_hStl',o.stl?1:0,5);
   const acc=ease('_hAcc',clamp(((o.mv||0)-(st._hPm??0))/Math.max(dt,.016),-4,4),6); st._hPm=o.mv||0;
   let df=(o.face||0)-(st._hPf??(o.face||0)); df=Math.atan2(Math.sin(df),Math.cos(df)); st._hPf=o.face||0; const turn=ease('_hTurn',clamp(df/Math.max(dt,.016),-6,6),6);
-  if(o.air) st._hAir=1; else if(st._hAir){ st._hAir=0; st._hLand=t; }
+  if(o.air){ if(!st._hAir) st._airT=t; st._hAir=1; } else if(st._hAir){ st._hAir=0; st._hLand=t; }
   const land=st._hLand?clamp(1-(t-st._hLand)/.32,0,1):0;
   const arms=(uR,fR,uL,fL)=>{ if(two){ add('grip',1,0,0,(uR+uL)/2+(fR+fL)/4); return; } add('uarmR',1,0,0,uR); add('farmR',1,0,0,fR); add('uarmL',1,0,0,uL); add('farmL',1,0,0,fL); };
   const out=(aR,aL)=>{ if(two) return; add('uarmR',0,0,1,-aR); add('uarmL',0,0,1,aL); };   /* raise arms out to the sides */
@@ -2085,8 +2124,9 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
   else if(EM==='sit'){ add('thighL',1,0,0,-1.5); add('thighR',1,0,0,-1.5); add('thighL',0,0,1,.25); add('thighR',0,0,1,-.25); add('shinL',1,0,0,1.45); add('shinR',1,0,0,1.45); add('spine',1,0,0,.12); add('head',1,0,0,.08+.04*Math.sin(t*.4));
     arms(-.55,-.35,-.55,-.35); add('chest',1,0,0,.02*Math.sin(t*1.4)); wing(-.12,.03*Math.sin(t*1.1)); dy=-.42; }
   else if(EM==='kneel'){ add('thighL',1,0,0,-1.45); add('shinL',1,0,0,1.5); add('thighR',1,0,0,.15); add('shinR',1,0,0,1.55); add('chest',1,0,0,.25); add('head',1,0,0,.25); arms(-.5,-.5,-.35,-.2); wing(.2,-.1); dy=-.38; }
-  else if(o.air){ const up=o.vy==null?1:clamp(o.vy*.5+.5,0,1);
-    add('thighL',1,0,0,-.75); add('shinL',1,0,0,1.1); add('thighR',1,0,0,-.35); add('shinR',1,0,0,.8); add('chest',1,0,0,-.08); arms(-.35,-.4,-.2,-.35); out(.35*up,.35*up); wing(.35,.45*Math.sin(t*11)); }
+  else if(o.air){ const vy=o.vy==null?0:clamp(o.vy,-1.3,1), u=clamp((1-vy)/2,0,1), tk=Math.sin(Math.PI*Math.min(1,u)), push=clamp(1-(t-(st._airT||t))/.14,0,1), fwd=clamp(mv,0,1);
+    add('thighL',1,0,0,-(.3+.6*tk+.25*fwd)*(1-push*.7)); add('shinL',1,0,0,(.35+.85*tk)*(1-push*.8)); add('thighR',1,0,0,(-.1-.35*tk+.2*fwd)*(1-push*.5)); add('shinR',1,0,0,(.25+.75*tk)*(1-push*.6));
+    add('chest',1,0,0,-.1*push+.08*(u-.5)); add('head',1,0,0,-.06*push); arms(-.3-.35*(1-u),-.35-.25*tk,-.2-.3*(1-u),-.35-.25*tk); out(.25+.3*(1-u),.25+.3*(1-u)); wing(.35,.45*Math.sin(t*11)); dy=-.04*tk; }
   else {
     /* walking and running: thighs swing, knees fold through the stride, the hips sway and bob twice a step, shoulders counter-turn and the arms swing against the legs */
     /* a real gait. Each leg has a stance phase (foot planted, sweeping back at ground speed, so it never slides) and a swing phase
@@ -2096,8 +2136,8 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
     { let dW=ph-(st._hW??ph); if(Math.abs(dW)>3) dW=0; st._hW=ph; st._gp=(st._gp||0)+dW*(TAU/3.6)/cyc; }   /* our own phase: one cycle per stride length (walkP grows 3.6 rad a metre) */
     const P0=((st._gp/TAU)%1+1)%1+0, A0=Math.asin(Math.min(.78,duty*cyc/(2*Lg)))*clamp(mv*2.2,0,1), sA=Math.sin(A0);
     const sst=u=>u*u*(3-2*u);
-    const leg=p=>{ if(p<duty){ const u=p/duty; return {st:1,u,th:Math.asin((1-2*u)*sA),kn:.07+(.06+.42*run)*Math.sin(Math.PI*u)}; }
-      const u=(p-duty)/(1-duty); return {st:0,u,th:Math.asin((-1+2*sst(u))*sA)+run*.3*A0*Math.sin(Math.PI*u),kn:(.5+.75*run)*Math.pow(Math.sin(Math.PI*Math.min(1,u*1.15)),1.3)*clamp(mv*2,0,1)}; };
+    const leg=p=>{ if(p<duty){ const u=p/duty; return {st:1,u,th:Math.asin((1-2*u)*sA),kn:.07+(.08+.3*run)*Math.sin(Math.PI*u)}; }
+      const u=(p-duty)/(1-duty), eu=1-(1-u)*(1-u)*(1-u*.35); return {st:0,u,th:Math.asin(clamp(-1+2*eu,-1,1)*sA)+run*.22*A0*Math.sin(Math.PI*u),kn:(.42+.78*run)*Math.pow(Math.sin(Math.PI*Math.min(1,u*1.08)),1.15)*clamp(mv*2,0,1)}; };
     const gl=leg(P0), gr=leg((P0+.5)%1);
     add('thighL',1,0,0,-gl.th); add('thighR',1,0,0,-gr.th); add('shinL',1,0,0,gl.kn); add('shinR',1,0,0,gr.kn);
     /* hips: turn toward the leading leg, drop on the swinging side; the chest turns the other way, the head stays steady */
@@ -2145,7 +2185,7 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
   if(o.swing>=0&&!o.ride){ const p=o.swing, v=o.swv||0, W=p<.3?eO(p/.3):1, Hh=p<.3?0:p<.48?eO((p-.3)/.18):1, B=p>.58?eI((p-.58)/.42):0, on=1-B, k=Y.k;
     const wind=W*(1-Hh), hit=Hh*on;   /* wind up, then the blow, then recover */
     const body=(tw,lean)=>{ tw*=AK.b||1; lean*=AK.b||1; add('chest',0,1,0,tw*.5); add('spine',0,1,0,tw*.3); add('root',0,1,0,tw*.2); add('chest',1,0,0,lean); };
-    const lunge=a=>{ add('thighL',1,0,0,-.32*a); add('shinL',1,0,0,.4*a); add('thighR',1,0,0,.22*a); add('shinR',1,0,0,.12*a); add('root',1,0,0,.05*a); dy-=.045*a; fw+=.22*a; };
+    const lunge=a=>{ a*=1-.75*mv; add('thighL',1,0,0,-.32*a); add('shinL',1,0,0,.4*a); add('thighR',1,0,0,.22*a); add('shinR',1,0,0,.12*a); add('root',1,0,0,.05*a); dy-=.045*a; fw+=.22*a; };
     if(k==='spear'){ if(v===1){ /* shield bash */ arms(-.2*hit,-.3*hit,(.3*wind-1.15*hit),(-.6*wind+.3*hit)); body(-.35*wind+.5*hit,.12*hit); lunge(hit); }
       else if(v===2){ /* overhead spear strike */ arms((-1.45*wind-.55*hit),(-.9*wind+.5*hit),-.45*on,-.45*on); body(.2*wind-.25*hit,-.1*wind+.25*hit); lunge(hit*.7); }
       else { /* thrust */ arms((.35*wind-1.25*hit),(-1.3*wind+.2*hit),-.5*on,-.55*on); body(.45*wind-.55*hit,.1*hit); lunge(hit); } }
@@ -2177,6 +2217,42 @@ function skAnimHero(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z
   /* ---------- a flinch when struck ---------- */
   const hk=ease('_hHit',o.hit?1:0,14); if(hk>.01){ add('chest',1,0,0,-.14*hk); add('head',1,0,0,-.12*hk); add('root',1,0,0,-.05*hk); arms(.2*hk,-.2*hk,.15*hk,-.2*hk); wing(.15*hk,0); }
   return {R,dy,fw}; }
+
+/* ======================================================================================================
+   v87 hero animation state machine
+   The pose code above (skAnimHero0) builds one frame for whatever the hero is doing. This layer on top of it:
+   - names the hero's base state each frame (ground, air, swim, ride, sit, kneel, dead) and, when it changes,
+     crossfades from the last pose into the new one instead of snapping (sitting down, landing, mounting, swimming);
+   - adds idle fidgets when a hero has stood still out of combat for a while (looking about, rolling the shoulders,
+     checking the weapon, a stretch), each with a smooth in and out;
+   - gives the in-combat ready stance a light, springy bounce so it reads as alert rather than frozen.
+   ====================================================================================================== */
+const ANIM_TUNE={ fade:.22, fadeAir:.12, idleWait:6, fidgetLen:2.4 };
+function heroBaseState(o){ if(o.dead>=0) return 'dead'; if(o.ride) return 'ride'; if(o.swim) return 'swim'; const e=o.emote&&o.emote.k; if(e==='sit'||e==='kneel') return e; return o.air?'air':'ground'; }
+const FIDGETS=['look','shoulders','weapon','stretch'];
+function skAnimHero(o,cls){ const A=skAnimHero0(o,cls), st=o.an||{}, t=now(), R=A.R; const add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); };
+  const two=(HSTY[cls]||{}).k==='two';
+  /* ---- idle fidgets ---- */
+  const still=heroBaseState(o)==='ground'&&(o.mv||0)<.05&&!o.rdy&&!o.cast&&!(o.swing>=0)&&!o.emote&&!o.stl;
+  if(still){ if(st._idle0==null){ st._idle0=t; st._fidNext=t+ANIM_TUNE.idleWait+Math.random()*5; } } else { st._idle0=null; st._fid=null; }
+  if(still&&!st._fid&&t>st._fidNext){ st._fid={k:FIDGETS[Math.floor(Math.random()*FIDGETS.length)],t0:t}; st._fidNext=t+ANIM_TUNE.fidgetLen+7+Math.random()*7; }
+  if(st._fid){ const u=(t-st._fid.t0)/ANIM_TUNE.fidgetLen; if(u>=1||!still) st._fid=null; else { const env=Math.sin(Math.PI*u)**2, k=st._fid.k;
+      if(k==='look'){ const y=Math.sin(u*Math.PI*2)*.55; add('head',0,1,0,y*env); add('chest',0,1,0,.2*y*env); }
+      else if(k==='shoulders'){ const r=Math.sin(u*Math.PI*4); if(!two){ add('uarmL',0,0,1,.12*r*env); add('uarmR',0,0,1,-.12*r*env); } add('chest',1,0,0,-.06*env); add('head',0,0,1,.05*r*env); }
+      else if(k==='weapon'){ if(two) add('grip',1,0,0,-.55*env); else { add('uarmR',1,0,0,-.55*env); add('farmR',1,0,0,-.75*env); add('handR',0,0,1,.3*Math.sin(u*Math.PI*3)*env); } add('head',1,0,0,.18*env); add('head',0,1,0,-.25*env); }
+      else { if(!two){ add('uarmL',0,0,1,.45*env); add('uarmR',0,0,1,-.45*env); add('farmL',1,0,0,-.3*env); add('farmR',1,0,0,-.3*env); } else add('grip',1,0,0,-.3*env); add('chest',1,0,0,-.12*env); add('head',1,0,0,-.15*env); } } }
+  /* ---- the ready stance breathes and bounces a little on the balls of the feet ---- */
+  if(o.rdy&&!o.ride&&!o.swim&&(o.mv||0)<.3&&!(o.swing>=0)){ const b=Math.abs(Math.sin(t*3.4+(o.x||0))); A.dy=(A.dy||0)-.012*b; add('chest',1,0,0,.02*Math.sin(t*3.4*2)); }
+  /* ---- crossfade between base states ---- */
+  const bs=heroBaseState(o);
+  if(st._bs!==undefined&&bs!==st._bs&&st._lastR){ st._snap={R:st._lastR,dy:st._lastDy||0}; st._snapT=t; st._snapLen=(bs==='ground'&&st._bs==='air')||bs==='air'?ANIM_TUNE.fadeAir:ANIM_TUNE.fade; }
+  st._bs=bs;
+  let outR=R, dy=A.dy||0;
+  if(st._snap){ const u=clamp((t-st._snapT)/st._snapLen,0,1), k=1-u*u*(3-2*u);
+    if(k<=0) st._snap=null;
+    else { outR={}; for(const n in R) outR[n]=R[n].map(q=>[q[0],q[1],q[2],q[3]*(1-k)]); for(const n in st._snap.R) (outR[n]||(outR[n]=[])).push(...st._snap.R[n].map(q=>[q[0],q[1],q[2],q[3]*k])); dy=lerp(st._snap.dy,dy,1-k); } }
+  st._lastR=outR; st._lastDy=dy;
+  return {R:outR,dy,fw:A.fw}; }
 
 function skDrawHero(o,cls){ if(OPT.heroModels===false||GFX.q==='low') return false; const f=HEROM[cls]; if(!f) return false; const M=skGet(f); if(!M) return false;
   const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc;
@@ -2714,7 +2790,7 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     for(let k=0;k<7;k++){ const a=k/7*Math.PI*2; gAdd(d,RBL,x+Math.cos(a)*.55,y0+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); }
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
-  addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); addPort(d); addCoastSites(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
+  addLandmarks(d); addVault(d); addRaid(d); addReachCamp(d); try{ addGateAreas(d); }catch(e){ console.warn('gate courts',e); } addPort(d); addCoastSites(d); addArena(d); addWilds(d); addWilds2(d); addEditorProps(d);
   if(TKIT&&HOLD_D.i.length) HOLD=mkVAO(HOLD_D);
   const V=mkVAO(d); V.chunks=[...SCH.values()].filter(c=>c.d.i.length).map(c=>{ const v=mkVAO(c.d); v.cx=c.cx; v.cz=c.cz; return v; }); SCH.clear(); STATIC_D=null; return V; })();
 if(EDITOR_MODE){ window.__EF={MW,MH,OWH,TS,T:{...T},map:Array.from(map.subarray(0,MW*OWH)),zmap:zmap.slice(0,MW*OWH),zones:Object.fromEntries(Object.entries(ZONES).map(([k,v])=>[k,v.name])),
@@ -3542,7 +3618,7 @@ function updateCamera(dt){
 function toScreen(X,Y,Z){ const v=VP; const x=v[0]*X+v[4]*Y+v[8]*Z+v[12], y=v[1]*X+v[5]*Y+v[9]*Z+v[13], w=v[3]*X+v[7]*Y+v[11]*Z+v[15]; if(!(w>=.2)) return null; const sx=(x/w*.5+.5)*W, sy=(.5-y/w*.5)*H; if(!isFinite(sx)||!isFinite(sy)) return null; return [sx,sy,w]; }
 function smoothY(st,y,dt){ if(st._ys==null||Math.abs(y-st._ys)>2.5||!(dt>0)) st._ys=y; else st._ys+=(y-st._ys)*(1-Math.exp(-dt*11)); return st._ys; }
 function animState(o,dt,x,y,moving,scale){ const ox=o._ax??x, oy=o._ay??y; const dm=Math.hypot(x-ox,y-oy); o._ax=x; o._ay=y; o.walkP=(o.walkP||0)+dm/TS*3.6/(scale||1)*((dm>.2&&o.rf!=null&&Math.cos(Math.atan2(y-oy,x-ox)-o.rf)<-.35)?-1:1);
-  { let tg=(moving||dm>.3)?1:0; if(o===me&&me._spRef&&!me.dash){ const f=Math.hypot(me.vx||0,me.vy||0)/me._spRef; tg=f>.9?1:f<.04?0:f; } o.mvS=lerp(o.mvS||0,tg,Math.min(1,dt*(tg?9:7))); }
+  { let tg=(moving||dm>.3)?1:0; if(o===me&&me._spRef&&!me.dash){ const f=Math.hypot(me.vx||0,me.vy||0)/me._spRef; tg=f>.9?1:f<.04?0:f; } o.mvS=lerp(o.mvS||0,tg,Math.min(1,dt*(o===me?22:(tg?9:7)))); }
   const kk=Math.min(1,dt*6), sp=dt>0?Math.min(30,dm/TS/dt):0; o.spdS=lerp(o.spdS||0,sp,kk);
   if(dm>.25){ const hd=Math.atan2(y-oy,x-ox); if(o._hd!=null){ let d=hd-o._hd; d=Math.atan2(Math.sin(d),Math.cos(d)); o.bankS=lerp(o.bankS||0,clamp(d/Math.max(dt,.008)*.05,-.28,.28),kk); } o._hd=hd; } else o.bankS=lerp(o.bankS||0,0,kk); }
 const STKb=o=>{ const g=o.swing??-1; return g>=0?Math.sin(Math.PI*clamp((g-.25)/.55,0,1)):0; };
@@ -3688,7 +3764,8 @@ function buildScene(dt){
   const near=(px,py,r)=>{ const d=Math.hypot(px/TS-CAM.tx,py/TS-CAM.tz); LOD_FAR=d>(GFX.q==='ultra'?26:20); LOD_MID=d>(GFX.q==='low'?3:GFX.q==='ultra'?12:8); CAST_SH=d<30; return d<r; };
   if(me&&me.pet&&me.petOn&&!me.dead) drawPetAt(me.pet.x,me.pet.y,me.pet.face,me.pet.mv,me.pet.swingT,me.pet.st,dt);
   for(const o of others.values()) if(o.pe&&!o.d&&seenO(o)){ o.peSt=o.peSt||{}; o.peX=lerp(o.peX??o.pe[0],o.pe[0],.25); o.peY=lerp(o.peY??o.pe[1],o.pe[1],.25); drawPetAt(o.peX,o.peY,o.pe[2],!!o.pe[3],o.peSw,o.peSt,dt); }
-  { const tt=Date.now()/1000; for(const v of VILL){ const p=villPos(v,tt); if(!near(p.x*TS,p.z*TS,60)) continue; drawHumanoid({x:p.x,y:groundY(p.x*TS,p.z*TS),z:p.z,face:p.face,mv:p.mv,walk:p.walk,dead:-1,L:v.L,skin:SKIN[v.skin]}); } }
+  { const tt=Date.now()/1000, nt=curDark>.6; VILL.forEach((v,i)=>{ if(nt&&i%2) return; const p=villPos(v,tt); if(!near(p.x*TS,p.z*TS,60)) return; const gy=groundY(p.x*TS,p.z*TS); drawHumanoid({x:p.x,y:gy,z:p.z,face:p.face,mv:p.mv,walk:p.walk,dead:-1,L:v.L,skin:SKIN[v.skin]});
+      if(nt){ const hx=p.x+Math.cos(p.face+.6)*.42, hz=p.z+Math.sin(p.face+.6)*.42, sw=Math.sin(tt*4+i)*.03*p.mv; mreset(); mtr(hx,gy+.82+sw,hz); P(GEO.box,.13,.18,.13,[1,.8,.4],5,0,0,0); P(GEO.box,.16,.03,.16,[.2,.17,.14],0,0,.1,0); addLight(hx,gy+.9,hz,4.5,[1.2,.78,.36]); } }); }
   try{ drawHarbourLife(t,near); }catch(e){}
   for(const n of NPCS){ if(!near(n.x,n.y,70)) continue; drawHumanoid({x:n.x/TS,y:groundY(n.x,n.y),z:n.y/TS,face:n.face??Math.PI/2,emote:n.emote,mv:0,walk:0,dead:-1,look:npcLook(n),L:LOOK[n.id]||LOOK.oriel,skin:SKIN[n.id==='mira'?1:2]}); }
   drawExtras(near,t);
@@ -3705,11 +3782,11 @@ function buildScene(dt){
     if(st.swingT!==st._swT0){ st._swT0=st.swingT; st.swingN=(st.swingN||0)+1; } const castF=isMe?!!me.cast:!!(o.b&4); if(castF) st._wasCast=1; else if(st._wasCast){ st._wasCast=0; st.relT=t; }
     const sw=(t-(st.swingT||0))/.5; const spin=false; const castCol=C3(CLS[cls].col);
     const mt=dead?0:((isMe?me.mounted:o.mt)||0); const swim=!mt&&!onDock(x,y)&&deepWaterAt(x,y);
-    const Y0=smoothY(st,standY(x,y),dt)+(isMe?(me.jumpH||0):0), face=smoothFace(st,isMe?me.face:o.f), emo=isMe?me.emote:o.emote;
+    const Y0=smoothY(st,standY(x,y),dt)+(isMe?(me.jumpH||0):0), face=isMe?(st.rf=me.face):smoothFace(st,o.f), emo=isMe?me.emote:o.emote;
     const SMv=mt?steedMotion(st.walkP||0,st.mvS||0,!!(MOUNTS[mt]&&MOUNTS[mt].celestial)):null;
     if(mt) drawHorse({x:x/TS,y:Y0,z:y/TS,face,mv:st.mvS||0,walk:st.walkP||0,m:mt,an:st});
     HALPHA=(isMe?me.stealth:o.sl)?(isMe?.4:.22):1;
-    const HO=({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?((MOUNTS[mt]&&MOUNTS[mt].lift)??.72)+SMv.y:(swim?.3*(st.mvS||0):0),pitch:mt?SMv.p:(swim?-1.08*(st.mvS||0):0),rmv:mt?(st.mvS||0):0,ride:!!mt,swim,emote:emo,an:st,swv:(st.swingN||0)%3,rel:(t-(st.relT||-9))/.38,rdy:isMe?(t-me.lastCombat<4?1:0):(t-(o.swingT||0)<4?1:0),stl:isMe?!!me.stealth:!!o.sl,air:isMe?(me.jumpH||0)>.08:0,
+    const HO=({x:x/TS,y:Y0,z:y/TS,face:face+(spin?(t-st.spinT)*26:0),mv:mt?0:(st.mvS||0),walk:st.walkP||0,swing:sw>=0&&sw<1?sw:-1,lift:mt?((MOUNTS[mt]&&MOUNTS[mt].lift)??.72)+SMv.y:(swim?.3*(st.mvS||0):0),pitch:mt?SMv.p:(swim?-1.08*(st.mvS||0):0),rmv:mt?(st.mvS||0):0,ride:!!mt,swim,emote:emo,an:st,swv:(st.swingN||0)%3,rel:(t-(st.relT||-9))/.38,rdy:isMe?(t-me.lastCombat<4?1:0):(t-(o.swingT||0)<4?1:0),stl:isMe?!!me.stealth:!!o.sl,air:isMe?(me.jumpH||0)>.08:0,vy:isMe?(me.jumpV||0)/6.2:0,
       cast:isMe?!!me.cast:!!(o.b&4),castCol,hit:t-(st.hurtT||-9)<.22,dead:dead?t-st.deadAt:-1,L:playerLook(cls,u,isMe?myGearVis():o.gv),skin:SKIN[hashU(u)%SKIN.length],hair:HAIR[hashU(u)%HAIR.length],big:(isMe?me.avatarU>t:(o.b&64))?1.25:1,wr:isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0)}); if(!skDrawHero(HO,cls)) drawHumanoid(HO);
     HALPHA=1;
     { const au=isMe?(gm.aura&&isGM):o.au; if(au&&!dead) drawAura(x/TS,Y0,y/TS,t,'#ffb03a');
@@ -3951,7 +4028,7 @@ function bubble(x,y,txt){ g.font='500 13px "Alegreya Sans",sans-serif'; const w=
 const MOBH={dummy:2.3,murkcrab:.9,drowned:2.1,tidecaller:2.2,grimmaw:2.4,boar:1.1,moth:2.2,oldtusk:1.7,wolf:1.3,thornling:2.6,fangmaw:1.9,lurker:1.6,bogwitch:2.1,sentinel:2.2,wraith:2.6,hking:3.6,cultist:2.2,magma:3.0,wyrm:6.2,emberling:1.9,frostwolf:1.5,yeti:3.7,icewraith:2.6,frostgiant:5.8,cryptmage:2.2,deathguard:3.0,lich:5.6,thrall:2.1};
 function drawOverlay(t){
   g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,W,H);
-  const items=[];
+  const items=[]; try{ aliveOverlay(items,t); }catch(e){}
   for(const n of NPCS){ const Y=groundY(n.x,n.y)+2.15; const s=toScreen(n.x/TS,Y,n.y/TS); if(s&&s[2]<45) items.push({w:s[2],d:()=>{ const a=clamp(1.4-s[2]/40,0,1);
     let mark=npcMark(n);
     if(mark==='$'&&n.id==='hilde'){ drawShoe(g,s[0],s[1]-48+Math.sin(t*3)*4,1.3,a); mark=''; }
@@ -4026,10 +4103,12 @@ function pickAt(mx,my,btn){ TOUCHPICK=TOUCHPICK_(); let best=null,bd=60;
   for(const m of mobs){ if(m.dead) continue; const h=(MOBH[m.t.key]||1.6), w=Math.max(.42,Math.min(2.6,(m.t.r||14)/TS*1.15,h*.42)); if(Math.hypot(m.rx/TS-CAM.tx,m.ry/TS-CAM.tz)>(m.t.boss?40:26)) continue; test(m.rx/TS,groundY(m.rx,m.ry),m.ry/TS,h*1.04,w,{kind:'m',id:m.id}); }
   for(const o of others.values()) if(seenO(o)) test(o.rx/TS,standY(o.rx,o.ry),o.ry/TS,o.mt?2.9:2.05,.5,{kind:'p',id:o.u});
   for(const n of NPCS) test(n.x/TS,groundY(n.x,n.y),n.y/TS,2.05,.5,{kind:'n',id:n.id});
+  for(const o of ALIVE.objs) if(aliveSeen(o)) test(o.x/TS,groundY(o.x,o.y),o.y/TS,o.h,o.w,{kind:'obj',o});
   for(const n of NODES){ if(n.resp>now()||!nodeSeen(n)) continue; test(n.x/TS,groundY(n.x,n.y),n.y/TS,.9,.55,{kind:'node',n}); }
   if(profSkill('skinning')) for(const m of mobs){ if(!m.dead||!(m.skinU>now())||m.skinned) continue; test(m.dx/TS,groundY(m.dx,m.dy),m.dy/TS,.7,Math.max(.5,(m.t.r||14)/TS),{kind:'skin',m}); }
   if(FISH&&FISH.ph!=='cast') test(FISH.x/TS,-1.2,FISH.y/TS,.6,.4,{kind:'bob'});
   if(PICKDRY) return best;
+  if(best&&best.kind==='obj'){ aliveUse(best.o); return; }
   if(best&&best.kind==='node'){ const n=best.n; if(dist(me.x,me.y,n.x,n.y)<95) startGather(n); else err('Too far away'); return; }
   if(best&&best.kind==='skin'){ if(dist(me.x,me.y,best.m.dx,best.m.dy)<95) startSkin(best.m); else err('Too far away'); return; }
   if(best&&best.kind==='bob'){ if(FISH&&FISH.ph==='bite') fishReel(); return; }
@@ -4491,12 +4570,13 @@ function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial,
 }
 /* ---------- dynamic world pieces ---------- */
 function drawExtras(near,t){
+  try{ aliveDraw(near,t); }catch(e){ frameErr&&frameErr(e,'living world'); }
   drawLootBags(near,t); drawVaultDyn(near,t); try{ drawRaidDyn(near,t); }catch(e){}
-  if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,70)){ const hs=[[-3.6,-2.2,.3,1,0],[2.4,-1.6,2.6,2,0],[3.6,2,4,3,1],[-1.6,2.1,1,1,1],[.4,-.2,5.4,2,0]];
+  if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,70)){ const hs=[[-3.6,-2.2,.3,1,0],[2.4,-1.6,2.6,7,0],[3.6,2,4,3,1],[-1.6,2.1,1,1,1],[.4,-.2,5.4,4,0]];
     hs.forEach(([dx,dz,f,m,walker],i)=>{ let X=STABLE.x+dx, Z=STABLE.z+dz, face=f+Math.sin(t*.3+dx)*.25, mv=0, walk=0;
       if(walker){ const w=t*.12+i*2.1; X+=Math.cos(w)*1.3; Z+=Math.sin(w)*.9; face=Math.atan2(Math.cos(w)*.9,-Math.sin(w)*1.3); mv=.32; walk=w*4.2; }
       drawHorse({x:X,y:hgt(X,Z),z:Z,face,mv,walk,m,free:1}); });
-    { const X=95.4+(STABLE.ox||0), Z=77.6+(STABLE.oz||0); drawHorse({x:X,y:hgt(X,Z),z:Z,face:Math.PI+Math.sin(t*.25)*.1,mv:0,walk:0,m:2,free:1}); } }
+    { const X=95.4+(STABLE.ox||0), Z=77.6+(STABLE.oz||0); drawHorse({x:X,y:hgt(X,Z),z:Z,face:Math.PI+Math.sin(t*.25)*.1,mv:0,walk:0,m:7,free:1}); } }
   if(WINDMILL.x&&near(WINDMILL.x*TS,WINDMILL.z*TS,70)){ mreset(); mtr(WINDMILL.x,WINDMILL.y,WINDMILL.z); P(GEO.sph,.5,.5,.5,[.3,.2,.12]); mrz(t*.7);
     for(let k=0;k<4;k++){ mpush(); mrz(k*Math.PI/2); P(GEO.box,.16,3.4,.12,[.34,.22,.12],0,0,1.7,0); P(GEO.box,.95,2.7,.04,[.86,.8,.66],0,.55,2.0,.03); mpop(); } }
   if(CAULDRON.x&&near(CAULDRON.x*TS,CAULDRON.z*TS,40)&&Math.random()<.3) P3(CAULDRON.x+(Math.random()-.5)*.6,CAULDRON.y,CAULDRON.z+(Math.random()-.5)*.6,0,.6,0,1.2,.18,'#8cff4a',{glow:true});
@@ -5855,7 +5935,9 @@ function innBuild(song,t0){ const spb=60/song.bpm, ev=[], chords=song.chords.spl
   const mel=song.mel.split(' ').map(x=>{ const [n,d]=x.split(':'); return [n==='r'?0:midiOf(n),+d]; });
   let t=t0; const barT=[]; for(let pass=0;pass<2;pass++) for(let b=0;b<bars;b++){ const rub=1+(Math.random()-.5)*.03+(b===bars-1?.08:0); barT.push([t,spb*rub,b,pass]); t+=N*spb*rub; }
   for(const [bt,sb,b,pass] of barT){ const C=chords[b], last=pass===1&&b===bars-1;
-    if(song.acc==='waltz'){ ev.push([bt,'pl',C.bass,.11,1.8]); if(!last){ for(const k of [1,2]) ev.push([bt+k*sb+(Math.random()*.02),'pl2',C.tones.slice(1),.045,.7]); } else ev.push([bt+.02,'pl2',C.tones,.05,2.6]); }
+    if(song.acc==='drone'){ ev.push([bt,'pl',C.bass,.1,N*sb*1.6]); ev.push([bt+.04,'pl2',C.tones,.028,N*sb*1.4]); if(!last&&N>=3) ev.push([bt+Math.floor(N/2)*sb,'hp',C.tones[2]+12,.03,2.2]); }
+    else if(song.acc==='march'){ if(!last){ for(let k=0;k<N;k++) ev.push([bt+k*sb,'pl',k%2?C.tones[0]+12:C.bass,k%2?.05:.12,k%2?.45:1.1]); ev.push([bt+(N-.5)*sb,'pl',C.bass,.06,.35]); } else ev.push([bt+.02,'pl2',C.tones,.06,3]); }
+    else if(song.acc==='waltz'){ ev.push([bt,'pl',C.bass,.11,1.8]); if(!last){ for(const k of [1,2]) ev.push([bt+k*sb+(Math.random()*.02),'pl2',C.tones.slice(1),.045,.7]); } else ev.push([bt+.02,'pl2',C.tones,.05,2.6]); }
     else if(song.acc==='ballad'){ ev.push([bt,'pl',C.bass,.11,2.2]); const ar=[C.tones[0],C.tones[1],C.tones[2],C.tones[0]+12]; if(!last) for(let k=1;k<N;k++) ev.push([bt+k*sb,'pl',ar[(k-1)%ar.length],.055,1.1]); else ev.push([bt+.02,'pl2',C.tones,.05,3]); }
     else { ev.push([bt,'hp',C.bass+12,.09,2.4]); const ar=[C.tones[0],C.tones[1],C.tones[2],C.tones[0]+12,C.tones[2],C.tones[1]]; const steps=last?1:N*2; for(let k=(last?0:1);k<steps;k++) ev.push([bt+k*sb/2,'hp',ar[k%ar.length]+(k>=N?0:0),.04,1.8]); } }
   for(let pass=0;pass<2;pass++){ let beat=0; const inst=song.lead[pass]; for(const [n,d] of mel){ const bi=Math.floor(beat/N), within=beat-bi*N; const B=barT[pass*bars+Math.min(bi,bars-1)]; const tt=B[0]+within*B[1]+(Math.random()-.5)*.02;
@@ -5878,7 +5960,7 @@ function fmusPlay(){ if(FMUS.dead||FMUS.pending) return; const a=fmusEl(); if(!a
 function fmusLevel(){ const v=(typeof AUD!=='undefined'&&AUD.vol)||{master:.8,music:.6}; return v.mute?0:clamp((v.master??.8)*(v.music??.6)*.9,0,1); }
 function fmusTick(){ const F=FMUS; let want=false; if(F.dead){ F.want=false; if(F.el&&!F.el.paused) try{ F.el.pause(); }catch(e){} return; }
   if(F.el&&!F.ok&&!F.blocked&&F.srcT&&performance.now()-F.srcT>30000&&F.el.readyState===0){ if(!F.triedRealm&&/^https?:$/.test(location.protocol)&&F.cur){ F.triedRealm=true; F.useRealm=true; F.el.src=fmusBase()+F.cur.f; F.srcT=performance.now(); F.pending=false; fmusPlay(); } else { F.dead=true; F.want=false; try{ F.el.pause(); }catch(e){} return; } }
-  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=z!=='vault'&&z!=='crypt'&&z!=='raid'&&!fight; }
+  if(!me) want=true; else if(!me.dead){ const z=zoneAtPx(me.x,me.y); const fight=(typeof AUD!=='undefined')&&(AUD.want==='combat'||AUD.want==='battle'); want=(z==='town'||z==='port')&&!fight;   /* recorded tavern music plays in the towns; the wilds have their own themes */ }
   F.want=want; const target=want?fmusLevel():0;
   if(want&&(!F.el||F.el.paused)&&!F.blocked) fmusPlay();
   if(!F.el) return; F.vol+=clamp(target-F.vol,want?-.05:-.12,.035); if(F.vol<.002&&!want){ F.vol=0; if(!F.el.paused) F.el.pause(); }
@@ -5891,13 +5973,27 @@ for(const ev of ['pointerdown','keydown','touchstart']) addEventListener(ev,()=>
 function fitLogin(){ const w=document.querySelector('.lg-wrap'); if(!w) return; w.style.setProperty('--lgz','1'); const L=$('login'); if(!L||L.classList.contains('hidden')) return; const need=w.scrollHeight, have=innerHeight-6; const z=need>have?Math.max(.6,have/need):1; w.style.setProperty('--lgz',z.toFixed(3)); }
 addEventListener('resize',()=>setTimeout(fitLogin,50)); setTimeout(fitLogin,60); setTimeout(fitLogin,600); setTimeout(fitLogin,2000);
 new MutationObserver(()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitLogin,40); }).observe(document.getElementById('login')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+/* ======================================================================================================
+   v87 zone music: every wild zone has its own original theme, played by the same synth band as the inn
+   (flute, fiddle, harp and lute), with a short rest between songs. The theme changes when you have been in
+   a new zone for a few seconds, so walking along a border does not flip the music back and forth.
+   Hearthmere and Brinehaven keep their recorded tavern music; dungeons, fights and bosses keep theirs.
+   ====================================================================================================== */
+const ZONE_ALBUM={"meadow":[{"name":"Amberfield Morning","bpm":92,"bar":3,"lead":["flute","fiddle"],"acc":"waltz","chords":"C G Am F C F G C Am Em F C Dm G C C","mel":"E5:1 F5:1 B5:1 B5:2 C6:1 E5:1 D5:1 A4:1 F4:2 E4:1 C5:1 D5:1 A4:1 F4:2 G4:1 G4:1 A4:1 B4:1 G4:3 C5:1 D5:1 G5:1 B5:2 C6:1 F5:1 E5:1 B4:1 G4:3 D5:1 E5:1 B4:1 G4:2 A4:1 G4:1 A4:1 B4:1 C5:3"},{"name":"Harvest Wind","bpm":84,"bar":4,"lead":["fiddle","flute"],"acc":"ballad","chords":"G D Em C G C D G Em C G D C D G G","mel":"G5:1 F#5:1 D5:2 F#5:2 B5:1 G5:1 E5:1 D5:1 E5:1 D5:1 C5:3 A4:1 D5:2 F#5:1 E5:1 C5:1 B4:1 G4:1 C5:1 A4:1 B4:1 A4:1 G4:1 D4:4 G4:1 F#4:1 E4:2 C5:2 F#5:1 D5:1 B4:1 A4:1 B4:1 A4:1 F#4:4 C5:2 E5:1 D5:1 A4:1 G4:1 E4:1 A4:1 G4:1 A4:1 G4:1 F#4:1 G4:4"}],"forest":[{"name":"Under the Thornwood","bpm":70,"bar":4,"lead":["flute","harp"],"acc":"harp","chords":"Am G Am Em F G Am Am C G Am F Dm Em Am Am","mel":"C5:2 E5:2 G5:2 D5:2 A4:2 E4:2 E4:3 F#4:1 C5:1 E5:1 A5:2 D5:3 E5:1 C5:2 A4:2 E4:4 C5:2 E5:2 G5:2 D5:2 C5:2 A4:2 C5:4 D5:1 F#5:1 A5:2 E5:3 F#5:1 C5:2 A4:2 A4:4"},{"name":"Mossroot Hollow","bpm":64,"bar":3,"lead":["harp","flute"],"acc":"harp","chords":"Dm C Dm Am Bb C Dm Dm F C Dm Bb Gm A Dm Dm","mel":"D5:2 G5:1 E5:2 D5:1 A4:3 E4:3 F4:3 E4:1 G4:2 F4:3 D4:3 A4:2 D5:1 E5:2 D5:1 A4:3 F4:3 G4:3 E4:1 A4:2 F4:3 D4:3"}],"swamp":[{"name":"Gloamfen Mists","bpm":58,"bar":4,"lead":["fiddle","flute"],"acc":"drone","chords":"Dm Dm Bb A Dm C Bb A Gm Dm Bb A Dm Gm A Dm","mel":"A4:3 Db5:1 D5:3 E5:1 Bb4:3 A4:1 E4:4 A4:4 G4:3 D4:1 F4:2 D4:2 E4:4 Bb4:3 D5:1 F5:3 E5:1 Bb4:3 A4:1 E4:4 A4:4 G4:3 D4:1 E4:2 A4:2 D4:4"}],"ruins":[{"name":"Stones of Vael","bpm":64,"bar":4,"lead":["harp","fiddle"],"acc":"harp","chords":"Em F Em D C D Em Em Am Em F Em C D Em Em","mel":"E5:3 F5:1 A5:3 G5:1 B4:2 D5:1 G5:1 D5:3 C5:1 E5:2 C5:2 A4:2 E4:1 F4:1 E4:2 F4:1 E4:1 E4:3 F4:1 C5:3 D5:1 E5:3 D5:1 A4:2 C5:1 F5:1 B4:4 E5:2 C5:2 A4:2 E4:1 F4:1 E4:2 F4:1 E4:1 E4:4"}],"ash":[{"name":"Embers Rising","bpm":80,"bar":4,"lead":["fiddle","fiddle"],"acc":"march","chords":"Cm Cm Ab Bb Cm Ab G G Cm Fm Ab Bb Cm Ab G Cm","mel":"C5:1 Eb5:1 C5:2 Eb5:1.5 B4:0.5 G4:2 Eb4:2 Ab4:1 Eb4:1 D4:4 G4:1 F4:1 G4:2 Eb4:2 Ab4:1 B4:1 G4:2 F4:1 D4:1 D4:4 G4:1 B4:1 G4:2 C5:1.5 G4:0.5 F4:2 Eb4:2 Ab4:1 Eb4:1 D4:4 G4:1 F4:1 G4:2 Eb4:2 Ab4:1 B4:1 G4:2 F4:1 D4:1 C4:4"}],"frost":[{"name":"Frostpeak Silence","bpm":56,"bar":3,"lead":["harp","flute"],"acc":"drone","chords":"Em C G D Em C D Em Am C Em B Em C B Em","mel":"G5:3 E5:3 B4:1 G4:2 F#4:3 B4:1 E5:2 C5:2 A4:1 F#4:2 G4:1 E4:3 C5:3 E5:3 B4:1 G4:2 F#4:3 B4:1 E5:2 C5:2 A4:1 F#4:2 G4:1 E4:3"}],"coast":[{"name":"Stormwake Shanty","bpm":100,"bar":3,"lead":["fiddle","flute"],"acc":"waltz","chords":"Dm C F C Dm A Dm Dm F C Dm A Bb C A Dm","mel":"D5:1 Bb4:1 A4:1 C5:1 E5:2 C5:2 Bb4:1 G4:2 E4:1 A4:1 F4:2 E4:1 F4:1 G4:1 F4:2 A4:1 F4:3 A4:1 F4:1 E4:1 G4:1 C5:2 A4:2 G4:1 E4:2 D4:1 Bb4:1 F4:2 E4:1 F4:1 G4:1 E4:2 G4:1 D4:3"}],"lake":[{"name":"Mirrowmere Stillness","bpm":60,"bar":3,"lead":["harp","flute"],"acc":"harp","chords":"F C Dm Bb F Am Bb C F C Dm Bb Gm C F F","mel":"F5:1 Bb5:1 A5:1 C6:3 F5:3 D5:3 F5:3 C5:1 Bb4:1 F4:1 F4:2 G4:1 G4:3 C5:1 F5:1 E5:1 G5:3 D5:3 Bb4:3 D5:3 C5:1 Bb4:1 F4:1 F4:2 G4:1 F4:3"}],"reach":[{"name":"The Scorched Reach","bpm":74,"bar":4,"lead":["fiddle","fiddle"],"acc":"march","chords":"Am F G Em Am F E E Am Dm G C F Dm E Am","mel":"C5:2 D5:1 G#5:1 A5:1 E5:1 C5:2 B4:2 G#4:1 E4:1 E4:3 G#4:1 C5:1 D5:1 E5:2 C5:2 A4:1 F4:1 E4:1 G#4:1 E4:2 E4:3 F4:1 C5:2 D5:1 G#5:1 A5:1 E5:1 D5:2 B4:2 G#4:1 E4:1 E4:3 G#4:1 C5:1 D5:1 F5:2 D5:2 B4:1 G#4:1 E4:1 G#4:1 E4:2 A4:4"}],"arena":[{"name":"Bloodsand Drums","bpm":96,"bar":4,"lead":["fiddle","flute"],"acc":"march","chords":"Em Em C D Em Em B B Em G C D Em C B Em","mel":"E5:2 G5:2 B5:1 A5:1 E5:1 G5:1 E5:1 D#5:1 C5:1 B4:1 A4:4 E5:1 F#5:1 G5:1 A5:1 E5:1 D#5:1 C5:1 A4:1 F#4:1 B4:1 D#5:2 B4:2 F#4:2 B4:2 E5:2 G5:1 F#5:1 C5:1 E5:1 C5:1 B4:1 A4:1 G4:1 F#4:2 A4:2 E5:1 F#5:1 G5:1 A5:1 E5:1 D#5:1 C5:1 A4:1 F#4:1 B4:1 D#5:2 E5:4"}]};
+function zoneTick(t,z){ const L=ZONE_ALBUM[z]; if(!L) return; let S=AUD.inn;
+  if(!S||(S.i>=S.ev.length&&t>S.end+(AUD.zoneRest||4))){ let k; do{ k=Math.random()*L.length|0; } while(L.length>1&&k===AUD.zoneLast); AUD.zoneLast=k; S=AUD.inn=innBuild(L[k],t+.6); AUD.zoneRest=5+Math.random()*7;
+    try{ chatLine(`♪ ${L[k].name} — ${ZONES[z]?ZONES[z].name:'Songs of Emberfall'}`,'c-sys'); }catch(e){} }
+  while(S.i<S.ev.length&&S.ev[S.i][0]<t+.6){ try{ innPlay(S.ev[S.i]); }catch(e){} S.i++; } }
+/* the zone the music follows: a new zone counts once you have been in it for 3 seconds */
+function musicZone(z,t){ if(z!==AUD.zCand){ AUD.zCand=z; AUD.zCandT=t; } if(!AUD.zCur||t-AUD.zCandT>3) AUD.zCur=AUD.zCand; return AUD.zCur; }
+
 function audTick(){ if(!AUD.on||!me) return; const c=AUD.ctx, t=c.currentTime; const z=zoneAtPx(me.x,me.y); const night=curDark>.55;
-  let tr=z==='vault'||z==='crypt'||z==='raid'?'eerie':'tavern'; const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
+  let tr=z==='vault'||z==='crypt'||z==='raid'?'eerie':'tavern'; if(tr==='tavern'&&gateAreaAt(me.x,me.y)) tr='eerie'; if(tr==='tavern'){ const mz=musicZone(gZone(me.x,me.y),t); if(ZONE_ALBUM[mz]) tr='zone:'+mz; } const inFight=mobs.some(m=>!m.dead&&!m.evade&&m.tgt===MY_U&&dist(m.rx,m.ry,me.x,me.y)<700)||(me.pvpBy&&now()-me.pvpBy.t<6&&!me.dead);
   if(inFight&&!me.dead) tr='combat'; if(bossEng&&!bossEng.m.dead&&!bossEng.m.evade) tr='battle';
   if(tr===AUD.track&&AUD.want!==tr){ AUD.want=tr; AUD.mbus.gain.setTargetAtTime(1,t,.4); }
   if(tr!==AUD.track){ if(AUD.want!==tr){ const fast=AUD.track==='combat'||AUD.track==='battle'||tr==='combat'; AUD.want=tr; AUD.mbus.gain.setTargetAtTime(0.0001,t,fast?.35:.5); AUD.switchAt=t+(fast?1.1:1.4); } if(t>=AUD.switchAt){ AUD.track=tr; AUD.step=0; AUD.inn=null; AUD.bar=0; AUD.nextNote=t+.1; AUD.mbus.gain.setTargetAtTime(1,t,.6); } }
   const spb=AUD.track==='tavern'?60/138/2*2:AUD.track==='battle'?60/150/2*2:60/70/2*2; const stepDur=AUD.track==='tavern'?.19:AUD.track==='battle'?.2:AUD.track==='combat'?.21:.42;
-  if(AUD.track===AUD.want&&AUD.track!=='quiet'){ if(AUD.track==='tavern'){ if(!FMUS.want) innTick(t); } else while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; } }
+  if(AUD.track===AUD.want&&AUD.track!=='quiet'){ if(AUD.track.startsWith('zone:')) zoneTick(t,AUD.track.slice(5)); else if(AUD.track==='tavern'){ if(!FMUS.want) innTick(t); } else while(AUD.nextNote<t+.35){ schedStep(AUD.track,AUD.nextNote,AUD.step); AUD.step++; AUD.nextNote+=stepDur; } }
   // ambience levels per zone
   const T0={wind:0,leaves:0,water:0,rumble:0,insects:0,frost:0,cave:0,town:0}; const set=o=>Object.assign(T0,o);
   if(z==='town') set({wind:.025,town:.05}); if(z==='meadow') set({wind:.16,leaves:.03}); if(z==='forest') set({wind:.12,leaves:.07}); if(z==='lake') set({wind:.1,water:.3}); if(z==='coast') set({wind:.2,water:.32}); if(z==='port') set({wind:.08,water:.22,town:.04}); if(z==='swamp') set({insects:.025,water:.12,wind:.05});
@@ -7432,6 +7528,11 @@ const ACH=[
   {id:"party",n:"Better Together",d:"Join a party",ic:"\ud83e\udd1d",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.partied||0)>=1},
   {id:"deaths10",n:"Back from the Brink",d:"Die 10 times and keep going",ic:"\ud83e\udea6",f:(c,S,QDONE,EPICALL,FORGE5)=>(S.deaths||0)>=10}
 ];
+ACH.push({id:'lore6',n:'Curious Mind',d:'Read 6 lore stones',ic:'\ud83d\udcdc',f:c=>Object.keys(c.lore||{}).length>=6},
+  {id:'loreall',n:'Loremaster',d:'Read every lore stone in Emberfall',ic:'\ud83d\udcd6',f:c=>Object.keys(c.lore||{}).length>=Math.max(1,ALIVE.objs.filter(o=>o.k==='lore').length)},
+  {id:'satchel10',n:'Finders Keepers',d:'Open 10 forgotten satchels',ic:'\ud83d\udc5c',f:(c,S)=>(S.satchels||0)>=10},
+  {id:'fireside',n:'Fireside Tales',d:'Rest by a wayside campfire',ic:'\ud83d\udd25',f:(c,S)=>(S.fires||0)>=1},
+  {id:'wish5',n:'Wishful Thinking',d:'Toss 5 coins into a wishing fountain',ic:'\ud83e\ude99',f:(c,S)=>(S.wishes||0)>=5});
 function cstats(){ const c=me.c; c.stats=c.stats||{}; const S=c.stats; S.kills=S.kills||0; S.bosses=S.bosses||{}; return S; }
 function stat(k,n){ if(!me) return; const S=cstats(); S[k]=(S[k]||0)+n; }
 function trackKill(m){ const S=cstats(); S.kills++; if(m.t.boss||m.t.elite) S.bosses[m.t.key]=(S.bosses[m.t.key]||0)+1; }
@@ -7621,6 +7722,142 @@ function castFx(st,X,Y,Z,col,p,face,near){ const t=now(), hex=castHex(col), lowQ
       if(near&&!lowQ){ burst3(X+Math.cos(face)*.45,Y+1.25,Z+Math.sin(face)*.45,castHex(c),16,3.2,{glow:true,up:1}); }
       FXP({k:'wave',x:X*TS,y:Z*TS,r:55,col:castHex(c),dur:.32,h:.5}); } } }
 
+/* ======================================================================================================
+   v87 Living world
+   1. Things to use, placed the same way on every player's map (seeded from the map itself):
+      - wayside campfires: sit by one for a few seconds to be "Warmed by the Fire" (+5% maximum health, 20 minutes);
+      - lore stones: a line of Emberfall's history, a little experience the first time, and two achievements;
+      - forgotten satchels: a cache of coin (and often a herb or ore from that zone) once a day per character;
+      - the wishing fountains in Hearthmere and Brinehaven: toss a gold coin for a fortune.
+   2. Ambient life near the camera: butterflies by day, fireflies at night, falling leaves in Thornwood,
+      rising embers in the Caldera and the Reach, snow flurries on Frostpeak, gulls over the coast and
+      fish leaping in the lakes.
+   3. Townsfolk talk as you pass, and after dark half of them head indoors while the rest carry lanterns.
+   ====================================================================================================== */
+const ALIVE={ready:false,objs:[],motes:[],gulls:[],fishT:0,fish:null,rest:null,talk:null,talkT:0,wishT:0};
+const ALIVE_ZONES=['meadow','forest','swamp','ruins','ash','frost','coast','lake','reach'];
+const ALIVE_ZLV={meadow:1,forest:3,swamp:4,ruins:6,ash:8,frost:11,coast:13,lake:5,reach:17};
+const LORE={
+  meadow:[['The Amber Sower','Before Hearthmere had walls, the first farmers sowed this field with grain carried from the burning south. The amber colour of the wheat, they said, was the last of the old sun caught in the seed.'],
+          ['The Shepherd’s Mark','Three notches for three winters without a wolf. The fourth winter, the shepherd carved no notch, and the stone does not say why.']],
+  forest:[['Rootbound Oath','Here the woodwardens swore to take no living branch from the Thornwood. The thornlings remember the oath, and they remember who broke it.'],
+          ['The Hollow Oak','A traveller who sleeps in the hollow oak dreams of the forest as it was: no paths, no fires, only green and the sound of something very large breathing.']],
+  swamp:[['The Drowned Lantern','Gloamfen was a town once, with a lamplighter who walked its streets each dusk. The water rose in a single night. Some say the lights you see over the fen are still his rounds.'],
+         ['A Witch’s Bargain','Ask the bog for anything and it will answer. It always asks for something you have not noticed you own yet.']],
+  ruins:[['The Fall of Vael','Vael stood a thousand years and fell in a day. Its sentinels still guard gates that open onto nothing, waiting for a king who will not come back.'],
+         ['The Hollow Throne','The Hollow King did not die. He only forgot that he was alive, and the forgetting spread through his court like frost through glass.']],
+  ash:[['Cinderfall','When the Caldera woke, the sky rained ash for forty days. The cultists call it a blessing. The farmers who lived here called it the end.'],
+       ['The Cinderlord’s Vow','Gorrakh swore to burn until the world was warm enough for him. The mountain listened. Mountains are patient, and they keep promises.']],
+  frost:[['Hrimgar’s Sleep','The giants did not build Frostpeak. They were here first, asleep under the snow, and the mountain grew up around them like a blanket.'],
+         ['The Last Thaw','Every hundred years the ice on the high lakes breaks, and the drowned bells of an old monastery ring once. The last thaw is overdue.']],
+  coast:[['The Stormwake','Sailors say the storm that gave this coast its name never ended. It only moved out to sea, and it watches the harbour lights.'],
+         ['The Wreckers’ Creed','Light the false beacon, wait for the crash, take what the sea gives. The wreckers say the sea is generous. The sea has never said so.']],
+  lake:[['Mirrowmere','On a still morning the lake shows the sky perfectly, and for a moment it is not clear which one you are standing above.'],
+        ['The Fisher’s Promise','An old fisher once caught a silver fish that spoke. He let it go and asked for nothing. He caught a fish every day for the rest of his life.']],
+  reach:[['The Scorched Reach','Nothing grows here because nothing is allowed to. The Reach remembers the war that burned it and keeps the ground bare as a warning.'],
+         ['Ember and Iron','The last army of the old kingdom marched into the Reach with iron and came back with embers in their hands. They called it victory. Their grandchildren called it the price.']]};
+const FORTUNES=['A friend you have not met yet is already on the road toward you.','Your next sword will be sharper than your last.','Beware of boars on Tuesdays.','The fen gives back what it takes, but not to the one it took it from.',
+  'Fortune favours the hero who remembers to repair their armour.','A long journey ends with a warm meal. Make sure it is the end you want.','Someone in Brinehaven owes you a drink, though neither of you knows it yet.',
+  'The coin you just spent will come back to you, tired, but with stories.','When the bells ring under the ice, be somewhere warm.','You will find what you are looking for in the last place you look. Look there first.'];
+const FOLK_TALK={day:['Lovely weather for it.','Mind the cart!','Fresh bread at the inn, I hear.','Have you seen my cat?','The Captain is looking for heroes again.','Mira has new potions in, they say.','Watch yourself past the walls.','Another adventurer! Good luck to you.','My knees say rain is coming.','The smith has been busy all week.'],
+  night:['Bit late to be wandering, isn’t it?','Keep to the lamplight.','Heard wolves earlier.','Good night, friend.','The stars are clear tonight.','Can’t sleep either?']};
+BUFFNAME.hearth=['Warmed by the Fire','🔥']; BUFFTIP.hearth='+5% maximum health';
+const aliveWalk=t=>t!==T.WATER&&t!==T.LAVA&&!SOLID.has(t)&&t!==T.PATH&&t!==T.BRIDGE&&t!==T.COBBLE&&t!==T.HOUSE&&t!==T.PROP&&t!==T.FOUNT&&t!==T.RUIN;
+function aliveInit(){ if(ALIVE.ready) return; ALIVE.ready=true; const R=mulberry32(8787), objs=[];
+  const near=(x,y,r,f)=>objs.some(o=>(!f||f(o))&&Math.hypot(o.tx-x,o.ty-y)<r);
+  const around=(x,y,r,test)=>{ for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++) if(test(tAt(x+dx,y+dy))) return true; return false; };
+  const npcNear=(x,y)=>NPCS.some(n=>Math.hypot(n.x/TS-x,n.y/TS-y)<8);
+  for(const z of ALIVE_ZONES){ const C=[];
+    for(let y=4;y<OWH-4;y+=2) for(let x=4;x<MW-4;x+=2){ const zz=zmap[y*MW+x]; if((zz==='ash'&&inReachT(x,y)?'reach':zz)!==z) continue; const t=tAt(x,y); if(!aliveWalk(t)) continue; if(!around(x,y,1,q=>aliveWalk(q)||q===T.PATH||q===T.FOREST||q===T.GRASS)) continue; if(npcNear(x,y)) continue; C.push([x,y,hash2(x,y,87)]); }
+    C.sort((a,b)=>a[2]-b[2]); if(!C.length) continue;
+    const place=(k,count,minSame,want)=>{ let n=0; for(const pass of [0,1]){ for(const [x,y] of C){ if(n>=count) break; if(want&&!pass&&!want(x,y)) continue; if(near(x,y,pass?minSame*.6:minSame,o=>o.k===k&&o.zone===z)||near(x,y,7)) continue;
+        objs.push({k,zone:z,i:n,id:k+'_'+z+'_'+n,tx:x,ty:y,x:x*TS+16,y:y*TS+16,h:k==='fire'?.9:k==='lore'?1.8:.5,w:k==='lore'?.5:.55}); n++; } if(n>=count) break; } };   /* a second, looser pass if the zone is short of good spots */
+    place('fire',2,30,(x,y)=>around(x,y,3,q=>q===T.PATH));
+    place('lore',2,28);
+    place('satchel',2,24,(x,y)=>around(x,y,1,q=>q===T.TREE||q===T.ROCK||q===T.WALL));
+  }
+  /* the wishing fountains: the fountain in each town square */
+  { let sx=0,sy=0,c=0; for(let y=Math.floor(TOWN.y-TOWN.r);y<=TOWN.y+TOWN.r;y++)for(let x=Math.floor(TOWN.x-TOWN.r);x<=TOWN.x+TOWN.r;x++) if(tAt(x,y)===T.FOUNT&&Math.hypot(x-TOWN.x,y-TOWN.y)<TOWN.r){ sx+=x; sy+=y; c++; }
+    if(c) objs.push({k:'wish',zone:'town',id:'wish_town',tx:sx/c,ty:sy/c,x:(sx/c+.5)*TS,y:(sy/c+.5)*TS,h:1.4,w:1.2}); }
+  if(typeof PORT!=='undefined') objs.push({k:'wish',zone:'port',id:'wish_port',tx:PORT.cx,ty:PORT.cy,x:(PORT.cx+.5)*TS,y:(PORT.cy+.5)*TS,h:1.4,w:1.2});
+  ALIVE.objs=objs; }
+const aliveDay=()=>Math.floor(Date.now()/864e5);
+function aliveTaken(o){ const c=me&&me.c; return o.k==='satchel'&&c&&c.sat&&c.sat[o.id]===aliveDay(); }
+function aliveSeen(o){ return !aliveTaken(o)&&Math.hypot(o.x/TS-CAM.tx,o.y/TS-CAM.tz)<34; }
+function aliveUse(o){ if(!me||me.dead) return; const c=me.c; if(dist(me.x,me.y,o.x,o.y)>(o.k==='wish'?150:110)){ err('Too far away'); return; }
+  if(o.k==='fire'){ if(now()-(me.lastCombat||-99)<5){ err('You cannot rest while in combat'); return; } if(me.mounted){ err('Get off your mount to rest by the fire'); return; }
+    ALIVE.rest={o,t0:now(),x:me.x,y:me.y}; me.emote={k:'sit',t0:now()}; sysMsg('You sit down by the fire and warm your hands...'); return; }
+  if(o.k==='lore'){ const L=(LORE[o.zone]||[])[o.i]; if(!L) return; c.lore=c.lore||{}; const first=!c.lore[o.id];
+    dlg(`<h2>${L[0]}</h2><p style="font-style:italic;line-height:1.5">"${L[1]}"</p><p style="font-size:12px;color:var(--dim)">Lore stones read: ${Object.keys(c.lore).length+(first?1:0)} of ${ALIVE.objs.filter(q=>q.k==='lore').length}</p><div class="btns"><button id="bk">Close</button></div>`);
+    $('bk').onclick=()=>closeDlg();
+    if(first){ c.lore[o.id]=1; const xp=Math.round(30+20*c.lvl); try{ gainXp(xp); }catch(e){} toast('Lore discovered: '+L[0],'small'); try{ checkAch(); }catch(e){} persist(); }
+    return; }
+  if(o.k==='satchel'){ c.sat=c.sat||{}; if(c.sat[o.id]===aliveDay()){ sysMsg('This satchel is empty. Someone may leave another here by tomorrow.'); return; }
+    c.sat[o.id]=aliveDay(); const lv=ALIVE_ZLV[o.zone]||1, g=Math.max(1,Math.round((3+lv*1.6)*(.75+Math.random()*.5))); c.gold+=g; chatLine(`You open a forgotten satchel and find ${g} gold.`,'c-loot');
+    const M=Object.keys(MATS).filter(k=>(MATS[k].kind==='herb'||MATS[k].kind==='ore')&&(!MATS[k].zones||MATS[k].zones.includes(o.zone)));
+    if(M.length&&Math.random()<.6) giveItem({mat:M[Math.floor(Math.random()*M.length)],n:1+Math.floor(Math.random()*2)},'Forgotten satchel');
+    try{ stat('satchels',1); checkAch(); }catch(e){} try{ burst3(o.x/TS,groundY(o.x,o.y)+.3,o.y/TS,'#ffd77a',14,1.6,{glow:true,up:1}); snd('holy',o.x,o.y,.5); }catch(e){} renderInv(); persist(); return; }
+  if(o.k==='wish'){ if(now()-ALIVE.wishT<3) return; if(c.gold<1){ err('You need a gold coin to make a wish'); return; } ALIVE.wishT=now(); c.gold-=1;
+    const f=FORTUNES[Math.floor(Math.random()*FORTUNES.length)]; chatLine(`You toss a coin into the fountain. A fortune drifts up: "${f}"`,'c-sys'); toast('🪙 '+f,'small');
+    try{ burst3(o.x/TS,groundY(o.x,o.y)+1,o.y/TS,'#9fe0ff',18,1.8,{glow:true,up:1}); snd('splash',o.x,o.y,.6); }catch(e){} try{ stat('wishes',1); checkAch(); }catch(e){} renderInv(); persist(); return; } }
+function aliveUpdate(dt){ if(!me) return; if(!ALIVE.ready){ try{ aliveInit(); }catch(e){ ALIVE.ready=true; console.warn('living world',e); } }
+  const R=ALIVE.rest; if(R){ const t=now(); if(me.dead||me.moving||dist(me.x,me.y,R.x,R.y)>8||now()-(me.lastCombat||-99)<1){ ALIVE.rest=null; if(me.emote&&me.emote.k==='sit') me.emote=null; }
+    else if(t-R.t0>3){ ALIVE.rest=null; me.c.buffs=me.c.buffs||{}; me.c.buffs.hearth=Date.now()+20*60e3; recalc(); toast('🔥 Warmed by the Fire: +5% maximum health for 20 minutes','small'); try{ stat('fires',1); checkAch(); }catch(e){} persist(); } } }
+/* ---------- drawing the objects ---------- */
+function aliveDraw(near,t){ if(!ALIVE.ready) return; const lowQ=GFX.q==='low';
+  for(const o of ALIVE.objs){ if(!near(o.x,o.y,o.k==='fire'?60:40)||aliveTaken(o)) continue; const X=o.x/TS, Z=o.y/TS, Y=groundY(o.x,o.y);
+    if(o.k==='fire'){ mreset(); mtr(X,Y,Z);
+      for(let k=0;k<8;k++){ const a=k/8*6.283; P(GEO.sph,.2,.13,.2,[.42,.4,.38],0,Math.cos(a)*.45,.05,Math.sin(a)*.45); }
+      for(let k=0;k<3;k++){ mreset(); mtr(X,Y+.08,Z); mry(k*1.05+.3); P(GEO.box,.8,.1,.1,[.3,.18,.09],0); }
+      const fl=.85+.15*Math.sin(t*13+X)+.08*Math.sin(t*23+Z); mreset(); mtr(X,Y+.1,Z);
+      P(GEO.cone,.42*fl,.75*fl,.42*fl,[1,.32,.05],2.2,0,.3,0,.9); P(GEO.cone,.24,.5*fl,.24,[1,.62,.15],2.8,0,.28,0,.95);
+      addLight(X,Y+.7,Z,7.5*fl,[1.5*fl,.62*fl,.2*fl]);
+      if(!lowQ&&Math.random()<.25) P3(X+(Math.random()-.5)*.3,Y+.6,Z+(Math.random()-.5)*.3,(Math.random()-.5)*.3,1.2+Math.random(),(Math.random()-.5)*.3,1.2,.04,'#ffb05a',{glow:true});
+      if(!lowQ&&Math.random()<.08) P3(X,Y+1.1,Z,(Math.random()-.5)*.2,.6,(Math.random()-.5)*.2,2.5,.25,'#5a5550'); }
+    else if(o.k==='lore'){ const read=me&&me.c.lore&&me.c.lore[o.id]; mreset(); mtr(X,Y,Z); mry(hash2(o.tx,o.ty,3)*6.28); mrz(.06);
+      P(GEO.box,.62,1.7,.34,[.3,.31,.29],0,0,.85,0); P(GEO.box,.68,.14,.4,[.24,.3,.22],0,0,.06,0);
+      const pu=.6+.4*Math.sin(t*2+X); P(GEO.box,.24,.5,.02,read?[.25,.45,.5]:[.4,.95,1],read?.6:3.5*pu,0,1.05,.18); P(GEO.box,.36,.05,.02,read?[.25,.45,.5]:[.4,.95,1],read?.6:3*pu,0,1.36,.18);
+      if(!read) addLight(X,Y+1.1,Z,2.2,[.3*pu,.8*pu,1*pu]); }
+    else if(o.k==='satchel'){ mreset(); mtr(X,Y,Z); mry(hash2(o.tx,o.ty,5)*6.28);
+      P(GEO.sph,.5,.32,.38,[.42,.27,.15],0,0,.15,0); P(GEO.box,.36,.04,.3,[.34,.21,.11],0,0,.3,.04); P(GEO.box,.06,.06,.06,[.8,.66,.3],1,0,.27,.2);
+      if(!lowQ&&Math.random()<.04) P3(X+(Math.random()-.5)*.4,Y+.45,Z+(Math.random()-.5)*.4,0,.4,0,.6,.06,'#fff3b0',{glow:true}); }
+    else if(o.k==='wish'){ if(!lowQ&&Math.random()<.06) P3(X+(Math.random()-.5)*1.2,Y+1.1,Z+(Math.random()-.5)*1.2,0,.5,0,.9,.05,'#bfefff',{glow:true}); } }
+  aliveAmbient(t,lowQ); }
+/* ---------- ambient life around the camera ---------- */
+function aliveAmbient(t,lowQ){ if(lowQ||!me) return; const cx=CAM.tx, cz=CAM.tz, tx=Math.floor(cx), tz=Math.floor(cz); if(tx<0||tz<0||tx>=MW||tz>=OWH) return;
+  const z=zmap[tz*MW+tx], night=curDark>.5, M=ALIVE.motes, dt=Math.min(.05,t-(ALIVE.lastT||t)); ALIVE.lastT=t;
+  const want={butterfly:!night&&(z==='meadow'||z==='lake'||z==='town')?7:0, firefly:night&&(z==='forest'||z==='swamp'||z==='meadow'||z==='lake')?16:0, leaf:z==='forest'?12:0, ember:z==='ash'||z==='reach'?18:0, snow:z==='frost'?40:0};
+  const count={}; for(const m of M) count[m.k]=(count[m.k]||0)+1;
+  for(const k in want) if((count[k]||0)<want[k]&&Math.random()<.3){ const a=Math.random()*6.283, r=3+Math.random()*16, x=cx+Math.cos(a)*r, zz=cz+Math.sin(a)*r, gy=hgt(x,zz);
+      M.push({k,x,z:zz,y:gy+(k==='snow'?6+Math.random()*4:k==='leaf'?3+Math.random()*3:k==='ember'?Math.random()*1.5:.4+Math.random()*1.4),gy,t0:t,life:k==='butterfly'?14:k==='firefly'?10:k==='snow'?7:6+Math.random()*3,ph:Math.random()*6.28,col:k==='butterfly'?[[1,1,.95],[1,.85,.3],[1,.55,.2],[.5,.7,1]][Math.floor(Math.random()*4)]:null}); }
+  for(let i=M.length-1;i>=0;i--){ const m=M[i], age=t-m.t0, far=Math.hypot(m.x-cx,m.z-cz)>26; if(age>m.life||far){ M.splice(i,1); continue; } const fade=Math.min(1,age/.6,(m.life-age)/.8);
+    if(m.k==='butterfly'){ m.x+=Math.cos(m.ph+t*.7)*dt*1.1; m.z+=Math.sin(m.ph*1.3+t*.5)*dt*1.1; m.y=m.gy+.6+.45*Math.sin(t*1.7+m.ph)+.3; const fl=Math.sin(t*22+m.ph);
+      for(const s of [-1,1]){ mreset(); mtr(m.x,m.y,m.z); mry(m.ph+t*.7); mrx(s*(.25+.9*Math.abs(fl))); P(GEO.box,.09,.006,.11,m.col,.4,0,0,s*.055,fade); } }
+    else if(m.k==='firefly'){ m.x+=Math.sin(t*.9+m.ph)*dt*.6; m.z+=Math.cos(t*.7+m.ph)*dt*.6; m.y+=Math.sin(t*1.3+m.ph)*dt*.3; const bl=Math.max(0,Math.sin(t*2.2+m.ph))**3*fade;
+      if(bl>.05){ mreset(); mtr(m.x,m.y,m.z); P(GEO.sph,.05,.05,.05,[.75,1,.35],6*bl,0,0,0,bl); } }
+    else if(m.k==='leaf'){ m.y-=dt*.55; m.x+=Math.sin(t*1.6+m.ph)*dt*.7; if(m.y<m.gy+.02){ m.y=m.gy+.02; } mreset(); mtr(m.x,m.y,m.z); mry(t*1.5+m.ph); mrx(Math.sin(t*3+m.ph)*.8); P(GEO.box,.1,.008,.07,[[.55,.4,.15],[.45,.55,.2],[.7,.35,.12]][Math.floor(m.ph)%3],.1,0,0,0,fade); }
+    else if(m.k==='ember'){ m.y+=dt*(.8+.4*Math.sin(m.ph)); m.x+=Math.sin(t*2+m.ph)*dt*.4; const fl=.6+.4*Math.sin(t*9+m.ph); mreset(); mtr(m.x,m.y,m.z); P(GEO.sph,.045,.045,.045,[1,.5,.15],5*fl,0,0,0,fade*fl); }
+    else if(m.k==='snow'){ m.y-=dt*1.1; m.x+=dt*(.6+.3*Math.sin(t+m.ph)); if(m.y<m.gy){ M.splice(i,1); continue; } mreset(); mtr(m.x,m.y,m.z); P(GEO.sph,.045,.045,.045,[1,1,1],.8,0,0,0,fade*.9); } }
+  /* gulls wheel over the coast, the harbour and the lake by day */
+  const G=ALIVE.gulls, gw=!night&&(z==='coast'||z==='port'||z==='lake')?3:0;
+  while(G.length<gw) G.push({cx,cz,r:6+Math.random()*7,h:9+Math.random()*5,ph:Math.random()*6.28,sp:.25+Math.random()*.15,cry:t+3+Math.random()*8});
+  if(G.length>gw) G.length=gw;
+  for(const g of G){ g.cx+=(cx-g.cx)*Math.min(1,dt*.15); g.cz+=(cz-g.cz)*Math.min(1,dt*.15); const a=g.ph+t*g.sp, x=g.cx+Math.cos(a)*g.r, zz=g.cz+Math.sin(a)*g.r, y=hgt(cx,cz)+g.h, fl=Math.sin(t*6+g.ph)*.35;
+    for(const s of [-1,1]){ mreset(); mtr(x,y,zz); mry(-a); mrx(s*(.35+fl)); P(GEO.box,.07,.015,.45,[.92,.92,.9],.3,0,0,s*.22); }
+    mreset(); mtr(x,y,zz); mry(-a); P(GEO.sph,.2,.1,.1,[.95,.95,.93],.3,0,0,0);
+    if(t>g.cry){ g.cry=t+6+Math.random()*10; try{ snd('bird',x*TS,zz*TS,.6); }catch(e){} } }
+  /* now and then a fish leaps clear of the water near you */
+  if((z==='lake'||z==='coast'||z==='swamp'||z==='port')&&!ALIVE.fish&&t>ALIVE.fishT){ ALIVE.fishT=t+5+Math.random()*9;
+    for(let k=0;k<8;k++){ const a=Math.random()*6.283, r=4+Math.random()*12, x=cx+Math.cos(a)*r, zz=cz+Math.sin(a)*r; if(isWaterAt(x*TS,zz*TS)&&isWaterAt((x+1)*TS,zz*TS)){ ALIVE.fish={x,z:zz,a:Math.random()*6.28,t0:t}; break; } } }
+  const F=ALIVE.fish; if(F){ const u=(t-F.t0)/.8; if(u>=1){ ALIVE.fish=null; try{ burst3(F.x+Math.cos(F.a),hgt(F.x,F.z)+.05,F.z+Math.sin(F.a),'#dff4ff',8,1.2,{up:1}); snd('splash',F.x*TS,F.z*TS,.4); }catch(e){} }
+    else { const wy=hgt(F.x,F.z), x=F.x+Math.cos(F.a)*u, zz=F.z+Math.sin(F.a)*u, y=wy+Math.sin(Math.PI*u)*.9; if(u<.05) try{ burst3(F.x,wy+.05,F.z,'#dff4ff',6,1,{up:1}); }catch(e){}
+      mreset(); mtr(x,y,zz); mry(-F.a); mrz((.5-u)*2.2); P(GEO.sph,.36,.12,.1,[.75,.8,.85],.5,0,0,0); P(GEO.cone,.12,.14,.04,[.65,.7,.75],.3,-.22,0,0); } } }
+/* ---------- townsfolk chatter ---------- */
+function aliveOverlay(items,t){ if(!me||typeof VILL==='undefined') return; const tt=Date.now()/1000, night=curDark>.6;
+  if(!ALIVE.talk&&t>ALIVE.talkT){ ALIVE.talkT=t+10+Math.random()*14; const cand=VILL.filter((v,i)=>{ if(night&&i%2) return false; const p=villPos(v,tt); return Math.hypot(p.x-me.x/TS,p.z-me.y/TS)<16; });
+    if(cand.length){ const L=night?FOLK_TALK.night:FOLK_TALK.day; ALIVE.talk={v:cand[Math.floor(Math.random()*cand.length)],txt:L[Math.floor(Math.random()*L.length)],until:t+4.5}; } }
+  const T2=ALIVE.talk; if(T2){ if(t>T2.until){ ALIVE.talk=null; return; } const p=villPos(T2.v,tt), s=toScreen(p.x,groundY(p.x*TS,p.z*TS)+2.2,p.z); if(s&&s[2]<40) items.push({w:s[2],d:()=>bubble(s[0],s[1],T2.txt)}); } }
+
 function update(dt){
   const t=now();
   syncPeers();
@@ -7638,7 +7875,7 @@ function update(dt){
     else { if(!rooted&&!me.dead&&!me.dash&&Math.hypot(me.vx||0,me.vy||0)>8){ const k=Math.exp(-dt*(me.mounted?MOVE_TUNE.stopMount:MOVE_TUNE.stopFoot)); me.vx*=k; me.vy*=k; movePlayer(me,me.vx*dt,me.vy*dt,10); } else { me.vx=0; me.vy=0; } }
     if(!me.moving&&!me.dash){ const te=targetEnt(); if(te&&te.kind!=='n'&&!te.self&&(me.cast||me.auto)) me.face=Math.atan2(te.y-me.y,te.x-me.x); }
     if(me.jumpV||me.jumpH>0){ me.jumpV=(me.jumpV||0)-15*dt; me.jumpH=Math.max(0,(me.jumpH||0)+me.jumpV*dt); if(me.jumpH<=0){ me.jumpH=0; me.jumpV=0; footDust(me.x,me.y); } }
-    runImpacts(); if(me.dash) updateDash(t);
+    runImpacts(); try{ aliveUpdate(dt); gateAreaTick(); }catch(e){} if(me.dash) updateDash(t);
     if(!me.dead){
       updateCast(); updateAuto(dt);
       if(me.leap) updateLeap(t); updatePet(dt,t);
