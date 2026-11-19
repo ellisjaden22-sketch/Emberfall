@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.91</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.92</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 91;
+const VERSION = 92;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1283,7 +1283,7 @@ ABIL.mender.push(
   {id:'sanct',lvl:11,name:'Sanctuary',icon:'🕊',cost:40,cd:45,self:true,sanct:true,radius:260,desc:'Consecrate the ground. Every ally inside is healed each second for 8s.'});
 ABIL.arcanist.push(
   {id:'blizzard',lvl:8,name:'Blizzard',icon:'🌨',cost:30,cd:18,cast:1.5,rng:380,hostile:true,area:130,aoeDmg:[18,5],root:2,ticks:3,vis:18,desc:'Three waves of ice crash down on the target area, freezing enemies in place.'},
-  {id:'phoenix',lvl:11,name:'Phoenix Flame',icon:'✹',cost:35,cd:30,self:true,radius:190,aoeDmg:[42,11],vis:19,desc:'Erupt in phoenix fire, scorching everything around you.'});
+  {id:'barrier',lvl:11,name:'Arcane Barrier',icon:'🛡',cost:25,cd:30,self:true,barrier:.4,dur:12,desc:'Wrap yourself in a shimmering arcane barrier that absorbs damage equal to 40% of your maximum health for 12s.'});
 /* ---------- v16: the Assassin, Celestus, talents ---------- */
 CLS.mender.name='Celestus';
 CLS.mender.desc='A priest of the starlit heavens. Channels celestial light to mend and shield allies, and calls down pillars of light on foes.';
@@ -1381,7 +1381,7 @@ const TALENTS={
     {id:'a_embers',t:0,max:3,n:'Searing Embers',ic:'🔥',d:'Deal {4}% more damage.',e:{dmg:.04}},
     {id:'a_mind',t:0,max:3,n:'Arcane Mind',ic:'🧠',d:'+{6}% maximum mana and mana regeneration.',e:{res:.06}},
     {id:'a_frost',t:0,max:3,n:'Frost Skin',ic:'❄',d:'Take {3}% less damage.',e:{mit:.03}},
-    {id:'a_pyro',t:1,max:3,n:'Pyromancy',ic:'☄',d:'Meteor and Phoenix Flame deal {12}% more damage.',e:{'ab:meteor':.12,'ab:phoenix':.12}},
+    {id:'a_pyro',t:1,max:3,n:'Pyromancy',ic:'☄',d:'Meteor deals {12}% more damage and Arcane Barrier absorbs {12}% more.',e:{'ab:meteor':.12,'ab:barrier':.12}},
     {id:'a_quick',t:1,max:3,n:'Quickened Mind',ic:'⏳',d:'Cooldowns are {6}% shorter.',e:{cdr:.06}},
     {id:'a_mass',t:1,max:3,n:'Critical Mass',ic:'✦',d:'+{3}% critical strike chance.',e:{crit:.03}},
     {id:'a_weave',t:2,max:2,n:'Mana Weave',ic:'🌀',d:'Spells cost {8}% less mana.',e:{cost:.08}},
@@ -1728,7 +1728,7 @@ function sendPresence(force){ if(KICKED) return;
   const p={v:VERSION,u:MY_U,ci:me.c.id||'',js:JOINMS,n:me.c.name,c:me.c.cls,l:me.c.lvl,x:Math.round(me.x),y:Math.round(me.y),f:+me.face.toFixed(2),
     hp:Math.round(me.hp),mhp:me.mhp,rs:[Math.round(me.res),me.mres],tr:tradePres(),pe:me.pet&&me.petOn&&!me.dead?[Math.round(me.pet.x),Math.round(me.pet.y),+(me.pet.face||0).toFixed(2),me.pet.mv?1:0,me.pet.swingT&&now()-me.pet.swingT<.4?1:0]:null,d:me.dead?1:0,pt:me.party||'',mt:me.mounted||null,em:me.emote?me.emote.k:null,wr:me.c.eq.weapon?me.c.eq.weapon.rar:0,ar:me.c.eq.armor?me.c.eq.armor.rar:0,gv:myGearVis(),nc:me.c.nc||null,ix:inspectData(),sg:me.song&&!me.dead?[me.song,+mySongMult().toFixed(2)]:null,bn:me.banner&&me.banner.until>t?[Math.round(me.banner.x),Math.round(me.banner.y),+(me.banner.until-t).toFixed(1),me.banner.song,+me.banner.mult.toFixed(2)]:null,ws:isGM&&gm.wset?[gm.wx,gm.tPh,gm.wset]:null,sl:me.stealth?(me.stepHide>now()?2:1):null,
     b:(me.bulwark>t?1:0)|(me.hots.length?2:0)|(me.cast?4:0)|(me.absorb>0&&me.absorbU>t?8:0)|(me.rootU>t?16:0)|(me.dots.length?32:0)|(me.avatarU>t?64:0),
-    z:gZone(me.x,me.y), bt:me.bgTeam&&inBG(me.x,me.y)?me.bgTeam:null, bg:inBG(me.x,me.y)&&BGS.host===String(MY_U)?bgOut():null, dm:meterOut(), gm:isGM?1:null, pid:MY_PID, iv:gm.invis?1:null, cs:cosBits()||null, ti:myTitle()||null, own:isRealmOwner()?1:null, au:gm.aura&&isGM&&!gm.invis?1:null, gl:isRealmOwner()&&(saves.gmGrants||[]).length?saves.gmGrants.map(g=>g.gid||g.pid).slice(0,20):null,
+    z:gZone(me.x,me.y), ac:ACHEST.claimed>=0?ACHEST.claimed:null, bt:me.bgTeam&&inBG(me.x,me.y)?me.bgTeam:null, bg:inBG(me.x,me.y)&&BGS.host===String(MY_U)?bgOut():null, dm:meterOut(), gm:isGM?1:null, pid:MY_PID, iv:gm.invis?1:null, cs:cosBits()||null, ti:myTitle()||null, own:isRealmOwner()?1:null, au:gm.aura&&isGM&&!gm.invis?1:null, gl:isRealmOwner()&&(saves.gmGrants||[]).length?saves.gmGrants.map(g=>g.gid||g.pid).slice(0,20):null,
     inv:myInv, ir:myIr, kk:myKick, pl:me.party&&amLeader()?1:null, cn:me.cast&&!me.cast.node&&!me.cast.fin?[String(me.cast.ab.name||'').slice(0,24),Math.round(clamp((t-me.cast.t0)/me.cast.dur,0,1)*100),Math.round(me.cast.dur*1000)]:null, a:myActs.slice(-28), ch:myChat.slice(-3),
     w: amHost? packMobs(): null, md: amHost? myMd.slice(-32): null, tg: amHost? myTg.slice(-16): null, hs: amHost?1:null, ny: MYNY?1:null, rd: isGM&&RAIDD.stamp?[RAIDD.k,RAIDD.stamp]:null, rr: isGM&&RAIDD.rr&&Date.now()-RAIDD.rr<10000?RAIDD.rr:null };
   const LIM=(room&&room.maxP)||3900; const ixs=JSON.stringify(p.ix); if(ixs===sendPresence.ixs&&t-(sendPresence.ixT||0)<4) delete p.ix; else { sendPresence.ixs=ixs; sendPresence.ixT=t; }
@@ -1788,9 +1788,9 @@ function syncPeers(){
     if(o.last===pr) continue; o.last=pr;
     o.n=clean(pr.n).slice(0,14)||'Stranger'; o.c=CLS[pr.c]?pr.c:'warden'; o.l=clamp(pr.l|0,1,MAXLVL);
     { const nx=+pr.x||0, ny=+pr.y||0, tn=now(), dtp=tn-(o.tr||0); if(o.tr&&dtp>.03&&dtp<1){ o.vx=clamp((nx-o.x)/dtp,-700,700); o.vy=clamp((ny-o.y)/dtp,-700,700); } else { o.vx=0; o.vy=0; } o.tr=tn; o.x=nx; o.y=ny; netSnap(o,nx,ny); }o.f=+pr.f||0;o.hp=+pr.hp||0;o.mhp=Math.max(1,+pr.mhp||1);o.d=!!pr.d;
-    o.sl=pr.sl|0; o.pe=Array.isArray(pr.pe)&&pr.pe.length>=4?pr.pe.map(Number):null; if(o.pe&&pr.pe[4]) o.peSw=now(); o.tr=pr.tr&&typeof pr.tr==='object'?pr.tr:null; if(Array.isArray(pr.ws)&&pr.gm&&p.gm!==false) applyWorldWs(pr.ws); o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,4); o.gv=parseGV(pr.gv); o.nc=clamp(pr.nc|0,0,12); o.sg=Array.isArray(pr.sg)?[clamp(pr.sg[0]|0,0,3),clamp(+pr.sg[1]||1,0,3)]:null; o.bn=Array.isArray(pr.bn)?{x:+pr.bn[0]||0,y:+pr.bn[1]||0,until:now()+clamp(+pr.bn[2]||0,0,25),song:clamp(pr.bn[3]|0,0,3),mult:clamp(+pr.bn[4]||1,0,3)}:null; if(Array.isArray(pr.ix)) o.ix=pr.ix.slice(0,3); o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.bt=pr.bt===1||pr.bt===2?pr.bt:0; o.bgS=Array.isArray(pr.bg)?pr.bg.slice(0,8):null; o.seenAt=t; o.dm=Array.isArray(pr.dm)&&pr.dm.length===4?pr.dm.map(v=>+v||0):null; if(o.gm) try{ raidNetIn(pr); }catch(e){}
-    if(o.isNew){ o.isNew=false; o.rx=o.x; o.ry=o.y; if(me&&seenO(o)) sysMsg(`${o.n} the ${CLS[o.c].name} has entered Emberfall.`); }
-    else if(o.wasVis!==undefined&&o.wasVis!==seenO(o)&&me) sysMsg(seenO(o)?`${o.n} the ${CLS[o.c].name} has entered Emberfall.`:`${o.n} has left the realm.`); o.wasVis=seenO(o);
+    o.sl=pr.sl|0; o.pe=Array.isArray(pr.pe)&&pr.pe.length>=4?pr.pe.map(Number):null; if(o.pe&&pr.pe[4]) o.peSw=now(); o.tr=pr.tr&&typeof pr.tr==='object'?pr.tr:null; if(Array.isArray(pr.ws)&&pr.gm&&p.gm!==false) applyWorldWs(pr.ws); o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,4); o.gv=parseGV(pr.gv); o.nc=clamp(pr.nc|0,0,12); o.sg=Array.isArray(pr.sg)?[clamp(pr.sg[0]|0,0,3),clamp(+pr.sg[1]||1,0,3)]:null; o.bn=Array.isArray(pr.bn)?{x:+pr.bn[0]||0,y:+pr.bn[1]||0,until:now()+clamp(+pr.bn[2]||0,0,25),song:clamp(pr.bn[3]|0,0,3),mult:clamp(+pr.bn[4]||1,0,3)}:null; if(Array.isArray(pr.ix)) o.ix=pr.ix.slice(0,3); o.pid=typeof pr.pid==='string'?pr.pid.slice(0,16):''; o.cs=pr.cs|0; o.ti=typeof pr.ti==='string'?clean(pr.ti).slice(0,20):''; o.own=!!pr.own&&!!pr.gm; o.au=!!pr.au&&!!pr.gm; o.iv=!!pr.iv; o.pl=!!pr.pl; if(Array.isArray(pr.cn)){ const nm=clean(pr.cn[0]).slice(0,24); if(!o.cast||o.cast.nm!==nm||Math.abs((pr.cn[1]|0)-o.cast.p0)>15&&(pr.cn[1]|0)<o.cast.p0) o.cast={nm,p0:clamp(pr.cn[1]|0,0,100),t0:t,dur:clamp(+pr.cn[2]||1000,200,10000)/1000}; } else o.cast=null; o.pt=clean(pr.pt).slice(0,20); o.gm=!!pr.gm&&(p.gm===undefined||!!p.gm); o.b=pr.b|0; o.wr=clamp(pr.wr|0,0,4); o.ar=clamp(pr.ar|0,0,3); o.mt=clamp(pr.mt|0,0,MOUNTS.length-1); { const ek=EMOTES[pr.em]?pr.em:''; if(ek!==(o.emk||'')){ o.emk=ek; o.emote=ek?{k:ek,t0:t}:null; if(ek&&me) chatLine(`${o.n} ${EMOTES[ek]}`,'c-say'); } } o.z=ZONES[pr.z]?pr.z:'meadow'; o.bt=pr.bt===1||pr.bt===2?pr.bt:0; if(+pr.ac>ACHEST.claimed&&+pr.ac<=achestCycle()){ ACHEST.claimed=+pr.ac; ACHEST.by=ACHEST.by||o.n; } o.bgS=Array.isArray(pr.bg)?pr.bg.slice(0,8):null; o.seenAt=t; o.dm=Array.isArray(pr.dm)&&pr.dm.length===4?pr.dm.map(v=>+v||0):null; if(o.gm) try{ raidNetIn(pr); }catch(e){}
+    if(o.isNew){ o.isNew=false; o.rx=o.x; o.ry=o.y; if(me&&seenOnline(o)) sysMsg(`${o.n} the ${CLS[o.c].name} has entered Emberfall.`); }
+    else if(o.wasVis!==undefined&&o.wasVis!==seenOnline(o)&&me) sysMsg(seenOnline(o)?`${o.n} the ${CLS[o.c].name} has entered Emberfall.`:`${o.n} has left the realm.`); o.wasVis=seenOnline(o);
     partyNet(o,pr);
     const acts=Array.isArray(pr.a)?pr.a:[];
     if(o.aSeq===null){ let mx=-1; for(const a of acts) if(Array.isArray(a)) mx=Math.max(mx,a[0]|0); o.aSeq=mx; }
@@ -1815,13 +1815,14 @@ function syncPeers(){
       if(party && (!me||!me.party||o.pt!==me.party)) continue;
       chatLine(txt, party?'c-party':'c-say', party?'[Party] ':'', {n:o.n,col:nameCol(o),gm:o.gm&&isGM}); o.bubble=txt; o.bubbleT=t+6; }
   }
-  for(const [peer,o] of others) if(!seen.has(peer)){ others.delete(peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); if(amHost) for(const m of mobs){ if(m.threat&&m.threat[o.u]) delete m.threat[o.u]; if(m.tgt===o.u) m.tgt=''; if(m.tag===o.u) m.tag=''; } if(me&&seenO(o)) sysMsg(`${o.n} has left the realm.`);
+  for(const [peer,o] of others) if(!seen.has(peer)){ others.delete(peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); if(amHost) for(const m of mobs){ if(m.threat&&m.threat[o.u]) delete m.threat[o.u]; if(m.tgt===o.u) m.tgt=''; if(m.tag===o.u) m.tag=''; } if(me&&seenOnline(o)) sysMsg(`${o.n} has left the realm.`);
     if(me&&me.target&&me.target.kind==='p'&&me.target.id===o.u) me.target=null; }
 }
 function handleRemoteAct(o,a){
   const kind=a[1],tgt=a[2],amt=a[3]|0,vis=a[4]|0;
   if(amHost && kind!==6 && kind!==7 && kind<12) hostApplyAct(o.u,o.c,a);
   if(kind===12){ o.swingT=vis===0?now():o.swingT; const tp=tgt===MY_U?null:othersByU.get(tgt); if(tp) spark(tp.rx,tp.ry,'#ffd0a0'); }
+  if(kind===41){ try{ achestRemote(o,amt); }catch(e){} }
   if(kind===14&&me&&(inArena(me.x,me.y)||inBG(me.x,me.y))&&tgt!==MY_U){ const k=othersByU.get(tgt); sysMsg(`⚔ ${k?k.n:'Someone'} defeated ${o.n}.`,'c-yell'); }
   if(me && tgt===MY_U && kind===14){ const P=me.c.pvp=me.c.pvp||{k:0,d:0,best:0,st:0}; P.k++; P.st=(P.st||0)+1; P.best=Math.max(P.best,P.st); stat('pvpKills',1); persist(); try{ pvpKillReward(o); }catch(e){}
     toast(`You defeated ${o.n}!`); sysMsg(`⚔ You defeated ${o.n}! Kill streak: ${P.st}.`,'c-xp'); if(P.st>=3) banner(P.st>=5?'UNSTOPPABLE':'KILLING SPREE',`${P.st} kills in a row`,'win'); }
@@ -2180,7 +2181,7 @@ function hitPlayer(o,d,vis,crit){ pushAct(12,o.u,Math.round(d*(1+pvpGear('d'))),
 function arenaHud(){ let el=$('arenaHud'); const on=!!(me&&inArena(me.x,me.y)); if(!on){ if(el) el.style.display='none'; return; }
   if(!el){ el=document.createElement('div'); el.id='arenaHud'; el.className='panel'; document.body.appendChild(el); } el.style.display='block'; const P=me.c.pvp||{k:0,d:0,best:0,st:0}, safe=arenaSafe(me.x,me.y);
   const foes=[...others.values()].filter(o=>inArena(o.rx,o.ry)&&!(me.party&&o.pt===me.party)).length;
-  el.innerHTML=`<b>⚔ Bloodsand Arena</b> <span class="${safe?'safe':'war'}">${safe?'Safe zone':'PvP active'}</span><br><small>Kills ${P.k} · Deaths ${P.d} · Streak ${P.st||0} (best ${P.best}) · ${foes} rival${foes===1?'':'s'} here</small>`; }
+  el.innerHTML=`<b>⚔ Bloodsand Arena</b> <span class="${safe?'safe':'war'}">${safe?'Safe zone':'PvP active'}</span><br><small>Kills ${P.k} · Deaths ${P.d} · Streak ${P.st||0} (best ${P.best}) · ${foes} rival${foes===1?'':'s'} here</small><br><small>${achestStatus()}</small>`; }
 function targetEnt(){
   const tg=me.target; if(!tg) return null;
   if(tg.kind==='m'){ const m=mobById[tg.id]; return m&&!m.dead?{kind:'m',e:m,x:m.rx,y:m.ry,hostile:true}:null; }
@@ -2255,6 +2256,8 @@ function execAbility(ab,tgt){
   if(ab.hot && tgt){ const h=Math.round(scaleV(ab.hot));
     petals(tgt.x,tgt.y); if(tgt.u===MY_U){ me.hots=me.hots.filter(x=>x.src!==MY_U); me.hots.push({src:MY_U,amt:h,left:5,next:t+2}); sparkle(me.x,me.y,'#c6ffb0'); }
     else { pushAct(4,tgt.u,h,6); sparkle(tgt.x,tgt.y,'#c6ffb0'); } }
+  if(ab.barrier){ const a=Math.round(me.mhp*ab.barrier*(1+TAL('absorb'))*(1+TAL('ab:barrier'))); me.absorb=Math.max(me.absorb||0,a); me.absorbU=t+(ab.dur||12);
+    ring(me.x,me.y,'#c9a0ff',40); burst(me.x,me.y,'#e8d0ff',16,70,{glow:true}); fct(me.x,me.y-44,'Barrier '+a,'#d8b8ff'); try{ snd('holy'); }catch(e){} sendPresence(true); }
   if(ab.absorb && tgt){ const a=Math.round(scaleV(ab.absorb)*(1+TAL('absorb')));
     if(tgt.u===MY_U){ me.absorb=a; me.absorbU=t+12; } else pushAct(7,tgt.u,a,0);
     ring(tgt.x,tgt.y,'#9fd8ff',36); burst(tgt.x,tgt.y,'#d8f0ff',14,70,{glow:true}); if(ab.id==='guardian'){ pushAct(6,0,0,26,tgt.x,tgt.y); FXP({k:'wings',x:tgt.x,y:tgt.y,dur:1.6,f:tgt.u===MY_U?me.face:0}); FXP({k:'dome',x:tgt.x,y:tgt.y,r:1,col:'#fff1b0',dur:1}); } else FXP({k:'dome',x:tgt.x,y:tgt.y,r:1.05,col:'#bfe8ff',dur:1.1}); }
@@ -2298,7 +2301,7 @@ function enterStealth(vanish){ me.stealth=true; me.auto=false; const [X,Y,Z]=ph3
 function rogueAbility(ab,tgt,t,dm,critCh,critM){
   if(ab.finisher){ me.cp=TAL('refund')?1:0; }
   if(ab.cp&&(ab.hostile||ab.aoeDmg)) me.cp=Math.min(5,(me.cp||0)+ab.cp);
-  if(ab.id==='sinister'&&TAL('poison')&&tgt&&tgt.kind==='m'){ const m=tgt.e, pd=Math.max(1,Math.round(scaleV(ab.dmg)*dm*TAL('poison')/3)); for(let k=1;k<=3;k++) setTimeout(()=>{ if(!m.dead&&me&&!me.dead){ pushAct(0,m.id,pd,0); fct(m.rx,m.ry-26,pd,'#7aff4a'); } },k*2000); }
+  if(ab.id==='sinister'&&TAL('poison')&&tgt&&(tgt.kind==='m'||(tgt.kind==='p'&&pvpFoe(tgt.e)))){ const m=tgt.e, isP=tgt.kind==='p', pd=Math.max(1,Math.round(scaleV(ab.dmg)*dm*TAL('poison')/3)); for(let k=1;k<=3;k++) setTimeout(()=>{ if(!me||me.dead) return; if(isP){ if(!m.d&&pvpFoe(m)){ hitPlayer(m,pd,0,false); fct(m.rx,m.ry-40,'Poison','#7aff4a'); } } else if(!m.dead){ pushAct(0,m.id,pd,0); fct(m.rx,m.ry-26,pd,'#7aff4a'); } },k*2000); }
   if(ab.stealth) enterStealth(false);
   if(ab.vanish) enterStealth(true);
   if(ab.buff==='evasion'){ me.evasionU=t+ab.dur; const [X,Y,Z]=ph3(me.x,me.y,1); burst3(X,Y,Z,'#bfffd8',16,1.6,{glow:true}); FXP({k:'wave',x:me.x,y:me.y,r:40,col:'#7affc0',dur:.4}); }
@@ -4821,11 +4824,13 @@ function pickAt(mx,my,btn){ TOUCHPICK=TOUCHPICK_(); let best=null,bd=60;
   for(const m of mobs){ if(m.dead) continue; const h=(MOBH[m.t.key]||1.6), w=Math.max(.42,Math.min(2.6,(m.t.r||14)/TS*1.15,h*.42)); if(Math.hypot(m.rx/TS-CAM.tx,m.ry/TS-CAM.tz)>(m.t.boss?40:26)) continue; test(m.rx/TS,groundY(m.rx,m.ry),m.ry/TS,h*1.04,w,{kind:'m',id:m.id}); }
   for(const o of others.values()) if(seenO(o)) test(o.rx/TS,standY(o.rx,o.ry),o.ry/TS,o.mt?2.9:2.05,.5,{kind:'p',id:o.u});
   for(const n of NPCS) test(n.x/TS,groundY(n.x,n.y),n.y/TS,2.05,.5,{kind:'n',id:n.id});
+  if(me&&inArena(me.x,me.y)&&achestUp()){ const Q=achestPos(); test(Q.x/TS,groundY(Q.x,Q.y),Q.y/TS,1.2,1,{kind:'achest'}); }
   for(const o of ALIVE.objs) if(aliveSeen(o)) test(o.x/TS,groundY(o.x,o.y),o.y/TS,o.h,o.w,{kind:'obj',o});
   for(const n of NODES){ if(n.resp>now()||!nodeSeen(n)) continue; test(n.x/TS,groundY(n.x,n.y),n.y/TS,.9,.55,{kind:'node',n}); }
   if(profSkill('skinning')) for(const m of mobs){ if(!m.dead||!(m.skinU>now())||m.skinned) continue; test(m.dx/TS,groundY(m.dx,m.dy),m.dy/TS,.7,Math.max(.5,(m.t.r||14)/TS),{kind:'skin',m}); }
   if(FISH&&FISH.ph!=='cast') test(FISH.x/TS,-1.2,FISH.y/TS,.6,.4,{kind:'bob'});
   if(PICKDRY) return best;
+  if(best&&best.kind==='achest'){ achestUse(); return; }
   if(best&&best.kind==='obj'){ aliveUse(best.o); return; }
   if(best&&best.kind==='node'){ const n=best.n; if(dist(me.x,me.y,n.x,n.y)<95) startGather(n); else err('Too far away'); return; }
   if(best&&best.kind==='skin'){ if(dist(me.x,me.y,best.m.dx,best.m.dy)<95) startSkin(best.m); else err('Too far away'); return; }
@@ -5288,7 +5293,7 @@ function drawHorse0(o){ const M=MOUNTS[o.m]||MOUNTS[1]; const cel=!!M.celestial,
 }
 /* ---------- dynamic world pieces ---------- */
 function drawExtras(near,t){
-  try{ aliveDraw(near,t); }catch(e){ frameErr&&frameErr(e,'living world'); } try{ bgDraw(near,t); }catch(e){} try{ townGateDraw(near,t,Math.min(.05,t-(TGATES.lt||t))); TGATES.lt=t; }catch(e){}
+  try{ aliveDraw(near,t); }catch(e){ frameErr&&frameErr(e,'living world'); } try{ bgDraw(near,t); }catch(e){} try{ shieldDraw(near,t); }catch(e){} try{ achestDraw(near,t); }catch(e){} try{ townGateDraw(near,t,Math.min(.05,t-(TGATES.lt||t))); TGATES.lt=t; }catch(e){}
   drawLootBags(near,t); drawVaultDyn(near,t); try{ drawRaidDyn(near,t); }catch(e){}
   if(STABLE.x&&near(STABLE.x*TS,STABLE.z*TS,70)){ const hs=[[-3.6,-2.2,.3,1,0],[2.4,-1.6,2.6,7,0],[3.6,2,4,3,1],[-1.6,2.1,1,1,1],[.4,-.2,5.4,4,0]];
     hs.forEach(([dx,dz,f,m,walker],i)=>{ let X=STABLE.x+dx, Z=STABLE.z+dz, face=f+Math.sin(t*.3+dx)*.25, mv=0, walk=0;
@@ -6123,6 +6128,7 @@ Object.assign(ICONS,{
   vanish:['shadow',`${[[22,40,12],[38,38,13],[30,28,12],[44,26,9],[18,26,9]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#6a6478" opacity=".85" ${OL}/>`).join('')}<circle cx="30" cy="34" r="8" fill="#9a94a8" opacity=".9"/><path d="M26 32 L28 34 M34 32 L32 34" stroke="#3aff9a" stroke-width="2.4"/>`],
 });
 
+ICONS.barrier=['arcane',`<path d="M32 8 L52 16 Q52 40 32 57 Q12 40 12 16 Z" fill="#d9b8ff" opacity=".85" stroke="#fff" stroke-width="2"/><path d="M32 18 L43 23 Q43 38 32 48 Q21 38 21 23 Z" fill="#8a4ad8" opacity=".85"/><circle cx="32" cy="32" r="4" fill="#fff"/>`];
 function iconSVG(id){ const d=ICONS[id]; if(!d) return null; const [a,b]=ISCHOOL[d[0]];
   return `<svg class="sv" viewBox="0 0 64 64"><defs><radialGradient id="ig_${id}" cx="38%" cy="30%" r="85%"><stop offset="0" stop-color="${a}"/><stop offset=".55" stop-color="${b}"/><stop offset="1" stop-color="#000"/></radialGradient></defs><rect width="64" height="64" fill="url(#ig_${id})"/>${d[1]}<rect x="0" y="0" width="64" height="64" fill="url(#igloss)"/></svg>`; }
 ISCHOOL.song=['#ffe0a8','#6a2408'];
@@ -6293,7 +6299,9 @@ function renderGMWin(){ const w=$('gmWin'); if(!w||w.classList.contains('hidden'
    v8 FEATURES: cast bar, boss encounters, loot bags, quest feedback,
    NPC life, parties, GM privacy
    ===================================================================== */
-const seenO=o=>(!o.iv||isGM)&&!(o.sl&&!isGM&&me&&typeof pvpFoe==='function'&&pvpFoe(o)&&dist(o.rx,o.ry,me.x,me.y)>32);
+const pvpZone=(px,py)=>inArena(px,py)||inBG(px,py);
+const seenOnline=o=>(!o.iv||isGM);
+const seenO=o=>(!o.iv||isGM)&&!(o.sl&&!isGM&&me&&(pvpZone(me.x,me.y)||pvpZone(o.rx,o.ry))&&!(me.party&&o.pt===me.party)&&!bgAlly(o)&&dist(o.rx,o.ry,me.x,me.y)>32);
 /* ---------- cast bar ---------- */
 let cbKey='', cbEnd=null;
 function updateCastbar(t){ const cb=$('castbar'); const c=me.cast;
@@ -8255,6 +8263,7 @@ ACH.push({id:'lore6',n:'Curious Mind',d:'Read 6 lore stones',ic:'\ud83d\udcdc',f
   {id:'wish5',n:'Wishful Thinking',d:'Toss 5 coins into a wishing fountain',ic:'\ud83e\ude99',f:(c,S)=>(S.wishes||0)>=5});
 ACH.push({id:'bgwin',n:'Battle-Tested',d:'Win a battle in Emberclash Fields',ic:'\u2694\ufe0f',f:(c,S)=>(S.bgWins||0)>=1},
   {id:'honor250',n:'Honor Bound',d:'Earn 250 Honor',ic:'\ud83d\udee1\ufe0f',f:(c,S)=>(S.honorEarned||0)>=250},
+  {id:'achest',n:'Spoils of the Sands',d:'Claim the Bloodsand Chest in the arena',ic:'\ud83d\udcb0',f:(c,S)=>(S.arenaChests||0)>=1},
   {id:'conqgear',n:'Champion of the Sands',d:'Buy a piece of the Ashen Champion set',ic:'\ud83c\udfc6',f:(c,S)=>(S.conqBuys||0)>=1});
 function cstats(){ const c=me.c; c.stats=c.stats||{}; const S=c.stats; S.kills=S.kills||0; S.bosses=S.bosses||{}; return S; }
 function stat(k,n){ if(!me) return; const S=cstats(); S[k]=(S[k]||0)+n; }
@@ -8604,6 +8613,47 @@ function townGateDraw(near,t,dt){ if(!TOWN.gates||!TOWN.gates.length) return; co
       P(GEO.box,.12,.22,.3,[.2,.19,.18],0,.08,.55,0); P(GEO.box,.12,.22,.3,[.2,.19,.18],0,.08,2.75,0);
       P(GEO.sph,.16,.16,.08,[.75,.6,.3],.3,hw-.35,1.5,s*.14); } }); }
 
+/* v92: absorb shields are visible as a soft bubble around the hero */
+function shieldBubble(x,y,t,k){ const X=x/TS, Z=y/TS, Y=groundY(x,y); mreset(); mtr(X,Y+1.05,Z); mry(t*.6); P(GEO.sph,1.55,2.25,1.55,[.68,.62,1],1.5,0,0,0,(.12+.05*Math.sin(t*4+k))); addLight(X,Y+1.2,Z,2.5,[.4,.35,.8]); }
+function shieldDraw(near,t){ if(!me) return; if(!me.dead&&me.absorb>0&&me.absorbU>t) shieldBubble(me.x,me.y,t,0); for(const o of others.values()) if((o.b&8)&&!o.d&&seenO(o)&&near(o.rx,o.ry,50)) shieldBubble(o.rx,o.ry,t,o.rx); }
+/* ======================================================================================================
+   v92 The Bloodsand Chest: a war chest appears in the middle of the Bloodsand Arena every 3 minutes (on a
+   shared clock, so every player sees the same chest). Opening it takes 3 seconds of standing still, and any
+   damage or movement breaks it, so it has to be fought over. The first hero to finish claims it for
+   +50 Conquest and +75 Honor, and everyone in the arena is told who took it.
+   ====================================================================================================== */
+const ACHEST={period:180,chan:3,claimed:-1,by:'',open:null,ann:-1,pos:null};
+const achestCycle=()=>Math.floor(Date.now()/1000/ACHEST.period);
+const achestUp=()=>ACHEST.claimed!==achestCycle();
+function achestPos(){ if(!ACHEST.pos){ const [x,y]=findOpen(Math.floor(AR.cx),Math.floor(AR.cy)); ACHEST.pos={x:(x+.5)*TS,y:(y+.5)*TS}; } return ACHEST.pos; }
+function achestUse(){ if(!me||me.dead) return; if(!inArena(me.x,me.y)) return; const Q=achestPos();
+  if(!achestUp()) return err('The chest has already been claimed. A new one appears soon.'); if(dist(me.x,me.y,Q.x,Q.y)>80) return err('Too far away');
+  if(me.mounted) dismount(); if(me.stealth) breakStealth(); me.auto=false; ACHEST.open={t0:now(),x:me.x,y:me.y,c:achestCycle()}; sysMsg('You start prying open the Bloodsand Chest… hold still!','c-sys'); }
+function achestClaim(){ const c=ACHEST.open.c; ACHEST.open=null; ACHEST.claimed=c; ACHEST.by=me.c.name; pushAct(41,0,c,0); sendPresence(true);
+  banner('BLOODSAND CHEST','+50 Conquest · +75 Honor','win'); try{ snd('holy'); const Q=achestPos(); burst3(Q.x/TS,groundY(Q.x,Q.y)+.8,Q.y/TS,'#ffd36a',30,2.4,{glow:true,up:1}); }catch(e){}
+  pvpGain('conq',50,'claiming the Bloodsand Chest'); pvpGain('honor',75,'claiming the Bloodsand Chest'); stat('arenaChests',1); try{ checkAch(); }catch(e){} }
+function achestRemote(o,c){ if(!(c>=ACHEST.claimed)) return; const fresh=c!==ACHEST.claimed; ACHEST.claimed=c; ACHEST.by=o.n;
+  if(fresh&&me&&inArena(me.x,me.y)) sysMsg(`🏆 ${o.n} claimed the Bloodsand Chest!`,'c-yell'); if(ACHEST.open&&ACHEST.open.c===c){ ACHEST.open=null; err(`${o.n} got to the chest first`); } }
+function achestTick(){ if(!me) return; const t=now(), inA=inArena(me.x,me.y), c=achestCycle();
+  if(inA&&achestUp()&&ACHEST.ann!==c){ ACHEST.ann=c; sysMsg('⚔ A Bloodsand Chest has appeared in the middle of the arena! Open it for +50 Conquest and +75 Honor.','c-yell'); }
+  const O=ACHEST.open; if(O){ const moved=dist(me.x,me.y,O.x,O.y)>6, hurt=(me.hurtT||0)>O.t0+.05;
+    if(me.dead||!inA||moved||hurt||!achestUp()||O.c!==c){ ACHEST.open=null; if(!me.dead&&(moved||hurt)) err(hurt?'Interrupted!':'You moved away from the chest'); }
+    else if(t-O.t0>=ACHEST.chan) achestClaim(); }
+  let bar=$('achestBar'); if(ACHEST.open){ if(!bar){ bar=document.createElement('div'); bar.id='achestBar'; bar.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);width:240px;height:18px;background:rgba(20,14,10,.85);border:1px solid #c9a24a;border-radius:9px;overflow:hidden;z-index:40;color:#fff;font:600 12px sans-serif;text-align:center;line-height:18px'; document.body.appendChild(bar); }
+    const k=clamp((t-ACHEST.open.t0)/ACHEST.chan,0,1); bar.style.display='block'; bar.innerHTML=`<div style="position:absolute;inset:0;width:${(k*100).toFixed(1)}%;background:linear-gradient(90deg,#b8860b,#ffd36a)"></div><span style="position:relative">Opening the Bloodsand Chest</span>`; }
+  else if(bar) bar.style.display='none'; }
+function achestStatus(){ if(achestUp()) return '<span style="color:#ffd36a">🏆 The chest is up! Fight for it in the middle.</span>'; const left=ACHEST.period-((Date.now()/1000)%ACHEST.period); return `Next chest in ${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}${ACHEST.by?` · last claimed by ${esc(ACHEST.by)}`:''}`; }
+function achestDraw(near,t){ if(!me||me.y<OWH*TS) return; const Q=achestPos(); if(!near(Q.x,Q.y,70)) return; const X=Q.x/TS, Z=Q.y/TS, Y=groundY(Q.x,Q.y);
+  mreset(); mtr(X,Y,Z); P(GEO.cyl,2.2,.18,2.2,[.42,.36,.3],0,0,.09,0); P(GEO.cyl,1.7,.1,1.7,[.62,.48,.25],.2,0,.22,0);
+  if(!achestUp()) return;
+  const open=ACHEST.open?clamp((now()-ACHEST.open.t0)/ACHEST.chan,0,1):0, bob=Math.sin(t*2)*.03;
+  mreset(); mtr(X,Y+.27+bob,Z); mry(t*.15);
+  P(GEO.box,1.1,.6,.72,[.42,.24,.1],0,0,.3,0); P(GEO.box,1.14,.08,.76,[.85,.66,.25],.6,0,.05,0); P(GEO.box,1.14,.08,.76,[.85,.66,.25],.6,0,.56,0);
+  for(const s of [-1,1]) P(GEO.box,.08,.62,.78,[.85,.66,.25],.6,s*.42,.3,0);
+  mreset(); mtr(X,Y+.27+bob+.6,Z); mry(t*.15); mtr(0,0,-.36); mrx(-open*1.1); P(GEO.box,1.12,.24,.74,[.46,.27,.11],0,0,.12,.36); P(GEO.box,1.16,.06,.78,[.9,.7,.28],.7,0,.25,.36); P(GEO.box,.16,.16,.06,[1,.85,.4],1.4,0,.1,.74);
+  addLight(X,Y+1.2,Z,6+3*Math.sin(t*3),[1.6,1.1,.4]); if(Math.random()<.3) P3(X+(Math.random()-.5)*1.2,Y+.8,Z+(Math.random()-.5)*.9,0,.9,0,1,.07,'#ffe08a',{glow:true});
+  if(Math.random()<.08) P3(X,Y+.9,Z,0,3.5,0,1.4,.14,'#ffd36a',{glow:true}); }
+
 function update(dt){
   const t=now();
   syncPeers();
@@ -8621,7 +8671,7 @@ function update(dt){
     else { if(!rooted&&!me.dead&&!me.dash&&Math.hypot(me.vx||0,me.vy||0)>8){ const k=Math.exp(-dt*(me.mounted?MOVE_TUNE.stopMount:MOVE_TUNE.stopFoot)); me.vx*=k; me.vy*=k; movePlayer(me,me.vx*dt,me.vy*dt,10); } else { me.vx=0; me.vy=0; } }
     if(!me.moving&&!me.dash){ const te=targetEnt(); if(te&&te.kind!=='n'&&!te.self&&(me.cast||me.auto)) me.face=Math.atan2(te.y-me.y,te.x-me.x); }
     if(me.jumpV||me.jumpH>0){ me.jumpV=(me.jumpV||0)-15*dt; me.jumpH=Math.max(0,(me.jumpH||0)+me.jumpV*dt); if(me.jumpH<=0){ me.jumpH=0; me.jumpV=0; footDust(me.x,me.y); } }
-    runImpacts(); try{ aliveUpdate(dt); gateAreaTick(); }catch(e){} try{ bgTick(dt); }catch(e){ console.warn('battleground',e); } if(me.dash) updateDash(t);
+    runImpacts(); try{ aliveUpdate(dt); gateAreaTick(); }catch(e){} try{ bgTick(dt); }catch(e){ console.warn('battleground',e); } try{ achestTick(); }catch(e){} if(me.dash) updateDash(t);
     if(!me.dead){
       updateCast(); updateAuto(dt);
       if(me.leap) updateLeap(t); updatePet(dt,t);
