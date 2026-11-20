@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 94;
+const VERSION = 95;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2249,7 +2249,7 @@ function skAnimCrt(S,M,b,m){ const t=now()+((m.id||0)%7)*.83, R={}, L=[], add=(n
 /* v73: hero models for the seven classes. Each is a sculpted statue given a simple rig (pelvis, spine, chest, head and two legs),
    animated here: legs that walk, run, sit a saddle and kick when swimming; the whole body twisting and lunging into attacks,
    leaning back to cast, emotes, and a fall on death. Turn off in Settings > Graphics to see the classic look with your gear. */
-const HEROM={warden:'hero4_warden',mender:'hero4_mender',barbarian:'hero4_barbarian',arcanist:'hero4_arcanist',assassin:'hero4_assassin',hunter:'hero4_hunter',bard:'hero4_bard'};
+const HEROM={warden:'hero5_warden',mender:'hero5_mender',barbarian:'hero5_barbarian',arcanist:'hero5_arcanist',assassin:'hero5_assassin',hunter:'hero5_hunter',bard:'hero5_bard'};   /* v95: re-rigged with ankles and toes */
 const HERO_H={warden:1.95,barbarian:1.95,mender:1.9,arcanist:1.92,assassin:1.82,hunter:1.85,bard:1.9};
 /* v75: hero movement, all round. The seven hero models now have shoulders and elbows (weapons, shields and staves ride in the hands;
    the Celestus and the Bard hold their swords two-handed; the Celestus' wings have their own joints). Everything below is
@@ -2423,8 +2423,87 @@ function skAnimHero(o,cls){ const A=skAnimHero0(o,cls), st=o.an||{}, t=now(), R=
   st._lastR=outR; st._lastDy=dy;
   return {R:outR,dy,fw:A.fw}; }
 
+/* ======================================================================================================
+   v95 feet, ground contact and footwork for the heroes
+   The heroes' skeletons now have ankles (footL/footR) and the balls of the feet (toeL/toeR). This layer runs after the
+   pose (skAnimHero) and before skinning:
+   - keeps each planted foot flat on the ground whatever the leg is doing, and lets the swinging foot hang more naturally;
+   - rolls the foot through every step: heel strike, flat, heel lift and toe-off (the toes bend so they stay on the ground),
+     toes pointed in the air, forefoot landings when running;
+   - plants the feet on slopes and uneven ground: each foot finds the ground under it, the hips drop to the lower foot and
+     the other knee bends (two-bone leg IK), and the feet tilt to match the slope;
+   - turns the hips toward the direction of travel when strafing or backing up, while the chest keeps facing forward;
+   - takes small steps when turning on the spot instead of sliding round;
+   - lifts the back heel in lunging attacks, rests the back foot on its toes when kneeling, points the toes when swimming,
+     lets the feet go slack in death and keeps the heels down in the stirrups.
+   ====================================================================================================== */
+function feetInfo(M){ if(M._feet!==undefined) return M._feet; const B=M.B, has=n=>B.findIndex(b=>b.n===n);
+  if(has('footL')<0||has('footR')<0) return M._feet=null;
+  const wp=i=>{ const p=[0,0,0]; for(let k=i;k>=0;k=B[k].p){ const t=B[k].t; p[0]+=t[0]; p[1]+=t[1]; p[2]+=t[2]; } return p; }, F={};
+  for(const s of ['L','R']){ const d=(M.meta&&M.meta.feet&&M.meta.feet[s]&&M.meta.feet[s].dir)||[0,0,1], A=wp(has('foot'+s)), T=wp(has('thigh'+s)), K=wp(has('shin'+s));
+    F[s]={a:A, hinge:[d[2],0,-d[0]], lt:Math.hypot(T[0]-K[0],T[1]-K[1],T[2]-K[2]), ls:Math.hypot(K[0]-A[0],K[1]-A[1],K[2]-A[2])}; }
+  return M._feet=F; }
+const FT_sm=x=>{ x=x<0?0:x>1?1:x; return x*x*(3-2*x); };
+function heroFeet(o,cls,A,M,scH,S){ const F=feetInfo(M); if(!F) return; const R=A.R, st=o.an||{}, t=now();
+  const add=(n,x,y,z,a)=>{ if(a&&isFinite(a)) (R[n]||(R[n]=[])).push([x,y,z,a]); };
+  const sumX=n=>{ let a=0; for(const q of R[n]||[]) if(q[0]===1&&!q[1]&&!q[2]) a+=q[3]; return a; };
+  const dt=clamp(t-(st._ftT||t),0,.1); st._ftT=t; const ease=(k,v,r)=>{ st[k]=(st[k]??v)+(v-(st[k]??v))*Math.min(1,dt*r); return st[k]; };
+  const EM=o.emote&&o.emote.k, bs=o.dead>=0?'dead':o.ride?'ride':o.swim?'swim':EM==='sit'||EM==='kneel'?EM:o.air?'air':'ground';
+  const mv=clamp(st._hMv??(o.mv||0),0,1), run=clamp((mv-.55)/.45,0,1), duty=.62-.24*run, TAU=Math.PI*2, P0=(((st._gp||0)/TAU)%1+1)%1, face=o.face||0;
+  const art={L:0,R:0}, toe={L:0,R:0}, flatK={L:1,R:1};
+  /* ---------- hips toward the direction of travel (strafing, backing up) ---------- */
+  if(bs==='ground'&&mv>.15&&st._hd!=null){ let rel=st._hd-face; rel=Math.atan2(Math.sin(rel),Math.cos(rel)); if(Math.abs(rel)>Math.PI/2+.35) rel=rel-Math.PI*Math.sign(rel);
+    const yaw=ease('_ftYaw',clamp(-rel*.6,-.62,.62)*FT_sm((mv-.15)/.3),8); if(Math.abs(yaw)>.005){ add('pelvis',0,1,0,yaw); add('spine',0,1,0,-yaw*.75); add('chest',0,1,0,-yaw*.25); } }
+  else ease('_ftYaw',0,8);
+  /* ---------- small steps when turning on the spot ---------- */
+  { let df=face-(st._ftF??face); df=Math.atan2(Math.sin(df),Math.cos(df)); st._ftF=face;
+    const rate=Math.abs(df)/Math.max(dt,.016), want=bs==='ground'&&mv<.2&&!(o.swing>=0)&&rate>.9?FT_sm((rate-.9)/2):0, k=ease('_ftTk',want,want>(st._ftTk||0)?10:5);
+    st._ftTp=(st._ftTp||0)+Math.abs(df)*(k>.01?1:0);
+    if(k>.01){ const q=st._ftTp/.6*Math.PI, l=Math.max(0,Math.sin(q))*k, r=Math.max(0,-Math.sin(q))*k;
+      add('thighL',1,0,0,-.32*l); add('shinL',1,0,0,.62*l); add('thighR',1,0,0,-.32*r); add('shinR',1,0,0,.62*r); add('pelvis',0,0,1,.04*(l-r)); A.dy=(A.dy||0)-.01*(l+r); } }
+  /* ---------- ground contact: find the ground under each foot ---------- */
+  const ik={L:0,R:0}; let drop=0;
+  if(bs==='ground'&&OPT.footIK!==false&&typeof standY==='function'){
+    const cf=Math.cos(face), sf=Math.sin(face), X=o.x, Z=o.z, h0=standY(X*TS,Z*TS), d={};
+    for(const s of ['L','R']){ const a=F[s].a, fx=X+cf*a[2]*S+sf*a[0]*S, fz=Z+sf*a[2]*S-cf*a[0]*S; d[s]=standY(fx*TS,fz*TS)-h0; }
+    const ok=Math.abs(d.L)<.45&&Math.abs(d.R)<.45, w=ok?1-.55*mv:0;
+    const dL=ease('_ftIL',ok?d.L*w:0,12), dR=ease('_ftIR',ok?d.R*w:0,12);
+    drop=Math.min(dL,dR,0); ik.L=dL-drop; ik.R=dR-drop;
+    /* the feet tilt with the slope they stand on */
+    const ahead=standY((X+cf*.35)*TS,(Z+sf*.35)*TS), behind=standY((X-cf*.35)*TS,(Z-sf*.35)*TS), sl=Math.abs(ahead-behind)<.5?Math.atan2(ahead-behind,.7):0;
+    const slope=ease('_ftSl',sl*(1-.5*mv),8); art.L-=slope; art.R-=slope;
+    if(drop<-.001) A.dy=(A.dy||0)+drop/scH; }
+  else { ease('_ftIL',0,12); ease('_ftIR',0,12); ease('_ftSl',0,8); }
+  /* two-bone leg: shorten each leg by bending the knee, the thigh comes forward so the foot stays under the hip */
+  for(const s of ['L','R']){ const e=ik[s]/S; if(e<.002) continue; const f=F[s], a=f.lt, b=f.ls, k0=clamp(sumX('shin'+s),0,2.6);
+    const L0=Math.sqrt(a*a+b*b+2*a*b*Math.cos(k0)), L1=Math.max(Math.abs(a-b)+.05,L0-e), k1=Math.acos(clamp((L1*L1-a*a-b*b)/(2*a*b),-1,1)), dk=Math.max(0,k1-k0);
+    add('shin'+s,1,0,0,dk); add('thigh'+s,1,0,0,-dk*b/(a+b)); }
+  /* ---------- the foot roll through each step ---------- */
+  const g=clamp(mv*1.8,0,1);
+  if(bs==='ground'){
+    for(const s of ['L','R']){ const p=s==='L'?P0:(P0+.5)%1;
+      if(p<duty){ const u=p/duty, strike=1-FT_sm(u/.2), off=FT_sm((u-.55)/.45);
+        art[s]+=g*(-.3*(1-run)*strike+.12*run*strike+(.36+.32*run)*off); toe[s]+=-g*(.36+.32*run)*off*.95; }
+      else { const w=(p-duty)/(1-duty), lift=1-FT_sm(w/.35);
+        art[s]+=g*((.46+.3*run)*lift-.14*Math.sin(Math.PI*w)-.22*(1-run)*FT_sm((w-.7)/.3)+.06*run*FT_sm((w-.7)/.3)); toe[s]+=-g*.28*(1-FT_sm(w/.25));
+        flatK[s]=1-.45*g*Math.sin(Math.PI*w); } }
+    /* lunging blows: the back heel comes up and the weight goes onto the ball of the foot */
+    if(o.swing>=0){ const h=Math.sin(Math.PI*clamp((o.swing-.28)/.55,0,1))*(1-mv*.75); art.R+=.42*h; toe.R-=.4*h; }
+    /* the combat stance sits a touch onto the balls of the feet */
+    const rd=st._hRdy||0; if(rd>.01&&mv<.3){ art.L+=.06*rd; art.R+=.1*rd; toe.R-=.08*rd; }
+    /* landing: the forefoot touches first, then the heel settles */
+    const ld=st._hLand?clamp(1-(t-st._hLand)/.2,0,1):0; if(ld>0){ art.L+=.22*ld*ld; art.R+=.22*ld*ld; } }
+  else if(bs==='air'){ const vy=o.vy==null?0:clamp(o.vy,-1.3,1); flatK.L=flatK.R=.35; const k=vy>0?.42:.42-.6*clamp(-vy,0,1); art.L+=k; art.R+=k+.08; }
+  else if(bs==='swim'){ flatK.L=flatK.R=0; art.L+=.7+.18*Math.sin(t*8); art.R+=.7+.18*Math.sin(t*8+Math.PI); }
+  else if(bs==='ride'){ flatK.L=flatK.R=.75; art.L-=.12; art.R-=.12; }
+  else if(bs==='dead'){ flatK.L=flatK.R=0; const k=clamp(o.dead/.6,0,1); art.L+=.55*k; art.R+=.45*k; }
+  else if(bs==='kneel'){ art.R+=1.15; toe.R-=1.05; }
+  for(const s of ['L','R']){ const chain=sumX('root')+sumX('pelvis')+sumX('thigh'+s)+sumX('shin'+s), hx=F[s].hinge;
+    add('foot'+s,1,0,0,-chain*flatK[s]); add('foot'+s,hx[0],0,hx[2],clamp(art[s],-.8,1.4)); add('toe'+s,hx[0],0,hx[2],clamp(toe[s],-1.2,.4)); }
+}
+
 function skDrawHero(o,cls){ if(OPT.heroModels===false||GFX.q==='low') return false; const f=HEROM[cls]; if(!f) return false; const M=skGet(f); if(!M) return false;
-  const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc;
+  const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc; try{ heroFeet(o,cls,A,M,sc,H/M.H); }catch(e){ if(!skDrawHero._fe){ skDrawHero._fe=1; console.warn('feet',e); } }
   const FW=(A.fw||0)*sc; mreset(); mtr(o.x+Math.cos(o.face||0)*FW,o.y+(o.lift||0)+(A.dy||0)*sc,o.z+Math.sin(o.face||0)*FW); mry(-o.face); mry(Math.PI/2); msc(H/M.H);
   SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,[],A.R,null).slice(),e:(o.hit?.45:0),a:typeof HALPHA==='number'?HALPHA:1});
   if(o.cast&&o.castCol) addLight(o.x+Math.cos(o.face)*.5,o.y+1.3*sc,o.z+Math.sin(o.face)*.5,3.2,o.castCol);

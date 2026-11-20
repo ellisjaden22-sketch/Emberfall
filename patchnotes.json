@@ -1,9 +1,9 @@
 {
- "version": "v0.94",
- "title": "One chest for the whole realm",
- "date": "19 Nov 2026",
- "text": "The Bloodsand Chest is now the same chest for everyone.\n\n🔧 Every player in the arena sees the same Bloodsand Chest. When someone loots it, it disappears for everyone, and a new one appears 30 minutes after it was looted\n🔧 The realm decides who reached the chest first, so two players can no longer both claim it, and players who join later see the same chest or the same countdown\n• The arena panel shows how long until the next chest and who looted the last one",
+ "version": "v0.95",
+ "title": "Heroes on their feet",
+ "date": "20 Nov 2026",
+ "text": "Every hero has a new skeleton with ankles and toes, and moves more naturally.\n\n✨ New skeletons: every hero now has ankles and toes. Feet roll through each step: the heel lands, the foot goes flat, the heel lifts and the toes push off. Runners land on the balls of their feet\n✨ Feet stay planted: a foot on the ground stays flat on the ground instead of tilting with the leg, and the swinging foot hangs naturally\n✨ Uneven ground: each foot finds the ground under it. On slopes and steps the hips drop, the uphill knee bends and the feet tilt with the slope, so heroes no longer float or sink into hills\n✨ Strafing and backing up turn the hips toward the direction of travel while the chest keeps facing forward\n✨ Turning on the spot takes small steps instead of sliding round\n✨ Footwork in combat: lunging blows lift the back heel, and the fighting stance sits on the balls of the feet. Kneeling rests the back foot on its toes, toes point when jumping and swimming, and heels stay down in the stirrups\n🔧 Leg armour that used to hang in the air when a leg swung (the Warden's and Barbarian's knee guards and boot toes) now moves with the leg",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-19T12:14:21Z"
+ "time": "2026-11-20T00:36:19Z"
 }
