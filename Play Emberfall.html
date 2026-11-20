@@ -2818,6 +2818,122 @@ const HARMK={warden:{uarmR:.9,farmR:.9,uarmL:.6,farmL:.6,b:1.15},barbarian:{b:1.
 const HREST={mender:{uarmR:[[0,0,1,-.1]],farmR:[[1,0,0,.95],[0,1,0,-1.0]],handR:[[1,0,0,-.32],[0,1,0,1.0],[1,0,0,-.95]],uarmL:[[0,0,1,.08]],farmL:[[1,0,0,1.5],[0,1,0,.75]],handL:[[0,1,0,-.6],[1,0,0,-.4]]},
   bard:{uarmR:[[0,0,1,-.12]],farmR:[[1,0,0,.95],[0,1,0,-1.0]],handR:[[1,0,0,-.32],[0,1,0,1.0],[1,0,0,-.95]],uarmL:[[0,0,1,.1]],farmL:[[1,0,0,1.5],[0,1,0,.75]],handL:[[0,1,0,-.6],[1,0,0,-.4]]}};
 const HSTY={warden:{k:'spear'},barbarian:{k:'mace'},arcanist:{k:'staff'},assassin:{k:'dagger'},hunter:{k:'gun'},mender:{k:'blade',wings:1},bard:{k:'blade'}};
+/* ======================================================================================================
+   v95 hero attacks, rebuilt
+   Each blow is a set of key poses (ready, wind-up, impact, follow-through, recover) blended with easing that accelerates
+   into the strike, the way a real swing does. The body moves as a chain: the hips turn first, the chest a moment later,
+   then the arm, and the wrist snaps last, so the weapon whips through instead of the whole body turning as one block.
+   The feet step in on the blow and the weight rocks back for the wind-up; the head stays on the target.
+   Pose channels (model-space turns): hy pelvis yaw, sy spine yaw, cy chest yaw, cx chest pitch (+ forward), rx root pitch,
+   uR/uL upper arm [x,y,z], fR/fL elbow, hR/hL wrist [x,z], lg step (+ forward, - weight back), cr crouch.
+   ====================================================================================================== */
+/* a full turn of the wrist (-6.28) looks exactly like no turn, so a levelled spear can recover by rising back to upright.
+   weapon angles: a blade or mace hangs point-down from the fist and a spear or staff stands head-up, so the sum of the arm's
+   forward turns (upper arm + elbow + wrist) sets where the weapon points: about -1 is a blade sloping forward and down,
+   -3.6 is a blade cocked up behind the shoulder, and -4.7 levels a spear or staff straight ahead. */
+const ATK95={
+  blade:[ /* forehand diagonal cut, backhand return, overhead chop */
+    {k:[[.26,{hy:-.3,cy:-.5,uR:[-2.1,-.7,0],fR:-1.0,hR:[-.5,0],uL:[-.4,0,.2],lg:-.35,cx:-.05,wd:[-0.45,0.75,-0.45]},'o'],[.44,{hy:.25,cy:.4,uR:[-1.05,.6,0],fR:-.15,hR:[.15,0],uL:[-.25,0,.35],lg:1,cx:.2,wd:[0.15,-0.35,0.92]},'i'],[.6,{hy:.3,cy:.58,uR:[-.75,1.05,0],fR:-.2,hR:[.35,0],uL:[-.2,0,.4],lg:1.05,cx:.24,wd:[0.75,-0.55,0.35]},'o']],tr:[.3,.62]},
+    {k:[[.26,{hy:.22,cy:.5,uR:[-1.6,1.0,0],fR:-1.6,hR:[-.4,0],uL:[-.2,0,.3],lg:-.3,wd:[0.5,0.7,-0.45]},'o'],[.44,{hy:-.22,cy:-.42,uR:[-1.2,-.6,0],fR:-.1,hR:[.2,0],uL:[-.45,0,.45],lg:.95,cx:.15,wd:[-0.3,-0.2,0.93]},'i'],[.6,{hy:-.28,cy:-.6,uR:[-.9,-1.0,0],fR:-.2,hR:[.4,0],uL:[-.35,0,.5],lg:1,cx:.18,wd:[-0.85,-0.25,0.45]},'o']],tr:[.3,.62]},
+    {k:[[.28,{cx:-.25,uR:[-2.8,.1,0],fR:-.9,hR:[-.3,0],uL:[-.6,0,.2],cr:.2,lg:-.4,wd:[0,0.6,-0.8]},'o'],[.45,{cx:.45,uR:[-1.15,.1,0],fR:-.1,hR:[.2,0],uL:[-.3,0,.3],cr:.55,lg:1.1,wd:[0,-0.45,0.9]},'i'],[.6,{cx:.5,uR:[-.75,.1,0],fR:-.2,hR:[.45,0],uL:[-.25,0,.3],cr:.6,lg:1.15,wd:[0,-0.85,0.5]},'o']],tr:[.32,.62]}],
+  spear:[ /* level overhand thrust past the shield, shield bash, downward stab */
+    {k:[[.26,{hy:-.35,cy:-.45,uR:[-2.6,-.2,.1],fR:-2.1,hR:[0,0],uL:[-1.05,.25,0],fL:-.9,lg:-.4,wd:[0,0.05,1]},'o'],[.43,{hy:.25,cy:.35,uR:[-1.75,.12,0],fR:-1.65,hR:[-1.3,0],uL:[-.85,.1,0],fL:-.75,lg:1.15,cx:.2,wd:[0,-0.05,1]},'i'],[.58,{hy:.3,cy:.42,uR:[-1.65,.15,0],fR:-1.7,hR:[-1.35,0],uL:[-.8,.1,0],fL:-.7,lg:1.22,cx:.25,wd:[0,-0.05,1]},'o'],[.82,{uR:[-.5,0,0],fR:-.4,hR:[-5.2,0],wd:[0,1,.15]},'s'],[1,{hR:[-6.2832,0]},'s']],tr:[.3,.6]},
+    {k:[[.26,{hy:.3,cy:.45,uL:[-.4,.55,0],fL:-1.2,uR:[-.3,0,0],fR:-.4,lg:-.35},'o'],[.42,{hy:-.25,cy:-.35,uL:[-1.45,-.1,0],fL:-.25,uR:[-.25,-.2,0],fR:-.5,lg:1.2,cx:.25},'i'],[.56,{hy:-.28,cy:-.4,uL:[-1.5,-.12,0],fL:-.2,uR:[-.2,-.2,0],fR:-.5,lg:1.25,cx:.28},'o']],tr:null},
+    {k:[[.28,{cx:-.2,uR:[-2.85,-.1,.1],fR:-1.9,hR:[.2,0],uL:[-1.0,.2,0],fL:-.8,cr:.1,lg:-.35,wd:[0,0.25,0.97]},'o'],[.45,{cx:.4,uR:[-1.95,.1,0],fR:-1.5,hR:[-.6,0],uL:[-.9,.1,0],fL:-.7,cr:.5,lg:1,wd:[0,-0.5,0.86]},'i'],[.6,{cx:.45,uR:[-1.85,.1,0],fR:-1.5,hR:[-.5,0],uL:[-.85,.1,0],fL:-.7,cr:.55,lg:1.05,wd:[0,-0.55,0.83]},'o'],[.82,{uR:[-.5,0,0],fR:-.4,hR:[-5.2,0],wd:[0,1,.15]},'s'],[1,{hR:[-6.2832,0]},'s']],tr:[.32,.6]}],
+  mace:[ /* overhead smash, forehand sweep, rising backhand */
+    {k:[[.28,{hy:-.2,cx:-.22,uR:[-2.4,.15,0],fR:-.5,hR:[0,0],uL:[-.9,0,.4],fL:-.6,cr:.15,lg:-.45,wd:[0,0.6,-0.8]},'o'],[.45,{hy:.12,cx:.5,uR:[-.9,.1,0],fR:-.1,hR:[.5,0],uL:[-.3,0,.5],fL:-.3,cr:.6,lg:1.1,wd:[0,-0.5,0.87]},'i'],[.6,{hy:.15,cx:.55,uR:[-.6,.1,0],fR:-.1,hR:[.5,0],uL:[-.25,0,.5],cr:.65,lg:1.15,wd:[0,-0.85,0.5]},'o']],tr:[.32,.6]},
+    {k:[[.26,{hy:-.42,cy:-.62,uR:[-1.2,-1.0,0],fR:-.2,hR:[.5,0],uL:[-.6,0,.5],lg:-.35,wd:[-0.9,0.1,0.35]},'o'],[.44,{hy:.36,cy:.5,uR:[-1.25,.6,0],fR:-.15,hR:[.5,0],uL:[-.3,0,.6],lg:1,cx:.15,wd:[0.2,0,1]},'i'],[.6,{hy:.45,cy:.72,uR:[-1.0,1.05,0],fR:-.25,hR:[.35,0],uL:[-.25,0,.6],lg:1.05,cx:.18,wd:[0.85,0,0.5]},'o']],tr:[.3,.62]},
+    {k:[[.26,{hy:.3,cy:.5,uR:[-.3,.85,0],fR:-.1,hR:[.5,0],uL:[-.3,0,.35],cr:.25,lg:-.3,wd:[0.5,-0.8,0.3]},'o'],[.44,{hy:-.3,cy:-.5,cx:-.12,uR:[-1.85,-.6,0],fR:-.2,hR:[.4,0],uL:[-.5,0,.5],lg:.9,wd:[-0.4,0.6,0.7]},'i'],[.6,{hy:-.35,cy:-.6,cx:-.15,uR:[-2.2,-.8,0],fR:-.3,hR:[.3,0],uL:[-.5,0,.5],lg:.95,wd:[-0.5,0.8,0.3]},'o']],tr:[.3,.62]}],
+  staff:[ /* overhand staff jab, levelled sweep, palm blast */
+    {k:[[.26,{hy:-.25,cy:-.35,uR:[-2.5,-.15,.1],fR:-2.2,hR:[0,0],uL:[-1.1,.3,0],fL:-1.1,lg:-.35,wd:[0,0.1,1]},'o'],[.43,{hy:.2,cy:.3,uR:[-1.75,.1,0],fR:-1.6,hR:[-1.35,0],uL:[-1.35,.2,0],fL:-.5,lg:1,cx:.18,wd:[0,0,1]},'i'],[.58,{hy:.22,cy:.35,uR:[-1.7,.12,0],fR:-1.62,hR:[-1.38,0],uL:[-1.35,.2,0],fL:-.45,lg:1.05,cx:.2,wd:[0,0,1]},'o'],[.82,{uR:[-.5,0,0],fR:-.4,hR:[-5.2,0],wd:[0,1,.15]},'s'],[1,{hR:[-6.2832,0]},'s']],tr:[.3,.6]},
+    {k:[[.26,{hy:-.4,cy:-.55,uR:[-2.4,-.8,.1],fR:-2.1,hR:[-.2,0],uL:[-.6,0,.4],lg:-.3,wd:[-0.8,0.15,0.6]},'o'],[.44,{hy:.3,cy:.45,uR:[-2.3,.6,0],fR:-2.0,hR:[-.4,0],uL:[-.4,0,.5],lg:.95,cx:.12,wd:[0.2,0.1,1]},'i'],[.6,{hy:.38,cy:.6,uR:[-2.2,.95,0],fR:-2.0,hR:[-.45,0],uL:[-.35,0,.5],lg:1,cx:.15,wd:[0.8,0.1,0.55]},'o'],[.82,{uR:[-.5,0,0],fR:-.4,hR:[-5.2,0],wd:[0,1,.15]},'s'],[1,{hR:[-6.2832,0]},'s']],tr:[.3,.62]},
+    {k:[[.26,{hy:.25,cy:.38,uL:[-.7,.35,0],fL:-1.6,hL:[.4,0],uR:[-.35,-.1,0],fR:-.5,lg:-.3},'o'],[.42,{hy:-.25,cy:-.35,uL:[-1.6,-.05,0],fL:-.05,hL:[-.6,0],uR:[-.3,-.15,0],fR:-.45,lg:1,cx:.15},'i'],[.58,{hy:-.28,cy:-.4,uL:[-1.62,-.05,0],fL:-.05,hL:[-.7,0],uR:[-.3,-.15,0],fR:-.45,lg:1.05,cx:.17},'o']],tr:null}],
+  dagger:[ /* right stab, left slash, double cross-cut */
+    {k:[[.24,{hy:-.35,cy:-.4,uR:[-.35,-.3,0],fR:-1.4,hR:[.45,0],uL:[-1.0,.2,0],fL:-1.2,cr:.3,lg:-.3,wd:[0,0.1,1]},'o'],[.4,{hy:.3,cy:.35,uR:[-1.45,.2,0],fR:-.1,hR:[.3,0],uL:[-.6,0,.2],fL:-1.3,cr:.35,lg:1.2,cx:.25,wd:[0,0,1]},'i'],[.55,{hy:.32,cy:.4,uR:[-1.55,.25,0],fR:-.05,hR:[.35,0],uL:[-.55,0,.2],fL:-1.3,cr:.38,lg:1.25,cx:.28,wd:[0,0,1]},'o']],tr:[.28,.58]},
+    {k:[[.24,{hy:.38,cy:.48,uL:[-1.0,.8,0],fL:-.6,hL:[.35,0],uR:[-.8,0,-.2],fR:-1.3,cr:.3,lg:-.25,wl:[0.85,0,0.5]},'o'],[.4,{hy:-.32,cy:-.45,uL:[-1.1,-.75,0],fL:-.3,hL:[.15,0],uR:[-.6,0,-.2],fR:-1.4,cr:.35,lg:1.1,cx:.2,wl:[-0.2,-0.1,1]},'i'],[.55,{hy:-.36,cy:-.55,uL:[-.95,-1.0,0],fL:-.35,hL:[.1,0],uR:[-.55,0,-.2],fR:-1.4,cr:.38,lg:1.15,cx:.22,wl:[-0.8,-0.1,0.55]},'o']],tr:[.28,.58],L:1},
+    {k:[[.26,{cx:-.12,uR:[-2.0,.6,0],fR:-1.4,hR:[0,0],uL:[-2.0,-.6,0],fL:-1.4,hL:[0,0],cr:.15,lg:-.3,wd:[0.4,0.8,-0.3],wl:[-0.4,0.8,-0.3]},'o'],[.43,{cx:.35,uR:[-1.15,-.55,0],fR:-.1,hR:[0,0],uL:[-1.15,.55,0],fL:-.1,hL:[0,0],cr:.5,lg:1.15,wd:[-0.35,-0.4,0.85],wl:[0.35,-0.4,0.85]},'i'],[.58,{cx:.4,uR:[-.95,-.8,0],fR:-.15,hR:[.1,0],uL:[-.95,.8,0],fL:-.15,hL:[.1,0],cr:.55,lg:1.2,wd:[-0.7,-0.6,0.3],wl:[0.7,-0.6,0.3]},'o']],tr:[.3,.6],L:1}]
+};
+/* the Bard fights with big two-handed-style overhead cuts: from over the right shoulder, from over the left, and straight down */
+const ATK95C={bard:[
+  {k:[[.28,{hy:-.15,cy:-.3,cx:-.25,uR:[-2.8,-.35,0],fR:-.9,hR:[-.3,0],uL:[-1.9,-.3,0],fL:-1.2,cr:.2,lg:-.4,wd:[-.3,.6,-.75]},'o'],[.45,{hy:.18,cy:.3,cx:.45,uR:[-1.15,.35,0],fR:-.1,hR:[.2,0],uL:[-.9,.2,0],fL:-.6,cr:.55,lg:1.1,wd:[.25,-.45,.86]},'i'],[.6,{hy:.22,cy:.38,cx:.5,uR:[-.8,.5,0],fR:-.2,hR:[.45,0],uL:[-.6,.2,0],fL:-.5,cr:.6,lg:1.15,wd:[.5,-.8,.3]},'o']],tr:[.32,.62]},
+  {k:[[.28,{hy:.15,cy:.35,cx:-.25,uR:[-2.8,.5,0],fR:-.9,hR:[-.3,0],uL:[-1.9,.1,0],fL:-1.2,cr:.2,lg:-.4,wd:[.3,.6,-.75]},'o'],[.45,{hy:-.18,cy:-.3,cx:.45,uR:[-1.2,-.3,0],fR:-.1,hR:[.2,0],uL:[-.9,-.1,0],fL:-.6,cr:.55,lg:1.1,wd:[-.25,-.45,.86]},'i'],[.6,{hy:-.22,cy:-.38,cx:.5,uR:[-.85,-.45,0],fR:-.2,hR:[.45,0],uL:[-.6,-.1,0],fL:-.5,cr:.6,lg:1.15,wd:[-.5,-.8,.3]},'o']],tr:[.32,.62]},
+  {k:[[.28,{cx:-.3,uR:[-2.85,.1,0],fR:-.9,hR:[-.3,0],uL:[-1.9,-.1,0],fL:-1.2,cr:.2,lg:-.45,wd:[0,.6,-.8]},'o'],[.45,{cx:.5,uR:[-1.15,.1,0],fR:-.1,hR:[.2,0],uL:[-.9,0,0],fL:-.6,cr:.6,lg:1.15,wd:[0,-.45,.9]},'i'],[.6,{cx:.55,uR:[-.75,.1,0],fR:-.2,hR:[.45,0],uL:[-.6,0,0],fL:-.5,cr:.65,lg:1.2,wd:[0,-.85,.5]},'o']],tr:[.32,.62]}]};
+const ATK_GRP={wd:-.035,wl:-.035,hy:.05,rx:.05,lg:.05,cr:.05,sy:.025,cy:.025,cx:.025,uR:0,uL:0,fR:-.01,fL:-.01,hR:-.035,hL:-.035};
+const atkEase=(u,e)=>e==='i'?u*u*u:e==='o'?1-(1-u)*(1-u)*(1-u):u*u*(3-2*u);
+/* the value of one channel at swing time u, from the key list (0 and 1 are the neutral pose) */
+function atkCh(keys,name,u){ const at=(i)=>{ const p=keys[i][1][name]; return p==null?0:p; };
+  let t0=0, v0=Array.isArray(at(0))?[0,0,0]:0, e='o';
+  for(let i=0;i<=keys.length;i++){ const t1=i<keys.length?keys[i][0]:1, v1=i<keys.length?at(i):(Array.isArray(v0)?[0,0,0]:0), ee=i<keys.length?keys[i][2]:'s';
+    if(u<=t1||i===keys.length){ const k=atkEase(clamp((u-t0)/Math.max(1e-3,t1-t0),0,1),ee); if(Array.isArray(v1)||Array.isArray(v0)){ const a=Array.isArray(v0)?v0:[v0||0,0,0], b=Array.isArray(v1)?v1:[v1||0,0,0]; return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k]; } return v0+(v1-v0)*k; }
+    t0=t1; v0=v1; e=ee; }
+  return 0; }
+function heroAtk95(o,k,v,p,mv,add,AK,cls){ const V=((cls&&ATK95C[cls])||ATK95[k]||ATK95.blade)[v%3]; if(!V) return {dy:0,fw:0}; const K=V.k, B=AK.b||1, step=1-.75*mv;
+  const ch=n=>atkCh(K,n,clamp(p+(ATK_GRP[n]||0),0,1));
+  const hy=ch('hy')*B, sy=ch('sy')*B, cy=ch('cy')*B, cx=ch('cx')*B, rx=ch('rx'), lg=ch('lg')*step, cr=ch('cr');
+  add('pelvis',0,1,0,hy); add('spine',0,1,0,sy+cy*.35); add('chest',0,1,0,cy*.65); add('chest',1,0,0,cx*.7); add('spine',1,0,0,cx*.3); add('root',1,0,0,rx+.04*Math.max(0,lg));
+  add('head',0,1,0,-(hy+sy+cy)*.75); add('head',1,0,0,-cx*.5);
+  for(const s of ['R','L']){ const u=ch('u'+s), f=ch('f'+s), h=ch('h'+s);
+    if(Array.isArray(u)){ add('uarm'+s,1,0,0,u[0]); add('uarm'+s,0,1,0,u[1]); add('uarm'+s,0,0,1,s==='R'?-u[2]:u[2]); }
+    if(f) add('farm'+s,1,0,0,f); if(Array.isArray(h)){ add('hand'+s,1,0,0,h[0]); add('hand'+s,0,0,1,h[1]); } }
+  /* where the weapon should point (model space: +x the hero's left, +y up, +z ahead); the wrist is solved to match after the pose */
+  const st=o.an||{}, aw=FT_sm(p/.12)*(1-FT_sm((p-.82)/.18)), wd=ch('wd'), wl=ch('wl');
+  st._aim=aw>.001&&(Array.isArray(wd)||Array.isArray(wl))?{w:aw,R:Array.isArray(wd)&&Math.hypot(...wd)>.01?wd:null,L:Array.isArray(wl)&&Math.hypot(...wl)>.01?wl:null}:null;
+  /* footwork: weight rocks back for the wind-up, the lead foot steps in on the blow; heavy blows sink the hips */
+  let dy=0, fw=0;
+  if(lg>0){ add('thighL',1,0,0,-.34*lg); add('shinL',1,0,0,.42*lg); add('thighR',1,0,0,.24*lg); add('shinR',1,0,0,.14*lg); dy-=.05*lg; fw+=.22*lg; }
+  else if(lg<0){ const b=-lg; add('thighR',1,0,0,-.18*b); add('shinR',1,0,0,.36*b); add('thighL',1,0,0,-.08*b); add('shinL',1,0,0,.08*b); add('root',1,0,0,-.05*b); dy-=.03*b; fw-=.06*b; }
+  if(cr>0){ add('thighL',1,0,0,-.28*cr); add('thighR',1,0,0,-.22*cr); add('shinL',1,0,0,.5*cr); add('shinR',1,0,0,.44*cr); dy-=.1*cr; }
+  return {dy,fw}; }
+/* ---------- weapon trails: the edge of the weapon leaves a streak of light through the strike ---------- */
+const TRAILCOL={warden:['#ffe7a0','#ffc94a'],barbarian:['#ffb070','#ff5a1e'],arcanist:['#e0b8ff','#9a5cff'],assassin:['#c8ffb0','#5aff7a'],mender:['#fff6d0','#ffe08a'],bard:['#bfefff','#6ac8ff']};
+function m4p(m,p){ return [m[0]*p[0]+m[4]*p[1]+m[8]*p[2]+m[12], m[1]*p[0]+m[5]*p[1]+m[9]*p[2]+m[13], m[2]*p[0]+m[6]*p[1]+m[10]*p[2]+m[14]]; }
+function heroTrail(o,cls,M,J,Mw){ const st=o.an||{}, W=M.meta&&M.meta.weap; if(!W||!(o.swing>=0)||o.ride){ st._trl=null; return; }
+  if(OPT.trails===false) return;
+  const k=(HSTY[cls]||{}).k, V=(ATK95C[cls]||ATK95[k]||[])[(o.swv||0)%3]; if(!V||!V.tr){ st._trl=null; return; } const p=o.swing; if(p<V.tr[0]||p>V.tr[1]){ st._trl=null; return; }
+  const sides=V.L&&W.L?(k==='dagger'&&(o.swv||0)%3===1?['L']:['R','L']):['R'], wr=o.wr||0, C=TRAILCOL[cls]||['#ffffff','#dddddd'], col=wr>=3&&typeof RARCOL!=='undefined'?RARCOL[wr]:C[1];
+  const prev=st._trl||{}, cur={};
+  for(const s of sides){ const w=W[s]; if(!w) continue; const bi=M.B.findIndex(b=>b.n==='hand'+s); if(bi<0) continue; const jm=J.subarray(bi*16,bi*16+16);
+    const tp=m4p(Mw,m4p(jm,w.tip)), bp=m4p(Mw,m4p(jm,w.base)); cur[s]=[bp,tp];
+    const pv=prev[s]; if(!pv) continue;
+    const steps=Math.min(12,1+Math.floor(Math.hypot(tp[0]-pv[1][0],tp[1]-pv[1][1],tp[2]-pv[1][2])/.05)), mid=.5*(1-Math.abs(p-(V.tr[0]+V.tr[1])/2)/((V.tr[1]-V.tr[0])/2));
+    for(let a=0;a<steps;a++){ const f=(a+Math.random())/steps;
+      for(let b=0;b<7;b++){ const g=(b+.5)/7, q=[0,1,2].map(i=>{ const B0=pv[0][i]+(bp[i]-pv[0][i])*f, T0=pv[1][i]+(tp[i]-pv[1][i])*f; return B0+(T0-B0)*g; });
+        const tipN=g>.8; try{ P3(q[0],q[1],q[2],0,.05,0,.1+.1*g+.06*mid,(.04+.06*g)*(.7+.6*mid),tipN?C[0]:col,{glow:true,drag:.7}); }catch(e){} } } }
+  st._trl=cur; }
+
+/* ---------- aim the weapon: turn the wrist so the weapon points where the blow needs it, whatever the shoulders and elbow did ---------- */
+const AQ={ mul:(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1], a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0], a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3], a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]],
+  ax:(x,y,z,a)=>{ const l=Math.hypot(x,y,z)||1, s=Math.sin(a/2)/l; return [x*s,y*s,z*s,Math.cos(a/2)]; },
+  rot:(q,v)=>{ const p=AQ.mul(AQ.mul(q,[v[0],v[1],v[2],0]),[-q[0],-q[1],-q[2],q[3]]); return [p[0],p[1],p[2]]; },
+  inv:q=>[-q[0],-q[1],-q[2],q[3]] };
+function heroAim(o,cls,A,M){ const st=o.an||{}, aim=st._aim, W=M.meta&&M.meta.weap; if(!aim||!W||!(o.swing>=0||aim.run)) return; const R=A.R, B=M.B;
+  const loc=n=>{ let w=[0,0,0,1]; for(const q of R[n]||[]) w=AQ.mul(AQ.ax(q[0],q[1],q[2],q[3]),w); return w; };
+  const glob=i=>{ let g=[0,0,0,1]; const chain=[]; for(let k=i;k>=0;k=B[k].p) chain.unshift(k); for(const k of chain) g=AQ.mul(g,loc(B[k].n)); return g; };
+  for(const s of ['R','L']){ const want=aim[s]; if(!want) continue; const w=W[s]||(s==='L'&&W.R?{tip:[-W.R.tip[0],W.R.tip[1],W.R.tip[2]],base:null}:null); if(!w) continue;
+    const hi=B.findIndex(b=>b.n==='hand'+s); if(hi<0) continue; const hp=(()=>{ const p=[0,0,0]; for(let k=hi;k>=0;k=B[k].p){ p[0]+=B[k].t[0]; p[1]+=B[k].t[1]; p[2]+=B[k].t[2]; } return p; })();
+    let d0=[w.tip[0]-hp[0],w.tip[1]-hp[1],w.tip[2]-hp[2]]; const l0=Math.hypot(...d0); if(l0<.01) continue; d0=d0.map(v=>v/l0);
+    const Gh=glob(hi), Gp=glob(B[hi].p), d=AQ.rot(Gh,d0); let t=want.map(v=>v); const lt=Math.hypot(...t); t=t.map(v=>v/lt);
+    let tt=[d[0]+(t[0]-d[0])*aim.w,d[1]+(t[1]-d[1])*aim.w,d[2]+(t[2]-d[2])*aim.w]; const ll=Math.hypot(...tt); if(ll<1e-4) continue; tt=tt.map(v=>v/ll);
+    const ax=[d[1]*tt[2]-d[2]*tt[1],d[2]*tt[0]-d[0]*tt[2],d[0]*tt[1]-d[1]*tt[0]], sn=Math.hypot(...ax), cs=d[0]*tt[0]+d[1]*tt[1]+d[2]*tt[2]; if(sn<1e-5) continue;
+    const ang=Math.atan2(sn,cs), al=AQ.rot(AQ.inv(Gp),ax); (R['hand'+s]||(R['hand'+s]=[])).push([al[0],al[1],al[2],ang]); } }
+
+/* the Barbarian charges: when running he leans into it and carries the mace low and forward, ready to swing, while the free arm pumps */
+function heroCarry95(o,cls,A){ if(cls==='bard'||cls==='mender') return heroSword95(o,cls,A); const st=o.an||{}; if(cls!=='barbarian'||o.ride||o.swim||o.dead>=0||o.air||o.swing>=0||o.emote){ if(st._aim&&st._aim.run) st._aim=null; return; }
+  const R=A.R, t=now(), dt=clamp(t-(st._cyT||t),0,.1); st._cyT=t; const mv=clamp(st._hMv??(o.mv||0),0,1), run=clamp((mv-.5)/.4,0,1);
+  const k=st._cyK=(st._cyK??0)+(run-(st._cyK??0))*Math.min(1,dt*6); if(k<.01){ if(st._aim&&st._aim.run) st._aim=null; return; }
+  const add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, sw=Math.sin((st._gp||0));
+  /* undo most of the right arm's swing, hold it out front and low; lean the chest and lower the head into the charge */
+  let ax=0; for(const q of R.uarmR||[]) if(q[0]===1&&!q[1]&&!q[2]) ax+=q[3];
+  add('uarmR',1,0,0,(-.85-ax*.8)*k); add('uarmR',0,1,0,.25*k); add('farmR',1,0,0,-.35*k); add('chest',1,0,0,.22*k); add('spine',1,0,0,.1*k); add('head',1,0,0,-.18*k);
+  add('uarmL',1,0,0,-.15*k*sw); add('farmL',1,0,0,-.4*k);
+  st._aim={w:.85*k,R:[.25,-.55,.8],L:null,run:1}; }
+
+/* the long swords of the Bard and the Celestus trail back and down while moving, so the point no longer drags through the ground */
+function heroSword95(o,cls,A){ const st=o.an||{}; if(o.ride||o.swim||o.dead>=0||o.swing>=0||o.emote){ if(st._aim&&st._aim.run) st._aim=null; return; }
+  const t=now(), dt=clamp(t-(st._cyT||t),0,.1); st._cyT=t; const mv=clamp(st._hMv??(o.mv||0),0,1);
+  const k=st._cyK=(st._cyK??0)+(clamp(mv*1.6,0,1)-(st._cyK??0))*Math.min(1,dt*6); if(k<.01){ if(st._aim&&st._aim.run) st._aim=null; return; }
+  st._aim={w:.9*k,R:[-.25,-.55,-.8],L:null,run:1}; }
+
 function skAnimHero0(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,z,a)=>{ if(AK[n]!=null) a*=AK[n]; if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); }, st=o.an||{}, Y=HSTY[cls]||{k:'gun'}, two=Y.k==='two';
   /* per-hero smoothing */
   const dt=clamp(t-(st._hT||t),0,.1); st._hT=t; const ease=(k,v,r)=>{ st[k]=(st[k]??v)+(v-(st[k]??v))*Math.min(1,dt*r); return st[k]; };
@@ -2886,7 +3002,7 @@ function skAnimHero0(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,
     if(!two){ add('uarmR',1,0,0,.03*br*id); add('uarmL',1,0,0,.03*br*id); } else add('grip',1,0,0,.02*br*id);
     wing(.04*br*id,.03*Math.sin(t*1.1)*id);
     /* combat stance: knees bent, weapon raised, guard up */
-    if(rdy>.01){ const r=rdy*(1-mv*.6);
+    if(rdy>.01){ const r=rdy*(1-mv*.6)*(o.swing>=0&&!o.ride&&Y.k!=='gun'&&Y.k!=='two'?1-FT_sm(o.swing/.16)*FT_sm((1-o.swing)/.3):1);   /* v95: the guard gives way to the blow */
       add('thighL',1,0,0,-.14*r); add('thighR',1,0,0,-.08*r); add('shinL',1,0,0,.26*r); add('shinR',1,0,0,.2*r); add('thighL',0,0,1,.06*r); add('thighR',0,0,1,-.06*r); add('chest',1,0,0,.07*r); add('spine',0,1,0,-.12*r); dy-=.03*r;
       if(k==='spear'){ arms(-.45*r,-.35*r,-.55*r,-.55*r); }
       else if(k==='mace'){ arms(-.55*r,-.75*r,-.3*r,-.45*r); out(.15*r,.15*r); }
@@ -2907,7 +3023,8 @@ function skAnimHero0(o,cls){ const t=now(), R={}, AK=HARMK[cls]||{}, add=(n,x,y,
     if(EM==='bow'){ const k2=Math.sin(Math.min(et/1.6,1)*Math.PI); add('spine',1,0,0,.45*k2); add('chest',1,0,0,.35*k2); add('head',1,0,0,.2*k2); arms(-.5*k2,-1.1*k2,.2*k2,0); wing(-.2*k2,0); }
   }
   /* ---------- attacks: each class strikes its own way, three alternating blows ---------- */
-  if(o.swing>=0&&!o.ride){ const p=o.swing, v=o.swv||0, W=p<.3?eO(p/.3):1, Hh=p<.3?0:p<.48?eO((p-.3)/.18):1, B=p>.58?eI((p-.58)/.42):0, on=1-B, k=Y.k;
+  if(o.swing>=0&&!o.ride&&Y.k!=='gun'&&Y.k!=='two'){ const r=heroAtk95(o,Y.k,o.swv||0,o.swing,mv,add,AK,cls); dy+=r.dy; fw+=r.fw; }
+  else if(o.swing>=0&&!o.ride){ const p=o.swing, v=o.swv||0, W=p<.3?eO(p/.3):1, Hh=p<.3?0:p<.48?eO((p-.3)/.18):1, B=p>.58?eI((p-.58)/.42):0, on=1-B, k=Y.k;
     const wind=W*(1-Hh), hit=Hh*on;   /* wind up, then the blow, then recover */
     const body=(tw,lean)=>{ tw*=AK.b||1; lean*=AK.b||1; add('chest',0,1,0,tw*.5); add('spine',0,1,0,tw*.3); add('root',0,1,0,tw*.2); add('chest',1,0,0,lean); };
     const lunge=a=>{ a*=1-.75*mv; add('thighL',1,0,0,-.32*a); add('shinL',1,0,0,.4*a); add('thighR',1,0,0,.22*a); add('shinR',1,0,0,.12*a); add('root',1,0,0,.05*a); dy-=.045*a; fw+=.22*a; };
@@ -3054,14 +3171,109 @@ function heroFeet(o,cls,A,M,scH,S){ const F=feetInfo(M); if(!F) return; const R=
   else if(bs==='ride'){ flatK.L=flatK.R=.75; art.L-=.12; art.R-=.12; }
   else if(bs==='dead'){ flatK.L=flatK.R=0; const k=clamp(o.dead/.6,0,1); art.L+=.55*k; art.R+=.45*k; }
   else if(bs==='kneel'){ art.R+=1.15; toe.R-=1.05; }
+  /* footfalls: each foot that comes down leaves a print in snow, sand and ash, kicks up dust or splashes in shallow water,
+     and (for your own hero) makes the footstep sound, exactly when the heel lands; a landing from a jump does all of it with both feet */
+  try{ const cf=Math.cos(face), sf=Math.sin(face), land=(s,heavy)=>{ const a=F[s].a, px=(o.x+cf*a[2]*S+sf*a[0]*S)*TS, py=(o.z+sf*a[2]*S-cf*a[0]*S)*TS;
+      if(GFX.q!=='low'&&Math.hypot(px/TS-CAM.tx,py/TS-CAM.tz)<30){ footPrint(px,py,face,0,scH);
+        if(isWaterAt(px,py)){ const wy=Math.max(o.y,-1.12)+.04; for(let k=0;k<(heavy?8:4);k++){ const an=Math.random()*6.283, v=.4+Math.random()*.8; P3(px/TS+Math.cos(an)*.1,wy,py/TS+Math.sin(an)*.1,Math.cos(an)*v,1.2+Math.random()*1.2,Math.sin(an)*v,.5,.045,'#e4f6ff',{grav:-10,drag:.96}); } }
+        else { const n=heavy?5:(mv>.6?2:1); for(let k=0;k<n;k++) P3(px/TS+(Math.random()-.5)*.15,o.y+.04,py/TS+(Math.random()-.5)*.15,(Math.random()-.5)*.5-cf*.25*mv,.2+Math.random()*.25,(Math.random()-.5)*.5-sf*.25*mv,.5,heavy?.2:.12,'#b0a284',{big:true,drag:.92}); } }
+      if(st===me) footSnd(); };
+    const pp=st._ftPP||{};
+    if(bs==='ground'&&mv>.3) for(const s of ['L','R']){ const p=s==='L'?P0:(P0+.5)%1; if(pp[s]!=null&&pp[s]>=duty&&p<duty&&p<.5) land(s,false); pp[s]=p; }
+    else { pp.L=pp.R=null; }
+    if(bs==='ground'&&st._ftAir){ land('L',true); land('R',true); } st._ftAir=bs==='air'; st._ftPP=pp; }catch(e){}
   for(const s of ['L','R']){ const chain=sumX('root')+sumX('pelvis')+sumX('thigh'+s)+sumX('shin'+s), hx=F[s].hinge;
     add('foot'+s,1,0,0,-chain*flatK[s]); add('foot'+s,hx[0],0,hx[2],clamp(art[s],-.8,1.4)); add('toe'+s,hx[0],0,hx[2],clamp(toe[s],-1.2,.4)); }
 }
+/* ---------- the upper body: eyes on the target, arms with a little weight to them ---------- */
+function heroBody95(o,cls,A){ const R=A.R, st=o.an||{}, t=now(); if(o.dead>=0||o.swim) return;
+  const add=(n,x,y,z,a)=>{ if(a&&isFinite(a)) (R[n]||(R[n]=[])).push([x,y,z,a]); };
+  const dt=clamp(t-(st._bdT||t),0,.1); st._bdT=t; const ease=(k,v,r)=>{ st[k]=(st[k]??v)+(v-(st[k]??v))*Math.min(1,dt*r); return st[k]; };
+  /* look at the target: the head turns most of the way, the chest a little (only the player's own hero knows its target) */
+  let want=0;
+  if(st===me&&me.target&&!o.ride){ let tx=null, ty=null; const T=me.target; try{ if(T.kind==='m'){ const m=mobById[T.id]; if(m&&!m.dead){ tx=m.rx; ty=m.ry; } } else if(T.kind==='p'){ const p=othersByU.get(T.id); if(p){ tx=p.rx; ty=p.ry; } } }catch(e){}
+    if(tx!=null&&Math.hypot(tx-me.x,ty-me.y)<TS*25){ let d=Math.atan2(ty-me.y,tx-me.x)-(o.face||0); d=Math.atan2(Math.sin(d),Math.cos(d)); if(Math.abs(d)<2.2) want=clamp(-d,-1.1,1.1); } }
+  const ly=ease('_bdLook',want,6); if(Math.abs(ly)>.005&&!(o.swing>=0)){ add('head',0,1,0,ly*.6); add('chest',0,1,0,ly*.25); add('spine',0,1,0,ly*.1); }
+  /* overlapping motion: when the upper arm swings, the forearm and hand lag behind a moment and then catch up */
+  for(const s of ['R','L']){ let a=0; for(const q of R['uarm'+s]||[]) if(q[0]===1&&!q[1]&&!q[2]) a+=q[3];
+    const pv=st['_bdA'+s]??a; st['_bdA'+s]=a; const vel=ease('_bdV'+s,clamp((a-pv)/Math.max(dt,.016),-8,8),10), sw=o.swing>=0?.35:1;
+    add('farm'+s,1,0,0,clamp(.035*vel,-.18,.18)*sw); add('hand'+s,1,0,0,clamp(.03*vel,-.15,.15)*sw); }
+  /* the shoulders rise and fall a little with each breath */
+  if((o.mv||0)<.3&&!(o.swing>=0)){ const br=Math.sin(t*1.6+(o.x||0)); add('uarmR',0,0,1,-.025*br); add('uarmL',0,0,1,.025*br); add('head',1,0,0,-.012*br); } }
+
+/* ======================================================================================================
+   v95 the Hunter's bow work
+   The Hunter's model carries no bow of its own, so one is drawn in the left hand (limbs, grip and string) every frame.
+   An attack is a real shot: the bow arm comes up to point at the target and the body turns side-on, the right hand takes an
+   arrow to the string and draws it back to the cheek (the string and nocked arrow follow the hand), a moment's aim, then the
+   release: the string snaps forward, the drawing hand flies back past the ear and the bow hand rocks with the shot.
+   Aimed Shot holds the full draw, steady but for a slight tremble, for the whole cast.
+   ====================================================================================================== */
+function boneWP(M,i){ const p=[0,0,0]; for(let k=i;k>=0;k=M.B[k].p){ const t=M.B[k].t; p[0]+=t[0]; p[1]+=t[1]; p[2]+=t[2]; } return p; }
+/* turn one bone (in its parent's frame) so that the direction from it to its child points along `want` (model space) */
+function aimBone(M,R,name,childName,want,w){ if(w<=.001) return; const B=M.B, i=B.findIndex(b=>b.n===name), c=B.findIndex(b=>b.n===childName); if(i<0||c<0) return;
+  const loc=n=>{ let q=[0,0,0,1]; for(const e of R[n]||[]) q=AQ.mul(AQ.ax(e[0],e[1],e[2],e[3]),q); return q; };
+  const glob=k=>{ const ch=[]; for(let j=k;j>=0;j=B[j].p) ch.unshift(j); let g=[0,0,0,1]; for(const j of ch) g=AQ.mul(g,loc(B[j].n)); return g; };
+  const a=boneWP(M,i), b=boneWP(M,c); let d0=[b[0]-a[0],b[1]-a[1],b[2]-a[2]]; const l0=Math.hypot(...d0); if(l0<1e-4) return; d0=d0.map(v=>v/l0);
+  const G=glob(i), Gp=B[i].p>=0?glob(B[i].p):[0,0,0,1], d=AQ.rot(G,d0); let t=want.slice(); const lt=Math.hypot(...t); t=t.map(v=>v/lt);
+  let tt=[d[0]+(t[0]-d[0])*w,d[1]+(t[1]-d[1])*w,d[2]+(t[2]-d[2])*w]; const ll=Math.hypot(...tt); if(ll<1e-4) return; tt=tt.map(v=>v/ll);
+  const ax=[d[1]*tt[2]-d[2]*tt[1],d[2]*tt[0]-d[0]*tt[2],d[0]*tt[1]-d[1]*tt[0]], sn=Math.hypot(...ax), cs=d[0]*tt[0]+d[1]*tt[1]+d[2]*tt[2]; if(sn<1e-5) return;
+  const al=AQ.rot(AQ.inv(Gp),ax); (R[name]||(R[name]=[])).push([al[0],al[1],al[2],Math.atan2(sn,cs)]); }
+const BOWK=[ /* time, upper-arm and forearm directions (model space, +z toward the target), body turn, how far the string is drawn */
+  {t:0,   L:null, R:null, turn:0, draw:0},
+  {t:.12, L:[.25,-.15,.95], Lf:[.15,0,1], R:[-.05,-.35,.94], Rf:[.35,.05,.94], turn:.5, draw:0},
+  {t:.42, L:[.06,.05,1], Lf:[.04,.04,1], R:[-.2,.16,-.97], Rf:[.48,.12,.87], turn:1, draw:1},
+  {t:.5,  L:[.06,.05,1], Lf:[.04,.04,1], R:[-.22,.16,-.96], Rf:[.5,.12,.86], turn:1, draw:1},
+  {t:.56, L:[.08,0,1], Lf:[.06,-.05,1], R:[-.45,.2,-.87], Rf:[-.35,.25,-.9], turn:1, draw:-1},
+  {t:.75, L:[.15,-.3,.94], Lf:[.1,-.25,.96], R:[-.4,-.3,-.86], Rf:[-.1,-.6,-.8], turn:.6, draw:0},
+  {t:1,   L:null, R:null, turn:0, draw:0}];
+function bowPose(p){ let a=BOWK[0], b=BOWK[BOWK.length-1]; for(let i=0;i<BOWK.length-1;i++) if(p>=BOWK[i].t&&p<=BOWK[i+1].t){ a=BOWK[i]; b=BOWK[i+1]; break; }
+  const u=clamp((p-a.t)/Math.max(1e-3,b.t-a.t),0,1), k=u*u*(3-2*u), lv=(x,y)=>x&&y?[x[0]+(y[0]-x[0])*k,x[1]+(y[1]-x[1])*k,x[2]+(y[2]-x[2])*k]:(x||y);
+  const wA=(a.L?1:0)+((b.L?1:0)-(a.L?1:0))*k;
+  return {L:lv(a.L,b.L),Lf:lv(a.Lf,b.Lf),R:lv(a.R,b.R),Rf:lv(a.Rf,b.Rf),w:wA,turn:a.turn+(b.turn-a.turn)*k,draw:a.draw+(b.draw-a.draw)*k}; }
+function heroHunter95(o,cls,A,M){ if(cls!=='hunter') return; const st=o.an||{}, R=A.R; st._bow=null; if(o.ride||o.swim||o.dead>=0) return;
+  let p=-1; if(o.cast) p=.46+.015*Math.sin(now()*9); else if(o.swing>=0) p=o.swing; else if(o.rel>=0&&o.rel<1) p=.5+o.rel*.4;
+  if(p<0){ st._bow={draw:0,aim:0}; return; }
+  const P=bowPose(p), w=P.w; if(w<=.001){ st._bow={draw:0,aim:0}; return; }
+  const add=(n,x,y,z,a)=>{ if(a) (R[n]||(R[n]=[])).push([x,y,z,a]); };
+  const tw=P.turn*w; add('pelvis',0,1,0,-.45*tw); add('spine',0,1,0,-.25*tw); add('chest',0,1,0,-.3*tw); add('head',0,1,0,.85*tw); add('head',0,0,1,-.08*tw);
+  add('thighL',1,0,0,-.12*tw); add('thighR',1,0,0,.1*tw); add('shinL',1,0,0,.12*tw);
+  if(P.L){ aimBone(M,R,'uarmL','farmL',P.L,w); aimBone(M,R,'farmL','handL',P.Lf,w); }
+  if(P.R){ aimBone(M,R,'uarmR','farmR',P.R,w); aimBone(M,R,'farmR','handR',P.Rf,w); }
+  st._bow={draw:Math.max(0,P.draw)*w,snap:P.draw<0?-P.draw*w:0,aim:w}; }
+/* ---------- the bow itself, drawn in the world around the left fist ---------- */
+function setFrame(pos,X,Y,Z){ mreset(); const m=CUR; m[0]=X[0]; m[1]=X[1]; m[2]=X[2]; m[4]=Y[0]; m[5]=Y[1]; m[6]=Y[2]; m[8]=Z[0]; m[9]=Z[1]; m[10]=Z[2]; m[12]=pos[0]; m[13]=pos[1]; m[14]=pos[2]; }
+const v3n=v=>{ const l=Math.hypot(...v)||1; return v.map(x=>x/l); }, v3x=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+function seg3(a,b,th,col,e){ const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]], L=Math.hypot(...d); if(L<1e-4) return; const Y=d.map(v=>v/L), X=v3n(Math.abs(Y[1])<.9?v3x(Y,[0,1,0]):v3x(Y,[1,0,0])), Z=v3x(X,Y);
+  setFrame([(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2],X,Y,Z); P(GEO.box,th,L,th,col,e||0,0,0,0); }
+function drawBow95(o,cls,M,J,Mw,sc){ if(cls!=='hunter') return; const st=o.an||{}, B=M.B, bw=st._bow||{draw:0,aim:0};
+  const hand=s=>{ const i=B.findIndex(b=>b.n==='hand'+s); if(i<0) return null; const hp=boneWP(M,i), jm=J.subarray(i*16,i*16+16); return m4p(Mw,m4p(jm,[hp[0],hp[1]-.035,hp[2]+.01])); };
+  const gL=hand('L'), gR=hand('R'); if(!gL) return;
+  const f=o.face||0, fwd=[Math.cos(f),0,Math.sin(f)], aim=clamp(bw.aim||0,0,1);
+  /* idle: the bow hangs from the fist along the leg; aiming: upright with a slight cant, belly toward the target */
+  const fl=(()=>{ const i=B.findIndex(b=>b.n==='farmL'), j=B.findIndex(b=>b.n==='handL'); const a=m4p(Mw,m4p(J.subarray(i*16,i*16+16),boneWP(M,i))), b2=m4p(Mw,m4p(J.subarray(j*16,j*16+16),boneWP(M,j))); return v3n([b2[0]-a[0],b2[1]-a[1],b2[2]-a[2]]); })();
+  const right=[Math.sin(f),0,-Math.cos(f)];   /* the hero's left in world space */
+  const upA=v3n([right[0]*.18,1,right[2]*.18]), Yax=v3n([fl[0]*(1-aim)+upA[0]*aim,fl[1]*(1-aim)+upA[1]*aim,fl[2]*(1-aim)+upA[2]*aim]);
+  const Zax=v3n(v3x(v3x(Yax,fwd),Yax)), Xax=v3x(Yax,Zax);   /* Zax points at the target: the grip faces forward and the limbs and string sweep back toward the archer */
+  const Lb=.62*sc, draw=clamp(bw.draw||0,0,1), bend=.1*sc+.13*sc*draw;
+  const pt=(y,z)=>[gL[0]+Yax[0]*y+Zax[0]*z,gL[1]+Yax[1]*y+Zax[1]*z,gL[2]+Yax[2]*y+Zax[2]*z];
+  const wood=[.36,.22,.12], dark=[.18,.11,.06], N=7; let prev=null;
+  for(let k=-N;k<=N;k++){ const y=k/N*Lb, z=-bend*Math.pow(Math.abs(k/N),1.8)+(Math.abs(k)>=N-1?.025*sc:0), q=pt(y,z); if(prev) seg3(prev,q,(.045-.018*Math.abs(k/N))*sc,Math.abs(k)<2?dark:wood); prev=q; }
+  const top=pt(Lb,-bend+.025*sc), bot=pt(-Lb,-bend+.025*sc);
+  /* the string: straight between the tips, or pulled back to the drawing fingers */
+  let nock=pt(0,-bend+.025*sc-(bw.snap?-.04*sc*bw.snap:0));
+  if(draw>.02&&gR){ nock=[nock[0]+(gR[0]-nock[0])*draw,nock[1]+(gR[1]-nock[1])*draw,nock[2]+(gR[2]-nock[2])*draw]; }
+  seg3(top,nock,.008*sc,[.85,.82,.72],.2); seg3(nock,bot,.008*sc,[.85,.82,.72],.2);
+  /* the nocked arrow, from the string past the grip */
+  if(draw>.15||(o.cast&&draw>.02)){ const tip=[gL[0]+fwd[0]*.22*sc,gL[1]+.02*sc,gL[2]+fwd[2]*.22*sc]; seg3(nock,tip,.018*sc,[.5,.36,.2]); seg3(tip,[tip[0]+fwd[0]*.08*sc,tip[1],tip[2]+fwd[2]*.08*sc],.03*sc,[.78,.8,.86],.25);
+    seg3(nock,[nock[0]+(tip[0]-nock[0])*.15,nock[1]+(tip[1]-nock[1])*.15,nock[2]+(tip[2]-nock[2])*.15],.05*sc,[.92,.9,.82]); }
+  if(bw.snap>.3&&Math.random()<.5) try{ P3(nock[0],nock[1],nock[2],fwd[0]*2,0,fwd[2]*2,.15,.05,'#fff2c0',{glow:true,drag:.8}); }catch(e){} }
 
 function skDrawHero(o,cls){ if(OPT.heroModels===false||GFX.q==='low') return false; const f=HEROM[cls]; if(!f) return false; const M=skGet(f); if(!M) return false;
-  const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc; try{ heroFeet(o,cls,A,M,sc,H/M.H); }catch(e){ if(!skDrawHero._fe){ skDrawHero._fe=1; console.warn('feet',e); } }
+  const A=skAnimHero(o,cls), sc=(o.L&&o.L.scale||1)*(o.sc||1)*(o.big||1), H=(HERO_H[cls]||1.9)*sc; try{ heroBody95(o,cls,A); }catch(e){} try{ heroCarry95(o,cls,A); }catch(e){} try{ heroHunter95(o,cls,A,M); }catch(e){} try{ heroFeet(o,cls,A,M,sc,H/M.H); }catch(e){ if(!skDrawHero._fe){ skDrawHero._fe=1; console.warn('feet',e); } } try{ heroAim(o,cls,A,M); }catch(e){}
   const FW=(A.fw||0)*sc; mreset(); mtr(o.x+Math.cos(o.face||0)*FW,o.y+(o.lift||0)+(A.dy||0)*sc,o.z+Math.sin(o.face||0)*FW); mry(-o.face); mry(Math.PI/2); msc(H/M.H);
-  SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,[],A.R,null).slice(),e:(o.hit?.45:0),a:typeof HALPHA==='number'?HALPHA:1});
+  const JJ=SK.pose(M,[],A.R,null).slice(); if(o.an) o.an._mdlT=now(); try{ heroTrail(o,cls,M,JJ,CUR); }catch(e){} { const MW=Float32Array.from(CUR); try{ drawBow95(o,cls,M,JJ,MW,H/1.9); }catch(e){} CUR=MW; }
+  SKQ.push({M,m:Float32Array.from(CUR),j:JJ,e:(o.hit?.45:0),a:typeof HALPHA==='number'?HALPHA:1});
   if(o.cast&&o.castCol) addLight(o.x+Math.cos(o.face)*.5,o.y+1.3*sc,o.z+Math.sin(o.face)*.5,3.2,o.castCol);
   return true; }
 /* fetch your own class's hero model as soon as you are in the world */
@@ -4581,7 +4793,7 @@ function buildScene(dt){
   const drawP=(o,isMe)=>{ const x=isMe?me.x:o.rx, y=isMe?me.y:o.ry; const cls=isMe?me.c.cls:o.c, u=isMe?MY_U:o.u; const dead=isMe?me.dead:o.d;
     const st=isMe?me:o; animState(st,dt,x,y,isMe?me.moving:o.moving); if(!isMe&&typeof o.hp==='number'){ if(st._lhp!=null&&o.hp<st._lhp-1) st.hurtT=t; st._lhp=o.hp; }
     if(dead&&!st.deadAt) st.deadAt=t; if(!dead) st.deadAt=0;
-    if(!dead&&MELEE_CLS[cls]&&st.swingT&&t-st.swingT>=.18&&t-st.swingT<.5&&st._arcT!==st.swingT&&!(isMe?me.mounted:o.mt)&&Math.hypot(x/TS-CAM.tx,y/TS-CAM.tz)<40){ st._arcT=st.swingT; const wr=isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0); const L0=LOOK[cls]||{}; slashArc(x,y,smoothFace(st,isMe?me.face:o.f),(st.swingN||0)%3,wr>=2?RARCOL[wr]:'#f4f0e6',isMe&&HSU>t,cls==='assassin'); }
+    if(!dead&&MELEE_CLS[cls]&&st.swingT&&t-st.swingT>=.18&&t-st.swingT<.5&&st._arcT!==st.swingT&&!(st._mdlT&&t-st._mdlT<.5)&&!(isMe?me.mounted:o.mt)&&Math.hypot(x/TS-CAM.tx,y/TS-CAM.tz)<40){ st._arcT=st.swingT; const wr=isMe?(me.c.eq.weapon?me.c.eq.weapon.rar:0):(o.wr||0); const L0=LOOK[cls]||{}; slashArc(x,y,smoothFace(st,isMe?me.face:o.f),(st.swingN||0)%3,wr>=2?RARCOL[wr]:'#f4f0e6',isMe&&HSU>t,cls==='assassin'); }
     if(isMe&&HSU>t&&me.swingT&&t-me.swingT<.5){ me.swingT+=dt; st._swT0=me.swingT; }
     if(st.swingT!==st._swT0){ st._swT0=st.swingT; st.swingN=(st.swingN||0)+1; } const castF=isMe?!!me.cast:!!(o.b&4); if(castF) st._wasCast=1; else if(st._wasCast){ st._wasCast=0; st.relT=t; }
     const sw=(t-(st.swingT||0))/.5; const spin=false; const castCol=C3(CLS[cls].col);
@@ -4619,7 +4831,9 @@ function buildScene(dt){
       case 'lflash': { const k=1-a; addLight(e.X,e.Y+.3,e.Z,e.r*(.5+k*.8),e.col.map(v=>v*3*k*k)); break; }
       case 'proj': { const p=e.to(); if(!p){ fx.splice(i,1); break; } const [X0,Y0,Z0]=ph3(e.x,e.y,1.35), [X1,Y1,Z1]=ph3(p.x,p.y,1.1);
         if(e.kind===40){ const X=lerp(X0,X1,a), Z=lerp(Z0,Z1,a), Y=lerp(Y0,Y1,a)+Math.sin(a*Math.PI)*.35, dy=(Y1-Y0)+Math.cos(a*Math.PI)*Math.PI*.35; mreset(); mtr(X,Y,Z); mry(-Math.atan2(Z1-Z0,X1-X0)); mrz(Math.atan2(dy,Math.hypot(X1-X0,Z1-Z0)));
-          P(GEO.box,.62,.025,.025,[.5,.36,.2]); P(GEO.cone,.05,.12,.05,[.75,.78,.84],.2,.33,0,0); P(GEO.box,.12,.06,.01,[.9,.88,.8],0,-.27,.03,0); P(GEO.box,.12,.01,.06,[.9,.88,.8],0,-.27,0,.03); if(Math.random()<.4) P3(X,Y,Z,0,0,0,.25,.04,'#f0e8d0',{drag:.9}); break; }
+          P(GEO.box,.62,.025,.025,[.5,.36,.2]); P(GEO.cone,.05,.12,.05,[.75,.78,.84],.2,.33,0,0); P(GEO.box,.12,.06,.01,[.9,.88,.8],0,-.27,.03,0); P(GEO.box,.12,.01,.06,[.9,.88,.8],0,-.27,0,.03);
+          /* v95: a bright streak follows the arrow, and it strikes with a puff of splinters */ if(GFX.q!=='low'){ const px=e._px??X, py=e._py??Y, pz=e._pz??Z; for(let k=0;k<4;k++){ const f=k/4; P3(px+(X-px)*f,py+(Y-py)*f,pz+(Z-pz)*f,0,0,0,.16,.05-.008*k,k<2?'#fff4d0':'#ffd890',{glow:true,drag:.85}); } e._px=X; e._py=Y; e._pz=Z; }
+          if(a>.93&&!e._hit){ e._hit=1; try{ burst3(X1,Y1,Z1,'#e8d8b0',9,2.4,{}); burst3(X1,Y1,Z1,'#fff2c0',5,1.6,{glow:true}); }catch(err){} } break; }
         const X=lerp(X0,X1,a), Z=lerp(Z0,Z1,a), Y=lerp(Y0,Y1,a)+Math.sin(a*Math.PI)*.5; const col=C3(PCOL[e.kind]||'#fff'); const s=e.kind===4?.14:(e.kind===2||e.kind===10)?.32:.24;
         if(GFX.q!=='low'){ for(let k=0;k<(e.kind===4?1:2);k++) P3(X+(Math.random()-.5)*s,Y+(Math.random()-.5)*s,Z+(Math.random()-.5)*s,(Math.random()-.5)*.5,(Math.random()-.5)*.5+(e.kind===2?.6:0),(Math.random()-.5)*.5,.3+Math.random()*.2,s*.32,PCOL[e.kind]||'#fff',{glow:true,drag:.9}); addLight(X,Y,Z,e.kind===4?2.5:4.5,col.map(v=>v*1.4)); }
         for(let k=1;k<=(e.kind===4?3:6);k++){ const q=a-k*.04; if(q<0) break; const ss=s*(1-k*.13); mreset(); mtr(lerp(X0,X1,q),lerp(Y0,Y1,q)+Math.sin(q*Math.PI)*.5,lerp(Z0,Z1,q)); P(GEO.sph,ss,ss,ss,col,3,0,0,0,.55*(1-k/7)); }
@@ -4877,11 +5091,11 @@ function hoverCheck(x,y){ const t=performance.now(); if(t-hoverT<70) return; hov
 cv.addEventListener('mousedown',e=>{ MOUSE.both=(e.buttons&3)===3; if(MOUSE.down>=0) return; MOUSE.down=e.button; MOUSE.sx=MOUSE.x=e.clientX; MOUSE.sy=MOUSE.y=e.clientY; MOUSE.drag=false; MOUSE.t0=performance.now(); MOUSE.acc=0; MOUSE.lyaw=CAM.yaw; MOUSE.right=e.button===2; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); });
 addEventListener('mousemove',e=>{ MOUSE.both=(e.buttons&3)===3; if(MOUSE.down<0){ if(e.target===cv) hoverCheck(e.clientX,e.clientY); else if(hoverK&&!(GCUR.on&&e.target===cv)) setHoverCursor(''); return; }
   const lk=!!document.pointerLockElement; const dx=lk?(e.movementX||0):e.clientX-MOUSE.x, dy=lk?(e.movementY||0):e.clientY-MOUSE.y; MOUSE.x=e.clientX; MOUSE.y=e.clientY;
-  if(!MOUSE.drag&&(lk?(MOUSE.acc=(MOUSE.acc||0)+Math.abs(dx)+Math.abs(dy))>4:Math.hypot(e.clientX-MOUSE.sx,e.clientY-MOUSE.sy)>4)){ MOUSE.drag=true; setHoverCursor('');
+  if(!MOUSE.drag&&(lk?(MOUSE.acc=(MOUSE.acc||0)+Math.abs(dx)+Math.abs(dy))>7:Math.hypot(e.clientX-MOUSE.sx,e.clientY-MOUSE.sy)>7)){ MOUSE.drag=true; setHoverCursor('');
     /* mouse-look: the cursor stays exactly where it was while a button is held (windowed: the pointer is captured, full screen: the game cursor freezes) */
     if(!document.pointerLockElement&&cv.requestPointerLock&&!document.body.classList.contains('touch')&&!document.fullscreenElement&&!windowIsFull()){ MOUSE.lockDrag=true; try{ const p=cv.requestPointerLock(); if(p&&p.catch) p.catch(()=>{ MOUSE.lockDrag=false; }); }catch(_){ MOUSE.lockDrag=false; } } }
   if(MOUSE.drag&&me){ CAM.yaw+=dx*.0065*OPT.sens; CAM.pitch=clamp(CAM.pitch+dy*.005*OPT.sens*(OPT.invertY?-1:1),-.15,1.35); if(MOUSE.right) me.face=CAM.yaw; } });
-addEventListener('mouseup',e=>{ MOUSE.both=(e.buttons&3)===3; if(e.buttons&3) return; if(MOUSE.down<0) return; const wasDrag=MOUSE.drag, btn=MOUSE.down; MOUSE.down=-1; MOUSE.right=false; const acc0=MOUSE.acc||0; MOUSE.acc=0; if(MOUSE.lockDrag){ MOUSE.lockDrag=false; if(document.pointerLockElement===cv) document.exitPointerLock(); } const quick=performance.now()-(MOUSE.t0||0)<280&&(document.pointerLockElement?acc0:Math.hypot(e.clientX-MOUSE.sx,e.clientY-MOUSE.sy))<16;
+addEventListener('mouseup',e=>{ MOUSE.both=(e.buttons&3)===3; if(e.buttons&3) return; if(MOUSE.down<0) return; const wasDrag=MOUSE.drag, btn=MOUSE.down; MOUSE.down=-1; MOUSE.right=false; const acc0=MOUSE.acc||0; MOUSE.acc=0; if(MOUSE.lockDrag){ MOUSE.lockDrag=false; if(document.pointerLockElement===cv) document.exitPointerLock(); } const quick=performance.now()-(MOUSE.t0||0)<420&&(document.pointerLockElement?acc0:Math.hypot(e.clientX-MOUSE.sx,e.clientY-MOUSE.sy))<26;   /* v95: a click with a little wobble in it still counts as a click */
   if((!wasDrag||quick)&&me) pickAt(MOUSE.sx,MOUSE.sy,btn); });
 cv.addEventListener('wheel',e=>{ e.preventDefault(); CAM.dist=clamp(CAM.dist*(1+e.deltaY*.0012),3,OPT.camMax); },{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -4901,17 +5115,24 @@ function pickUnder(mx,my){ PICKDRY=true; try{ return pickAt(mx,my,-1); }finally{
 function pickAt(mx,my,btn){ TOUCHPICK=TOUCHPICK_(); let best=null,bd=60;
   bd=1e9; let bz=1e9;
   /* every actor is a capsule from its feet to the top of its head; a click anywhere on it counts. Overlaps go to the one nearest the camera. */
-  const test=(X,Y0,Z,h,w,cand)=>{ const a=toScreen(X,Y0,Z), b=toScreen(X,Y0+h,Z); if(!a||!b) return; const sx=b[0]-a[0], sy=b[1]-a[1], L2=sx*sx+sy*sy||1;
-    const u=clamp(((mx-a[0])*sx+(my-a[1])*sy)/L2,0,1), d=Math.hypot(a[0]+sx*u-mx,a[1]+sy*u-my), ppu=Math.sqrt(L2)/h, lim=TOUCHPICK?Math.max(34,w*ppu+24):Math.max(a[2]>26?8:a[2]>14?12:16,w*ppu+6);
-    if(d>lim) return; if(!pickSeen(X,Y0+h*.55,Z)) return; const z=a[2]-(d<lim*.6?2:0); if(z<bz||(Math.abs(z-bz)<.5&&d<bd)){ bz=z; bd=d; best=cand; } };
-  for(const m of mobs){ if(m.dead) continue; const h=(MOBH[m.t.key]||1.6), w=Math.max(.42,Math.min(2.6,(m.t.r||14)/TS*1.15,h*.42)); if(Math.hypot(m.rx/TS-CAM.tx,m.ry/TS-CAM.tz)>(m.t.boss?40:26)) continue; test(m.rx/TS,groundY(m.rx,m.ry),m.ry/TS,h*1.04,w,{kind:'m',id:m.id}); }
-  for(const o of others.values()) if(seenO(o)) test(o.rx/TS,standY(o.rx,o.ry),o.ry/TS,o.mt?2.9:2.05,.5,{kind:'p',id:o.u});
+  /* v95: targets are forgiving. Each actor is a capsule from its feet to just above its name plate, a little wider than its body and
+     never thinner than a comfortable click; if a click lands on nothing, the nearest creature or player within easy reach of the
+     pointer is taken instead. Something in front still wins over something behind. */
+  let near2=null, nd2=1e9;
+  const test=(X,Y0,Z,h,w,cand,actor)=>{ const a=toScreen(X,Y0,Z), b=toScreen(X,Y0+h,Z); if(!a||!b) return; const sx=b[0]-a[0], sy=b[1]-a[1], L2=sx*sx+sy*sy||1;
+    const u=clamp(((mx-a[0])*sx+(my-a[1])*sy)/L2,0,1), d=Math.hypot(a[0]+sx*u-mx,a[1]+sy*u-my), ppu=Math.sqrt(L2)/h, lim=TOUCHPICK?Math.max(44,w*ppu+30):Math.max(a[2]>26?16:a[2]>14?20:24,w*ppu+14);
+    if(d>lim*(actor?2.4:1)) return; if(!pickSeen(X,Y0+h*.55,Z)&&!pickSeen(X,Y0+h*.95,Z)&&!pickSeen(X,Y0+h*.2,Z)) return;
+    if(d>lim){ if(d-lim<nd2){ nd2=d-lim; near2=cand; } return; }
+    const z=a[2]-(d<lim*.6?2:0); if(z<bz||(Math.abs(z-bz)<.5&&d<bd)){ bz=z; bd=d; best=cand; } };
+  for(const m of mobs){ if(m.dead) continue; const h=(MOBH[m.t.key]||1.6), w=Math.max(.6,Math.min(3.2,(m.t.r||14)/TS*1.3,h*.55)); if(Math.hypot(m.rx/TS-CAM.tx,m.ry/TS-CAM.tz)>(m.t.boss?60:40)) continue; test(m.rx/TS,groundY(m.rx,m.ry),m.ry/TS,h*1.04+.6,w,{kind:'m',id:m.id},true); }
+  for(const o of others.values()) if(seenO(o)) test(o.rx/TS,standY(o.rx,o.ry),o.ry/TS,(o.mt?2.9:2.05)+.5,.65,{kind:'p',id:o.u},true);
   for(const n of NPCS) test(n.x/TS,groundY(n.x,n.y),n.y/TS,2.05,.5,{kind:'n',id:n.id});
   if(me&&inArena(me.x,me.y)&&achestUp()){ const Q=achestPos(); test(Q.x/TS,groundY(Q.x,Q.y),Q.y/TS,1.2,1,{kind:'achest'}); }
   for(const o of ALIVE.objs) if(aliveSeen(o)) test(o.x/TS,groundY(o.x,o.y),o.y/TS,o.h,o.w,{kind:'obj',o});
   for(const n of NODES){ if(n.resp>now()||!nodeSeen(n)) continue; test(n.x/TS,groundY(n.x,n.y),n.y/TS,.9,.55,{kind:'node',n}); }
   if(profSkill('skinning')) for(const m of mobs){ if(!m.dead||!(m.skinU>now())||m.skinned) continue; test(m.dx/TS,groundY(m.dx,m.dy),m.dy/TS,.7,Math.max(.5,(m.t.r||14)/TS),{kind:'skin',m}); }
   if(FISH&&FISH.ph!=='cast') test(FISH.x/TS,-1.2,FISH.y/TS,.6,.4,{kind:'bob'});
+  if(!best&&near2) best=near2;
   if(PICKDRY) return best;
   if(best&&best.kind==='achest'){ achestUse(); return; }
   if(best&&best.kind==='obj'){ aliveUse(best.o); return; }
@@ -6110,7 +6331,7 @@ function worldTick(dt){
   buffT-=dt; if(buffT<=0){ buffT=1; let ch=false; for(const k in me.c.buffs){ if(me.c.buffs[k]&&me.c.buffs[k]<=Date.now()){ delete me.c.buffs[k]; ch=true; if(BUFFNAME[k]) sysMsg(`${BUFFNAME[k][0]} has worn off.`); } } if(ch){ recalc(); persist(); } renderBuffs(); }
   if(me.moving&&me.emote) { me.emote=null; sendPresence(true); }
   if(!isSwimming()&&isWaterAt(me.x,me.y)&&me.moving&&Math.random()<dt*7){ P3(me.x/TS+(Math.random()-.5)*.5,WATER_Y+.03,me.y/TS+(Math.random()-.5)*.5,(Math.random()-.5)*.6,.9,(Math.random()-.5)*.6,.5,.08,'#e8f4ff',{drag:.95}); }
-  if(me.moving&&!me.mounted&&!(me.jumpH>0)&&!isSwimming()){ me._stepT=(me._stepT||0)+dt; if(me._stepT>.32){ me._stepT=0; if(Math.random()<.7) footDust(me.x+(Math.random()-.5)*8,me.y+(Math.random()-.5)*8); } }
+  if(me.moving&&!me.mounted&&!(me.jumpH>0)&&!isSwimming()&&!(me._mdlT&&now()-me._mdlT<.5)){ me._stepT=(me._stepT||0)+dt; if(me._stepT>.32){ me._stepT=0; if(Math.random()<.7) footDust(me.x+(Math.random()-.5)*8,me.y+(Math.random()-.5)*8); } }
   if(isSwimming()&&Math.random()<dt*(me.moving?3:1.2)){ const R0=me.moving?.5:.35; for(let k=0;k<10;k++){ const a=k/10*6.283; P3(me.x/TS+Math.cos(a)*R0,WATER_Y+.04,me.y/TS+Math.sin(a)*R0,Math.cos(a)*.7,0,Math.sin(a)*.7,.9,.07,'#dff2ff',{drag:.9}); } }
   if(isSwimming()&&me.moving&&Math.random()<dt*10){ P3(me.x/TS+(Math.random()-.5)*.6,WATER_Y+.03,me.y/TS+(Math.random()-.5)*.6,0,.15,0,.9,.25,'#e8f4ff',{big:true,drag:.95}); }
   const wet=(WX.kind>=2?WX.k:0); if(wet>0&&zoneAtPx(me.x,me.y)!=='ash'){ const fz=zoneAtPx(me.x,me.y)==='frost'; for(let i=0;i<Math.floor(wet*(WX.kind===3?60:35));i++){ const X=CAM.tx+(Math.random()-.5)*30, Z=CAM.tz+(Math.random()-.5)*30; P3(X,hgt(X,Z)+6+Math.random()*6,Z,fz?(Math.random()-.5)*.6:-.6,fz?-2.2:-16,fz?(Math.random()-.5)*.6:0,fz?3:.55,fz?.07:.045,fz?'#ffffff':'#c8d8ee',{drag:1}); } for(let i=0;i<Math.floor(wet*40*dt*10);i++){ const X=CAM.tx+(Math.random()-.5)*24, Z=CAM.tz+(Math.random()-.5)*24; const y=hgt(X,Z); P3(X,Math.max(y,WATER_Y)+.05,Z,0,.6,0,.25,.05,'#cfe2ff',{drag:.9}); } }
@@ -8418,7 +8639,7 @@ function initTouch(){ if(!isTouch) return; document.body.classList.add('touch');
   cv.addEventListener('touchmove',e=>{ e.preventDefault(); for(const t of e.changedTouches){ const T=TL[t.identifier]; if(!T) continue; const dx=t.clientX-T.x, dy=t.clientY-T.y; T.x=t.clientX; T.y=t.clientY;
       if(!pinch&&me){ CAM.yaw+=dx*.008*OPT.sens; CAM.pitch=clamp(CAM.pitch+dy*.006*OPT.sens*(OPT.invertY?-1:1),-.15,1.35); } }
     const ids=Object.keys(TL); if(pinch&&ids.length>=2){ const a=TL[ids[0]],b=TL[ids[1]]; const d=Math.hypot(a.x-b.x,a.y-b.y); CAM.dist=clamp(pinch.c*pinch.d/Math.max(20,d),3,OPT.camMax); } },{passive:false});
-  const tend=e=>{ for(const t of e.changedTouches){ const T=TL[t.identifier]; delete TL[t.identifier]; if(T&&!pinch&&Math.hypot(T.x-T.sx,T.y-T.sy)<12&&performance.now()-T.t0<350&&me) pickAt(t.clientX,t.clientY,0); } if(Object.keys(TL).length<2) pinch=null; };
+  const tend=e=>{ for(const t of e.changedTouches){ const T=TL[t.identifier]; delete TL[t.identifier]; if(T&&!pinch&&Math.hypot(T.x-T.sx,T.y-T.sy)<20&&performance.now()-T.t0<450&&me) pickAt(t.clientX,t.clientY,0); } if(Object.keys(TL).length<2) pinch=null; };
   cv.addEventListener('touchend',tend); cv.addEventListener('touchcancel',tend);
   document.querySelectorAll('#touchBtns [data-t]').forEach(b=>b.addEventListener('touchstart',e=>{ e.preventDefault(); if(!me) return; const a=b.dataset.t; doAction(a); },{passive:false})); }
 function doAction(a){ if(!me) return;
