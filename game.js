@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 95;
+const VERSION = 96;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -2123,7 +2123,7 @@ const SKMOB={ thornling:{f:'puglin',h:1.95,ws:.55}, ravager:{f:'imp',h:2.3,ws:.6
  oldtusk:{f:'tusk',h:1.3,statue:1,beast:1},
  drowned:{f:'sailor',h:2.05,crt:1,rig:{root:'_rootJoint',spine:['DEF-spine.002_07','DEF-spine.003_08'],head:'DEF-spine.006_011',thighs:['DEF-thigh.L_073','DEF-thigh.R_091'],shins:['DEF-shin.L_075','DEF-shin.R_093'],arms:['DEF-upper_arm.L_0142','DEF-upper_arm.R_0171']}},
  murkcrab:{f:'crab',h:1.85,crt:1,ws:.5,rig:{root:'_rootJoint'}},
- grimmaw:{f:'void',h:3.2,crt:1,rig:{root:'_rootJoint',spine:['BackSpine1_01','BackSpine4_08'],head:'HeadTop_043',jaw:['LeftJawBase_059','RightJawBase_082'],lunge:1.3,fall:.9,legs:['LeftFrontThighLeg_057','RightMiddleThighLeg_088','LeftBackThighLeg_053','RightFrontThighLeg_080','LeftMiddleThighLeg_065','RightBackThighLeg_076'],legSide:[-1,1,-1,1,-1,1]}} };
+ grimmaw:{f:'void',h:3.2,crt:1,grim:1,yaw:Math.PI,rig:{root:'_rootJoint',spine:['BackSpine1_01','BackSpine4_08'],head:'HeadTop_043',jaw:['LeftJawBase_059','RightJawBase_082'],lunge:1.3,fall:.9,legs:['LeftFrontThighLeg_057','RightMiddleThighLeg_088','LeftBackThighLeg_053','RightFrontThighLeg_080','LeftMiddleThighLeg_065','RightBackThighLeg_076'],legSide:[-1,1,-1,1,-1,1]}} };
 const SKM={}, SKQ=[];
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
 /* skinned-model core: loading, clip sampling, blending, pose -> joint matrices (shared by the game and the test viewer) */
@@ -2722,8 +2722,60 @@ function skDrawHero(o,cls){ if(OPT.heroModels===false||GFX.q==='low') return fal
   return true; }
 /* fetch your own class's hero model as soon as you are in the world */
 setInterval(()=>{ try{ if(typeof me!=='undefined'&&me&&me.c&&OPT.heroModels!==false&&GFX.q!=='low'&&HEROM[me.c.cls]) skGet(HEROM[me.c.cls]); }catch(e){} },3000);
+/* ======================================================================================================
+   v96 Grimmaw the Bonecrawler, animated properly
+   - He was drawn back to front (his head is at the model's -z), so he crawled tail first. He now faces where he goes.
+   - Six legs walk in two alternating tripods (left front, right middle, left back / right front, left middle, right back), the way
+     insects and spiders do: three feet always on the ground, the other three lifting, knees tucking and reaching forward. The body
+     rises a little on each step, sways side to side, and the tail swings against the stride.
+   - Idle: he breathes, the neck sways, the jaws work, and now and then a leg shifts its footing.
+   - Attack: he rears up on his back legs with the front claws raised and the jaws gaping, then crashes forward and down with a bite;
+     the second attack is a sideways rake of the front claws.
+   ====================================================================================================== */
+const GRIM={legs:['LeftFrontThighLeg_057','RightMiddleThighLeg_088','LeftBackThighLeg_053','RightFrontThighLeg_080','LeftMiddleThighLeg_065','RightBackThighLeg_076'],
+  knees:['LeftFrontKneeLeg_056','RightMiddleKneeLeg_087','LeftBackKneeLeg_052','RightFrontKneeLeg_079','LeftMiddleKneeLeg_064','RightBackKneeLeg_075'],
+  side:[-1,1,-1,1,-1,1], grp:[0,0,0,1,1,1], front:[1,0,0,1,0,0], back:[0,0,1,0,0,1],
+  spine:['BackSpine1_01','BackSpine2_06','BackSpine3_07','BackSpine4_08'], neck:['BackSpine6_010','BackSpine8_012','BackSpine10_02'], head:'HeadTop_043', jaw:['LeftJawBase_059','RightJawBase_082'],
+  tail:['FrontSpine3_035','FrontSpine6_038','FrontSpine10_023','FrontSpine14_027','FrontSpine18_031'], root:'_rootJoint'};
+function skAnimGrim(S,M,b,m){ const t=now()+((m.id||0)%7)*.83, R={}, L=[], G=GRIM, add=(n,x,y,z,a)=>{ if(a&&n&&isFinite(a)) (R[n]||(R[n]=[])).push([x,y,z,a]); };
+  const mv=clamp(b.mv||0,0,1), C=M.A&&M.A.clips||{}, sm=x=>{ x=clamp(x,0,1); return x*x*(3-2*x); };
+  /* model space: -z is his front, +x his right, +y up */
+  if(b.dead>=0){ const k=sm(b.dead/1.1); if(C.idle) L.push({c:'idle',t:.4,loop:true,w:1}); add(G.root,0,0,1,1.25*k); G.legs.forEach((n,i)=>{ add(n,0,0,1,G.side[i]*.5*k); add(G.knees[i],0,0,1,-G.side[i]*.7*k); }); for(const n of G.jaw) add(n,1,0,0,.5*k); return {L,R}; }
+  let aw=0; const p=b.swing>=0?b.swing:-1; if(p>=0) aw=p<.08?p/.08:p>.86?(1-p)/.14:1;
+  if(C.idle) L.push({c:'idle',t:t*.8,loop:true,w:1});
+  /* ---------- walking: alternating tripods ---------- */
+  const ph=(b.walk||0)*.85, step=mv*(1-aw*.85);
+  if(step>.01){ G.legs.forEach((n,i)=>{ const q=ph+(G.grp[i]?Math.PI:0)+(G.front[i]?.25:G.back[i]?-.25:0), f=-Math.cos(q), lift=Math.pow(Math.max(0,Math.sin(q)),.8), sd=G.side[i];
+      add(n,0,1,0,sd*.32*f*step); add(n,0,0,1,sd*.42*lift*step); add(G.knees[i],0,0,1,-sd*.38*lift*step); });
+    const bob=Math.abs(Math.sin(ph)); add(G.root,1,0,0,.03*step*Math.sin(ph*2)); add(G.root,0,0,1,.035*step*Math.sin(ph));
+    G.spine.forEach((n,k)=>add(n,0,1,0,.05*step*Math.sin(ph+k*.4))); G.tail.forEach((n,k)=>add(n,0,1,0,-.07*step*Math.sin(ph-k*.5)));
+    G.neck.forEach(n=>add(n,0,1,0,-.03*step*Math.sin(ph))); b._bob=bob*.12*step; }
+  /* ---------- idle: breathing, a swaying neck, working jaws, the odd shift of a foot ---------- */
+  const idle=(1-mv)*(1-aw);
+  if(idle>.01){ const br=Math.sin(t*1.3); G.spine.forEach(n=>add(n,1,0,0,.015*br*idle)); G.neck.forEach((n,k)=>{ add(n,0,1,0,.06*idle*Math.sin(t*.6+k*.5)); add(n,1,0,0,.03*idle*Math.sin(t*.9+k)); });
+    const jw=Math.max(0,Math.sin(t*2.3))*Math.max(0,Math.sin(t*.37)); for(const n of G.jaw) add(n,1,0,0,.22*jw*idle);
+    G.tail.forEach((n,k)=>add(n,0,1,0,.06*idle*Math.sin(t*.5-k*.6)));
+    const sh=(t*.21)%1, li=Math.floor(t*.21)%6; if(sh<.18){ const u=Math.sin(Math.PI*sh/.18); add(G.legs[li],0,0,1,G.side[li]*.3*u*idle); add(G.knees[li],0,0,1,-G.side[li]*.3*u*idle); } }
+  /* ---------- attacks ---------- */
+  if(p>=0){ const v=(b.swv||0)%2;
+    if(v===0){ /* rear up, then crash down with a bite */
+      const rear=p<.38?sm(p/.38):p<.52?1-sm((p-.38)/.14)*1.35:-.35*(1-sm((p-.52)/.4));
+      add('BackSpine1_01',1,0,0,.55*rear*aw); add('Hip_044',1,0,0,.1*rear*aw); G.neck.forEach(n=>add(n,1,0,0,-.18*rear*aw)); add(G.head,1,0,0,-.2*Math.max(0,-rear)*aw);
+      G.legs.forEach((n,i)=>{ const sd=G.side[i];
+        if(G.front[i]){ add(n,0,0,1,sd*.9*Math.max(0,rear)*aw); add(n,0,1,0,sd*.35*Math.max(0,rear)*aw); add(G.knees[i],0,0,1,-sd*.6*Math.max(0,rear)*aw); add(n,0,0,1,-sd*.25*Math.max(0,-rear)*aw); }
+        else if(G.back[i]){ add(n,0,0,1,-sd*.15*Math.max(0,rear)*aw); add(G.knees[i],0,0,1,sd*.2*Math.max(0,rear)*aw); } });
+      const bite=p<.3?sm(p/.3):p<.5?1:1-sm((p-.5)/.1); for(const n of G.jaw) add(n,1,0,0,.6*bite*aw); }
+    else { /* a raking sweep of the front claws from his right to his left */
+      const sw=p<.3?-sm(p/.3):p<.55?-1+2*sm((p-.3)/.25):1-sm((p-.55)/.4);
+      add(G.root,0,1,0,-.25*sw*aw); G.spine.forEach(n=>add(n,0,1,0,-.08*sw*aw)); add(G.root,1,0,0,.12*aw*Math.sin(Math.PI*p));
+      G.legs.forEach((n,i)=>{ if(!G.front[i]) return; const sd=G.side[i]; add(n,0,0,1,sd*.55*aw); add(n,0,1,0,.55*sw*aw); add(G.knees[i],0,0,1,-sd*.35*aw); });
+      for(const n of G.jaw) add(n,1,0,0,.35*aw*Math.sin(Math.PI*p)); } }
+  /* flinch */
+  const fl=b.pitch?b.pitch/.2:0; if(fl>.05&&aw<.5) G.spine.forEach(n=>add(n,1,0,0,-.08*fl));
+  return {L,R}; }
+
 function skDrawMob(m,mt,b){ const S=SKMOB[mt.key]; if(!S) return false; const M=skGet(S.f); if(!M) return false;
-  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.crt?skAnimCrt(S,M,b,m):S.dragon?skAnimDragon(S,M,b,m):S.statue?skAnimStatue(S,M,b,m):S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); const hv=S.hover&&!(b.dead>=0)?S.hover*(1+.6*Math.sin(now()*1.7+(m.id||0))):0; mreset(); mtr(b.x,b.y+hv,b.z); mry(-b.face); mry(Math.PI/2); msc(S.h/M.H*(b.sc||1));
+  if(S.ork){ b={...b}; const rr=m.roarU?(m.roarU-now())/2.2:0; b.roar=rr>0?rr:0; } const A=S.grim?skAnimGrim(S,M,b,m):S.crt?skAnimCrt(S,M,b,m):S.dragon?skAnimDragon(S,M,b,m):S.statue?skAnimStatue(S,M,b,m):S.ork?skAnimOrk(S,M,b,m):skAnim(S,M,b,m,mt); const hv=S.hover&&!(b.dead>=0)?S.hover*(1+.6*Math.sin(now()*1.7+(m.id||0))):0; mreset(); mtr(b.x,b.y+hv+(b._bob||0),b.z); mry(-b.face); mry(Math.PI/2+(S.yaw||0)); msc(S.h/M.H*(b.sc||1));
   SKQ.push({M,m:Float32Array.from(CUR),j:SK.pose(M,A.L||[],A.R||null,null).slice(),e:(HOVE||0)+(b.hit?.45:0)});
   if(HOVE) addLight(b.x,b.y+S.h*.6,b.z,2.2,[1,.95,.8]); if(S.dragon&&!(b.dead>=0)){ const fl=.8+.2*Math.sin(now()*7); addLight(b.x,b.y+S.h*.55,b.z,11,[1.3*fl,.5*fl,.15*fl]); }
   return true; }
@@ -8547,8 +8599,21 @@ function achestDraw(near,t){ if(!me||me.y<OWH*TS) return; const Q=achestPos(); i
   addLight(X,Y+1.2,Z,6+3*Math.sin(t*3),[1.6,1.1,.4]); if(Math.random()<.3) P3(X+(Math.random()-.5)*1.2,Y+.8,Z+(Math.random()-.5)*.9,0,.9,0,1,.07,'#ffe08a',{glow:true});
   if(Math.random()<.08) P3(X,Y+.9,Z,0,3.5,0,1.4,.14,'#ffd36a',{glow:true}); }
 
+/* v96: Old Rendclaw gets a quiet corner of Amberfield to himself, as far from the town, the roads, the landmarks and every other
+   creature as the meadow allows (worked out the same way on every computer, so everyone finds him in the same place) */
+const REND={done:false,pos:null};
+function rendLair(){ if(REND.done||!mobs||!mobs.length) return; REND.done=true; const ot=mobs.find(m=>m.t.key==='oldtusk'); if(!ot) return;
+  let best=null, bs=-1;
+  for(let ty=8;ty<OWH-8;ty+=2) for(let tx=8;tx<MW-8;tx+=2){ if(zmap[ty*MW+tx]!=='meadow') continue; const x=(tx+.5)*TS, y=(ty+.5)*TS;
+    if(Math.hypot(tx-TOWN.x,ty-TOWN.y)<28||blocked(x,y,30)||isWaterAt(x,y)||inTown(x,y)) continue;
+    let road=false; for(let dy=-3;dy<=3&&!road;dy++) for(let dx=-3;dx<=3;dx++) if(tAt(tx+dx,ty+dy)===T.PATH||tAt(tx+dx,ty+dy)===T.BRIDGE){ road=true; break; } if(road) continue;
+    let sc=1e9; for(const m of mobs){ if(m===ot||m.gmc||m.t.summon) continue; const d=Math.hypot(m.sx-x,m.sy-y); if(d<sc){ sc=d; if(sc<=bs) break; } } if(sc<=bs) continue;
+    for(const p of POIS) sc=Math.min(sc,Math.hypot(p.x-tx,p.y-ty)*TS*1.2); for(const n of NPCS) sc=Math.min(sc,Math.hypot(n.x-x,n.y-y)*1.2);
+    if(sc>bs){ bs=sc; best=[x,y]; } }
+  if(best){ ot.sx=ot.x=ot.rx=ot.wx=best[0]; ot.sy=ot.y=ot.ry=ot.wy=best[1]; REND.pos=best; } }
+
 function update(dt){
-  const t=now();
+  const t=now(); try{ rendLair(); }catch(e){}
   syncPeers();
   if(me){
     let f=0,s=0;
