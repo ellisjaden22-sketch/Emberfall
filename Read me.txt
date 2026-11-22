@@ -1,20 +1,7 @@
-EMBERFALL ONLINE (BETA) - Windows
+EMBERFALL ONLINE (BETA) - Mac
 
-1. Double-click Emberfall.exe.
-   Windows may show "Windows protected your PC" because the game is new and unsigned:
-   click "More info", then "Run anyway". You only need to do this once.
-2. The first time, Emberfall installs itself for you (no administrator password needed):
-   you get an "Emberfall Online" shortcut on your desktop and in the Start menu.
-   From then on, start the game from either shortcut. You can delete the downloaded file.
-3. The game opens in its own window. If the realm was asleep, it takes up to a minute to wake up.
-4. Create your own hero. Your characters are saved on this PC.
-
-The game itself always updates automatically. If the Emberfall app ever gets a new version,
-it tells you when it starts, with a link to download it.
-
-To uninstall: Settings > Apps > Installed apps > Emberfall Online > Uninstall.
-Your heroes stay saved on this PC in case you install it again.
-
-Controls: WASD move, mouse to look, 1-8 abilities, F talk/loot, R mount, M map, C character,
-B bags, P party, Esc menu (options, keybinds, sound, bug reports). Alt+F4 or the X closes the game.
-Needs Microsoft Edge or Google Chrome installed (every Windows 10/11 PC has Edge).
+1. Drag Emberfall.app into your Applications folder (optional).
+2. The first time: right-click Emberfall.app and choose Open, then Open again.
+   If macOS still blocks it: System Settings > Privacy & Security > scroll down > "Open Anyway".
+3. The game opens in its own window (uses Google Chrome, Edge or Brave if installed, otherwise your browser).
+4. Create your own hero. Your characters are saved on this Mac.
