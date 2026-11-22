@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.02</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.03</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 102;
+const VERSION = 103;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -932,7 +932,7 @@ function bgTick(dt){ if(!me) return; const host=bgHostU(); BGS.host=host; const 
     if(S.st==='over'&&S.id&&BGC.part[S.id]&&!BGC.rewarded[S.id]){ BGC.rewarded[S.id]=1; const mine=BGC.part[S.id], won=S.win===mine, draw=!S.win;
       const c=me.c, P=c.pvp=c.pvp||{k:0,d:0,best:0,st:0}; if(won){ P.bgw=(P.bgw||0)+1; stat('bgWins',1); } else if(!draw) P.bgl=(P.bgl||0)+1;
       banner(won?'VICTORY':draw?'DRAW':'DEFEAT',`${BG.base[1].n} ${Math.round(S.sc[1])} · ${Math.round(S.sc[2])} ${BG.base[2].n}`,won?'win':'');
-      pvpGain('honor',won?25:draw?15:10,won?'winning Emberclash Fields':'fighting in Emberclash Fields'); try{ checkAch(); }catch(e){} } }
+      pvpGain('honor',won?25:draw?15:10,won?'winning Emberclash Fields':'fighting in Emberclash Fields'); pvpGain('conq',won?12:draw?8:5,'fighting in Emberclash Fields'); if(won&&pvpDaily('bw')) pvpGain('honor',40,'your first win today'); try{ checkAch(); }catch(e){} } }
   bgHud(); }
 /* ---------- joining and leaving ---------- */
 function bgJoin(){ if(!me||me.dead) return; if(me.c.lvl<10) return err('You must be level 10 to fight in Emberclash Fields');
@@ -947,8 +947,9 @@ function bgLeave(){ if(!me) return; me.bgTeam=0; const n=NPCS.find(x=>x.id==='ys
 /* ---------- currencies, rewards and gear ---------- */
 function pvpGain(kind,n,why){ if(!me||!n) return; const c=me.c; if(kind==='honor'){ c.honor=(c.honor||0)+n; stat('honorEarned',n); } else { c.conq=(c.conq||0)+n; stat('conqEarned',n); }
   chatLine(`${kind==='honor'?'🛡':'🏆'} +${n} ${kind==='honor'?'Honor':'Conquest'} for ${why}.`,'c-xp'); try{ checkAch(); }catch(e){} renderInv(); persist(); }
-function pvpKillReward(o){ if(!me) return; const nm=(o&&o.n)||'a player'; pvpGain('honor',1,`defeating ${nm}`);
-  if(inArena(me.x,me.y)){ const P=me.c.pvp||{}; pvpGain('conq',3,`an arena kill`); if((P.st||0)===3) pvpGain('conq',5,'a three-kill streak'); } }
+function pvpDaily(k){ const c=me.c, d=woDay(); if(!c.pvpd||c.pvpd.d!==d) c.pvpd={d}; if(c.pvpd[k]) return false; c.pvpd[k]=1; return true; }
+function pvpKillReward(o){ if(!me) return; const nm=(o&&o.n)||'a player'; pvpGain('honor',3,`defeating ${nm}`);
+  if(inArena(me.x,me.y)){ const P=me.c.pvp||{}; pvpGain('conq',5,`an arena kill`); if((P.st||0)===3) pvpGain('conq',8,'a three-kill streak'); if(pvpDaily('ak')) pvpGain('conq',25,'your first arena kill today'); } }
 function pvpGear(k){ if(!me) return 0; let s=0; for(const sl of SLOTS){ const it=me.c.eq[sl]; if(it&&it.pvp) s+=+it.pvp[k]||0; } return s; }
 const PVPSET={honor:{set:'Emberguard',rar:3,lv:20,req:20,cur:'honor',cost:{weapon:150,armor:120,trinket:90},b:{weapon:[83,32],armor:[29,86],trinket:[58,57]},pvp:{r:.04,d:.03},trink:'Insignia'},
   conq:{set:'Ashen Champion’s',rar:4,lv:20,req:20,cur:'conq',cost:{weapon:300,armor:240,trinket:180},b:{weapon:[108,42],armor:[38,112],trinket:[75,75]},pvp:{r:.06,d:.05},trink:'Seal'}};
@@ -956,7 +957,7 @@ function pvpItem(kind,slot,cls){ const D=PVPSET[kind], [pow,sta]=D.b[slot]; cons
   const it={id:rid(6),slot,name:`${D.set} ${base}`,rar:D.rar,pow,sta,lv:D.lv,reqLv:D.req,val:kind==='conq'?120:60,pvp:{...D.pvp},pset:kind}; if(slot==='armor') it.at=CLS_ARMOR[cls]; return it; }
 function openPvpShop(kind,n){ const c=me.c, D=PVPSET[kind], have=c[D.cur]||0, cur=kind==='honor'?'Honor':'Conquest', icon=kind==='honor'?'🛡':'🏆';
   const intro=kind==='honor'?'"Honor is earned in blood, on the field. Spend it here, and the field will remember you."':'"Only the arena makes champions. Bring me Conquest and I will arm you like one."';
-  let h=`<h2>${esc(n.name)}</h2><p>${intro}</p><div style="color:var(--dim);font-size:13px;margin-bottom:6px">${kind==='honor'?'Earn Honor by defeating players in the arena and in Emberclash Fields, by capturing points, and by winning battles.':'Earn Conquest by defeating players in the Bloodsand Arena (+3 a kill, +5 more on a three-kill streak).'} All pieces require level ${D.req}.</div>`;
+  let h=`<h2>${esc(n.name)}</h2><p>${intro}</p><div style="color:var(--dim);font-size:13px;margin-bottom:6px">${kind==='honor'?'Earn Honor by defeating players (+3), capturing points and finishing battles in Emberclash Fields (+10 to +25, and +40 for your first win each day).':'Earn Conquest in the Bloodsand Arena (+5 a kill, +8 more on a three-kill streak, +25 for your first kill each day) and in Emberclash Fields (+5 to +12 a battle, win or lose).'} All pieces require level ${D.req}.</div>`;
   for(const sl of SLOTS){ const it=pvpItem(kind,sl,c.cls), cost=D.cost[sl]; h+=`<div class="shoprow" data-tip="${sl}"><span><b class="t${it.rar}">${esc(it.name)}</b><br><span style="font-size:12px;color:var(--dim)">+${it.pow} Power · +${it.sta} Stamina · +${Math.round(it.pvp.r*100)}% PvP Toughness · +${Math.round(it.pvp.d*100)}% PvP Damage</span></span><button data-buy="${sl}" ${have<cost?'disabled':''}>${icon} ${cost} ${cur}</button></div>`; }
   h+=`<div style="margin-top:10px;color:var(--gold)">Your ${cur}: ${have}</div><div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`; dlg(h);
   $('bk').onclick=()=>talk(n);

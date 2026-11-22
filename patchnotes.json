@@ -1,9 +1,9 @@
 {
- "version": "v1.02",
- "title": "Boss tuning",
+ "version": "v1.03",
+ "title": "PvP rewards",
  "date": "21 Nov 2026",
- "text": "Every boss was measured against a geared tank of its own level.\n\n⬆️ Ignara the Searing (Cinderhold) hits about a quarter less hard. She dealt half again as much damage as the bosses after her, at the second fight of the raid\n⬆️ The world bosses of the Stormwake Coast and the Scorched Reach now hit like bosses: Pyraxis, Thalassor, Skarn the Ashlord and Captain Blackwake deal 50–120% more damage. They dealt about the same share of your health as Old Rendclaw at level 3",
+ "text": "PvP gear took far too long to earn: a full Conquest set needed 240 arena kills, and losing a battle gave no Conquest at all.\n\n⬆️ Arena kills give 5 Conquest (was 3), a three-kill streak 8 more (was 5), and your first arena kill each day gives 25 more\n✨ Emberclash Fields now gives Conquest too: 12 for a win, 8 for a draw and 5 for a loss\n⬆️ Defeating a player gives 3 Honor (was 1), and your first Emberclash win each day gives 40 more Honor",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-21T07:14:30Z"
+ "time": "2026-11-21T07:20:28Z"
 }
