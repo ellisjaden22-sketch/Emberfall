@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION='v0.96';
+const SERVER_VERSION='v0.97';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
@@ -151,9 +151,62 @@ function sendFile(res, file, extra) {
     res.writeHead(200, Object.assign({ 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-cache' }, extra || {})); res.end(data); });
 }
 
+
+// ---------- world editor: publish world.js from /play/editor.html ----------
+// Only the owner can publish (the GM_PASSWORD). The new world.js is live for every page load straight away.
+// To keep it after Render restarts or redeploys, the server can also save it to GitHub: give GITHUB_TOKEN (or a separate
+// WORLD_GITHUB_TOKEN) "Contents: Read and write" on your game repository. GITHUB_REPO and GITHUB_BRANCH pick the repo (default main).
+const WORLD_FILE = path.join(ROOT, 'world.js');
+const WORLD_REPO = process.env.GITHUB_REPO || 'ellisjaden22-sketch/Emberfall', WORLD_BRANCH = process.env.GITHUB_BRANCH || 'main', WORLD_PATH = process.env.WORLD_PATH || 'world.js';
+const WORLD_TOKEN = process.env.WORLD_GITHUB_TOKEN || process.env.GITHUB_TOKEN || '';
+const pubTries = new Map();
+function readBody(req, max, cb) { let b = [], n = 0, done = false; req.on('data', x => { if (done) return; n += x.length; if (n > max) { done = true; cb(null); req.destroy(); } else b.push(x); }); req.on('end', () => { if (!done) { done = true; cb(Buffer.concat(b).toString('utf8')); } }); req.on('error', () => { if (!done) { done = true; cb(null); } }); }
+function cleanWorld(d) {
+  const int = v => Math.round(+v || 0), num = (v, a, b) => Math.max(a, Math.min(b, +(+v || 0).toFixed(2))), str = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u2028\u2029]/g, ' ').slice(0, n);
+  const A = v => Array.isArray(v) ? v : [];
+  return { v: 1,
+    tiles: A(d.tiles).slice(0, 200000).filter(e => Array.isArray(e) && /^[A-Z]{2,8}$/.test(e[2])).map(e => [int(e[0]), int(e[1]), e[2]]),
+    zones: A(d.zones).slice(0, 200000).filter(e => Array.isArray(e) && /^[a-z]{2,12}$/.test(e[2])).map(e => [int(e[0]), int(e[1]), e[2]]),
+    props: A(d.props).slice(0, 6000).filter(p => p && /^[a-z]{2,16}$/.test(p.k)).map(p => ({ k: p.k, x: num(p.x, 0, 4096), y: num(p.y, 0, 4096), r: num(p.r, -100, 100), s: num(p.s || 1, .3, 4) })),
+    npcs: A(d.npcs).slice(0, 300).filter(n => n && typeof n === 'object').map(n => ({ name: str(n.name, 28), title: str(n.title, 28), x: int(n.x), y: int(n.y), col: /^#[0-9a-f]{6}$/i.test(n.col || '') ? n.col : '#8a7a5a', say: str(n.say, 240) })),
+    spawns: A(d.spawns).slice(0, 1000).filter(x => x && /^[a-z0-9_]{1,24}$/i.test(x.mob)).map(x => ({ mob: x.mob, x: int(x.x), y: int(x.y), n: Math.max(1, Math.min(12, int(x.n) || 1)) })),
+    pois: A(d.pois).slice(0, 300).filter(p => p && p.name).map(p => ({ name: str(p.name, 30), x: int(p.x), y: int(p.y), r: Math.max(2, Math.min(20, int(p.r) || 5)) })) };
+}
+function ghFile(method, body) { return new Promise(res => {
+  const data = body ? JSON.stringify(body) : null, p = '/repos/' + WORLD_REPO + '/contents/' + WORLD_PATH.split('/').map(encodeURIComponent).join('/') + (method === 'GET' ? '?ref=' + encodeURIComponent(WORLD_BRANCH) : '');
+  const rq = require('https').request({ host: 'api.github.com', path: p, method, headers: { 'User-Agent': 'emberfall-server', Authorization: 'Bearer ' + WORLD_TOKEN, Accept: 'application/vnd.github+json', ...(data ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } : {}) } }, r => {
+    let b = ''; r.on('data', x => b += x); r.on('end', () => { let j = null; try { j = JSON.parse(b || 'null'); } catch (e) {} res({ code: r.statusCode, j }); }); });
+  rq.on('error', e => res({ code: 0, j: { message: e.message } })); rq.setTimeout(20000, () => { rq.destroy(); res({ code: 0, j: { message: 'GitHub did not answer in time' } }); }); if (data) rq.write(data); rq.end(); }); }
+async function worldToGitHub(text, who) {
+  if (!WORLD_TOKEN) return { ok: false, msg: 'No GitHub token is set on the server (GITHUB_TOKEN or WORLD_GITHUB_TOKEN in Render).' };
+  const cur = await ghFile('GET'); if (cur.code !== 200 && cur.code !== 404) return { ok: false, msg: `GitHub said ${cur.code}: ${(cur.j && cur.j.message) || 'no access'}. The token needs "Contents: Read and write" on ${WORLD_REPO}.` };
+  const r = await ghFile('PUT', { message: `World edits from the World Editor${who ? ' (' + who + ')' : ''}`, content: Buffer.from(text).toString('base64'), branch: WORLD_BRANCH, ...(cur.code === 200 && cur.j && cur.j.sha ? { sha: cur.j.sha } : {}) });
+  if (r.code === 200 || r.code === 201) return { ok: true, msg: `Saved to GitHub (${WORLD_REPO}, ${WORLD_BRANCH}). Render will redeploy in a few minutes.`, commit: r.j && r.j.commit && r.j.commit.html_url };
+  return { ok: false, msg: `GitHub said ${r.code}: ${(r.j && r.j.message) || 'the save failed'}. The token needs "Contents: Read and write" on ${WORLD_REPO}.` };
+}
+function publishWorld(req, res) {
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',').pop().trim(), t = pubTries.get(ip) || { n: 0, at: 0 };
+  if (Date.now() - t.at > 15 * 60000) { t.n = 0; t.at = Date.now(); }
+  if (t.n >= 6) return json(res, 429, { ok: false, msg: 'Too many wrong passwords. Wait 15 minutes and try again.' });
+  if (!GM_PASSWORD) return json(res, 403, { ok: false, msg: 'Publishing is switched off: this realm has no GM_PASSWORD. Add one in Render (Environment) first.' });
+  readBody(req, 6 * 1024 * 1024, async body => {
+    let d = null; try { d = JSON.parse(body || 'null'); } catch (e) {}
+    if (!d || typeof d !== 'object') return json(res, 400, { ok: false, msg: 'The editor sent something the server could not read.' });
+    if (!crypto.timingSafeEqual(sha(d.pw || ''), sha(GM_PASSWORD))) { t.n++; pubTries.set(ip, t); return json(res, 403, { ok: false, msg: 'Wrong password. Use the same password as /gm login.' }); }
+    const w = cleanWorld(d.world || {}), who = String(d.who || '').replace(/[^\w .'-]/g, '').slice(0, 30);
+    const text = `/* Emberfall world edits, published from the World Editor on ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC.\n   The game reads this file at start-up. Edit it with /play/editor.html. */\nwindow.WORLD_EDITS=${JSON.stringify(w)};\n`;
+    try { fs.writeFileSync(WORLD_FILE, text); } catch (e) { return json(res, 500, { ok: false, msg: 'The server could not write world.js: ' + e.message }); }
+    log(`# world.js published from the editor${who ? ' by ' + who : ''} (${w.props.length} props, ${w.npcs.length} NPCs, ${w.spawns.length} spawns, ${w.tiles.length} tiles)`);
+    const out = { ok: true, live: true, bytes: Buffer.byteLength(text) };
+    if (d.github) out.github = await worldToGitHub(text, who);
+    json(res, 200, out);
+  });
+}
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
+  if (name === 'api/world/publish' && req.method === 'POST') return publishWorld(req, res);
+  if (name === 'api/world/info') return json(res, 200, { publish: !!GM_PASSWORD, github: !!WORLD_TOKEN, repo: WORLD_REPO, branch: WORLD_BRANCH, live: fs.existsSync(WORLD_FILE) });
   if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); return json(res, 200, { server: SERVER_VERSION, launcher: LAUNCHER_VERSION, music, musicFound: music.length > 0, online: [...clients.values()].filter(c => c.p && c.p.v).length, connections: clients.size, uptimeMin: Math.round((Date.now() - STARTED) / 60000), memoryMB: Math.round(process.memoryUsage().rss / 1048576), slowClients: [...clients.values()].filter(c => c.slow).length, raidOpen }); }
   if (name === 'health' || name === 'api/status') return json(res, 200, { ok: true, online: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).length, players: [...clients.values()].filter(c => c.p && c.p.u && !c.p.iv).map(c => ({ name: c.p.n, level: c.p.l, class: c.p.c, zone: c.p.z })), uptime: Math.round(process.uptime()) });
   if (name === 'api/armory') { const q = String(url.searchParams.get('name') || '').toLowerCase().trim(); if (!q) return json(res, 200, []);

@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 96;
+const VERSION = 97;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1499,6 +1499,7 @@ function enterWorld(name,cls,existing,fresh){ TALC=null;
   me={c,x:SPAWN.x,y:SPAWN.y,face:-Math.PI/2,hp:null,res:null,dead:false,target:null,cast:null,gcd:0,cds:{},auto:false,autoT:0,
     bulwark:0,hots:[],mounted:0,emote:null,jumpH:0,jumpV:0,absorb:0,absorbU:0,rootU:0,dots:[],dash:null,swingT:0,spinT:0,stepT:0,lastCombat:-99,lastSpend:-99,potCd:0,party:'',moving:false,zone:'',tabIdx:0,cp:0,stealth:false,evasionU:0,stepU:0};
   recalc(); me.hp=me.mhp; me.res=CLS[cls].res==='rage'?0:me.mres;
+  if(/[?&]preview=1/.test(location.search)){ try{ const a=JSON.parse(localStorage.getItem('ef_world_preview_at')||'null'); if(a&&a[0]>1&&a[1]>1&&a[0]<MW-1&&a[1]<OWH-1){ const [px,py]=findOpen(a[0]|0,a[1]|0); me.x=px*TS+16; me.y=py*TS+16; } }catch(e){} setTimeout(()=>sysMsg('World Editor preview: only you can see these changes. Close this tab to go back to the editor.','c-gm'),400); }
   persist();
   document.getElementById('login').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');

@@ -3,190 +3,843 @@
 <title>Emberfall World Editor</title>
 <link rel="icon" href="icon.png">
 <style>
-:root{--bg:#120c08;--panel:#1d140c;--edge:#5a4020;--gold:#ffd36a;--txt:#f0dfb8;--dim:#a8957a}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px/1.35 "Segoe UI",system-ui,sans-serif;overflow:hidden}
-header{height:48px;display:flex;align-items:center;gap:8px;padding:0 12px;background:linear-gradient(#2a1c10,#1a1109);border-bottom:1px solid var(--edge)}
-header h1{font:700 17px Georgia,serif;color:var(--gold);margin:0 14px 0 0;letter-spacing:.5px;white-space:nowrap}header .sp{flex:1}
-button,select,input,textarea{font:inherit;color:var(--txt);background:#2a1c10;border:1px solid var(--edge);border-radius:5px;padding:5px 10px}
-button{cursor:pointer}button:hover{border-color:#b8862a}button.gold{background:linear-gradient(#ffd56a,#b8761a);color:#2a1604;border-color:#ffd56a;font-weight:700}button.on{background:#5a3a12;border-color:var(--gold);color:#fff}
-button:disabled{opacity:.45;cursor:default}
-#wrap{display:flex;height:calc(100% - 48px)}
-aside{width:270px;background:var(--panel);border-right:1px solid var(--edge);overflow:auto;padding:10px}
-aside h3{font:700 12px sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin:12px 0 6px}
-.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.tools button{padding:7px 4px;font-size:12.5px}
-.pal{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.pal button{text-align:left;padding:4px 6px;font-size:12.5px;display:flex;align-items:center;gap:6px}
-.pal i{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid #0008;flex:none}
-.row{display:flex;align-items:center;gap:6px;margin:5px 0}.row label{min-width:64px;color:var(--dim);font-size:12.5px}.row input[type=range]{flex:1}.row input[type=text],.row textarea,.row select{flex:1;min-width:0}
-main{flex:1;position:relative}canvas{display:block;width:100%;height:100%;cursor:crosshair}
-#status{position:absolute;left:10px;bottom:8px;background:#000a;padding:4px 10px;border-radius:5px;font-size:12.5px;pointer-events:none}
-#msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#120c08ee;text-align:center;padding:20px;z-index:5}
-#msg div{max-width:560px}#msg h2{font-family:Georgia,serif;color:var(--gold)}
-.insp{border:1px solid var(--edge);border-radius:6px;padding:8px;margin-top:6px;background:#140d07}.hint{color:var(--dim);font-size:12.5px;margin:4px 0}
-.layers label{display:flex;gap:6px;align-items:center;font-size:13px;margin:3px 0}
-#help{position:absolute;right:12px;top:12px;width:340px;background:#1d140cf2;border:1px solid var(--edge);border-radius:8px;padding:12px 14px;font-size:13px;z-index:4}#help.hidden{display:none}#help h3{margin:0 0 6px;color:var(--gold);font-family:Georgia,serif}
-kbd{background:#2a1c10;border:1px solid var(--edge);border-radius:3px;padding:0 4px;font-size:12px}
-.count{color:var(--dim);font-size:12px;margin-top:8px}
+:root{--bg:#0e0a07;--p1:#16100b;--p2:#1d1610;--p3:#271d14;--line:#35281b;--line2:#4a3825;--gold:#f0bd55;--gold2:#ffd98a;--txt:#eadfca;--dim:#9c8b72;--dim2:#6f6250;--red:#ff6a5a;--amber:#ffb340;--green:#7ed17e;--blue:#6fb6ff;--sel:#ffd36a}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:13px/1.4 "Segoe UI",system-ui,-apple-system,sans-serif;overflow:hidden;user-select:none}
+input,textarea,select,button{font:inherit;color:var(--txt)}
+input[type=text],input[type=number],input[type=search],textarea,select{background:#0f0b08;border:1px solid var(--line2);border-radius:4px;padding:4px 7px;outline:none;min-width:0;user-select:text}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{resize:vertical;width:100%}
+button{background:var(--p3);border:1px solid var(--line2);border-radius:4px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+button:hover{border-color:#8a6a3a;background:#30241a}button:disabled{opacity:.4;cursor:default}
+button.pri{background:linear-gradient(#f6c862,#c98a26);color:#2a1604;border-color:#f6c862;font-weight:650}button.pri:hover{filter:brightness(1.08)}
+button.on{background:#4a3416;border-color:var(--gold);color:#fff}
+button.ghost{background:none;border-color:transparent}button.ghost:hover{background:#ffffff10;border-color:transparent}
+button.danger:hover{border-color:var(--red);color:#ffb0a8}
+input[type=range]{accent-color:var(--gold);min-width:60px}input[type=color]{width:46px;height:26px;padding:2px;background:#0f0b08;border:1px solid var(--line2);border-radius:4px;cursor:pointer}input[type=checkbox]{accent-color:var(--gold)}
+kbd{display:inline-block;background:#0f0b08;border:1px solid var(--line2);border-bottom-width:2px;border-radius:3px;padding:0 5px;font:11px/16px ui-monospace,Consolas,monospace;color:var(--txt)}
+.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* layout */
+#app{display:grid;grid-template-rows:34px 38px 1fr 24px;grid-template-columns:46px 1fr var(--rw,310px);height:100%}
+#menubar{grid-column:1/-1;display:flex;align-items:center;gap:2px;padding:0 8px;background:linear-gradient(#21180f,#18110b);border-bottom:1px solid var(--line)}
+#menubar .logo{font:700 14px Georgia,serif;color:var(--gold);margin-right:12px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+#menubar .logo b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:4px;background:linear-gradient(#f6c862,#a8661a);color:#2a1604;font:700 12px sans-serif}
+.menu{position:relative}.menu>button{background:none;border:0;padding:5px 10px;border-radius:4px}.menu>button:hover,.menu.open>button{background:#ffffff12}
+.drop{position:absolute;left:0;top:100%;min-width:260px;background:var(--p2);border:1px solid var(--line2);border-radius:6px;padding:4px;box-shadow:0 10px 30px #000a;z-index:50;display:none}
+.menu.open .drop{display:block}
+.mi{display:flex;align-items:center;gap:10px;padding:5px 10px;border-radius:4px;cursor:pointer;white-space:nowrap}.mi:hover{background:#4a3416}.mi .k{margin-left:auto;color:var(--dim);font-size:11.5px}.mi.dis{opacity:.4;pointer-events:none}
+.mi .chk{width:14px;text-align:center;color:var(--gold)}
+.msep{height:1px;background:var(--line);margin:4px 2px}
+#menubar .sp{flex:1}#menubar .qb{display:flex;gap:6px;align-items:center}
+#docname{color:var(--dim);font-size:12px;margin-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+#optbar{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 12px;background:var(--p1);border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:hidden;white-space:nowrap}
+#optbar .tname{font-weight:650;color:var(--gold2);display:flex;align-items:center;gap:6px;min-width:110px}
+#optbar label{display:flex;align-items:center;gap:6px;color:var(--dim)}#optbar label b{color:var(--txt);font-weight:600;min-width:22px}
+#optbar .seg{display:flex}#optbar .seg button{border-radius:0;padding:3px 9px}#optbar .seg button:first-child{border-radius:4px 0 0 4px}#optbar .seg button:last-child{border-radius:0 4px 4px 0}#optbar .seg button+button{margin-left:-1px}
+#optbar .vs{width:1px;height:20px;background:var(--line2)}
+#toolbar{background:var(--p1);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:3px;overflow-y:auto}
+#toolbar button{width:36px;height:34px;padding:0;display:grid;place-items:center;background:none;border-color:transparent;color:#cdbb9c;position:relative}
+#toolbar button:hover{background:#ffffff10}#toolbar button.on{background:#4a3416;border-color:var(--gold);color:#fff}
+#toolbar .tsep{width:26px;height:1px;background:var(--line2);margin:4px 0}
+#view{position:relative;overflow:hidden;background:#080604}
+#cv{display:block;width:100%;height:100%;touch-action:none}
+#mini{position:absolute;right:10px;bottom:10px;border:1px solid var(--line2);border-radius:4px;background:#000;box-shadow:0 4px 14px #0009;cursor:pointer}
+#zoombox{position:absolute;right:10px;top:10px;display:flex;gap:2px;background:#16100bd8;border:1px solid var(--line2);border-radius:6px;padding:3px;align-items:center}
+#zoombox button{padding:2px 8px;background:none;border-color:transparent}#zoombox button:hover{background:#ffffff14}#zoombox span{min-width:46px;text-align:center;color:var(--dim);font-size:12px}
+#hoverTip{position:absolute;pointer-events:none;background:#000c;border:1px solid var(--line2);border-radius:4px;padding:3px 8px;font-size:12px;display:none;white-space:nowrap;z-index:3}
+#side{background:var(--p1);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;position:relative}
+#side .split{position:absolute;left:-3px;top:0;bottom:0;width:6px;cursor:ew-resize;z-index:2}
+.pane{display:flex;flex-direction:column;min-height:0;border-bottom:1px solid var(--line)}#paneTop{flex:1 1 55%}#paneBot{flex:1 1 45%}
+.tabs{display:flex;background:var(--p2);border-bottom:1px solid var(--line);flex:none}
+.tabs button{flex:1;border:0;border-radius:0;background:none;padding:7px 4px;color:var(--dim);border-bottom:2px solid transparent;font-size:12.5px}
+.tabs button.on{color:var(--txt);border-bottom-color:var(--gold);background:none}.tabs button .bd{display:inline-block;min-width:16px;padding:0 4px;border-radius:8px;background:#5a2a20;color:#ffd0c8;font-size:10.5px;margin-left:4px}
+.tabs button .bd.ok{background:#24402a;color:#bfe8bf}
+.body{flex:1;overflow:auto;padding:10px;min-height:0}
+h4{margin:12px 0 6px;font:650 11px/1 sans-serif;letter-spacing:.8px;text-transform:uppercase;color:var(--dim)}h4:first-child{margin-top:2px}
+.hint{color:var(--dim);font-size:12px;margin:6px 0}
+.fld{display:grid;grid-template-columns:78px 1fr;align-items:center;gap:6px;margin:6px 0}.fld>span{color:var(--dim);font-size:12px}
+.fld .two{display:flex;gap:6px}.fld .two>*{flex:1;width:0}
+.fld .rr{display:flex;gap:6px;align-items:center;min-width:0}.fld .rr input[type=range]{flex:1;min-width:0;width:0}.fld .rr input[type=number]{width:58px;flex:none}.fld>*{min-width:0}
+.pal{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.pal button{display:flex;align-items:center;gap:7px;text-align:left;padding:5px 7px;font-size:12.5px;overflow:hidden}
+.pal button i{width:16px;height:16px;border-radius:3px;border:1px solid #0009;flex:none}.pal button em{font-style:normal;font-size:16px;line-height:1;width:18px;text-align:center}
+.pal button small{margin-left:auto;color:var(--dim2);font-size:10.5px}
+.pal.one{grid-template-columns:1fr}
+.search{width:100%;margin-bottom:8px}
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;min-height:26px}
+.row:hover{background:#ffffff0c}.row.on{background:#4a3416}.row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.row .xy{color:var(--dim2);font-size:11.5px;font-variant-numeric:tabular-nums}
+.row .ic{width:18px;text-align:center}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}.chips button{padding:2px 8px;font-size:12px;border-radius:12px}
+.lay .row{cursor:default}.lay .row button{padding:1px 6px;background:none;border-color:transparent;color:var(--dim)}.lay .row button.on{color:var(--gold);background:none;border-color:transparent}
+.prob .row{align-items:flex-start}.prob .sev{width:16px;text-align:center}.prob .err{color:var(--red)}.prob .warn{color:var(--amber)}.prob .info{color:var(--blue)}
+.hist .row.fut{opacity:.45}
+.card{border:1px solid var(--line2);border-radius:6px;padding:10px;background:#120d09;margin-bottom:8px}
+.card .title{font-weight:650;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.swatches{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.swatches span{width:18px;height:18px;border-radius:3px;border:1px solid #0009;cursor:pointer}
+.warnline{color:var(--amber);font-size:12px;margin:4px 0}
+#status{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:0 10px;background:var(--p2);border-top:1px solid var(--line);font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden}
+#status b{color:var(--txt);font-weight:600}#status .sp{flex:1;overflow:hidden;text-overflow:ellipsis}#status .clk{cursor:pointer}#status .clk:hover{color:var(--txt)}
+#stSave.dirty{color:var(--amber)}
+/* overlays */
+.ovl{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-start;justify-content:center;z-index:100;padding-top:9vh}
+.dlg{background:var(--p2);border:1px solid var(--line2);border-radius:10px;box-shadow:0 20px 60px #000c;width:min(560px,94vw);max-height:82vh;display:flex;flex-direction:column}
+.dlg header{padding:12px 16px;border-bottom:1px solid var(--line);font:650 15px Georgia,serif;color:var(--gold2);display:flex;align-items:center}
+.dlg header button{margin-left:auto}
+.dlg .db{padding:14px 16px;overflow:auto;user-select:text}.dlg footer{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.dlg p{margin:0 0 10px}.dlg ol,.dlg ul{margin:0 0 10px;padding-left:20px}.dlg li{margin:3px 0}
+.qo{width:min(620px,94vw)}.qo input{width:100%;font-size:15px;padding:10px 12px;border:0;border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;background:#0f0b08}
+.qo .res{max-height:52vh;overflow:auto;padding:6px}.qo .row .k{color:var(--dim);font-size:11.5px}.qo .row.on{background:#4a3416}
+.sc{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}.sc div{display:flex;justify-content:space-between;gap:10px;padding:2px 0;border-bottom:1px solid #ffffff08}
+#ctx{position:fixed;z-index:120;background:var(--p2);border:1px solid var(--line2);border-radius:6px;padding:4px;box-shadow:0 10px 30px #000a;min-width:220px}
+#toasts{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;z-index:99;pointer-events:none}
+.toast{background:#241a10f2;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:6px;padding:7px 14px;box-shadow:0 6px 20px #0009;animation:tin .18s ease-out}
+.toast.err{border-left-color:var(--red)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;text-align:center;padding:20px}
+#loading h2{font-family:Georgia,serif;color:var(--gold);font-weight:600}#loading .bar{width:260px;height:4px;background:var(--p3);border-radius:2px;margin:16px auto;overflow:hidden}
+#loading .bar i{display:block;height:100%;width:40%;background:var(--gold);animation:ld 1.2s infinite ease-in-out}@keyframes ld{0%{margin-left:-40%}100%{margin-left:100%}}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#3a2c1e;border-radius:5px;border:2px solid var(--p1)}::-webkit-scrollbar-track{background:transparent}
 </style></head><body>
-<header><h1>⚒ Emberfall World Editor</h1>
-<button id="bUndo" title="Ctrl+Z">↶ Undo</button><button id="bRedo" title="Ctrl+Y">↷ Redo</button>
-<span class="sp"></span>
-<button id="bLoad" title="Load the world.js that is live on your realm">⤓ Load live world</button><button id="bOpen">📂 Open file</button><input type="file" id="fOpen" accept=".js,.json" hidden>
-<button id="bNew" title="Start over with no edits">🗑 Clear</button>
-<button id="bPrev" class="gold">▶ Preview in game</button><button id="bExp" class="gold">💾 Export world.js</button><button id="bHelp">?</button>
-</header>
-<div id="wrap"><aside>
-<h3>Tool</h3><div class="tools" id="tools"></div>
-<div id="opts"></div>
-<h3>Show</h3><div class="layers"><label><input type="checkbox" id="lBase" checked> Existing NPCs, places and monsters</label><label><input type="checkbox" id="lZones"> Zone colours</label><label><input type="checkbox" id="lGrid" checked> Grid when zoomed in</label></div>
-<div class="count" id="count"></div>
-</aside>
-<main><canvas id="cv"></canvas><div id="status">Loading the world…</div>
-<div id="msg"><div><h2>Loading the world of Emberfall…</h2><p>The editor is building the map exactly the way the game does. This takes a few seconds.</p></div></div>
-<div id="help" class="hidden"><h3>How it works</h3>
-<p>1. Paint tiles, place props, NPCs, monster spawns and landmarks on the map.<br>2. Press <b>Preview in game</b> to walk around your changes right away (only you see the preview).<br>3. Press <b>Export world.js</b> and upload that file to your GitHub repository, next to <code>index.html</code>. After Render redeploys, everyone gets your changes.</p>
-<p><b>Mouse:</b> left click / drag uses the tool, right or middle drag moves the map, the wheel zooms.<br><b>Keys:</b> <kbd>R</kbd> rotate the prop, <kbd>[</kbd> <kbd>]</kbd> brush size, <kbd>Del</kbd> delete the selected object, <kbd>Ctrl+Z</kbd> undo, <kbd>Esc</kbd> back to Select.</p>
-<p>Your work is saved in this browser automatically. Export it whenever you are happy with it.</p><button id="hClose">Got it</button></div>
-</main></div>
+<div id="app">
+ <div id="menubar">
+  <div class="logo"><b>E</b>World Editor</div>
+  <div id="menus" style="display:flex"></div>
+  <span class="sp"></span>
+  <span id="docname"></span>
+  <div class="qb">
+   <button class="ghost" id="qUndo" title="Undo (Ctrl+Z)"><svg class="ico" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+   <button class="ghost" id="qRedo" title="Redo (Ctrl+Shift+Z)"><svg class="ico" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+   <button id="qPrev" title="Walk around your changes in the game (Ctrl+P)">▶ Preview</button>
+   <button id="qPub" class="pri" title="Publish or export your world (Ctrl+E)">Publish…</button>
+  </div>
+ </div>
+ <div id="optbar"></div>
+ <div id="toolbar"></div>
+ <div id="view"><canvas id="cv"></canvas><canvas id="mini"></canvas>
+  <div id="zoombox"><button id="zOut" title="Zoom out (-)">−</button><span id="zPct">100%</span><button id="zIn" title="Zoom in (+)">+</button><button id="zFit" title="Whole map (Home)">⤢</button></div>
+  <div id="hoverTip"></div></div>
+ <div id="side"><div class="split" id="split"></div>
+  <div class="pane" id="paneTop"><div class="tabs" id="tabsTop"></div><div class="body" id="bodyTop"></div></div>
+  <div class="pane" id="paneBot"><div class="tabs" id="tabsBot"></div><div class="body" id="bodyBot"></div></div>
+ </div>
+ <div id="status"><span id="stPos">–</span><span class="sp" id="stHint"></span><span id="stSel"></span><span id="stEd" class="clk" title="Show everything you changed"></span><span id="stProb" class="clk" title="Show problems"></span><span id="stSave"></span></div>
+</div>
+<div id="toasts"></div>
+<div id="loading"><div><h2>Loading the world of Emberfall…</h2><div class="bar"><i></i></div><p style="color:var(--dim)">The editor builds the map exactly the way the game does. This takes a few seconds.</p></div></div>
+<input type="file" id="fOpen" accept=".js,.json" hidden>
 <iframe id="game" title="world loader" style="position:absolute;left:-9999px;top:0;width:320px;height:200px;border:0"></iframe>
 <script>
 'use strict';
-const $=id=>document.getElementById(id), cv=$('cv'), g=cv.getContext('2d');
-let W=null; // the base world from the game
+/* ===================== Emberfall World Editor 2 =====================
+   Writes the same world.js format the game has always read (window.WORLD_EDITS, v:1), so older world files keep working. */
+const $=id=>document.getElementById(id), cv=$('cv'), g=cv.getContext('2d'), mini=$('mini'), mg=mini.getContext('2d');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const LS={get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }};
+let W=null;                       // the base world, built by the game itself
 const ED={tiles:{},zones:{},props:[],npcs:[],spawns:[],pois:[]};
-const VIEW={x:0,y:0,z:4}; let tool='select', sel=null, brush=2, curTile='GRASS', curZone='meadow', curProp='tree', curMob='boar', spawnN=3, propRot=0, propScale=1;
-const TCOL={GRASS:'#5f8f3a',FOREST:'#3f6b2a',TREE:'#22421a',SWAMP:'#4d5a34',WATER:'#2f6fa0',LAVA:'#e0561c',ASH:'#4a403c',ROCK:'#7a7470',PATH:'#b49a6a',BRIDGE:'#8a6a48',COBBLE:'#b8ad98',HOUSE:'#a8442e',TWALL:'#7d7468',WALL:'#6d665e',SAND:'#d8c48a',SNOW:'#e8eef2',ICE:'#a8d8f0',RUIN:'#8d8a78',FOUNT:'#4fa0d8',FENCE:'#8a6a3a',PROP:'#c08040',MEADOW:'#6f9a44',FROST:'#cfe0e8'};
-const TDESC={GRASS:'Grass',FOREST:'Forest floor',TREE:'Tree (solid)',SWAMP:'Swamp mud',WATER:'Water (swim)',LAVA:'Lava (burns)',ASH:'Ash',ROCK:'Rock (solid)',PATH:'Dirt road',BRIDGE:'Bridge',COBBLE:'Cobblestone',HOUSE:'House block (solid)',TWALL:'Town wall (solid)',WALL:'Stone wall (solid)',SAND:'Sand',SNOW:'Snow',ICE:'Ice',RUIN:'Ruin floor',FENCE:'Fence (solid, jumpable)'};
+const KINDS=['props','npcs','spawns','pois'];
+const KN={props:'Prop',npcs:'NPC',spawns:'Monster group',pois:'Landmark'}, KNP={props:'Props',npcs:'NPCs',spawns:'Monsters',pois:'Landmarks'};
+const KI={props:'🌳',npcs:'🧑',spawns:'👹',pois:'⭐'};
+const TCOL={GRASS:'#5f8f3a',FOREST:'#3f6b2a',TREE:'#22421a',SWAMP:'#4d5a34',WATER:'#2f6fa0',LAVA:'#e0561c',ASH:'#4a403c',ROCK:'#7a7470',PATH:'#b49a6a',BRIDGE:'#8a6a48',COBBLE:'#b8ad98',HOUSE:'#a8442e',TWALL:'#7d7468',WALL:'#6d665e',SAND:'#d8c48a',SNOW:'#e8eef2',ICE:'#a8d8f0',RUIN:'#8d8a78',FOUNT:'#4fa0d8',FENCE:'#8a6a3a',PROP:'#c08040',MEADOW:'#6f9a44',FROST:'#cfe0e8',VOID:'#111',DWALL:'#3a3440',COLUMN:'#8a8478',DGATE:'#6a5a40',DOOR:'#7a4a2a'};
+const TDESC={GRASS:'Grass',FOREST:'Forest floor',SWAMP:'Swamp mud',SAND:'Sand',SNOW:'Snow',ICE:'Ice',ASH:'Ash',PATH:'Dirt road',COBBLE:'Cobblestone',BRIDGE:'Bridge',RUIN:'Ruin floor',TREE:'Tree',ROCK:'Rock',WALL:'Stone wall',TWALL:'Town wall',HOUSE:'House block',FENCE:'Fence',WATER:'Water',LAVA:'Lava'};
+const SOLID=new Set(['TREE','WATER','WALL','LAVA','HOUSE','ROCK','FOUNT','TWALL','VOID','DWALL','COLUMN','DGATE','FENCE','PROP']);
+const TNOTE={WATER:'swim',LAVA:'burns',FENCE:'jump',TREE:'solid',ROCK:'solid',WALL:'solid',TWALL:'solid',HOUSE:'solid'};
 const ZCOL={meadow:'#e8d060',forest:'#40a040',swamp:'#70806a',ruins:'#b0a890',ash:'#e05020',lake:'#4090e0',town:'#ffffff',frost:'#a0e0ff',crypt:'#8060a0',lair:'#ff3000'};
-const PROPS={tree:'🌳 Tree',pine:'🌲 Pine',deadtree:'🪵 Dead tree',bush:'🌿 Bush',flowers:'🌼 Flowers',mushrooms:'🍄 Glowing mushrooms',rock:'🪨 Rock',boulder:'⛰ Boulder',crystal:'💎 Ice crystals',house:'🏠 Cottage',tent:'⛺ Tent',well:'🪣 Well',statue:'🗿 Statue',pillar:'🏛 Pillar',wall:'🧱 Stone wall',tower:'🏰 Watchtower',campfire:'🔥 Campfire',lamp:'🏮 Street lamp',torch:'🕯 Torch',crate:'📦 Crate',barrel:'🛢 Barrel',fence:'🚧 Fence',banner:'🚩 Banner',stall:'🛒 Market stall',cart:'🛞 Cart',bench:'🪑 Bench',sign:'🪧 Signpost',grave:'🪦 Gravestone',hay:'🌾 Hay bale'};
-const TOOLS=[['select','👆 Select'],['tile','🖌 Tiles'],['zone','🗺 Zones'],['prop','🌳 Props'],['npc','🧑 NPC'],['spawn','👹 Monsters'],['poi','⭐ Landmark'],['erase','🧽 Erase'],['pan','✋ Move']];
-let base=null, over=null, undo=[], redo=[];
+const PROPS={tree:['🌳','Tree'],pine:['🌲','Pine'],deadtree:['🪵','Dead tree'],bush:['🌿','Bush'],flowers:['🌼','Flowers'],mushrooms:['🍄','Glowing mushrooms'],rock:['🪨','Rock'],boulder:['⛰','Boulder'],crystal:['💎','Ice crystals'],house:['🏠','Cottage'],tent:['⛺','Tent'],well:['🪣','Well'],statue:['🗿','Statue'],pillar:['🏛','Pillar'],wall:['🧱','Stone wall'],tower:['🏰','Watchtower'],campfire:['🔥','Campfire'],lamp:['🏮','Street lamp'],torch:['🕯','Torch'],crate:['📦','Crate'],barrel:['🛢','Barrel'],fence:['🚧','Fence'],banner:['🚩','Banner'],stall:['🛒','Market stall'],cart:['🛞','Cart'],bench:['🪑','Bench'],sign:['🪧','Signpost'],grave:['🪦','Gravestone'],hay:['🌾','Hay bale']};
+const SOLIDPROP=new Set(['tree','pine','deadtree','rock','boulder','house','tent','well','statue','pillar','wall','tower']);
+const PROPGRP={Nature:['tree','pine','deadtree','bush','flowers','mushrooms','rock','boulder','crystal','hay'],Buildings:['house','tent','well','tower','wall','pillar','statue','fence'],Village:['campfire','lamp','torch','crate','barrel','banner','stall','cart','bench','sign','grave']};
+const NPCCOL=['#8a7a5a','#a84a3a','#4a6aa8','#4a8a4a','#8a4a9a','#c89a3a','#3a8a8a','#cfcfcf','#3a3a3a','#b86a2a'];
+const MAXPROPS=4000;
+const VIEW={x:0,y:0,z:4};
+const ST=Object.assign({tool:'select',layer:'tile',tile:'GRASS',zone:'meadow',prop:'tree',mob:'boar',n:3,brush:2,shape:'circle',filled:true,rot:0,scale:1,rndRot:false,rndScale:0,scatter:false,density:4,snap:false,fillLimit:6000,erT:true,erZ:true,erO:true,rightW:310,minimap:true,
+  autoTab:true},LS.get('ef_editor_prefs',{}));
+const LAY=Object.assign({base:{v:1},tiles:{v:1},tint:{v:0},borders:{v:1},grid:{v:1},labels:{v:1},props:{v:1,l:0},npcs:{v:1,l:0},spawns:{v:1,l:0},pois:{v:1,l:0}},LS.get('ef_editor_layers',{}));
+const savePrefs=()=>{ LS.set('ef_editor_prefs',ST); LS.set('ef_editor_layers',LAY); };
+let sel=new Set(), selRect=null, clip=LS.get('ef_editor_clip',null), pasteMode=false;
+let base=null, over=null, tint=null, borders=null, bordersDirty=true;
 
-/* ---------- load the world through the game itself ---------- */
-function start(){ const fr=$('game'); const here=location.pathname.replace(/[^/]*$/,'');
-  if(location.protocol==='file:'){ $('msg').innerHTML='<div><h2>Open the editor from your realm</h2><p>The editor needs the game next to it. Open <b>/play/editor.html</b> on your Emberfall site (for example https://emberfall-sb6p.onrender.com/play/editor.html).</p></div>'; return; }
+/* ---------- toasts and dialogs ---------- */
+function toast(msg,err){ const box=$('toasts'); while(box.children.length>=3) box.firstChild.remove(); const d=document.createElement('div'); d.className='toast'+(err?' err':''); d.textContent=msg; $('toasts').appendChild(d); setTimeout(()=>{ d.style.transition='opacity .3s'; d.style.opacity=0; setTimeout(()=>d.remove(),320); },err?4200:2400); }
+let dlgOpen=0;
+function dlg({title,html,buttons=[{t:'OK',v:true,pri:1}],wide,onOpen}){ return new Promise(res=>{ const o=document.createElement('div'); o.className='ovl';
+  o.innerHTML=`<div class="dlg" style="${wide?'width:min(760px,95vw)':''}"><header>${esc(title)}<button class="ghost" data-x>✕</button></header><div class="db">${html}</div>${buttons.length?`<footer>${buttons.map((b,i)=>`<button data-i="${i}" class="${b.pri?'pri':''} ${b.cls||''}">${esc(b.t)}</button>`).join('')}</footer>`:''}</div>`;
+  document.body.appendChild(o); dlgOpen++; const close=v=>{ o.remove(); dlgOpen--; removeEventListener('keydown',kd,true); res(v); };
+  const kd=e=>{ if(e.key==='Escape'){ e.stopPropagation(); close(null); } else if(e.key==='Enter'&&!/TEXTAREA/.test(document.activeElement.tagName)){ const p=buttons.findIndex(b=>b.pri); if(p>=0){ e.preventDefault(); e.stopPropagation(); close(buttons[p].v===undefined?true:(buttons[p].get?buttons[p].get(o):buttons[p].v)); } } };
+  addEventListener('keydown',kd,true);
+  o.addEventListener('mousedown',e=>{ if(e.target===o) close(null); }); o.querySelector('[data-x]').onclick=()=>close(null);
+  o.querySelectorAll('footer button').forEach(b=>b.onclick=()=>{ const B=buttons[+b.dataset.i]; close(B.get?B.get(o):B.v); });
+  if(onOpen) onOpen(o,close); const f=o.querySelector('input,textarea'); if(f){ f.focus(); if(f.select) f.select(); } }); }
+const confirmDlg=(title,text,ok='OK',danger)=>dlg({title,html:`<p>${text}</p>`,buttons:[{t:'Cancel',v:false},{t:ok,v:true,pri:1,cls:danger?'danger':''}]});
+const askDlg=(title,label,def='')=>dlg({title,html:`<p>${label}</p><input type="text" id="dlgIn" style="width:100%" maxlength="60" value="${esc(def)}">`,buttons:[{t:'Cancel',v:null},{t:'OK',pri:1,get:o=>o.querySelector('#dlgIn').value.trim()||null}]});
+
+/* ---------- loading the world through the game ---------- */
+function start(){ const fr=$('game'), here=location.pathname.replace(/[^/]*$/,'');
+  if(location.protocol==='file:'){ $('loading').innerHTML='<div><h2>Open the editor from your realm</h2><p>The editor needs the game next to it. Open <b>/play/editor.html</b> on your Emberfall site, for example<br><b>https://emberfall-sb6p.onrender.com/play/editor.html</b></p></div>'; return; }
   fr.src=here+'index.html?editor=1&t='+Date.now();
-  const poll=setInterval(()=>{ try{ const w=fr.contentWindow.__EF; if(w){ clearInterval(poll); W=w; ready(); } }catch(e){} },300);
-  setTimeout(()=>{ if(!W) $('msg').innerHTML='<div><h2>The world did not load</h2><p>Make sure this page is opened from your realm at <b>/play/editor.html</b>, then reload.</p></div>'; },90000); }
-function ready(){ $('msg').remove(); $('status').textContent='Ready. Pick a tool on the left.'; const T=W.T; W.tname={}; for(const k in T) W.tname[T[k]]=k;
-  base=document.createElement('canvas'); base.width=W.MW; base.height=W.OWH; const bx=base.getContext('2d'), id=bx.createImageData(W.MW,W.OWH);
-  for(let i=0;i<W.MW*W.OWH;i++){ const c=hex(TCOL[W.tname[W.map[i]]]||'#333'); id.data.set([c[0],c[1],c[2],255],i*4); } bx.putImageData(id,0,0);
-  over=document.createElement('canvas'); over.width=W.MW; over.height=W.OWH;
-  VIEW.x=W.town.x; VIEW.y=W.town.y; VIEW.z=Math.max(2,Math.min(8,cv.clientHeight/90));
-  try{ const d=JSON.parse(localStorage.getItem('ef_editor_draft')||'null'); if(d) loadData(d,true); }catch(e){}
-  buildTools(); redrawOver(); draw(); if(!localStorage.getItem('ef_editor_seen')){ $('help').classList.remove('hidden'); localStorage.setItem('ef_editor_seen','1'); } }
-const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const poll=setInterval(()=>{ try{ const w=fr.contentWindow.__EF; if(w){ clearInterval(poll); W=w; ready(); } }catch(e){} },250);
+  setTimeout(()=>{ if(!W) $('loading').innerHTML='<div><h2>The world did not load</h2><p>Make sure this page is opened from your realm at <b>/play/editor.html</b>, then reload the page.</p><button onclick="location.reload()">Reload</button></div>'; },90000); }
+function ready(){ const T=W.T; W.tname={}; for(const k in T) W.tname[T[k]]=k; W.mobByKey={}; for(const m of W.mobTypes) W.mobByKey[m.key]=m;
+  W.baseNpcTiles=new Map(); for(const n of W.npcs) W.baseNpcTiles.set(n.x+','+n.y,n);
+  buildBase(); over=mk(W.MW,W.OWH); tint=mk(W.MW,W.OWH); rebuildTint();
+  VIEW.x=W.town.x+.5; VIEW.y=W.town.y+.5; VIEW.z=6;
+  const d=LS.get('ef_editor_draft',null); if(d) loadData(d,'replace',true);
+  undo=[]; redo=[];
+  setTimeout(()=>{ try{ $('game').remove(); }catch(e){} },500);   // the hidden game is no longer needed; this frees its memory
+  $('loading').remove(); buildMenus(); buildToolbar(); setTool(ST.tool==='paste'?'select':ST.tool,true); renderTabs(); layout(); draw(); updateStatus(); runChecks();
+  if(!LS.get('ef_editor_seen2',0)){ LS.set('ef_editor_seen2',1); showWelcome(); } }
+const mk=(w,h)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
+const hex=h=>{ h=h||'#333'; return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; };
+function noise(x,y){ let n=x*374761393+y*668265263; n=(n^(n>>13))*1274126177; return ((n^(n>>16))&255)/255; }
+function buildBase(){ base=mk(W.MW,W.OWH); const bx=base.getContext('2d'), id=bx.createImageData(W.MW,W.OWH);
+  for(let y=0;y<W.OWH;y++) for(let x=0;x<W.MW;x++){ const i=y*W.MW+x, c=hex(TCOL[W.tname[W.map[i]]]), f=.92+noise(x,y)*.14; id.data.set([c[0]*f,c[1]*f,c[2]*f,255],i*4); }
+  bx.putImageData(id,0,0); }
+function rebuildTint(){ const tx=tint.getContext('2d'), id=tx.createImageData(W.MW,W.OWH);
+  for(let y=0;y<W.OWH;y++) for(let x=0;x<W.MW;x++){ const z=zoneAt(x,y); if(!z) continue; const c=hex(ZCOL[z]||'#888888'); id.data.set([c[0],c[1],c[2],255],(y*W.MW+x)*4); }
+  tx.putImageData(id,0,0); bordersDirty=true; }
+function rebuildBorders(){ const S=4; borders=borders||mk(W.MW*S,W.OWH*S); const bx=borders.getContext('2d'); bx.clearRect(0,0,borders.width,borders.height); bx.fillStyle='#fff';
+  for(let y=0;y<W.OWH;y++) for(let x=0;x<W.MW;x++){ const z=zoneAt(x,y); if(x+1<W.MW&&zoneAt(x+1,y)!==z) bx.fillRect((x+1)*S-1,y*S,2,S); if(y+1<W.OWH&&zoneAt(x,y+1)!==z) bx.fillRect(x*S,(y+1)*S-1,S,2); }
+  bordersDirty=false; }
 
-/* ---------- data ---------- */
+/* ---------- the map ---------- */
+const inMap=(x,y)=>x>=1&&y>=1&&x<W.MW-1&&y<W.OWH-1;
+const baseTile=(x,y)=>W.tname[W.map[y*W.MW+x]];
+const tileAt=(x,y)=>(x<0||y<0||x>=W.MW||y>=W.OWH)?null:(ED.tiles[x+','+y]||baseTile(x,y));
+const zoneAt=(x,y)=>(x<0||y<0||x>=W.MW||y>=W.OWH)?null:(ED.zones[x+','+y]||W.zmap[y*W.MW+x]);
+const zoneName=z=>(W.zones[z]||z||'');
+function setTile(x,y,t){ if(!inMap(x,y)) return false; const k=x+','+y, cur=ED.tiles[k];
+  if(baseTile(x,y)===t){ if(cur===undefined) return false; delete ED.tiles[k]; } else { if(cur===t) return false; ED.tiles[k]=t; }
+  const ox=over.getContext('2d'); ox.clearRect(x,y,1,1); if(ED.tiles[k]){ const c=hex(TCOL[t]), f=.92+noise(x,y)*.14; ox.fillStyle=`rgb(${c[0]*f|0},${c[1]*f|0},${c[2]*f|0})`; ox.fillRect(x,y,1,1); } return true; }
+function setZone(x,y,z){ if(x<0||y<0||x>=W.MW||y>=W.OWH) return false; const k=x+','+y, cur=ED.zones[k];
+  if(W.zmap[y*W.MW+x]===z){ if(cur===undefined) return false; delete ED.zones[k]; } else { if(cur===z) return false; ED.zones[k]=z; }
+  const tx=tint.getContext('2d'); tx.clearRect(x,y,1,1); const zz=zoneAt(x,y); if(zz){ tx.fillStyle=ZCOL[zz]||'#888'; tx.fillRect(x,y,1,1); } bordersDirty=true; return true; }
+function redrawOver(){ const ox=over.getContext('2d'); ox.clearRect(0,0,over.width,over.height); for(const k in ED.tiles){ const [x,y]=k.split(',').map(Number), c=hex(TCOL[ED.tiles[k]]), f=.92+noise(x,y)*.14; ox.fillStyle=`rgb(${c[0]*f|0},${c[1]*f|0},${c[2]*f|0})`; ox.fillRect(x,y,1,1); } }
+const solidAt=(x,y)=>{ const t=tileAt(Math.floor(x),Math.floor(y)); return t==null||SOLID.has(t); };
+
+/* ---------- the document ---------- */
+const kindOf=o=>{ for(const k of KINDS) if(ED[k].includes(o)) return k; return null; };
+const objName=(o,k)=>{ k=k||kindOf(o); return k==='props'?(PROPS[o.k]||['?',o.k])[1]:k==='npcs'?(o.name||'Villager'):k==='spawns'?`${mobName(o.mob)} ×${o.n}`:(o.name||'Unnamed landmark'); };
+const objPos=(o,k)=>{ k=k||kindOf(o); return k==='props'?[o.x,o.y]:[o.x+.5,o.y+.5]; };
+const mobName=k=>(W&&W.mobByKey[k]||{name:k}).name;
+function exportData(){ const pair=o=>Object.entries(o).map(([k,v])=>{ const [x,y]=k.split(',').map(Number); return [x,y,v]; });
+  return {v:1,tiles:pair(ED.tiles),zones:pair(ED.zones),
+    props:ED.props.map(p=>({k:p.k,x:+(+p.x).toFixed(2),y:+(+p.y).toFixed(2),r:+(+p.r||0).toFixed(2),s:+(+p.s||1).toFixed(2)})),
+    npcs:ED.npcs.map(n=>({name:n.name,title:n.title||'',x:n.x|0,y:n.y|0,col:n.col||'#8a7a5a',say:n.say||''})),
+    spawns:ED.spawns.map(s=>({mob:s.mob,x:s.x|0,y:s.y|0,n:s.n|0||1})),pois:ED.pois.map(p=>({name:p.name,x:p.x|0,y:p.y|0,r:p.r|0||5}))}; }
+function loadData(d,mode='replace',quiet){ d=d||{}; if(mode==='replace'){ ED.tiles={}; ED.zones={}; for(const k of KINDS) ED[k]=[]; }
+  for(const e of d.tiles||[]) if(Array.isArray(e)&&W.T[e[2]]!=null&&inMap(e[0]|0,e[1]|0)&&baseTile(e[0]|0,e[1]|0)!==e[2]) ED.tiles[(e[0]|0)+','+(e[1]|0)]=e[2];
+  for(const e of d.zones||[]) if(Array.isArray(e)&&(W.zones[e[2]]||e[2]==='town')&&W.zmap[(e[1]|0)*W.MW+(e[0]|0)]!==e[2]) ED.zones[(e[0]|0)+','+(e[1]|0)]=e[2];
+  for(const p of d.props||[]) if(p&&PROPS[p.k]) ED.props.push({k:p.k,x:+p.x||0,y:+p.y||0,r:+p.r||0,s:+p.s||1});
+  for(const n of d.npcs||[]) if(n) ED.npcs.push({name:String(n.name||'Villager').slice(0,28),title:String(n.title||'').slice(0,28),x:n.x|0,y:n.y|0,col:n.col||'#8a7a5a',say:String(n.say||'').slice(0,240)});
+  for(const s of d.spawns||[]) if(s&&s.mob) ED.spawns.push({mob:s.mob,x:s.x|0,y:s.y|0,n:clamp(s.n|0||1,1,12)});
+  for(const p of d.pois||[]) if(p) ED.pois.push({name:String(p.name||'').slice(0,30),x:p.x|0,y:p.y|0,r:clamp(p.r|0||5,2,20)});
+  sel.clear(); selRect=null; if(over){ redrawOver(); rebuildTint(); } if(!quiet) changed(); }
+const editCount=()=>Object.keys(ED.tiles).length+Object.keys(ED.zones).length+ED.props.length+ED.npcs.length+ED.spawns.length+ED.pois.length;
+
+/* ---------- undo, redo and history ---------- */
+let undo=[], redo=[], pending=null;
 const snap=()=>JSON.stringify(ED);
-function pushUndo(){ undo.push(snap()); if(undo.length>80) undo.shift(); redo=[]; save(); }
-function save(){ try{ localStorage.setItem('ef_editor_draft',JSON.stringify(exportData())); }catch(e){} count(); }
-function exportData(){ return {v:1,tiles:Object.entries(ED.tiles).map(([k,v])=>{ const [x,y]=k.split(',').map(Number); return [x,y,v]; }),zones:Object.entries(ED.zones).map(([k,v])=>{ const [x,y]=k.split(',').map(Number); return [x,y,v]; }),
-  props:ED.props.map(p=>({k:p.k,x:+p.x.toFixed(2),y:+p.y.toFixed(2),r:+(p.r||0).toFixed(2),s:+(p.s||1).toFixed(2)})),npcs:ED.npcs,spawns:ED.spawns,pois:ED.pois}; }
-function loadData(d,quiet){ ED.tiles={}; ED.zones={}; for(const [x,y,v] of d.tiles||[]) ED.tiles[x+','+y]=v; for(const [x,y,v] of d.zones||[]) ED.zones[x+','+y]=v;
-  ED.props=(d.props||[]).map(p=>({...p})); ED.npcs=(d.npcs||[]).map(n=>({...n})); ED.spawns=(d.spawns||[]).map(n=>({...n})); ED.pois=(d.pois||[]).map(n=>({...n})); sel=null; if(over) redrawOver(); count(); if(!quiet) save(); draw(); }
-function count(){ $('count').textContent=`Your edits: ${Object.keys(ED.tiles).length} tiles · ${Object.keys(ED.zones).length} zone cells · ${ED.props.length} props · ${ED.npcs.length} NPCs · ${ED.spawns.length} spawns · ${ED.pois.length} landmarks`; }
-function redrawOver(){ const ox=over.getContext('2d'); ox.clearRect(0,0,over.width,over.height); for(const k in ED.tiles){ const [x,y]=k.split(',').map(Number); ox.fillStyle=TCOL[ED.tiles[k]]||'#f0f'; ox.fillRect(x,y,1,1); } }
+function restore(s){ const d=JSON.parse(s); ED.tiles=d.tiles; ED.zones=d.zones; for(const k of KINDS) ED[k]=d[k]; sel.clear(); selRect=null; redrawOver(); rebuildTint(); }
+/* begin(label) before a change, end() after it: a step that changed nothing leaves no history behind */
+function begin(label){ if(pending) end(); pending={label,s:snap()}; }
+function end(){ if(!pending) return false; const p=pending; pending=null; if(snap()===p.s) return false; undo.push({label:p.label,s:p.s,t:Date.now()}); if(undo.length>100) undo.shift(); redo=[]; changed(); return true; }
+function doUndo(){ if(pending) end(); if(!undo.length) return toast('Nothing to undo'); const u=undo.pop(); redo.push({label:u.label,s:snap(),t:u.t}); restore(u.s); changed(); toast('Undid: '+u.label); }
+function doRedo(){ if(!redo.length) return toast('Nothing to redo'); const r=redo.pop(); undo.push({label:r.label,s:snap(),t:r.t}); restore(r.s); changed(); toast('Redid: '+r.label); }
+function jumpHistory(i){ // i = number of steps to keep
+  while(undo.length>i){ const u=undo.pop(); redo.push({label:u.label,s:snap(),t:u.t}); restore(u.s); }
+  while(undo.length<i&&redo.length){ const r=redo.pop(); undo.push({label:r.label,s:snap(),t:r.t}); restore(r.s); } changed(); }
 
-/* ---------- view ---------- */
-function resize(){ cv.width=cv.clientWidth*devicePixelRatio; cv.height=cv.clientHeight*devicePixelRatio; draw(); }
-const toScr=(x,y)=>[(x-VIEW.x)*VIEW.z*devicePixelRatio+cv.width/2,(y-VIEW.y)*VIEW.z*devicePixelRatio+cv.height/2];
-const toW=(sx,sy)=>[(sx*devicePixelRatio-cv.width/2)/(VIEW.z*devicePixelRatio)+VIEW.x,(sy*devicePixelRatio-cv.height/2)/(VIEW.z*devicePixelRatio)+VIEW.y];
-let drawQ=false; function draw(){ if(drawQ) return; drawQ=true; requestAnimationFrame(()=>{ drawQ=false; draw0(); }); }
-function draw0(){ if(!W) return; const Z=VIEW.z*devicePixelRatio; g.setTransform(1,0,0,1,0,0); g.fillStyle='#0b0805'; g.fillRect(0,0,cv.width,cv.height);
-  g.imageSmoothingEnabled=false; const [ox,oy]=toScr(0,0); g.drawImage(base,ox,oy,W.MW*Z,W.OWH*Z); g.drawImage(over,ox,oy,W.MW*Z,W.OWH*Z);
-  if($('lZones').checked){ g.globalAlpha=.28; for(let y=0;y<W.OWH;y+=1)for(let x=0;x<W.MW;x+=1){ const z=ED.zones[x+','+y]||W.zmap[y*W.MW+x]; if(!z) continue; const [sx,sy]=toScr(x,y); if(sx<-Z||sy<-Z||sx>cv.width||sy>cv.height) continue; g.fillStyle=ZCOL[z]||'#888'; g.fillRect(sx,sy,Z+.5,Z+.5); } g.globalAlpha=1; }
-  else { g.globalAlpha=.55; for(const k in ED.zones){ const [x,y]=k.split(',').map(Number); const [sx,sy]=toScr(x,y); g.fillStyle=ZCOL[ED.zones[k]]||'#888'; g.fillRect(sx,sy,Z+.5,Z+.5); } g.globalAlpha=1; }
-  for(const k in ED.tiles){ if(Z<5) break; const [x,y]=k.split(',').map(Number); const [sx,sy]=toScr(x,y); g.strokeStyle='#ffd36a88'; g.lineWidth=1; g.strokeRect(sx+.5,sy+.5,Z-1,Z-1); }
-  if($('lGrid').checked&&Z>=14){ g.strokeStyle='#00000030'; g.lineWidth=1; const [a,b]=toW(0,0), [c,d]=toW(cv.clientWidth,cv.clientHeight); g.beginPath(); for(let x=Math.floor(a);x<=c;x++){ const [sx]=toScr(x,0); g.moveTo(sx,0); g.lineTo(sx,cv.height); } for(let y=Math.floor(b);y<=d;y++){ const [,sy]=toScr(0,y); g.moveTo(0,sy); g.lineTo(cv.width,sy); } g.stroke(); }
-  const dot=(x,y,r,fill,stroke)=>{ const [sx,sy]=toScr(x,y); g.beginPath(); g.arc(sx,sy,r*devicePixelRatio,0,7); g.fillStyle=fill; g.fill(); if(stroke){ g.strokeStyle=stroke; g.lineWidth=1.5*devicePixelRatio; g.stroke(); } return [sx,sy]; };
-  const label=(t,sx,sy,col)=>{ if(Z<4) return; g.font=`${11*devicePixelRatio}px sans-serif`; g.textAlign='center'; g.lineWidth=3*devicePixelRatio; g.strokeStyle='#000'; g.strokeText(t,sx,sy); g.fillStyle=col||'#fff'; g.fillText(t,sx,sy); };
-  if($('lBase').checked){ for(const m of W.mobs){ dot(m[1]+.5,m[2]+.5,1.6,'#ff4a3a'); } for(const p of W.pois){ const [sx,sy]=dot(p.x+.5,p.y+.5,3,'#ffd36a','#000'); label(p.name,sx,sy-8*devicePixelRatio,'#ffe8a0'); } for(const n of W.npcs){ const [sx,sy]=dot(n.x+.5,n.y+.5,3.2,'#ffe066','#000'); label(n.name,sx,sy-8*devicePixelRatio); } }
-  for(const p of ED.props){ const [sx,sy]=toScr(p.x,p.y); const s=Math.max(10,Math.min(32,Z*1.4*(p.s||1))); g.font=`${s}px sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText((PROPS[p.k]||'?').split(' ')[0],sx,sy); g.textBaseline='alphabetic'; if(p===sel){ g.strokeStyle='#ffd36a'; g.lineWidth=2; g.strokeRect(sx-s/2-2,sy-s/2-2,s+4,s+4); }
-    if(Z>=8){ g.strokeStyle='#fff8'; g.beginPath(); g.moveTo(sx,sy); g.lineTo(sx+Math.cos(p.r||0)*s*.7,sy+Math.sin(p.r||0)*s*.7); g.stroke(); } }
-  for(const s of ED.spawns){ const [sx,sy]=dot(s.x+.5,s.y+.5,5,'#c0302a','#fff'); label(`${mobName(s.mob)} ×${s.n}`,sx,sy-9*devicePixelRatio,'#ffb0a0'); if(s===sel){ g.strokeStyle='#ffd36a'; g.lineWidth=2; g.strokeRect(sx-9,sy-9,18,18); } }
-  for(const n of ED.npcs){ const [sx,sy]=dot(n.x+.5,n.y+.5,5,n.col||'#8a7a5a','#ffe066'); label(n.name+(n.title?` <${n.title}>`:''),sx,sy-9*devicePixelRatio,'#ffe8a0'); if(n===sel){ g.strokeStyle='#ffd36a'; g.lineWidth=2; g.strokeRect(sx-9,sy-9,18,18); } }
-  for(const p of ED.pois){ const [sx,sy]=toScr(p.x+.5,p.y+.5); g.strokeStyle='#ffd36a'; g.setLineDash([4,4]); g.beginPath(); g.arc(sx,sy,(p.r||5)*Z,0,7); g.stroke(); g.setLineDash([]); label('⭐ '+p.name,sx,sy,'#ffe8a0'); if(p===sel){ g.lineWidth=2; g.strokeRect(sx-9,sy-9,18,18); } }
-  if(hover&&(tool==='tile'||tool==='zone'||tool==='erase')){ const [hx,hy]=hover.map(Math.floor), r=brush-1; const [sx,sy]=toScr(hx-r,hy-r); g.strokeStyle='#fff'; g.lineWidth=1.5; g.strokeRect(sx,sy,(2*r+1)*Z,(2*r+1)*Z); }
-  if(hover){ const [x,y]=hover.map(Math.floor); const t=ED.tiles[x+','+y]||W.tname[W.map[y*W.MW+x]], z=ED.zones[x+','+y]||W.zmap[y*W.MW+x]; $('status').textContent=`x ${x}, y ${y} · ${TDESC[t]||t||'outside the map'} · ${W.zones[z]||z||''}  |  zoom ${VIEW.z.toFixed(1)}`; } }
-const mobName=k=>{ const m=W&&W.mobTypes.find(q=>q.key===k); return m?m.name:k; };
+/* ---------- saving ---------- */
+let saveT=0, savedAt=0, checkT=0;
+function changed(){ draw(); clearTimeout(saveT); $('stSave').textContent='● Saving…'; $('stSave').className='dirty'; saveT=setTimeout(saveDraft,350); clearTimeout(checkT); checkT=setTimeout(runChecks,500); refreshPanels(); updateStatus(); }
+function saveDraft(){ const ok=LS.set('ef_editor_draft',exportData()); savedAt=Date.now(); $('stSave').textContent=ok?'✓ Saved in this browser '+new Date(savedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'⚠ Not saved: browser storage is full. Export a backup.'; $('stSave').className=ok?'':'dirty'; }
 
-/* ---------- tools ---------- */
-function buildTools(){ $('tools').innerHTML=TOOLS.map(([k,n])=>`<button data-t="${k}" class="${tool===k?'on':''}">${n}</button>`).join(''); $('tools').querySelectorAll('button').forEach(b=>b.onclick=()=>setTool(b.dataset.t)); opts(); }
-function setTool(t){ tool=t; if(t!=='select') sel=null; buildTools(); draw(); cv.style.cursor=t==='pan'?'grab':'crosshair'; }
-function opts(){ const o=$('opts'); let h='';
-  if(tool==='tile'){ h=`<h3>Tile</h3><div class="pal">${Object.keys(TDESC).filter(k=>W.T[k]!=null).map(k=>`<button data-v="${k}" class="${curTile===k?'on':''}"><i style="background:${TCOL[k]}"></i>${TDESC[k]}</button>`).join('')}</div>${brushUI()}<p class="hint">Water and lava lower the ground; roads, cobbles and grass are walkable. Solid tiles block players and monsters.</p>`; }
-  else if(tool==='zone'){ h=`<h3>Zone</h3><div class="pal">${Object.keys(W.zones).map(k=>`<button data-v="${k}" class="${curZone===k?'on':''}"><i style="background:${ZCOL[k]||'#888'}"></i>${W.zones[k]}</button>`).join('')}</div>${brushUI()}<p class="hint">The zone decides the area name, the music and which monsters roam there. Turn on "Zone colours" below to see zones.</p>`; }
-  else if(tool==='prop'){ h=`<h3>Prop</h3><div class="pal">${Object.keys(PROPS).filter(k=>W.props.includes(k)).map(k=>`<button data-v="${k}" class="${curProp===k?'on':''}">${PROPS[k]}</button>`).join('')}</div>
-    <div class="row"><label>Rotation</label><input type="range" id="oRot" min="0" max="360" step="15" value="${Math.round(propRot*180/Math.PI)}"></div><div class="row"><label>Size</label><input type="range" id="oSc" min="40" max="250" step="10" value="${Math.round(propScale*100)}"></div><p class="hint">Click to place. <kbd>R</kbd> turns the next prop.</p>`; }
-  else if(tool==='spawn'){ h=`<h3>Monster</h3><div class="row"><select id="oMob">${W.mobTypes.map(m=>`<option value="${m.key}" ${curMob===m.key?'selected':''}>${m.name} (Lv ${m.lv[0]}-${m.lv[1]})</option>`).join('')}</select></div><div class="row"><label>How many</label><input type="range" id="oN" min="1" max="12" value="${spawnN}"><b id="oNv">${spawnN}</b></div><p class="hint">Click to place a group. They respawn like normal monsters.</p>`; }
-  else if(tool==='npc') h='<p class="hint">Click on the map to place an NPC, then set its name, title, colour and what it says in the panel.</p>';
-  else if(tool==='poi') h='<p class="hint">Click to add a named landmark. Players discover it when they walk close, it appears on the maps and it counts towards the Cartographer achievement.</p>';
-  else if(tool==='erase') h=`${brushUI()}<p class="hint">Click objects to remove them. Dragging over painted tiles puts the original ground back.</p>`;
-  else if(tool==='select') h='<p class="hint">Click a prop, NPC, monster group or landmark to edit or move it (drag). <kbd>Del</kbd> removes it.</p>';
-  else h='<p class="hint">Drag to move around the map. You can always move the map with the right mouse button.</p>';
-  if(sel) h+=inspector(); o.innerHTML=h;
-  o.querySelectorAll('.pal button').forEach(b=>b.onclick=()=>{ if(tool==='tile') curTile=b.dataset.v; else if(tool==='zone') curZone=b.dataset.v; else curProp=b.dataset.v; opts(); });
-  if($('oRot')) $('oRot').oninput=e=>{ propRot=e.target.value*Math.PI/180; }; if($('oSc')) $('oSc').oninput=e=>{ propScale=e.target.value/100; };
-  if($('oMob')) $('oMob').onchange=e=>{ curMob=e.target.value; }; if($('oN')) $('oN').oninput=e=>{ spawnN=+e.target.value; $('oNv').textContent=spawnN; };
-  if($('oBr')) $('oBr').oninput=e=>{ brush=+e.target.value; $('oBrv').textContent=brush*2-1; };
-  bindInspector(); }
-const brushUI=()=>`<div class="row"><label>Brush</label><input type="range" id="oBr" min="1" max="8" value="${brush}"><b id="oBrv">${brush*2-1}</b></div>`;
-function inspector(){ const s=sel; let h='<h3>Selected</h3><div class="insp">';
-  if(ED.props.includes(s)) h+=`<div><b>${PROPS[s.k]}</b></div><div class="row"><label>Rotation</label><input type="range" id="iR" min="0" max="360" step="5" value="${Math.round((s.r||0)*180/Math.PI)%360}"></div><div class="row"><label>Size</label><input type="range" id="iS" min="40" max="250" step="5" value="${Math.round((s.s||1)*100)}"></div>`;
-  else if(ED.npcs.includes(s)) h+=`<div class="row"><label>Name</label><input type="text" id="iN" maxlength="28" value="${esc(s.name)}"></div><div class="row"><label>Title</label><input type="text" id="iT" maxlength="28" value="${esc(s.title||'')}"></div><div class="row"><label>Colour</label><input type="color" id="iC" value="${s.col||'#8a7a5a'}"></div><div class="row"><label>Says</label><textarea id="iSay" rows="3" maxlength="240">${esc(s.say||'')}</textarea></div>`;
-  else if(ED.spawns.includes(s)) h+=`<div class="row"><select id="iM">${W.mobTypes.map(m=>`<option value="${m.key}" ${s.mob===m.key?'selected':''}>${m.name}</option>`).join('')}</select></div><div class="row"><label>How many</label><input type="range" id="iNn" min="1" max="12" value="${s.n}"></div>`;
-  else if(ED.pois.includes(s)) h+=`<div class="row"><label>Name</label><input type="text" id="iPn" maxlength="30" value="${esc(s.name)}"></div><div class="row"><label>Radius</label><input type="range" id="iPr" min="2" max="20" value="${s.r||5}"></div>`;
-  return h+'<div class="row"><button id="iDel">🗑 Delete</button></div></div>'; }
-function bindInspector(){ const s=sel; if(!s) return; const on=(id,f)=>{ const e=$(id); if(e){ e.onfocus=()=>pushUndo(); e.oninput=()=>{ f(e.value); save(); draw(); }; } };
-  on('iR',v=>s.r=v*Math.PI/180); on('iS',v=>s.s=v/100); on('iN',v=>s.name=v); on('iT',v=>s.title=v); on('iC',v=>s.col=v); on('iSay',v=>s.say=v); on('iM',v=>s.mob=v); on('iNn',v=>s.n=+v); on('iPn',v=>s.name=v); on('iPr',v=>s.r=+v);
-  $('iDel').onclick=()=>delSel(); }
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function delSel(){ if(!sel) return; pushUndo(); for(const k of ['props','npcs','spawns','pois']){ const i=ED[k].indexOf(sel); if(i>=0) ED[k].splice(i,1); } sel=null; save(); opts(); draw(); }
-function pick(x,y){ let best=null,bd=1.2; const ck=(o,ox,oy)=>{ const d=Math.hypot(ox-x,oy-y); if(d<bd){ bd=d; best=o; } };
-  for(const p of ED.props) ck(p,p.x,p.y); for(const n of ED.npcs) ck(n,n.x+.5,n.y+.5); for(const s of ED.spawns) ck(s,s.x+.5,s.y+.5); for(const p of ED.pois) ck(p,p.x+.5,p.y+.5); return best; }
-function paint(x,y){ const r=brush-1; let ch=false; for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){ const tx=Math.floor(x)+dx, ty=Math.floor(y)+dy; if(tx<1||ty<1||tx>=W.MW-1||ty>=W.OWH-1) continue; const k=tx+','+ty;
-    if(tool==='tile'){ if(W.tname[W.map[ty*W.MW+tx]]===curTile) { if(ED.tiles[k]){ delete ED.tiles[k]; ch=true; } } else if(ED.tiles[k]!==curTile){ ED.tiles[k]=curTile; ch=true; } }
-    else if(tool==='zone'){ if(W.zmap[ty*W.MW+tx]===curZone){ if(ED.zones[k]){ delete ED.zones[k]; ch=true; } } else if(ED.zones[k]!==curZone){ ED.zones[k]=curZone; ch=true; } }
-    else if(tool==='erase'){ if(ED.tiles[k]){ delete ED.tiles[k]; ch=true; } if(ED.zones[k]){ delete ED.zones[k]; ch=true; } } }
-  if(ch){ redrawOver(); draw(); } return ch; }
+/* ===================== view and drawing ===================== */
+let DPR=1, CW=0, CH=0, hover=null, hoverObj=null, drag=null;
+function layout(){ document.documentElement.style.setProperty('--rw',ST.rightW+'px'); DPR=devicePixelRatio||1; const r=cv.getBoundingClientRect(); CW=r.width; CH=r.height; cv.width=Math.round(CW*DPR); cv.height=Math.round(CH*DPR);
+  if(W){ const mw=Math.min(240,Math.max(140,CW*.2)), mh=mw*W.OWH/W.MW; mini.style.width=mw+'px'; mini.style.height=mh+'px'; mini.width=Math.round(mw*DPR); mini.height=Math.round(mh*DPR); mini.classList.toggle('hidden',!ST.minimap); } draw(); }
+const toScr=(x,y)=>[(x-VIEW.x)*VIEW.z+CW/2,(y-VIEW.y)*VIEW.z+CH/2];
+const toW=(sx,sy)=>[(sx-CW/2)/VIEW.z+VIEW.x,(sy-CH/2)/VIEW.z+VIEW.y];
+const visRect=()=>{ const [a,b]=toW(0,0),[c,d]=toW(CW,CH); return [Math.max(0,Math.floor(a)),Math.max(0,Math.floor(b)),Math.min(W.MW-1,Math.ceil(c)),Math.min(W.OWH-1,Math.ceil(d))]; };
+function zoomAt(f,sx=CW/2,sy=CH/2){ const [x,y]=toW(sx,sy); VIEW.z=clamp(VIEW.z*f,.6,64); const [x2,y2]=toW(sx,sy); VIEW.x+=x-x2; VIEW.y+=y-y2; draw(); }
+function centerOn(x,y,z){ VIEW.x=x; VIEW.y=y; if(z) VIEW.z=clamp(z,.6,64); draw(); }
+function fitMap(){ VIEW.x=W.MW/2; VIEW.y=W.OWH/2; VIEW.z=Math.min(CW/W.MW,CH/W.OWH)*.95; draw(); }
+function frameSel(){ if(!sel.size) return toast('Nothing is selected'); let a=1e9,b=1e9,c=-1e9,d=-1e9; for(const o of sel){ const [x,y]=objPos(o); a=Math.min(a,x); b=Math.min(b,y); c=Math.max(c,x); d=Math.max(d,y); }
+  centerOn((a+c)/2,(b+d)/2,Math.min(28,Math.min(CW/(c-a+12),CH/(d-b+12)))); }
+let drawQ=false; function draw(){ if(drawQ||!W) return; drawQ=true; requestAnimationFrame(()=>{ drawQ=false; try{ draw0(); drawMini(); }catch(e){ console.error(e); } }); }
+function draw0(){ const Z=VIEW.z; g.setTransform(DPR,0,0,DPR,0,0); g.fillStyle='#080604'; g.fillRect(0,0,CW,CH);
+  g.imageSmoothingEnabled=false; const [ox,oy]=toScr(0,0), mw=W.MW*Z, mh=W.OWH*Z;
+  g.drawImage(base,ox,oy,mw,mh); if(LAY.tiles.v) g.drawImage(over,ox,oy,mw,mh);
+  if(LAY.tint.v){ g.globalAlpha=.32; g.drawImage(tint,ox,oy,mw,mh); g.globalAlpha=1; }
+  if(LAY.borders.v&&Z>=1.5){ if(bordersDirty) rebuildBorders(); g.globalAlpha=.55; g.imageSmoothingEnabled=Z<4; g.drawImage(borders,ox,oy,mw,mh); g.imageSmoothingEnabled=false; g.globalAlpha=1; }
+  g.strokeStyle='#ffd36a55'; g.lineWidth=1; g.strokeRect(ox-.5,oy-.5,mw+1,mh+1);
+  const [vx0,vy0,vx1,vy1]=visRect(), onScr=(x,y,m=40)=>{ const [sx,sy]=toScr(x,y); return sx>-m&&sy>-m&&sx<CW+m&&sy<CH+m; };
+  // painted tiles get a faint outline when zoomed in so you can see what you changed
+  if(LAY.tiles.v&&Z>=9){ g.strokeStyle='#ffd36a70'; for(const k in ED.tiles){ const i=k.indexOf(','), x=+k.slice(0,i), y=+k.slice(i+1); if(x<vx0||x>vx1||y<vy0||y>vy1) continue; const [sx,sy]=toScr(x,y); g.strokeRect(sx+.5,sy+.5,Z-1,Z-1); } }
+  if(LAY.grid.v&&Z>=12){ g.strokeStyle='#00000038'; g.lineWidth=1; g.beginPath(); for(let x=vx0;x<=vx1+1;x++){ const [sx]=toScr(x,0); g.moveTo(Math.round(sx)+.5,0); g.lineTo(Math.round(sx)+.5,CH); } for(let y=vy0;y<=vy1+1;y++){ const [,sy]=toScr(0,y); g.moveTo(0,Math.round(sy)+.5); g.lineTo(CW,Math.round(sy)+.5); } g.stroke();
+    if(Z>=24){ g.strokeStyle='#0000005a'; g.beginPath(); for(let x=Math.ceil(vx0/8)*8;x<=vx1;x+=8){ const [sx]=toScr(x,0); g.moveTo(Math.round(sx)+.5,0); g.lineTo(Math.round(sx)+.5,CH); } for(let y=Math.ceil(vy0/8)*8;y<=vy1;y+=8){ const [,sy]=toScr(0,y); g.moveTo(0,Math.round(sy)+.5); g.lineTo(CW,Math.round(sy)+.5); } g.stroke(); } }
+  const lab=LAY.labels.v&&Z>=3.5;
+  const label=(t,sx,sy,col,sz=11)=>{ g.font=`600 ${sz}px "Segoe UI",sans-serif`; g.textAlign='center'; g.textBaseline='alphabetic'; g.lineWidth=3; g.strokeStyle='#000c'; g.strokeText(t,sx,sy); g.fillStyle=col||'#fff'; g.fillText(t,sx,sy); };
+  const dot=(x,y,r,fill,stroke,lw=1.5)=>{ const [sx,sy]=toScr(x,y); g.beginPath(); g.arc(sx,sy,r,0,7); g.fillStyle=fill; g.fill(); if(stroke){ g.strokeStyle=stroke; g.lineWidth=lw; g.stroke(); } return [sx,sy]; };
+  const ring=(sx,sy,r,col='#ffd36a',lw=2)=>{ g.beginPath(); g.arc(sx,sy,r,0,7); g.strokeStyle=col; g.lineWidth=lw; g.stroke(); };
+  // the world as the game made it
+  if(LAY.base.v){ const r=clamp(Z*.35,1.2,4);
+    for(const m of W.mobs){ if(!onScr(m[1]+.5,m[2]+.5)) continue; dot(m[1]+.5,m[2]+.5,r,'#e8483acc'); }
+    for(const p of W.pois){ if(!onScr(p.x+.5,p.y+.5,200)) continue; const [sx,sy]=toScr(p.x+.5,p.y+.5); if(Z>=2){ g.setLineDash([3,4]); ring(sx,sy,(p.r||5)*Z,'#ffd36a55',1); g.setLineDash([]); } dot(p.x+.5,p.y+.5,3.5,'#ffd36a','#000'); if(lab) label(p.name,sx,sy-8,'#ffe8a0'); }
+    for(const n of W.npcs){ if(!onScr(n.x+.5,n.y+.5)) continue; const [sx,sy]=dot(n.x+.5,n.y+.5,3.6,'#ffe066','#000'); if(lab&&Z>=6) label(n.name,sx,sy-8,'#fff4c8',10.5); } }
+  // your edits
+  if(LAY.pois.v) for(const p of ED.pois){ if(!onScr(p.x+.5,p.y+.5,(p.r||5)*Z+40)) continue; const [sx,sy]=toScr(p.x+.5,p.y+.5); g.setLineDash([5,4]); ring(sx,sy,(p.r||5)*Z,sel.has(p)?'#ffd36a':'#ffd36a99',1.5); g.setLineDash([]);
+    g.font='16px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('⭐',sx,sy); g.textBaseline='alphabetic'; if(lab||sel.has(p)) label(p.name||'(no name)',sx,sy-13,'#ffe8a0',12); if(sel.has(p)) ring(sx,sy,12); else if(hoverObj===p) ring(sx,sy,12,'#fff8',1.5); }
+  if(LAY.props.v){ const many=ED.props.length>1500&&Z<3;
+    for(const p of ED.props){ if(!onScr(p.x,p.y)) continue; const [sx,sy]=toScr(p.x,p.y);
+      if(many){ g.fillStyle=SOLIDPROP.has(p.k)?'#c08040':'#e0b070'; g.fillRect(sx-1.5,sy-1.5,3,3); continue; }
+      const s=clamp(Z*1.3*(p.s||1),9,64); g.font=`${s}px sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText((PROPS[p.k]||['?'])[0],sx,sy); g.textBaseline='alphabetic';
+      if(Z>=10){ g.strokeStyle='#ffffffa0'; g.lineWidth=1.5; g.beginPath(); g.moveTo(sx,sy); g.lineTo(sx+Math.cos(p.r||0)*s*.75,sy+Math.sin(p.r||0)*s*.75); g.stroke(); }
+      if(sel.has(p)) ring(sx,sy,s*.62); else if(hoverObj===p) ring(sx,sy,s*.62,'#fff8',1.5); } }
+  if(LAY.spawns.v) for(const s of ED.spawns){ if(!onScr(s.x+.5,s.y+.5,120)) continue; const [sx,sy]=toScr(s.x+.5,s.y+.5);
+    if(s.n>1&&Z>=3){ g.beginPath(); g.arc(sx,sy,3*Z,0,7); g.fillStyle='#e8483a1c'; g.fill(); g.strokeStyle='#e8483a66'; g.lineWidth=1; g.stroke(); }
+    dot(s.x+.5,s.y+.5,6,'#b8261c','#ffd0c8',1.5); g.font='700 9px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#fff'; g.fillText(s.n,sx,sy+.5); g.textBaseline='alphabetic';
+    if(lab||sel.has(s)) label(mobName(s.mob),sx,sy-10,'#ffc0b4'); if(sel.has(s)) ring(sx,sy,10); else if(hoverObj===s) ring(sx,sy,10,'#fff8',1.5); }
+  if(LAY.npcs.v) for(const n of ED.npcs){ if(!onScr(n.x+.5,n.y+.5)) continue; const [sx,sy]=dot(n.x+.5,n.y+.5,6,n.col||'#8a7a5a','#ffe066',2);
+    if(lab||sel.has(n)) label((n.name||'Villager')+(n.title?` ‹${n.title}›`:''),sx,sy-10,'#ffe8a0'); if(sel.has(n)) ring(sx,sy,10); else if(hoverObj===n) ring(sx,sy,10,'#fff8',1.5); }
+  // selection region and tool previews
+  if(selRect&&ST.tool==='select'){ const [a,b]=toScr(selRect.x0,selRect.y0),[c,d]=toScr(selRect.x1+1,selRect.y1+1); g.setLineDash([6,4]); g.strokeStyle='#ffd36a'; g.lineWidth=1.5; g.strokeRect(a,b,c-a,d-b); g.setLineDash([]);
+    label(`${selRect.x1-selRect.x0+1} × ${selRect.y1-selRect.y0+1}`,(a+c)/2,b-6,'#ffd36a'); }
+  if(drag&&drag.k==='marquee'){ const [a,b]=toScr(drag.x0,drag.y0),[c,d]=toScr(drag.x1,drag.y1); g.fillStyle='#ffd36a18'; g.fillRect(a,b,c-a,d-b); g.strokeStyle='#ffd36a'; g.lineWidth=1; g.strokeRect(a+.5,b+.5,c-a,d-b); }
+  if(hover) drawToolPreview(Z);
+  if(pasteMode&&clip&&hover) drawPasteGhost(Z);
+}
+function brushCells(cx,cy,r,shape){ const out=[]; const R=r-1; for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){ if(shape==='circle'&&dx*dx+dy*dy>R*R+R*.8) continue; out.push([cx+dx,cy+dy]); } return out; }
+function cellsOutline(cells,col){ const Z=VIEW.z, S=new Set(cells.map(c=>c[0]+','+c[1])); g.strokeStyle=col||'#fff'; g.lineWidth=1.5; g.beginPath();
+  for(const [x,y] of cells){ const [sx,sy]=toScr(x,y);
+    if(!S.has((x-1)+','+y)){ g.moveTo(sx,sy); g.lineTo(sx,sy+Z); } if(!S.has((x+1)+','+y)){ g.moveTo(sx+Z,sy); g.lineTo(sx+Z,sy+Z); }
+    if(!S.has(x+','+(y-1))){ g.moveTo(sx,sy); g.lineTo(sx+Z,sy); } if(!S.has(x+','+(y+1))){ g.moveTo(sx,sy+Z); g.lineTo(sx+Z,sy+Z); } } g.stroke(); }
+function lineCells(x0,y0,x1,y1){ const out=[]; let dx=Math.abs(x1-x0), sx=x0<x1?1:-1, dy=-Math.abs(y1-y0), sy=y0<y1?1:-1, e=dx+dy; for(let i=0;i<4000;i++){ out.push([x0,y0]); if(x0===x1&&y0===y1) break; const e2=2*e; if(e2>=dy){ e+=dy; x0+=sx; } if(e2<=dx){ e+=dx; y0+=sy; } } return out; }
+function rectCells(x0,y0,x1,y1,filled){ const out=[], a=Math.min(x0,x1), b=Math.min(y0,y1), c=Math.max(x0,x1), d=Math.max(y0,y1); for(let y=b;y<=d;y++) for(let x=a;x<=c;x++) if(filled||x===a||x===c||y===b||y===d) out.push([x,y]); return out; }
+function strokeCells(cells,r,shape){ if(r<=1) return cells; const S=new Map(); for(const [x,y] of cells) for(const c of brushCells(x,y,r,shape)) S.set(c[0]+','+c[1],c); return [...S.values()]; }
+function drawToolPreview(Z){ const t=ST.tool, hx=Math.floor(hover[0]), hy=Math.floor(hover[1]), col=ST.layer==='zone'?(ZCOL[ST.zone]||'#fff'):'#fff';
+  if(t==='brush'||t==='erase'){ if(!(t==='erase'&&!ST.erT&&!ST.erZ)) cellsOutline(brushCells(hx,hy,ST.brush,ST.shape),t==='erase'?'#ff8a7a':col); if(t==='erase'&&ST.erO){ const [sx,sy]=toScr(hover[0],hover[1]); g.setLineDash([3,3]); g.beginPath(); g.arc(sx,sy,Math.max(ST.brush-.5,.7)*Z,0,7); g.strokeStyle='#ff8a7a99'; g.lineWidth=1; g.stroke(); g.setLineDash([]); } }
+  else if(t==='line'&&drag&&drag.k==='line') cellsOutline(strokeCells(lineCells(drag.x0,drag.y0,hx,hy),ST.brush,ST.shape),col);
+  else if(t==='line') cellsOutline(brushCells(hx,hy,ST.brush,ST.shape),col);
+  else if(t==='rect'&&drag&&drag.k==='rect'){ const c=rectCells(drag.x0,drag.y0,hx,hy,ST.filled); cellsOutline(ST.filled?c:strokeCells(c,1),col); const [sx,sy]=toScr(Math.min(drag.x0,hx),Math.min(drag.y0,hy)); g.font='600 11px sans-serif'; g.textAlign='left'; g.lineWidth=3; g.strokeStyle='#000'; const s=`${Math.abs(hx-drag.x0)+1} × ${Math.abs(hy-drag.y0)+1}`; g.strokeText(s,sx,sy-5); g.fillStyle='#fff'; g.fillText(s,sx,sy-5); }
+  else if(t==='rect'||t==='fill'||t==='pick'){ const [sx,sy]=toScr(hx,hy); g.strokeStyle=col; g.lineWidth=1.5; g.strokeRect(sx,sy,Z,Z); }
+  else if(t==='prop'){ const [sx,sy]=toScr(...snapP(hover)); if(ST.scatter){ g.setLineDash([3,3]); g.beginPath(); g.arc(sx,sy,Math.max(1,ST.brush)*Z,0,7); g.strokeStyle='#fff9'; g.lineWidth=1; g.stroke(); g.setLineDash([]); }
+    else { const s=clamp(Z*1.3*ST.scale,9,64); g.globalAlpha=.55; g.font=`${s}px sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText(PROPS[ST.prop][0],sx,sy); g.textBaseline='alphabetic'; g.globalAlpha=1; if(Z>=8&&!ST.rndRot){ g.strokeStyle='#fff'; g.beginPath(); g.moveTo(sx,sy); g.lineTo(sx+Math.cos(ST.rot)*s*.75,sy+Math.sin(ST.rot)*s*.75); g.stroke(); } } }
+  else if(t==='npc'||t==='spawn'||t==='poi'){ const [sx,sy]=toScr(hx,hy); g.strokeStyle=solidAt(hx,hy)?'#ff6a5a':'#fff'; g.lineWidth=1.5; g.strokeRect(sx,sy,Z,Z); }
+  if(t==='measure'&&drag&&drag.k==='measure'){ const [a,b]=toScr(drag.x0,drag.y0),[c,d]=toScr(hover[0],hover[1]); g.strokeStyle='#6fb6ff'; g.lineWidth=2; g.setLineDash([6,4]); g.beginPath(); g.moveTo(a,b); g.lineTo(c,d); g.stroke(); g.setLineDash([]);
+    const dist=Math.hypot(hover[0]-drag.x0,hover[1]-drag.y0); g.font='600 12px sans-serif'; g.textAlign='center'; g.lineWidth=3; g.strokeStyle='#000'; const s=`${dist.toFixed(1)} tiles`; g.strokeText(s,(a+c)/2,(b+d)/2-8); g.fillStyle='#bfe0ff'; g.fillText(s,(a+c)/2,(b+d)/2-8); } }
+function drawPasteGhost(Z){ const hx=Math.floor(hover[0]), hy=Math.floor(hover[1]); g.globalAlpha=.6;
+  for(const [dx,dy,t] of clip.tiles||[]){ const [sx,sy]=toScr(hx+dx,hy+dy); g.fillStyle=TCOL[t]||'#f0f'; g.fillRect(sx,sy,Z+.5,Z+.5); }
+  for(const o of clip.objs||[]){ const isP=o.kind==='props', [sx,sy]=toScr(hx+o.d.x+(isP?0:.5),hy+o.d.y+(isP?0:.5)); if(isP){ const s=clamp(Z*1.3*(o.d.s||1),9,64); g.font=`${s}px sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText(PROPS[o.d.k][0],sx,sy); g.textBaseline='alphabetic'; } else { g.beginPath(); g.arc(sx,sy,6,0,7); g.fillStyle=o.kind==='npcs'?'#ffe066':o.kind==='spawns'?'#b8261c':'#ffd36a'; g.fill(); } }
+  g.globalAlpha=1; const [a,b]=toScr(hx,hy),[c,d]=toScr(hx+clip.w,hy+clip.h); g.setLineDash([6,4]); g.strokeStyle='#6fb6ff'; g.lineWidth=1.5; g.strokeRect(a,b,c-a,d-b); g.setLineDash([]); }
+function drawMini(){ if(!ST.minimap) return; const w=mini.width, h=mini.height; mg.setTransform(1,0,0,1,0,0); mg.imageSmoothingEnabled=true; mg.drawImage(base,0,0,w,h); mg.drawImage(over,0,0,w,h);
+  const sx=w/W.MW, sy=h/W.OWH; mg.fillStyle='#ffd36a'; for(const p of ED.pois) mg.fillRect(p.x*sx-1.5,p.y*sy-1.5,3,3); mg.fillStyle='#ff6a5a'; for(const s of ED.spawns) mg.fillRect(s.x*sx-1,s.y*sy-1,2.5,2.5); mg.fillStyle='#ffe066'; for(const n of ED.npcs) mg.fillRect(n.x*sx-1,n.y*sy-1,2.5,2.5);
+  const [a,b]=toW(0,0),[c,d]=toW(CW,CH); mg.strokeStyle='#fff'; mg.lineWidth=1.5*DPR; mg.strokeRect(a*sx,b*sy,(c-a)*sx,(d-b)*sy); mg.strokeStyle='#000a'; mg.lineWidth=.8*DPR; mg.strokeRect(a*sx-1.5*DPR,b*sy-1.5*DPR,(c-a)*sx+3*DPR,(d-b)*sy+3*DPR);
+  $('zPct').textContent=Math.round(VIEW.z/4*100)+'%'; }
 
-/* ---------- mouse and keys ---------- */
-let hover=null, drag=null;
+/* ===================== tools ===================== */
+const IC={
+ select:'<path d="M5 3l13 7.5-5.8 1.6L9.6 18z"/>',
+ brush:'<path d="M15 4l5 5-10 10H5v-5z"/><path d="M13 6l5 5"/>',
+ line:'<path d="M5 19L19 5"/><circle cx="5" cy="19" r="1.6"/><circle cx="19" cy="5" r="1.6"/>',
+ rect:'<rect x="4" y="6" width="16" height="12" rx="1"/>',
+ fill:'<path d="M4 11l7-7 8 8-7 7z"/><path d="M4 11h15"/><path d="M20 16c0 1.6 1 2.4 1 3.4a1 1 0 0 1-2 0c0-1 1-1.8 1-3.4z"/>',
+ pick:'<path d="M16 3.5l4.5 4.5-3 3-4.5-4.5z"/><path d="M14 7l-9 9v3h3l9-9"/>',
+ prop:'<path d="M12 3l6 8h-3.5l4 6H5.5l4-6H6z"/><path d="M12 17v4"/>',
+ npc:'<circle cx="12" cy="7.5" r="3.5"/><path d="M5 20c.8-5 13.2-5 14 0"/>',
+ spawn:'<path d="M12 3c4.2 0 7 3 7 6.8 0 2.8-2 3.8-2 5.7V19H7v-3.5c0-1.9-2-2.9-2-5.7C5 6 7.8 3 12 3z"/><circle cx="9.3" cy="10.5" r="1.2"/><circle cx="14.7" cy="10.5" r="1.2"/><path d="M10 19v-2M14 19v-2"/>',
+ poi:'<path d="M12 3l2.6 5.8 6.4.6-4.8 4.3 1.4 6.3L12 16.8 6.4 20l1.4-6.3L3 9.4l6.4-.6z"/>',
+ erase:'<path d="M4 16l9-9 6 6-6 6H8z"/><path d="M14 19h6"/><path d="M9.5 10.5l6 6"/>',
+ measure:'<path d="M3.5 16.5L16.5 3.5l4 4-13 13z"/><path d="M7.5 12.5l2 2M10.5 9.5l2 2M13.5 6.5l2 2"/>',
+ pan:'<path d="M12 3v18M3 12h18"/><path d="M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>'};
+const svg=k=>`<svg class="ico" viewBox="0 0 24 24">${IC[k]}</svg>`;
+const TOOLS=[
+ {id:'select',key:'V',name:'Select',hint:'Click an object to select it, drag to move it. Drag on empty ground to box-select (that area can be copied too). Shift adds to the selection, Alt-drag makes a copy.'},
+ {id:'pan',key:'H',name:'Move view',hint:'Drag to move around. You can also drag with the right or middle mouse button, or hold Space, in any tool.'},
+ '|',
+ {id:'brush',key:'B',name:'Brush',hint:'Paint ground or zones. [ and ] change the brush size. Alt-click picks the ground under the cursor.'},
+ {id:'line',key:'L',name:'Line',hint:'Drag to draw a straight road, wall or river. Uses the brush size.'},
+ {id:'rect',key:'U',name:'Rectangle',hint:'Drag to fill a rectangle (or draw its outline: switch "Filled" off).'},
+ {id:'fill',key:'G',name:'Fill',hint:'Click to fill a connected area of the same ground or zone.'},
+ {id:'pick',key:'I',name:'Eyedropper',hint:'Click to pick the ground and zone under the cursor, then go back to the last tool.'},
+ '|',
+ {id:'prop',key:'P',name:'Props',hint:'Click to place a prop. Switch on Scatter to paint many at once. R turns the next prop.'},
+ {id:'npc',key:'N',name:'NPC',hint:'Click to place a villager, then name it and write what it says.'},
+ {id:'spawn',key:'M',name:'Monsters',hint:'Click to place a group of monsters. They respawn like normal monsters.'},
+ {id:'poi',key:'K',name:'Landmark',hint:'Click to add a named landmark. Players discover it when they walk close, and it counts towards the Cartographer achievement.'},
+ '|',
+ {id:'erase',key:'E',name:'Erase',hint:'Drag to put back the original ground and zone, and to remove your objects under the brush. Choose what it erases above.'},
+ {id:'measure',key:'Q',name:'Measure',hint:'Drag to measure a distance in tiles.'}];
+const toolById=id=>TOOLS.find(t=>t.id===id);
+let lastTool='select';
+function buildToolbar(){ $('toolbar').innerHTML=TOOLS.map(t=>t==='|'?'<div class="tsep"></div>':`<button data-t="${t.id}" title="${t.name} (${t.key})">${svg(t.id)}</button>`).join('');
+  $('toolbar').querySelectorAll('button').forEach(b=>b.onclick=()=>setTool(b.dataset.t)); }
+function setTool(t,quiet){ if(pending) end(); if(t!=='pick') lastTool=t; pasteMode=false; ST.tool=t; if(t!=='select') selRect=null; savePrefs();
+  $('toolbar').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); cv.style.cursor=t==='pan'?'grab':t==='select'?'default':'crosshair';
+  buildOptbar(); if(ST.autoTab&&!quiet) showTop(sel.size&&t==='select'?'insp':'pal'); else renderTop(); $('stHint').textContent=toolById(t).hint; draw(); }
+
+/* ---------- the options bar above the map ---------- */
+function buildOptbar(){ const t=ST.tool, T=toolById(t); let h=`<div class="tname">${svg(t)}${T.name}</div>`;
+  const rng=(id,lab,min,max,val,step=1,fmt=v=>v)=>`<label>${lab}<input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><b id="${id}v">${fmt(val)}</b></label>`;
+  const chk=(id,lab,on)=>`<label><input type="checkbox" id="${id}" ${on?'checked':''}>${lab}</label>`;
+  const seg=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([v,n])=>`<button data-v="${v}" class="${cur===v?'on':''}">${n}</button>`).join('')}</div>`;
+  const layerSeg=()=>seg('oLayer',[['tile','Ground'],['zone','Zone']],ST.layer)+'<div class="vs"></div>';
+  const brushOpts=()=>rng('oBr','Size',1,15,ST.brush,1,v=>v*2-1)+seg('oShape',[['circle','● Round'],['square','■ Square']],ST.shape);
+  if(t==='brush'||t==='line') h+=layerSeg()+brushOpts()+`<div class="vs"></div><span style="color:var(--dim)">Painting: <b style="color:var(--txt)">${ST.layer==='zone'?esc(zoneName(ST.zone)):esc(TDESC[ST.tile]||ST.tile)}</b></span>`;
+  else if(t==='rect') h+=layerSeg()+chk('oFilled','Filled',ST.filled);
+  else if(t==='fill') h+=layerSeg()+rng('oLim','Max size',500,20000,ST.fillLimit,500,v=>v);
+  else if(t==='erase') h+=chk('oErT','Ground',ST.erT)+chk('oErZ','Zones',ST.erZ)+chk('oErO','Objects',ST.erO)+'<div class="vs"></div>'+brushOpts();
+  else if(t==='prop') h+=`<label>Rotation<input type="range" id="oRot" min="0" max="345" step="15" value="${Math.round(ST.rot*180/Math.PI)}"><b id="oRotv">${Math.round(ST.rot*180/Math.PI)}°</b></label>`+chk('oRR','Random',ST.rndRot)+'<div class="vs"></div>'+rng('oSc','Size',40,250,Math.round(ST.scale*100),5,v=>v+'%')+rng('oRS','Vary',0,60,ST.rndScale,5,v=>'±'+v+'%')+'<div class="vs"></div>'+chk('oScat','Scatter',ST.scatter)+(ST.scatter?rng('oBr','Area',1,10,ST.brush)+rng('oDen','Density',1,10,ST.density):'')+'<div class="vs"></div>'+chk('oSnap','Snap to ½ tile',ST.snap);
+  else if(t==='spawn') h+=rng('oN','Group size',1,12,ST.n)+`<span style="color:var(--dim)">Monster: <b style="color:var(--txt)">${esc(mobName(ST.mob))}</b></span>`;
+  else if(t==='select') h+=chk('oSnap','Snap props to ½ tile',ST.snap)+'<div class="vs"></div><button id="oAll">Select all</button><button id="oNone">Select none</button>'+(sel.size?`<div class="vs"></div><button id="oDup">Duplicate</button><button id="oDel" class="danger">Delete</button>`:'');
+  else if(t==='measure') h+='<span style="color:var(--dim)">Drag on the map. A player walks about 6 tiles a second; monster groups spread about 3 tiles.</span>';
+  else h+=`<span style="color:var(--dim)">${T.hint}</span>`;
+  const o=$('optbar'); o.innerHTML=h;
+  const bind=(id,f,ev='input')=>{ const e=$(id); if(e) e.addEventListener(ev,()=>{ f(e.type==='checkbox'?e.checked:+e.value,e); savePrefs(); draw(); }); };
+  const showv=(id,v)=>{ const e=$(id+'v'); if(e) e.textContent=v; };
+  bind('oBr',v=>{ ST.brush=v; showv('oBr',ST.tool==='prop'?v:v*2-1); }); bind('oLim',v=>{ ST.fillLimit=v; showv('oLim',v); }); bind('oFilled',v=>ST.filled=v,'change');
+  bind('oErT',v=>ST.erT=v,'change'); bind('oErZ',v=>ST.erZ=v,'change'); bind('oErO',v=>ST.erO=v,'change');
+  bind('oRot',v=>{ ST.rot=v*Math.PI/180; showv('oRot',v+'°'); }); bind('oRR',v=>ST.rndRot=v,'change'); bind('oSc',v=>{ ST.scale=v/100; showv('oSc',v+'%'); }); bind('oRS',v=>{ ST.rndScale=v; showv('oRS','±'+v+'%'); });
+  bind('oScat',v=>{ ST.scatter=v; buildOptbar(); },'change'); bind('oDen',v=>{ ST.density=v; showv('oDen',v); }); bind('oSnap',v=>ST.snap=v,'change');
+  bind('oN',v=>{ ST.n=v; showv('oN',v); });
+  o.querySelectorAll('.seg').forEach(sg=>sg.querySelectorAll('button').forEach(b=>b.onclick=()=>{ if(sg.id==='oLayer') ST.layer=b.dataset.v; else if(sg.id==='oShape') ST.shape=b.dataset.v; savePrefs(); buildOptbar(); renderTop(); draw(); }));
+  if($('oAll')) $('oAll').onclick=selectAll; if($('oNone')) $('oNone').onclick=()=>setSel([]); if($('oDup')) $('oDup').onclick=()=>duplicateSel(); if($('oDel')) $('oDel').onclick=deleteSel; }
+
+/* ---------- editing operations ---------- */
+const snapP=p=>ST.snap?[Math.round(p[0]*2)/2,Math.round(p[1]*2)/2]:[+p[0].toFixed(2),+p[1].toFixed(2)];
+function paintCells(cells){ let n=0; for(const [x,y] of cells) n+=(ST.layer==='zone'?setZone(x,y,ST.zone):setTile(x,y,ST.tile))?1:0; if(n) draw(); return n; }
+function eraseCells(cells,cx,cy){ let n=0; for(const [x,y] of cells){ const k=x+','+y; if(ST.erT&&ED.tiles[k]!==undefined){ setTile(x,y,baseTile(x,y)); n++; } if(ST.erZ&&ED.zones[k]!==undefined){ setZone(x,y,W.zmap[y*W.MW+x]); n++; } }
+  if(ST.erO){ const R=Math.max(ST.brush-.5,.7); for(const k of KINDS){ if(!LAY[k].v||LAY[k].l) continue; const keep=ED[k].filter(o=>{ const [x,y]=objPos(o,k); return Math.hypot(x-cx,y-cy)>R; }); if(keep.length!==ED[k].length){ n+=ED[k].length-keep.length; for(const o of ED[k]) if(!keep.includes(o)) sel.delete(o); ED[k]=keep; } } }
+  if(n) draw(); return n; }
+function floodFill(x0,y0){ if(!inMap(x0,y0)) return 0; const zone=ST.layer==='zone', get=zone?zoneAt:tileAt, from=get(x0,y0), to=zone?ST.zone:ST.tile; if(from===to) return 0;
+  const seen=new Uint8Array(W.MW*W.OWH), q=[[x0,y0]], cells=[]; seen[y0*W.MW+x0]=1;
+  while(q.length){ const [x,y]=q.pop(); cells.push([x,y]); if(cells.length>=ST.fillLimit) break; for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+dx, ny=y+dy; if(!inMap(nx,ny)||seen[ny*W.MW+nx]) continue; seen[ny*W.MW+nx]=1; if(get(nx,ny)===from) q.push([nx,ny]); } }
+  const n=paintCells(cells); if(cells.length>=ST.fillLimit) toast(`Filled ${cells.length} tiles and stopped at the size limit. Raise "Max size" to fill more.`); return n; }
+function placeProp(x,y){ if(ED.props.length>=MAXPROPS){ toast(`The game shows at most ${MAXPROPS} props.`,1); return null; }
+  const vary=ST.rndScale/100, s=clamp(ST.scale*(1+(Math.random()*2-1)*vary),.3,4), r=ST.rndRot?Math.random()*Math.PI*2:ST.rot;
+  const p={k:ST.prop,x:clamp(x,1,W.MW-1),y:clamp(y,1,W.OWH-1),r:+r.toFixed(2),s:+s.toFixed(2)}; ED.props.push(p); return p; }
+function setSel(list,add){ if(!add) sel.clear(); for(const o of list) sel.add(o); if(ST.tool==='select') buildOptbar(); if(ST.autoTab) showTop(sel.size?'insp':'pal'); else renderTop(); refreshBottom(); draw(); updateStatus(); }
+function selectAll(){ const L=[]; for(const k of KINDS) if(LAY[k].v&&!LAY[k].l) L.push(...ED[k]); if(ST.tool!=='select') setTool('select'); setSel(L); toast(`Selected ${L.length} objects`); }
+function deleteSel(){ if(!sel.size) return; begin(`Delete ${sel.size>1?sel.size+' objects':objName([...sel][0])}`); for(const k of KINDS) ED[k]=ED[k].filter(o=>!sel.has(o)); sel.clear(); end(); setSel([]); }
+function cloneObj(o){ return JSON.parse(JSON.stringify(o)); }
+function duplicateSel(dx=1,dy=1){ if(!sel.size) return; begin('Duplicate'); const out=[]; for(const o of sel){ const k=kindOf(o); if(k==='props'&&ED.props.length>=MAXPROPS) break; const c=cloneObj(o); c.x+=dx; c.y+=dy; if(k==='npcs') c.name=uniqueName(c.name); ED[k].push(c); out.push(c); } end(); setSel(out); }
+function uniqueName(n){ const names=new Set(ED.npcs.map(q=>q.name)); if(!names.has(n)) return n; const b=n.replace(/ \d+$/,''); for(let i=2;i<999;i++) if(!names.has(b+' '+i)) return (b+' '+i).slice(0,28); return n; }
+function nudge(dx,dy){ if(!sel.size) return; begin('Move'); for(const o of sel){ o.x+=dx; o.y+=dy; } end(); draw(); renderTop(); }
+function rotateSel(a){ const P=[...sel].filter(o=>ED.props.includes(o)); if(!P.length){ ST.rot=((ST.rot+a)%(2*Math.PI)+2*Math.PI)%(2*Math.PI); buildOptbar(); draw(); return; } begin('Rotate'); for(const p of P) p.r=+((((p.r||0)+a)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)).toFixed(3); end(); renderTop(); }
+/* copy: the selected objects, plus the ground inside the box you dragged */
+function copySel(cut){ let objs=[...sel], tiles=[], a=1e9,b=1e9,c=-1e9,d=-1e9;
+  if(selRect){ a=selRect.x0; b=selRect.y0; c=selRect.x1; d=selRect.y1; }
+  for(const o of objs){ const [x,y]=objPos(o); a=Math.min(a,Math.floor(x)); b=Math.min(b,Math.floor(y)); c=Math.max(c,Math.floor(x)); d=Math.max(d,Math.floor(y)); }
+  if(!objs.length&&!selRect) return toast('Select something first. Drag a box with the Select tool to copy ground too.');
+  if(selRect){ if((c-a+1)*(d-b+1)>128*128) return toast('That area is too big to copy (at most 128 × 128 tiles).',1); for(let y=selRect.y0;y<=selRect.y1;y++) for(let x=selRect.x0;x<=selRect.x1;x++) tiles.push([x-a,y-b,tileAt(x,y)]); }
+  clip={w:c-a+1,h:d-b+1,tiles,objs:objs.map(o=>{ const k=kindOf(o), d0=cloneObj(o); d0.x-=a; d0.y-=b; return {kind:k,d:d0}; })}; LS.set('ef_editor_clip',clip);
+  toast(`Copied ${objs.length} object${objs.length===1?'':'s'}${tiles.length?` and ${tiles.length} tiles of ground`:''}`);
+  if(cut){ begin('Cut'); for(const k of KINDS) ED[k]=ED[k].filter(o=>!sel.has(o)); sel.clear(); end(); setSel([]); } }
+function startPaste(){ if(!clip) return toast('The clipboard is empty. Copy something first (Ctrl+C).'); if(ST.tool!=='select') setTool('select'); pasteMode=true; $('stHint').textContent='Click where the copy should go. Shift-click to keep pasting, Esc to stop.'; cv.style.cursor='copy'; draw(); }
+function pasteAt(x,y){ begin('Paste'); const out=[]; for(const [dx,dy,t] of clip.tiles||[]) if(W.T[t]!=null) setTile(x+dx,y+dy,t);
+  for(const o of clip.objs||[]){ if(o.kind==='props'&&ED.props.length>=MAXPROPS) continue; const c=cloneObj(o.d); c.x+=x; c.y+=y; if(o.kind==='npcs') c.name=uniqueName(c.name); ED[o.kind].push(c); out.push(c); }
+  end(); setSel(out); }
+
+/* ---------- picking objects on the map ---------- */
+function pick(x,y,all){ const R=Math.max(.7,11/VIEW.z); let best=null,bd=R; const hits=[];
+  for(const k of ['npcs','spawns','pois','props']){ if(!LAY[k].v||LAY[k].l) continue; for(const o of ED[k]){ const [ox,oy]=objPos(o,k), d=Math.hypot(ox-x,oy-y)+(k==='props'?.05:0); if(d<bd){ bd=d; best=o; } if(all&&d<R) hits.push(o); } }
+  return all?hits:best; }
+function inBox(x0,y0,x1,y1){ const a=Math.min(x0,x1),b=Math.min(y0,y1),c=Math.max(x0,x1),d=Math.max(y0,y1), out=[]; for(const k of KINDS){ if(!LAY[k].v||LAY[k].l) continue; for(const o of ED[k]){ const [x,y]=objPos(o,k); if(x>=a&&x<=c&&y>=b&&y<=d) out.push(o); } } return out; }
+function baseAt(x,y){ const R=Math.max(.8,9/VIEW.z); for(const n of W.npcs) if(Math.hypot(n.x+.5-x,n.y+.5-y)<R) return {t:'NPC',n:n.name+(n.title?' ‹'+n.title+'›':'')}; for(const p of W.pois) if(Math.hypot(p.x+.5-x,p.y+.5-y)<R) return {t:'Landmark',n:p.name}; for(const m of W.mobs) if(Math.hypot(m[1]+.5-x,m[2]+.5-y)<R*.8) return {t:'Monster',n:mobName(m[0])}; return null; }
+
+/* ---------- mouse ---------- */
+let spaceDown=false;
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('mousedown',e=>{ if(!W) return; const [x,y]=toW(e.offsetX,e.offsetY);
-  if(e.button!==0||tool==='pan'){ drag={k:'pan',sx:e.offsetX,sy:e.offsetY,vx:VIEW.x,vy:VIEW.y}; cv.style.cursor='grabbing'; return; }
-  if(tool==='tile'||tool==='zone'||(tool==='erase')){ const o=tool==='erase'?pick(x,y):null; pushUndo(); if(o){ sel=o; delSel(); return; } paint(x,y); drag={k:'paint'}; return; }
-  if(tool==='select'){ sel=pick(x,y); opts(); draw(); if(sel){ pushUndo(); drag={k:'move',o:sel,ox:x,oy:y,x0:sel.x,y0:sel.y}; } return; }
-  pushUndo();
-  if(tool==='prop'){ const p={k:curProp,x,y,r:propRot,s:propScale}; ED.props.push(p); }
-  else if(tool==='spawn'){ ED.spawns.push({mob:curMob,x:Math.floor(x),y:Math.floor(y),n:spawnN}); }
-  else if(tool==='npc'){ const n={name:'New villager',title:'',x:Math.floor(x),y:Math.floor(y),col:'#8a7a5a',say:''}; ED.npcs.push(n); sel=n; tool='select'; buildTools(); setTimeout(()=>{ const i=$('iN'); if(i){ i.focus(); i.select(); } },0); }
-  else if(tool==='poi'){ const nm=prompt('Name of the landmark:','The Old Mill'); if(!nm){ undo.pop(); return; } ED.pois.push({name:nm.slice(0,30),x:Math.floor(x),y:Math.floor(y),r:5}); }
-  save(); draw(); });
-addEventListener('mousemove',e=>{ if(!W) return; const r=cv.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top; hover=toW(mx,my);
-  if(drag&&drag.k==='pan'){ VIEW.x=drag.vx-(mx-drag.sx)/VIEW.z; VIEW.y=drag.vy-(my-drag.sy)/VIEW.z; }
-  else if(drag&&drag.k==='paint') paint(hover[0],hover[1]);
-  else if(drag&&drag.k==='move'){ const o=drag.o, dx=hover[0]-drag.ox, dy=hover[1]-drag.oy; if(ED.props.includes(o)){ o.x=drag.x0+dx; o.y=drag.y0+dy; } else { o.x=Math.floor(drag.x0+dx); o.y=Math.floor(drag.y0+dy); } }
+cv.addEventListener('pointerdown',e=>{ if(!W||dlgOpen) return; closeMenus(); hideCtx(); cv.setPointerCapture(e.pointerId); const [x,y]=toW(e.offsetX,e.offsetY), tx=Math.floor(x), ty=Math.floor(y);
+  if(e.button===1||e.button===2||spaceDown||ST.tool==='pan'){ drag={k:'pan',sx:e.offsetX,sy:e.offsetY,vx:VIEW.x,vy:VIEW.y,btn:e.button,moved:false}; cv.style.cursor='grabbing'; return; }
+  if(e.button!==0) return;
+  if(pasteMode){ pasteAt(tx-Math.floor(clip.w/2),ty-Math.floor(clip.h/2)); if(!e.shiftKey){ pasteMode=false; setTool('select'); } return; }
+  const t=ST.tool;
+  if((t==='brush'||t==='line'||t==='rect'||t==='fill')&&e.altKey){ eyedrop(tx,ty,true); return; }
+  if(t==='select'){ const o=pick(x,y);
+    if(o){ if(e.shiftKey||e.ctrlKey||e.metaKey){ if(sel.has(o)) sel.delete(o); else sel.add(o); setSel([...sel]); return; } if(!sel.has(o)) setSel([o]); selRect=null;
+      begin(e.altKey?'Copy and move':(sel.size>1?`Move ${sel.size} objects`:'Move '+objName(o)));
+      if(e.altKey){ const cp=[]; for(const q of sel){ const k=kindOf(q), c=cloneObj(q); if(k==='npcs') c.name=uniqueName(c.name); ED[k].push(c); cp.push(c); } sel=new Set(cp); }
+      drag={k:'move',x0:x,y0:y,start:[...sel].map(q=>[q,q.x,q.y,kindOf(q)]),moved:false}; return; }
+    drag={k:'marquee',x0:x,y0:y,x1:x,y1:y,add:e.shiftKey}; return; }
+  if(t==='brush'){ begin(ST.layer==='zone'?'Paint zone':'Paint '+(TDESC[ST.tile]||ST.tile)); paintCells(brushCells(tx,ty,ST.brush,ST.shape)); drag={k:'paint',lx:tx,ly:ty}; return; }
+  if(t==='erase'){ begin('Erase'); eraseCells(brushCells(tx,ty,ST.brush,ST.shape),x,y); drag={k:'erase',lx:tx,ly:ty}; return; }
+  if(t==='line'){ drag={k:'line',x0:tx,y0:ty}; return; }
+  if(t==='rect'){ drag={k:'rect',x0:tx,y0:ty}; return; }
+  if(t==='measure'){ drag={k:'measure',x0:x,y0:y}; return; }
+  if(t==='fill'){ begin(ST.layer==='zone'?'Fill zone':'Fill '+(TDESC[ST.tile]||ST.tile)); floodFill(tx,ty); end(); return; }
+  if(t==='pick'){ eyedrop(tx,ty); return; }
+  if(!inMap(tx,ty)) return;
+  if(t==='prop'){ begin(ST.scatter?'Scatter '+PROPS[ST.prop][1]:'Place '+PROPS[ST.prop][1]); if(ST.scatter){ scatter(x,y); drag={k:'scatter',lx:x,ly:y}; } else { placeProp(...snapP([x,y])); end(); } draw(); return; }
+  if(t==='npc'){ begin('Add NPC'); const n={name:uniqueName('New villager'),title:'',x:tx,y:ty,col:NPCCOL[ED.npcs.length%NPCCOL.length],say:''}; ED.npcs.push(n); end(); setTool('select'); setSel([n]); focusField('iName'); return; }
+  if(t==='spawn'){ begin('Add '+mobName(ST.mob)); const s={mob:ST.mob,x:tx,y:ty,n:ST.n}; ED.spawns.push(s); end(); draw(); return; }
+  if(t==='poi'){ begin('Add landmark'); const p={name:'New landmark',x:tx,y:ty,r:5}; ED.pois.push(p); end(); setTool('select'); setSel([p]); focusField('iName'); return; } });
+function scatter(x,y){ const R=Math.max(1,ST.brush), n=Math.max(1,Math.round(ST.density*R*R*.12)); for(let i=0;i<n;i++){ const a=Math.random()*6.283, r=Math.sqrt(Math.random())*R, px=x+Math.cos(a)*r, py=y+Math.sin(a)*r;
+  if(!inMap(Math.floor(px),Math.floor(py))||tileAt(Math.floor(px),Math.floor(py))==='WATER') continue; const md=.9/Math.sqrt(ST.density/4); if(ED.props.some(p=>Math.abs(p.x-px)<md&&Math.abs(p.y-py)<md)) continue; if(!placeProp(...snapP([px,py]))) break; } }
+function eyedrop(tx,ty,stay){ if(!inMap(tx,ty)) return; const t=tileAt(tx,ty), z=zoneAt(tx,ty); if(TDESC[t]) ST.tile=t; if(z&&(W.zones[z]||z==='town')) ST.zone=z; savePrefs(); toast(`Picked ${TDESC[t]||t} · ${zoneName(z)}`); if(!stay) setTool(lastTool==='pick'?'brush':lastTool); else { buildOptbar(); renderTop(); } }
+addEventListener('pointermove',e=>{ if(!W) return; const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, inside=mx>=0&&my>=0&&mx<CW&&my<CH;
+  hover=inside||drag?toW(mx,my):null; const x=hover?hover[0]:0, y=hover?hover[1]:0, tx=Math.floor(x), ty=Math.floor(y);
+  if(drag&&drag.k==='pan'){ if(Math.abs(mx-drag.sx)+Math.abs(my-drag.sy)>3) drag.moved=true; VIEW.x=drag.vx-(mx-drag.sx)/VIEW.z; VIEW.y=drag.vy-(my-drag.sy)/VIEW.z; }
+  else if(drag&&drag.k==='paint'){ for(const [cx,cy] of lineCells(drag.lx,drag.ly,tx,ty)) paintCells(brushCells(cx,cy,ST.brush,ST.shape)); drag.lx=tx; drag.ly=ty; }
+  else if(drag&&drag.k==='erase'){ for(const [cx,cy] of lineCells(drag.lx,drag.ly,tx,ty)) eraseCells(brushCells(cx,cy,ST.brush,ST.shape),cx+.5,cy+.5); eraseCells([],x,y); drag.lx=tx; drag.ly=ty; }
+  else if(drag&&drag.k==='scatter'){ if(Math.hypot(x-drag.lx,y-drag.ly)>Math.max(.8,ST.brush*.6)){ scatter(x,y); drag.lx=x; drag.ly=y; } }
+  else if(drag&&drag.k==='marquee'){ drag.x1=x; drag.y1=y; }
+  else if(drag&&drag.k==='move'){ let dx=x-drag.x0, dy=y-drag.y0; if(Math.abs(dx)+Math.abs(dy)>.15) drag.moved=true;
+    for(const [o,ox,oy,k] of drag.start){ if(k==='props'){ const p=snapP([ox+dx,oy+dy]); o.x=clamp(p[0],1,W.MW-1); o.y=clamp(p[1],1,W.OWH-1); } else { o.x=clamp(Math.round(ox+dx),1,W.MW-2); o.y=clamp(Math.round(oy+dy),1,W.OWH-2); } } }
+  // hover feedback
+  const tip=$('hoverTip'); hoverObj=null;
+  if(hover&&inside&&!drag&&!dlgOpen){ hoverObj=ST.tool==='select'||ST.tool==='erase'?pick(x,y):null; const b=hoverObj?null:baseAt(x,y);
+    if(hoverObj||b){ tip.style.display='block'; tip.textContent=hoverObj?`${KN[kindOf(hoverObj)]}: ${objName(hoverObj)}`:`${b.t} (part of the world): ${b.n}`; tip.style.left=(mx+16)+'px'; tip.style.top=(my+14)+'px'; } else tip.style.display='none'; }
+  else tip.style.display='none';
+  if(hover&&tx>=0&&ty>=0&&tx<W.MW&&ty<W.OWH){ const t=tileAt(tx,ty), z=zoneAt(tx,ty), ed=ED.tiles[tx+','+ty]!==undefined;
+    $('stPos').innerHTML=`<b>${tx}, ${ty}</b> &nbsp;${esc(TDESC[t]||t)}${ed?' <span style="color:var(--gold)">(painted)</span>':''} · ${esc(zoneName(z))}`; } else if(hover) $('stPos').textContent='Outside the map';
+  if(hover||drag) draw(); });
+addEventListener('pointerup',e=>{ if(!drag) return; const d=drag; drag=null; const [x,y]=hover||[0,0], tx=Math.floor(x), ty=Math.floor(y);
+  if(d.k==='pan'){ cv.style.cursor=ST.tool==='pan'||spaceDown?'grab':ST.tool==='select'?'default':'crosshair'; if(d.btn===2&&!d.moved) openCtx(e.clientX,e.clientY,x,y); }
+  else if(d.k==='paint'||d.k==='erase'||d.k==='scatter') end();
+  else if(d.k==='move'){ if(!d.moved&&!pending.label.startsWith('Copy')) pending=null; else end(); renderTop(); }
+  else if(d.k==='marquee'){ const small=Math.abs(d.x1-d.x0)*VIEW.z<4&&Math.abs(d.y1-d.y0)*VIEW.z<4;
+    if(small){ selRect=null; if(!d.add) setSel([]); }
+    else { const L=inBox(d.x0,d.y0,d.x1,d.y1); selRect={x0:clamp(Math.floor(Math.min(d.x0,d.x1)),0,W.MW-1),y0:clamp(Math.floor(Math.min(d.y0,d.y1)),0,W.OWH-1),x1:clamp(Math.floor(Math.max(d.x0,d.x1)),0,W.MW-1),y1:clamp(Math.floor(Math.max(d.y0,d.y1)),0,W.OWH-1)}; setSel(L,d.add); } }
+  else if(d.k==='line'){ begin('Draw line'); paintCells(strokeCells(lineCells(d.x0,d.y0,tx,ty),ST.brush,ST.shape)); end(); }
+  else if(d.k==='rect'){ begin(ST.filled?'Fill rectangle':'Draw rectangle'); paintCells(rectCells(d.x0,d.y0,tx,ty,ST.filled)); end(); }
   draw(); });
-addEventListener('mouseup',()=>{ if(drag&&(drag.k==='paint'||drag.k==='move')) save(); drag=null; cv.style.cursor=tool==='pan'?'grab':'crosshair'; });
-cv.addEventListener('wheel',e=>{ e.preventDefault(); const [x,y]=toW(e.offsetX,e.offsetY); VIEW.z=Math.max(1,Math.min(48,VIEW.z*(e.deltaY<0?1.15:1/1.15))); const [x2,y2]=toW(e.offsetX,e.offsetY); VIEW.x+=x-x2; VIEW.y+=y-y2; draw(); },{passive:false});
-addEventListener('keydown',e=>{ if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); doUndo(); } else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){ e.preventDefault(); doRedo(); }
-  else if(e.key==='Delete'||e.key==='Backspace') delSel(); else if(e.key==='Escape') setTool('select');
-  else if(e.key.toLowerCase()==='r'){ if(sel&&ED.props.includes(sel)){ pushUndo(); sel.r=((sel.r||0)+Math.PI/4)%(Math.PI*2); save(); opts(); } else { propRot=(propRot+Math.PI/4)%(Math.PI*2); opts(); } draw(); }
-  else if(e.key===']'){ brush=Math.min(8,brush+1); opts(); draw(); } else if(e.key==='['){ brush=Math.max(1,brush-1); opts(); draw(); } });
-function doUndo(){ if(!undo.length) return; redo.push(snap()); loadData(JSON.parse(undo.pop()),true); save(); opts(); }
-function doRedo(){ if(!redo.length) return; undo.push(snap()); loadData(JSON.parse(redo.pop()),true); save(); opts(); }
+cv.addEventListener('wheel',e=>{ e.preventDefault(); if(e.ctrlKey||Math.abs(e.deltaY)>=Math.abs(e.deltaX)) zoomAt(Math.pow(1.0018,-e.deltaY*(e.deltaMode?30:1)),e.offsetX,e.offsetY); else { VIEW.x+=e.deltaX/VIEW.z; draw(); } },{passive:false});
+cv.addEventListener('pointerleave',()=>{ if(!drag){ hover=null; hoverObj=null; $('hoverTip').style.display='none'; draw(); } });
+cv.addEventListener('dblclick',e=>{ const [x,y]=toW(e.offsetX,e.offsetY); const o=pick(x,y); if(o){ setSel([o]); showTop('insp'); focusField('iName'); } });
+// the minimap moves the view
+let miniDrag=false; const miniGo=e=>{ const r=mini.getBoundingClientRect(); centerOn((e.clientX-r.left)/r.width*W.MW,(e.clientY-r.top)/r.height*W.OWH); };
+mini.addEventListener('pointerdown',e=>{ miniDrag=true; mini.setPointerCapture(e.pointerId); miniGo(e); }); mini.addEventListener('pointermove',e=>{ if(miniDrag) miniGo(e); }); mini.addEventListener('pointerup',()=>miniDrag=false);
+mini.addEventListener('wheel',e=>{ e.preventDefault(); zoomAt(e.deltaY<0?1.2:1/1.2); },{passive:false});
+$('zIn').onclick=()=>zoomAt(1.4); $('zOut').onclick=()=>zoomAt(1/1.4); $('zFit').onclick=fitMap;
 
-/* ---------- buttons ---------- */
-$('bUndo').onclick=doUndo; $('bRedo').onclick=doRedo; $('bHelp').onclick=()=>$('help').classList.toggle('hidden'); $('hClose').onclick=()=>$('help').classList.add('hidden');
-for(const id of ['lBase','lZones','lGrid']) $(id).onchange=draw;
-const parseWorld=txt=>{ const i=txt.indexOf('{'), j=txt.lastIndexOf('}'); return JSON.parse(txt.slice(i,j+1)); };
-$('bLoad').onclick=async()=>{ try{ const r=await fetch('world.js?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw 0; pushUndo(); loadData(parseWorld(await r.text())); alert('Loaded the world.js that is live on your realm.'); }catch(e){ alert('There is no world.js on your realm yet. Export one and upload it to GitHub first.'); } };
-$('bOpen').onclick=()=>$('fOpen').click(); $('fOpen').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ pushUndo(); loadData(parseWorld(await f.text())); }catch(err){ alert('That file is not an Emberfall world file.'); } e.target.value=''; };
-$('bNew').onclick=()=>{ if(!confirm('Remove all your edits and start over? (You can undo this.)')) return; pushUndo(); loadData({}); };
-$('bExp').onclick=()=>{ const d=exportData(); const txt=`/* Emberfall world edits, made with the Emberfall World Editor on ${new Date().toISOString().slice(0,10)}.\n   Upload this file to your GitHub repository next to index.html. */\nwindow.WORLD_EDITS=${JSON.stringify(d)};\n`;
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/javascript'})); a.download='world.js'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); };
-$('bPrev').onclick=()=>{ try{ localStorage.setItem('ef_world_preview',JSON.stringify(exportData())); }catch(e){ return alert('The preview is too big to send to the game.'); } window.open('index.html?preview=1','_blank'); };
-addEventListener('resize',resize); resize(); start();
+/* ===================== side panels ===================== */
+let topTab='pal', botTab='out', outKind='all', outQ='', palQ='', problems=[];
+function renderTabs(){ const tb=(id,tabs,cur,fn)=>{ $(id).innerHTML=tabs.map(([k,n])=>`<button data-k="${k}" class="${cur===k?'on':''}">${n}</button>`).join(''); $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>fn(b.dataset.k)); };
+  tb('tabsTop',[['pal','Palette'],['insp','Inspector'+(sel.size?` <span class="bd ok">${sel.size}</span>`:'')]],topTab,showTop);
+  const np=problems.filter(p=>p.sev!=='info').length;
+  tb('tabsBot',[['out','Objects'],['lay','Layers'],['prob','Problems'+(problems.length?` <span class="bd ${np?'':'ok'}">${problems.length}</span>`:'')],['hist','History']],botTab,showBot); }
+function showTop(t){ topTab=t; renderTabs(); renderTop(); }
+function showBot(t){ botTab=t; renderTabs(); renderBot(); }
+function refreshPanels(){ renderTabs(); if(topTab==='insp'&&!(document.activeElement&&$('bodyTop').contains(document.activeElement))) renderTop(); renderBot(); }
+function refreshBottom(){ renderTabs(); renderBot(); }
+function renderTop(){ const b=$('bodyTop'); b.innerHTML=topTab==='pal'?palette():inspector(); topTab==='pal'?bindPalette():bindInspector(); }
+function renderBot(){ const b=$('bodyBot'), st=b.scrollTop; b.innerHTML=botTab==='out'?outliner():botTab==='lay'?layersUI():botTab==='prob'?problemsUI():historyUI(); bindBot(); b.scrollTop=st; }
+function focusField(id){ setTimeout(()=>{ const e=$(id); if(e){ e.focus(); if(e.select) e.select(); } },30); }
+
+/* ---------- palette ---------- */
+function palette(){ const t=ST.tool, q=palQ.toLowerCase(), m=s=>!q||String(s).toLowerCase().includes(q), srch=ph=>`<input type="search" class="search" id="palQ" placeholder="${ph}" value="${esc(palQ)}">`;
+  if(['brush','line','rect','fill','pick'].includes(t)){
+    if(ST.layer==='zone') return `<h4>Zones</h4><div class="hint">The zone sets the area's name, its music and which monsters roam there.</div><div class="pal one">${Object.keys(W.zones).map(k=>`<button data-z="${k}" class="${ST.zone===k?'on':''}"><i style="background:${ZCOL[k]||'#888'}"></i>${esc(W.zones[k])}</button>`).join('')}</div><div class="btns"><button id="pSwap">Paint ground instead</button></div>`;
+    const grp={Walkable:['GRASS','FOREST','SWAMP','SAND','SNOW','ICE','ASH','PATH','COBBLE','BRIDGE','RUIN'],Blocking:['TREE','ROCK','WALL','TWALL','HOUSE','FENCE'],Liquid:['WATER','LAVA']};
+    let h=srch('Search ground…');
+    for(const gname in grp){ const L=grp[gname].filter(k=>W.T[k]!=null&&m(TDESC[k]||k)); if(!L.length) continue; h+=`<h4>${gname}</h4><div class="pal">${L.map(k=>`<button data-t="${k}" class="${ST.tile===k?'on':''}" title="${esc(TDESC[k])}"><i style="background:${TCOL[k]}"></i>${esc(TDESC[k]||k)}${TNOTE[k]&&gname!=='Blocking'?`<small>${TNOTE[k]}</small>`:''}</button>`).join('')}</div>`; }
+    return h+`<div class="btns"><button id="pSwap">Paint zones instead</button></div><p class="hint">Tip: Alt-click on the map to pick up the ground that is already there.</p>`; }
+  if(t==='prop'){ let h=srch('Search props…'); for(const gname in PROPGRP){ const L=PROPGRP[gname].filter(k=>W.props.includes(k)&&m(PROPS[k][1])); if(!L.length) continue;
+      h+=`<h4>${gname}</h4><div class="pal">${L.map(k=>`<button data-p="${k}" class="${ST.prop===k?'on':''}"><em>${PROPS[k][0]}</em>${PROPS[k][1]}${SOLIDPROP.has(k)?'<small>solid</small>':''}</button>`).join('')}</div>`; }
+    return h+`<p class="hint">${ED.props.length} of ${MAXPROPS} props used. Solid props block walking.</p>`; }
+  if(t==='spawn'){ const L=W.mobTypes.filter(x=>m(x.name)||m(zoneName(x.zone))).sort((a,b)=>a.lv[0]-b.lv[0]||a.name.localeCompare(b.name));
+    return srch('Search monsters…')+`<div class="list">${L.map(x=>`<div class="row ${ST.mob===x.key?'on':''}" data-m="${x.key}"><span class="nm">${esc(x.name)}</span><span class="xy">Lv ${x.lv[0]}–${x.lv[1]}${x.zone?' · '+esc(zoneName(x.zone)):''}</span></div>`).join('')||'<p class="hint">No monster matches.</p>'}</div>`; }
+  if(t==='npc') return `<h4>NPC</h4><p class="hint">Click the map to place a villager. You can then give it a name, a title, a colour and something to say when players talk to it.</p><p class="hint">Every NPC needs its own name: the game loads only the first of two NPCs with the same name.</p>`;
+  if(t==='poi') return `<h4>Landmark</h4><p class="hint">Click the map to add a landmark. Players discover it when they walk within its radius. It shows on the maps and counts towards the Cartographer achievement.</p>`;
+  if(t==='erase') return `<h4>Erase</h4><p class="hint">Erasing puts back the ground and zones the game made, and removes your own props, NPCs, monsters and landmarks under the brush.</p><p class="hint">The original world (yellow and red dots) cannot be erased, but you can paint over it.</p>`;
+  if(t==='measure') return `<h4>Measure</h4><p class="hint">Drag to measure. A tile is about one stride; players walk about 6 tiles a second.</p>`;
+  return `<h4>${t==='pan'?'Move view':'Select'}</h4><p class="hint">${toolById(t).hint}</p>`+selSummary(); }
+function selSummary(){ return `<h4>Your world</h4><div class="card">${[['Painted tiles',Object.keys(ED.tiles).length],['Zone cells',Object.keys(ED.zones).length],...KINDS.map(k=>[KNP[k],ED[k].length])].map(([a,b])=>`<div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">${a}</span><b>${b}</b></div>`).join('')}</div>`; }
+function bindPalette(){ const b=$('bodyTop'); const q=$('palQ'); if(q){ q.oninput=()=>{ palQ=q.value; const p=q.selectionStart; renderTop(); const n=$('palQ'); n.focus(); n.setSelectionRange(p,p); }; }
+  b.querySelectorAll('[data-t]').forEach(e=>e.onclick=()=>{ ST.tile=e.dataset.t; ST.layer='tile'; if(!['brush','line','rect','fill'].includes(ST.tool)) setTool('brush'); else { buildOptbar(); renderTop(); } savePrefs(); });
+  b.querySelectorAll('[data-z]').forEach(e=>e.onclick=()=>{ ST.zone=e.dataset.z; ST.layer='zone'; if(!['brush','line','rect','fill'].includes(ST.tool)) setTool('brush'); else { buildOptbar(); renderTop(); } savePrefs(); });
+  b.querySelectorAll('[data-p]').forEach(e=>e.onclick=()=>{ ST.prop=e.dataset.p; savePrefs(); renderTop(); draw(); });
+  b.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{ ST.mob=e.dataset.m; savePrefs(); renderTop(); buildOptbar(); });
+  if($('pSwap')) $('pSwap').onclick=()=>{ ST.layer=ST.layer==='zone'?'tile':'zone'; savePrefs(); buildOptbar(); renderTop(); draw(); }; }
+
+/* ---------- inspector ---------- */
+const fld=(lab,inner)=>`<div class="fld"><span>${lab}</span>${inner}</div>`;
+const num=(id,v,step=1,min,max)=>`<input type="number" id="${id}" value="${v}" step="${step}" ${min!=null?`min="${min}"`:''} ${max!=null?`max="${max}"`:''}>`;
+function inspector(){ if(!sel.size) return `<p class="hint">Nothing is selected. Click an object on the map with the Select tool (V), or pick one in the Objects list below.</p>`+selSummary();
+  const L=[...sel]; if(L.length>1){ const by={}; for(const o of L){ const k=kindOf(o); by[k]=(by[k]||0)+1; } const props=L.filter(o=>ED.props.includes(o));
+    return `<div class="card"><div class="title">${L.length} objects selected</div>${Object.entries(by).map(([k,n])=>`<div>${KI[k]} ${n} ${n===1?KN[k]:KNP[k]}</div>`).join('')}</div>
+      ${props.length?`<h4>Props</h4>${fld('Size',`<div class="rr"><input type="range" id="mS" min="40" max="250" step="5" value="100"><b id="mSv">keep</b></div>`)}<div class="btns"><button id="mRR">Random rotation</button><button id="mRS">Vary sizes</button><button id="mR0">Face north</button></div>`:''}
+      <h4>Arrange</h4><div class="btns"><button id="iDup">Duplicate</button><button id="iCopy">Copy</button><button id="iZoom">Zoom to</button><button id="iDel" class="danger">Delete</button></div><p class="hint">Arrow keys nudge the selection (Shift: 5 tiles). R rotates props.</p>`; }
+  const o=L[0], k=kindOf(o); let h=`<div class="card"><div class="title">${KI[k]} ${esc(KN[k])}</div>`;
+  if(k==='props'){ h+=fld('Type',`<select id="iK">${Object.keys(PROPS).filter(x=>W.props.includes(x)).map(x=>`<option value="${x}" ${o.k===x?'selected':''}>${PROPS[x][0]} ${PROPS[x][1]}</option>`).join('')}</select>`)
+      +fld('Position',`<div class="two">${num('iX',(+o.x).toFixed(2),.5)}${num('iY',(+o.y).toFixed(2),.5)}</div>`)
+      +fld('Rotation',`<div class="rr"><input type="range" id="iRr" min="0" max="359" value="${Math.round((o.r||0)*180/Math.PI)%360}">${num('iR',Math.round((o.r||0)*180/Math.PI)%360,15,0,359)}</div>`)
+      +fld('Size',`<div class="rr"><input type="range" id="iSr" min="30" max="400" step="5" value="${Math.round((o.s||1)*100)}">${num('iS',Math.round((o.s||1)*100),5,30,400)}</div>`)
+      +(SOLIDPROP.has(o.k)?'<div class="hint">Solid: players and monsters walk around it.</div>':''); }
+  else if(k==='npcs'){ const bad=solidAt(o.x+.5,o.y+.5);
+    h+=fld('Name',`<input type="text" id="iName" maxlength="28" value="${esc(o.name)}">`)+fld('Title',`<input type="text" id="iTitle" maxlength="28" placeholder="e.g. Blacksmith" value="${esc(o.title||'')}">`)
+      +fld('Colour',`<div><input type="color" id="iCol" value="${o.col||'#8a7a5a'}"><div class="swatches">${NPCCOL.map(c=>`<span data-c="${c}" style="background:${c}"></span>`).join('')}</div></div>`)
+      +fld('Position',`<div class="two">${num('iX',o.x)}${num('iY',o.y)}</div>`)
+      +`<div class="fld" style="align-items:start"><span>Says</span><div><textarea id="iSay" rows="4" maxlength="240" placeholder="What the NPC says when a player talks to it">${esc(o.say||'')}</textarea><div class="hint" id="iSayN" style="text-align:right;margin:0">${(o.say||'').length}/240</div></div></div>`
+      +(bad?'<div class="warnline">⚠ This spot is blocked. The game moves the NPC to the nearest open tile.</div>':''); }
+  else if(k==='spawns'){ const mt=W.mobByKey[o.mob], bad=solidAt(o.x+.5,o.y+.5);
+    h+=fld('Monster',`<select id="iMob">${W.mobTypes.slice().sort((a,b)=>a.lv[0]-b.lv[0]).map(x=>`<option value="${x.key}" ${o.mob===x.key?'selected':''}>${esc(x.name)} (Lv ${x.lv[0]}–${x.lv[1]})</option>`).join('')}</select>`)
+      +fld('Group size',`<div class="rr"><input type="range" id="iNr" min="1" max="12" value="${o.n}">${num('iN',o.n,1,1,12)}</div>`)+fld('Position',`<div class="two">${num('iX',o.x)}${num('iY',o.y)}</div>`)
+      +(mt?`<div class="hint">Level ${mt.lv[0]}–${mt.lv[1]}${mt.zone?', usually found in '+esc(zoneName(mt.zone)):''}. Zone here: ${esc(zoneName(zoneAt(o.x,o.y)))}.</div>`:'<div class="warnline">⚠ Unknown monster: the game will skip this group.</div>')
+      +(bad?'<div class="warnline">⚠ The centre is blocked. Monsters that land on blocked ground are skipped.</div>':''); }
+  else if(k==='pois'){ h+=fld('Name',`<input type="text" id="iName" maxlength="30" value="${esc(o.name)}">`)+fld('Radius',`<div class="rr"><input type="range" id="iRadr" min="2" max="20" value="${o.r||5}">${num('iRad',o.r||5,1,2,20)}</div>`)+fld('Position',`<div class="two">${num('iX',o.x)}${num('iY',o.y)}</div>`)
+      +(o.name?'':'<div class="warnline">⚠ A landmark without a name is skipped by the game.</div>'); }
+  return h+`</div><div class="btns"><button id="iDup">Duplicate</button><button id="iCopy">Copy</button><button id="iZoom">Zoom to</button><button id="iDel" class="danger">Delete</button></div>`; }
+function bindInspector(){ if(!sel.size) return; const L=[...sel], o=L[0];
+  // live editing: one history step per field you touch
+  const live=(id,label,apply,opts={})=>{ const e=$(id); if(!e) return; e.addEventListener('focus',()=>begin(label)); e.addEventListener('pointerdown',()=>{ if(!pending) begin(label); });
+    e.addEventListener('input',()=>{ if(!pending) begin(label); apply(e.type==='number'||e.type==='range'?+e.value:e.value); if(opts.sync) opts.sync(); draw(); });
+    e.addEventListener('change',()=>{ end(); if(opts.rerender) renderTop(); }); e.addEventListener('blur',()=>end()); };
+  const pair=(a,b)=>({sync:()=>{ const A=$(a),B=$(b); if(document.activeElement===A) B.value=A.value; else A.value=B.value; }});
+  const XY=(isP)=>{ live('iX','Move',v=>{ o.x=isP?clamp(v,1,W.MW-1):clamp(Math.round(v),1,W.MW-2); },{rerender:1}); live('iY','Move',v=>{ o.y=isP?clamp(v,1,W.OWH-1):clamp(Math.round(v),1,W.OWH-2); },{rerender:1}); };
+  if(L.length===1){ const k=kindOf(o);
+    if(k==='props'){ live('iK','Change prop',v=>o.k=v,{rerender:1}); XY(true); live('iRr','Rotate',v=>o.r=+(v*Math.PI/180).toFixed(3),pair('iRr','iR')); live('iR','Rotate',v=>o.r=+(((v%360)+360)%360*Math.PI/180).toFixed(3),pair('iR','iRr')); live('iSr','Resize',v=>o.s=clamp(v/100,.3,4),pair('iSr','iS')); live('iS','Resize',v=>o.s=clamp(v/100,.3,4),pair('iS','iSr')); }
+    if(k==='npcs'){ live('iName','Rename NPC',v=>o.name=v.slice(0,28)); live('iTitle','Change title',v=>o.title=v.slice(0,28)); live('iCol','Change colour',v=>o.col=v); XY(false);
+      live('iSay','Change what the NPC says',v=>{ o.say=v.slice(0,240); $('iSayN').textContent=o.say.length+'/240'; });
+      $('bodyTop').querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{ begin('Change colour'); o.col=s.dataset.c; end(); renderTop(); }); }
+    if(k==='spawns'){ live('iMob','Change monster',v=>o.mob=v,{rerender:1}); live('iNr','Change group size',v=>o.n=clamp(v|0,1,12),pair('iNr','iN')); live('iN','Change group size',v=>o.n=clamp(v|0,1,12),pair('iN','iNr')); XY(false); }
+    if(k==='pois'){ live('iName','Rename landmark',v=>o.name=v.slice(0,30)); live('iRadr','Change radius',v=>o.r=clamp(v|0,2,20),pair('iRadr','iRad')); live('iRad','Change radius',v=>o.r=clamp(v|0,2,20),pair('iRad','iRadr')); XY(false); } }
+  else { const P=L.filter(q=>ED.props.includes(q));
+    if($('mS')){ let s0=null; $('mS').addEventListener('pointerdown',()=>{ begin('Resize'); s0=P.map(p=>p.s||1); }); $('mS').addEventListener('input',e=>{ if(!s0){ begin('Resize'); s0=P.map(p=>p.s||1); } const f=e.target.value/100; P.forEach((p,i)=>p.s=clamp(+(s0[i]*f).toFixed(2),.3,4)); $('mSv').textContent='×'+f.toFixed(2); draw(); }); $('mS').addEventListener('change',()=>{ end(); s0=null; }); }
+    const act=(id,label,f)=>{ const e=$(id); if(e) e.onclick=()=>{ begin(label); P.forEach(f); end(); }; };
+    act('mRR','Random rotation',p=>p.r=+(Math.random()*6.283).toFixed(2)); act('mRS','Vary sizes',p=>p.s=clamp(+((p.s||1)*(.8+Math.random()*.4)).toFixed(2),.3,4)); act('mR0','Face north',p=>p.r=0); }
+  if($('iDup')) $('iDup').onclick=()=>duplicateSel(); if($('iCopy')) $('iCopy').onclick=()=>copySel(); if($('iZoom')) $('iZoom').onclick=frameSel; if($('iDel')) $('iDel').onclick=deleteSel; }
+
+/* ---------- the object list ---------- */
+function outliner(){ const q=outQ.toLowerCase(), chips=[['all','All'],...KINDS.map(k=>[k,KNP[k]])];
+  let rows=[]; for(const k of KINDS){ if(outKind!=='all'&&outKind!==k) continue; ED[k].forEach((o,i)=>{ const n=objName(o,k); if(q&&!n.toLowerCase().includes(q)&&!(k==='npcs'&&(o.title||'').toLowerCase().includes(q))) return; rows.push([o,k,n]); }); }
+  const total=rows.length, MAX=300, bad=new Set(problems.filter(p=>p.obj).map(p=>p.obj));
+  return `<input type="search" class="search" id="outQ" placeholder="Search your objects…" value="${esc(outQ)}"><div class="chips">${chips.map(([k,n])=>`<button data-k="${k}" class="${outKind===k?'on':''}">${n} ${k==='all'?KINDS.reduce((a,b)=>a+ED[b].length,0):ED[k].length}</button>`).join('')}</div>
+    <div class="list">${rows.slice(0,MAX).map(([o,k,n],i)=>`<div class="row ${sel.has(o)?'on':''}" data-i="${i}"><span class="ic">${k==='props'?(PROPS[o.k]||['?'])[0]:KI[k]}</span><span class="nm">${esc(n)}${k==='npcs'&&o.title?` <span style="color:var(--dim)">‹${esc(o.title)}›</span>`:''}</span>${bad.has(o)?'<span style="color:var(--amber)" title="Has a problem">⚠</span>':''}<span class="xy">${Math.floor(o.x)}, ${Math.floor(o.y)}</span></div>`).join('')}
+    ${total>MAX?`<p class="hint">…and ${total-MAX} more. Search to narrow the list.</p>`:''}${!total?`<p class="hint">${editCount()?'Nothing matches.':'You have not placed anything yet. Pick a tool on the left and click the map.'}</p>`:''}</div>`;
+  /* rows are rebuilt in bindBot */ }
+let outRows=[];
+function bindBot(){ const b=$('bodyBot');
+  if(botTab==='out'){ const q=outQ.toLowerCase(); outRows=[]; for(const k of KINDS){ if(outKind!=='all'&&outKind!==k) continue; for(const o of ED[k]){ const n=objName(o,k); if(q&&!n.toLowerCase().includes(q)&&!(k==='npcs'&&(o.title||'').toLowerCase().includes(q))) continue; outRows.push(o); } }
+    const i=$('outQ'); i.oninput=()=>{ outQ=i.value; const p=i.selectionStart; renderBot(); const n=$('outQ'); n.focus(); n.setSelectionRange(p,p); };
+    b.querySelectorAll('.chips button').forEach(c=>c.onclick=()=>{ outKind=c.dataset.k; renderBot(); });
+    b.querySelectorAll('.row[data-i]').forEach(r=>{ const o=outRows[+r.dataset.i]; r.onclick=e=>{ if(ST.tool!=='select') setTool('select'); if(e.shiftKey||e.ctrlKey||e.metaKey){ sel.has(o)?sel.delete(o):sel.add(o); setSel([...sel]); } else { setSel([o]); const [x,y]=objPos(o); centerOn(x,y,Math.max(VIEW.z,10)); } }; r.ondblclick=()=>{ setSel([o]); frameSel(); showTop('insp'); focusField('iName'); }; }); }
+  if(botTab==='lay'){ b.querySelectorAll('[data-v]').forEach(e=>e.onclick=()=>{ const L=LAY[e.dataset.v]; L.v=L.v?0:1; if(!L.v) for(const o of [...sel]) if(ED[e.dataset.v]&&ED[e.dataset.v].includes(o)) sel.delete(o); savePrefs(); renderBot(); draw(); });
+    b.querySelectorAll('[data-l]').forEach(e=>e.onclick=()=>{ const L=LAY[e.dataset.l]; L.l=L.l?0:1; if(L.l) for(const o of [...sel]) if(ED[e.dataset.l].includes(o)) sel.delete(o); savePrefs(); renderBot(); draw(); });
+    const m=$('layMini'); if(m) m.onchange=()=>{ ST.minimap=m.checked; savePrefs(); layout(); }; }
+  if(botTab==='prob'){ b.querySelectorAll('.row[data-i]').forEach(r=>r.onclick=()=>{ const p=problems[+r.dataset.i]; if(p.obj){ if(ST.tool!=='select') setTool('select'); setSel([p.obj]); } centerOn(p.x,p.y,Math.max(VIEW.z,12)); }); const rc=$('reCheck'); if(rc) rc.onclick=()=>{ runChecks(); toast(problems.length?`${problems.length} thing${problems.length>1?'s':''} to look at`:'No problems found'); }; }
+  if(botTab==='hist'){ b.querySelectorAll('.row[data-h]').forEach(r=>r.onclick=()=>jumpHistory(+r.dataset.h)); } }
+function layersUI(){ const row=(k,ic,n,lockable)=>`<div class="row"><button data-v="${k}" class="${LAY[k].v?'on':''}" title="Show or hide">${LAY[k].v?'👁':'◌'}</button><span class="ic">${ic}</span><span class="nm">${n}</span>${lockable?`<button data-l="${k}" class="${LAY[k].l?'on':''}" title="Lock: can't be selected or erased">${LAY[k].l?'🔒':'🔓'}</button>`:''}</div>`;
+  return `<h4>Your edits</h4><div class="lay">${row('tiles','🖌','Painted ground')}${row('props','🌳',`Props (${ED.props.length})`,1)}${row('npcs','🧑',`NPCs (${ED.npcs.length})`,1)}${row('spawns','👹',`Monsters (${ED.spawns.length})`,1)}${row('pois','⭐',`Landmarks (${ED.pois.length})`,1)}</div>
+   <h4>The world</h4><div class="lay">${row('base','🗺','Original NPCs, landmarks and monsters')}${row('tint','🎨','Zone colours')}${row('borders','▦','Zone borders')}${row('grid','#','Grid (when zoomed in)')}${row('labels','🏷','Names on the map')}</div>
+   <h4>View</h4><label class="row" style="cursor:pointer"><input type="checkbox" id="layMini" ${ST.minimap?'checked':''}> Minimap</label>`; }
+function historyUI(){ const H=undo.map((u,i)=>`<div class="row" data-h="${i}"><span class="ic">↺</span><span class="nm">${esc(u.label)}</span><span class="xy">${new Date(u.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>`);
+  const F=redo.slice().reverse().map((r,i)=>`<div class="row fut" data-h="${undo.length+i+1}"><span class="ic">↻</span><span class="nm">${esc(r.label)}</span></div>`);
+  return `<p class="hint">Click a step to go back to just after it. Steps that were undone stay greyed out until you make a new change.</p><div class="list hist"><div class="row" data-h="0"><span class="ic">◆</span><span class="nm" style="color:var(--dim)">Start of this session</span></div>${H.map((h,i)=>h.replace(`data-h="${i}"`,`data-h="${i+1}"`)).join('')}<div class="row on" style="cursor:default"><span class="ic">▶</span><span class="nm">Now</span></div>${F.join('')}</div>`; }
+
+/* ---------- problems: things the game would skip or that would play badly ---------- */
+function runChecks(){ if(!W) return; const P=[], add=(sev,msg,x,y,obj)=>P.push({sev,msg,x,y,obj});
+  const names=new Map(); for(const n of ED.npcs){ const id=String(n.name||'Villager').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,20); if(names.has(id)) add('err',`Two NPCs are called "${n.name}". The game only loads the first one, so rename this one.`,n.x+.5,n.y+.5,n); else names.set(id,n);
+    if(solidAt(n.x+.5,n.y+.5)) add('warn',`${n.name} stands on blocked ground. The game moves them to the nearest open tile.`,n.x+.5,n.y+.5,n); if(!n.say) add('info',`${n.name} has nothing to say yet.`,n.x+.5,n.y+.5,n); }
+  for(const s of ED.spawns){ const mt=W.mobByKey[s.mob]; if(!mt) add('err',`Unknown monster "${s.mob}". The game skips this group.`,s.x+.5,s.y+.5,s);
+    else if(solidAt(s.x+.5,s.y+.5)) add('warn',`${mt.name} ×${s.n} is placed on blocked ground. Monsters that land on blocked ground are skipped.`,s.x+.5,s.y+.5,s);
+    if(zoneAt(s.x,s.y)==='town') add('warn',`${mobName(s.mob)} ×${s.n} is inside the town. They will attack players in town.`,s.x+.5,s.y+.5,s);
+    if(mt&&mt.zone&&zoneAt(s.x,s.y)&&mt.zone!==zoneAt(s.x,s.y)&&zoneAt(s.x,s.y)!=='town') add('info',`${mt.name} usually lives in ${zoneName(mt.zone)}, but this group is in ${zoneName(zoneAt(s.x,s.y))}.`,s.x+.5,s.y+.5,s); }
+  const pn=new Set(); for(const p of ED.pois){ if(!p.name) add('err','A landmark has no name. The game skips it.',p.x+.5,p.y+.5,p); else { const k=p.name.toLowerCase().replace(/[^a-z0-9]+/g,''); if(pn.has(k)||W.pois.some(b=>b.name.toLowerCase().replace(/[^a-z0-9]+/g,'')===k)) add('warn',`There is already a landmark called "${p.name}".`,p.x+.5,p.y+.5,p); pn.add(k); } }
+  if(ED.props.length>MAXPROPS) add('err',`You have ${ED.props.length} props. The game only draws the first ${MAXPROPS}.`,ED.props[MAXPROPS].x,ED.props[MAXPROPS].y,ED.props[MAXPROPS]);
+  let pw=0; for(const p of ED.props){ if(tileAt(Math.floor(p.x),Math.floor(p.y))==='WATER'&&SOLIDPROP.has(p.k)&&pw++<20) add('info',`A ${PROPS[p.k][1].toLowerCase()} stands in water. It is drawn, but does not block swimmers.`,p.x,p.y,p); }
+  for(const n of W.npcs){ const t=ED.tiles[n.x+','+n.y]; if(t&&SOLID.has(t)) add('warn',`Your ${TDESC[t].toLowerCase()} covers ${n.name}. The game will move them to the nearest open tile.`,n.x+.5,n.y+.5,null); }
+  const blockedTown=Object.entries(ED.tiles).filter(([k,t])=>SOLID.has(t)&&(()=>{ const [x,y]=k.split(',').map(Number); return Math.hypot(x-W.town.x,y-W.town.y)<4; })()).length; if(blockedTown) add('warn',`${blockedTown} blocking tile${blockedTown>1?'s are':' is'} right next to the town square, where new players arrive.`,W.town.x+.5,W.town.y+.5,null);
+  const ord={err:0,warn:1,info:2}; problems=P.sort((a,b)=>ord[a.sev]-ord[b.sev]); renderTabs(); if(botTab==='prob') renderBot(); updateStatus(); }
+function problemsUI(){ if(!problems.length) return `<p class="hint">✓ No problems found. Everything you placed will load in the game.</p><div class="btns"><button id="reCheck">Check again</button></div>`;
+  return `<div class="list prob">${problems.map((p,i)=>`<div class="row" data-i="${i}"><span class="sev ${p.sev}">${p.sev==='err'?'⛔':p.sev==='warn'?'⚠':'ℹ'}</span><span class="nm" style="white-space:normal">${esc(p.msg)}</span></div>`).join('')}</div><div class="btns"><button id="reCheck">Check again</button></div>`; }
+function updateStatus(){ if(!W) return; $('stSel').textContent=sel.size?`${sel.size} selected`:''; const n=editCount(); $('stEd').textContent=`${n} change${n===1?'':'s'}`;
+  const e=problems.filter(p=>p.sev==='err').length, w=problems.filter(p=>p.sev==='warn').length; $('stProb').innerHTML=e?`<span style="color:var(--red)">⛔ ${e}</span> `:''; $('stProb').innerHTML+=w?`<span style="color:var(--amber)">⚠ ${w}</span>`:(e?'':'<span style="color:var(--green)">✓ No problems</span>');
+  $('qUndo').disabled=!undo.length; $('qRedo').disabled=!redo.length; $('docname').textContent=LS.get('ef_editor_name','')||'Untitled world'; }
+$('stProb').onclick=()=>showBot('prob'); $('stEd').onclick=()=>showChanges();
+// the side panel can be resized
+$('split').addEventListener('pointerdown',e=>{ const sx=e.clientX, w0=ST.rightW; $('split').setPointerCapture(e.pointerId); const mv=ev=>{ ST.rightW=clamp(w0-(ev.clientX-sx),240,560); layout(); }; const up=()=>{ removeEventListener('pointermove',mv); removeEventListener('pointerup',up); savePrefs(); }; addEventListener('pointermove',mv); addEventListener('pointerup',up); });
+
+/* ===================== commands, menus and shortcuts ===================== */
+const isMac=/Mac|iPhone|iPad/.test(navigator.platform), MOD=isMac?'⌘':'Ctrl';
+const CMDS={};
+function cmd(id,name,run,key,opts={}){ CMDS[id]={id,name,run,key,...opts}; }
+const keyLabel=k=>k?k.replace('Mod',MOD).replace(/\+/g,'+'):'';
+cmd('new','New empty world…',async()=>{ if(editCount()&&!await confirmDlg('Start a new world?','This removes all your edits from the editor. You can still undo it, and saved versions are kept.','Start over',1)) return; begin('New world'); loadData({},'replace',true); end(); LS.set('ef_editor_name',''); updateStatus(); });
+cmd('open','Open world file…',()=>$('fOpen').click(),'Mod+O');
+cmd('loadLive','Load the live world from your realm',()=>loadLive());
+cmd('saveVer','Save a version…',()=>saveVersion(),'Mod+S');
+cmd('versions','Versions…',()=>versionsDlg());
+cmd('rename','Rename this world…',async()=>{ const n=await askDlg('Name your world','A name helps you tell your saved versions apart.',LS.get('ef_editor_name','')); if(n!=null){ LS.set('ef_editor_name',n.slice(0,40)); updateStatus(); } });
+cmd('preview','Preview in game',()=>preview(),'Mod+P');
+cmd('publish','Publish…',()=>publishDlg(),'Mod+E');
+cmd('backup','Download a backup (.json)',()=>download(`emberfall-world-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(exportData(),null,1),'application/json'));
+cmd('undo','Undo',doUndo,'Mod+Z'); cmd('redo','Redo',doRedo,isMac?'Mod+Shift+Z':'Mod+Y');
+cmd('cut','Cut',()=>copySel(true),'Mod+X'); cmd('copy','Copy',()=>copySel(),'Mod+C'); cmd('paste','Paste',startPaste,'Mod+V');
+cmd('dup','Duplicate',()=>duplicateSel(),'Mod+D'); cmd('del','Delete',deleteSel,'Delete');
+cmd('selAll','Select all',selectAll,'Mod+A'); cmd('selNone','Select none',()=>{ selRect=null; setSel([]); },'Esc');
+cmd('rot','Rotate props 45°',()=>rotateSel(Math.PI/4),'R'); cmd('rotB','Rotate props back 45°',()=>rotateSel(-Math.PI/4),'Shift+R');
+cmd('find','Find…',()=>quickOpen(''),'Mod+F'); cmd('palette','Command palette…',()=>quickOpen('>'),'Mod+K');
+cmd('goto','Go to coordinates…',async()=>{ const v=await askDlg('Go to','Type x, y (for example 220, 140):',''); if(!v) return; const m=v.match(/(-?\d+)\D+(-?\d+)/); if(!m) return toast('Use the form x, y',1); centerOn(+m[1]+.5,+m[2]+.5,Math.max(VIEW.z,10)); },'Mod+G');
+cmd('town','Go to town',()=>centerOn(W.town.x+.5,W.town.y+.5,8),'T');
+cmd('fit','Show the whole map',fitMap,'Home'); cmd('frame','Zoom to selection',frameSel,'F');
+cmd('zin','Zoom in',()=>zoomAt(1.4),'+'); cmd('zout','Zoom out',()=>zoomAt(1/1.4),'-'); cmd('z100','Zoom to 100%',()=>{ VIEW.z=4; draw(); },'1');
+cmd('tGrid','Grid',()=>togLay('grid'),'Mod+\''); cmd('tTint','Zone colours',()=>togLay('tint'),'Z'); cmd('tBorders','Zone borders',()=>togLay('borders')); cmd('tBase','Original NPCs, landmarks and monsters',()=>togLay('base')); cmd('tLabels','Names on the map',()=>togLay('labels'));
+cmd('tMini','Minimap',()=>{ ST.minimap=!ST.minimap; savePrefs(); layout(); }); cmd('tSnap','Snap props to ½ tile',()=>{ ST.snap=!ST.snap; savePrefs(); buildOptbar(); toast('Snap '+(ST.snap?'on':'off')); });
+cmd('changes','Everything I changed…',()=>showChanges()); cmd('check','Check for problems',()=>{ runChecks(); showBot('prob'); });
+cmd('keys','Keyboard shortcuts',()=>shortcutsDlg(),'?'); cmd('welcome','Getting started',()=>showWelcome()); cmd('back','Back to the game',()=>{ location.href='index.html'; });
+for(const t of TOOLS) if(t!=='|') cmd('tool_'+t.id,t.name+' tool',()=>setTool(t.id),t.key,{tool:1});
+function togLay(k){ LAY[k].v=LAY[k].v?0:1; savePrefs(); draw(); if(botTab==='lay') renderBot(); }
+const MENUS=[['File',['new','open','loadLive','|','saveVer','versions','rename','|','preview','publish','backup','|','back']],
+ ['Edit',['undo','redo','|','cut','copy','paste','dup','del','|','selAll','selNone','|','rot','rotB','|','find','palette']],
+ ['View',['fit','town','frame','goto','|','zin','zout','z100','|','tGrid','tTint','tBorders','tBase','tLabels','tMini']],
+ ['Tools',[...TOOLS.filter(t=>t!=='|').map(t=>'tool_'+t.id),'|','tSnap']],
+ ['World',['check','changes','|','preview','publish']],
+ ['Help',['welcome','keys']]];
+const checked=id=>({tGrid:LAY.grid.v,tTint:LAY.tint.v,tBorders:LAY.borders.v,tBase:LAY.base.v,tLabels:LAY.labels.v,tMini:ST.minimap,tSnap:ST.snap})[id];
+function buildMenus(){ const m=$('menus'); m.innerHTML=MENUS.map(([n],i)=>`<div class="menu" data-m="${i}"><button>${n}</button><div class="drop"></div></div>`).join('');
+  m.querySelectorAll('.menu').forEach(el=>{ const fill=()=>{ el.querySelector('.drop').innerHTML=MENUS[+el.dataset.m][1].map(id=>{ if(id==='|') return '<div class="msep"></div>'; const c=CMDS[id], ck=checked(id), dis=(id==='undo'&&!undo.length)||(id==='redo'&&!redo.length)||(['cut','copy','dup','del','frame'].includes(id)&&!sel.size)||(id==='paste'&&!clip);
+      return `<div class="mi ${dis?'dis':''}" data-c="${id}"><span class="chk">${ck===undefined?(c.tool&&ST.tool===c.id.slice(5)?'●':''):ck?'✓':''}</span>${esc(c.name)}<span class="k">${keyLabel(c.key)}</span></div>`; }).join('');
+      el.querySelectorAll('.mi').forEach(mi=>mi.onclick=()=>{ closeMenus(); CMDS[mi.dataset.c].run(); }); };
+    el.querySelector('button').onclick=e=>{ e.stopPropagation(); const was=el.classList.contains('open'); closeMenus(); if(!was){ fill(); el.classList.add('open'); } };
+    el.querySelector('button').onmouseenter=()=>{ if(document.querySelector('.menu.open')&&!el.classList.contains('open')){ closeMenus(); fill(); el.classList.add('open'); } }; }); }
+function closeMenus(){ document.querySelectorAll('.menu.open').forEach(m=>m.classList.remove('open')); }
+addEventListener('pointerdown',e=>{ if(!e.target.closest('.menu')) closeMenus(); if(!e.target.closest('#ctx')) hideCtx(); });
+$('qUndo').onclick=doUndo; $('qRedo').onclick=doRedo; $('qPrev').onclick=preview; $('qPub').onclick=publishDlg;
+
+/* keyboard */
+addEventListener('keydown',e=>{ if(!W||dlgOpen) return; const typing=/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName), mod=e.ctrlKey||e.metaKey, k=e.key, kl=k.toLowerCase();
+  if(mod&&kl==='s'){ e.preventDefault(); return CMDS.saveVer.run(); } if(mod&&kl==='e'){ e.preventDefault(); return publishDlg(); } if(mod&&kl==='p'){ e.preventDefault(); return preview(); }
+  if(mod&&kl==='f'){ e.preventDefault(); return quickOpen(''); } if(mod&&kl==='k'){ e.preventDefault(); return quickOpen('>'); } if(mod&&kl==='g'){ e.preventDefault(); return CMDS.goto.run(); } if(mod&&kl==='o'){ e.preventDefault(); return CMDS.open.run(); }
+  if(typing){ if(k==='Escape') document.activeElement.blur(); return; }
+  if(mod&&kl==='z'){ e.preventDefault(); return e.shiftKey?doRedo():doUndo(); } if(mod&&kl==='y'){ e.preventDefault(); return doRedo(); }
+  if(mod&&kl==='c'){ e.preventDefault(); return copySel(); } if(mod&&kl==='x'){ e.preventDefault(); return copySel(true); } if(mod&&kl==='v'){ e.preventDefault(); return startPaste(); }
+  if(mod&&kl==='d'){ e.preventDefault(); return duplicateSel(); } if(mod&&kl==='a'){ e.preventDefault(); return selectAll(); } if(mod&&k==='\''){ e.preventDefault(); return togLay('grid'); }
+  if(mod) return;
+  if(k===' '){ e.preventDefault(); if(!spaceDown){ spaceDown=true; cv.style.cursor='grab'; } return; }
+  if(k==='Escape'){ hideCtx(); if(pasteMode){ pasteMode=false; setTool('select'); return; } if(drag&&drag.k!=='pan'){ if(pending){ restore(pending.s); pending=null; } drag=null; draw(); return; } if(sel.size||selRect){ selRect=null; setSel([]); } else if(ST.tool!=='select') setTool('select'); return; }
+  if(k==='Delete'||k==='Backspace'){ e.preventDefault(); return deleteSel(); }
+  if(k.startsWith('Arrow')&&sel.size){ e.preventDefault(); const s=e.shiftKey?5:1; return nudge(k==='ArrowLeft'?-s:k==='ArrowRight'?s:0,k==='ArrowUp'?-s:k==='ArrowDown'?s:0); }
+  if(k.startsWith('Arrow')){ e.preventDefault(); const s=(e.shiftKey?240:80)/VIEW.z; VIEW.x+=k==='ArrowLeft'?-s:k==='ArrowRight'?s:0; VIEW.y+=k==='ArrowUp'?-s:k==='ArrowDown'?s:0; return draw(); }
+  if(k==='['||k===']'){ ST.brush=clamp(ST.brush+(k===']'?1:-1),1,15); savePrefs(); buildOptbar(); return draw(); }
+  if(k==='+'||k==='='){ return zoomAt(1.4); } if(k==='-'||k==='_'){ return zoomAt(1/1.4); } if(k==='Home'){ return fitMap(); } if(k==='?'){ return shortcutsDlg(); }
+  if(kl==='r'){ return rotateSel(e.shiftKey?-Math.PI/4:Math.PI/4); } if(kl==='f'&&!e.shiftKey){ return sel.size?frameSel():null; } if(kl==='t'){ return CMDS.town.run(); } if(kl==='z'){ return togLay('tint'); } if(k==='1'){ return CMDS.z100.run(); }
+  if(kl==='x'&&['brush','line','rect','fill'].includes(ST.tool)){ ST.layer=ST.layer==='zone'?'tile':'zone'; savePrefs(); buildOptbar(); renderTop(); return draw(); }
+  const t=TOOLS.find(t=>t!=='|'&&t.key.toLowerCase()===kl); if(t) setTool(t.id); });
+addEventListener('keyup',e=>{ if(e.key===' '){ spaceDown=false; if(!drag) cv.style.cursor=ST.tool==='pan'?'grab':ST.tool==='select'?'default':'crosshair'; } });
+addEventListener('blur',()=>{ spaceDown=false; });
+
+/* ---------- right-click menu ---------- */
+function openCtx(cx,cy,x,y){ const o=pick(x,y), tx=Math.floor(x), ty=Math.floor(y); if(o&&!sel.has(o)){ if(ST.tool!=='select') setTool('select'); setSel([o]); }
+  const items=[]; const it=(n,f,k,dis)=>items.push({n,f,k,dis});
+  if(sel.size){ it(sel.size>1?`${sel.size} objects`:objName([...sel][0]),null,null,true); it('Properties',()=>showTop('insp')); it('Duplicate',()=>duplicateSel(),MOD+'+D'); it('Copy',()=>copySel(),MOD+'+C'); it('Cut',()=>copySel(true),MOD+'+X'); if([...sel].some(q=>ED.props.includes(q))) it('Rotate 45°',()=>rotateSel(Math.PI/4),'R'); it('Zoom to',frameSel,'F'); it('Delete',deleteSel,'Del'); items.push('|'); }
+  if(clip) it('Paste here',()=>pasteAt(tx-Math.floor(clip.w/2),ty-Math.floor(clip.h/2)),MOD+'+V');
+  if(inMap(tx,ty)){ it(`Pick ground here (${TDESC[tileAt(tx,ty)]||tileAt(tx,ty)})`,()=>eyedrop(tx,ty,true)); it('Add NPC here',()=>{ begin('Add NPC'); const n={name:uniqueName('New villager'),title:'',x:tx,y:ty,col:NPCCOL[ED.npcs.length%NPCCOL.length],say:''}; ED.npcs.push(n); end(); setTool('select'); setSel([n]); focusField('iName'); });
+    it(`Add ${mobName(ST.mob)} ×${ST.n} here`,()=>{ begin('Add '+mobName(ST.mob)); ED.spawns.push({mob:ST.mob,x:tx,y:ty,n:ST.n}); end(); }); it('Add landmark here',()=>{ begin('Add landmark'); const p={name:'New landmark',x:tx,y:ty,r:5}; ED.pois.push(p); end(); setTool('select'); setSel([p]); focusField('iName'); });
+    items.push('|'); it(`Copy coordinates (${tx}, ${ty})`,()=>{ navigator.clipboard&&navigator.clipboard.writeText(`${tx}, ${ty}`); toast('Copied '+tx+', '+ty); }); }
+  const c=document.createElement('div'); c.id='ctx'; c.innerHTML=items.map((m,i)=>m==='|'?'<div class="msep"></div>':`<div class="mi ${m.dis?'dis':''}" data-i="${i}" ${m.dis?'style="opacity:.75;font-weight:600"':''}><span>${esc(m.n)}</span><span class="k">${m.k||''}</span></div>`).join('');
+  hideCtx(); document.body.appendChild(c); const r=c.getBoundingClientRect(); c.style.left=Math.min(cx,innerWidth-r.width-6)+'px'; c.style.top=Math.min(cy,innerHeight-r.height-6)+'px';
+  c.querySelectorAll('.mi[data-i]').forEach(e=>e.onclick=()=>{ const m=items[+e.dataset.i]; hideCtx(); if(m.f) m.f(); }); }
+function hideCtx(){ const c=$('ctx'); if(c) c.remove(); }
+
+/* ---------- find and the command palette ---------- */
+function quickOpen(init){ const o=document.createElement('div'); o.className='ovl'; o.innerHTML=`<div class="dlg qo"><input type="text" id="qoIn" placeholder="Find a place, NPC, landmark, monster or x, y… (type > for commands)" value="${esc(init)}"><div class="res" id="qoRes"></div></div>`;
+  document.body.appendChild(o); dlgOpen++; const inp=o.querySelector('#qoIn'), res=o.querySelector('#qoRes'); let items=[], cur=0;
+  const close=()=>{ o.remove(); dlgOpen--; };
+  const search=()=>{ const q=inp.value.trim(), ql=q.replace(/^>/,'').trim().toLowerCase(); items=[];
+    if(q.startsWith('>')){ for(const c of Object.values(CMDS)) if(!ql||c.name.toLowerCase().includes(ql)) items.push({ic:'⌘',n:c.name,k:keyLabel(c.key),run:c.run}); }
+    else { const m=q.match(/^(\d+)\s*[, ]\s*(\d+)$/); if(m) items.push({ic:'📍',n:`Go to ${m[1]}, ${m[2]}`,k:'',run:()=>centerOn(+m[1]+.5,+m[2]+.5,Math.max(VIEW.z,10))});
+      const has=s=>String(s||'').toLowerCase().includes(ql);
+      if(ql){ for(const k of ['npcs','pois','spawns','props']) for(const x of ED[k]) if(has(objName(x,k))||(k==='npcs'&&has(x.title))) items.push({ic:KI[k],n:objName(x,k),k:`yours · ${Math.floor(x.x)}, ${Math.floor(x.y)}`,run:()=>{ setTool('select'); setSel([x]); frameSel(); }});
+        for(const n of W.npcs) if(has(n.name)||has(n.title)) items.push({ic:'🟡',n:n.name+(n.title?' ‹'+n.title+'›':''),k:`NPC · ${n.x}, ${n.y}`,run:()=>centerOn(n.x+.5,n.y+.5,14)});
+        for(const p of W.pois) if(has(p.name)) items.push({ic:'⭐',n:p.name,k:`landmark · ${p.x}, ${p.y}`,run:()=>centerOn(p.x+.5,p.y+.5,10)});
+        for(const z in W.zones) if(has(W.zones[z])){ let sx=0,sy=0,c=0; for(let i=0;i<W.MW*W.OWH;i+=7) if(W.zmap[i]===z){ sx+=i%W.MW; sy+=Math.floor(i/W.MW); c++; } if(c) items.push({ic:'🗺',n:W.zones[z],k:'zone',run:()=>centerOn(sx/c,sy/c,4)}); }
+        const seen=new Set(); for(const mt of W.mobTypes) if(has(mt.name)&&!seen.has(mt.key)){ seen.add(mt.key); const L=W.mobs.filter(q=>q[0]===mt.key); if(L.length) items.push({ic:'👹',n:mt.name,k:`${L.length} in the world · Lv ${mt.lv[0]}–${mt.lv[1]}`,run:()=>{ const q=L[(quickOpen.cyc=(quickOpen.cyc||0)+1)%L.length]; centerOn(q[1]+.5,q[2]+.5,12); }}); } }
+      else items.push({ic:'💡',n:'Type a name, or x, y to jump there. Start with > for commands.',k:'',run:null}); }
+    items=items.slice(0,80); cur=Math.min(cur,Math.max(0,items.length-1));
+    res.innerHTML=items.map((it,i)=>`<div class="row ${i===cur?'on':''}" data-i="${i}"><span class="ic">${it.ic}</span><span class="nm">${esc(it.n)}</span><span class="k">${esc(it.k)}</span></div>`).join('')||'<p class="hint" style="padding:8px">Nothing found.</p>';
+    res.querySelectorAll('.row').forEach(r=>{ r.onclick=()=>go(+r.dataset.i); r.onmousemove=()=>{ if(cur!==+r.dataset.i){ cur=+r.dataset.i; res.querySelectorAll('.row').forEach(x=>x.classList.toggle('on',+x.dataset.i===cur)); } }; }); };
+  const go=i=>{ const it=items[i]; if(!it||!it.run) return; close(); it.run(); };
+  inp.oninput=()=>{ cur=0; search(); }; inp.onkeydown=e=>{ if(e.key==='Escape'){ e.stopPropagation(); close(); } else if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); cur=clamp(cur+(e.key==='ArrowDown'?1:-1),0,items.length-1); search(); const r=res.querySelector('.row.on'); if(r) r.scrollIntoView({block:'nearest'}); } else if(e.key==='Enter'){ e.preventDefault(); go(cur); } };
+  o.addEventListener('mousedown',e=>{ if(e.target===o) close(); }); search(); inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length); }
+
+/* ===================== files, versions, preview and publishing ===================== */
+function download(name,text,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),3000); }
+const worldJs=()=>`/* Emberfall world edits, made with the World Editor on ${new Date().toISOString().slice(0,10)}.\n   Upload this file to your GitHub repository next to index.html, or use Publish in the editor. */\nwindow.WORLD_EDITS=${JSON.stringify(exportData())};\n`;
+const parseWorld=txt=>{ const i=txt.indexOf('{'), j=txt.lastIndexOf('}'); if(i<0||j<i) throw new Error('no data'); const d=JSON.parse(txt.slice(i,j+1)); if(!d||typeof d!=='object') throw new Error('no data'); return d; };
+const summary=d=>`${(d.tiles||[]).length} painted tiles, ${(d.zones||[]).length} zone cells, ${(d.props||[]).length} props, ${(d.npcs||[]).length} NPCs, ${(d.spawns||[]).length} monster groups and ${(d.pois||[]).length} landmarks`;
+async function importWorld(d,from){ if(!editCount()){ begin('Open '+from); loadData(d,'replace',true); end(); toast('Opened '+from); return; }
+  const v=await dlg({title:'Open '+from,html:`<p>This file has ${summary(d)}.</p><p>You already have ${editCount()} changes in the editor. Do you want to replace them, or add this file's edits to yours?</p>`,buttons:[{t:'Cancel',v:null},{t:'Add to mine',v:'merge'},{t:'Replace mine',v:'replace',pri:1}]});
+  if(!v) return; begin(v==='merge'?'Merge '+from:'Open '+from); loadData(d,v,true); end(); toast(v==='merge'?'Added the edits from '+from:'Opened '+from); }
+$('fOpen').onchange=async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return; try{ await importWorld(parseWorld(await f.text()),f.name); }catch(err){ dlg({title:'Could not open the file',html:`<p>${esc(f.name)} is not an Emberfall world file (world.js or a .json backup).</p>`}); } };
+async function loadLive(){ try{ const r=await fetch('world.js?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw 0; const d=parseWorld(await r.text()); await importWorld(d,'the live world'); }
+  catch(e){ dlg({title:'No live world yet',html:'<p>Your realm does not have a world.js yet (or it could not be read). Make some changes and press <b>Publish</b> to create one.</p>'}); } }
+// drag a world file onto the editor to open it
+addEventListener('dragover',e=>{ e.preventDefault(); }); addEventListener('drop',async e=>{ e.preventDefault(); const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f||!W) return; try{ await importWorld(parseWorld(await f.text()),f.name); }catch(err){ toast(f.name+' is not a world file',1); } });
+
+/* ---------- versions: named snapshots kept in this browser ---------- */
+async function saveVersion(){ const n=await askDlg('Save a version','Give this version a name so you can come back to it later:',`${LS.get('ef_editor_name','')||'World'} – ${new Date().toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}`); if(!n) return;
+  const V=LS.get('ef_editor_versions',[]); V.unshift({n:n.slice(0,60),t:Date.now(),d:exportData(),c:editCount()}); while(V.length>20) V.pop();
+  if(!LS.set('ef_editor_versions',V)){ V.pop(); if(!LS.set('ef_editor_versions',V.slice(0,5))) return dlg({title:'Not enough room',html:'<p>This browser has no room left for more versions. Delete old versions, or use File › Download a backup.</p>'}); } saveDraft(); toast('Saved version "'+n+'"'); }
+function versionsDlg(){ const V=LS.get('ef_editor_versions',[]);
+  const html=V.length?`<div class="list">${V.map((v,i)=>`<div class="row" style="cursor:default"><span class="nm"><b>${esc(v.n)}</b><br><span style="color:var(--dim);font-size:12px">${new Date(v.t).toLocaleString()} · ${v.c} changes</span></span><button data-o="${i}">Open</button><button data-d="${i}" class="danger">Delete</button></div>`).join('')}</div>`:'<p class="hint">No saved versions yet. Use File › Save a version (Ctrl+S) to keep a copy of your world that you can go back to.</p>';
+  dlg({title:'Versions',html,buttons:[{t:'Close',v:null,pri:1}],onOpen:(o,close)=>{ o.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{ const v=V[+b.dataset.o]; close(); begin('Open version '+v.n); loadData(v.d,'replace',true); end(); toast('Opened "'+v.n+'"'); });
+    o.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{ const v=V[+b.dataset.d]; close(); if(await confirmDlg('Delete version?',`Delete "${esc(v.n)}"? This cannot be undone.`,'Delete',1)){ V.splice(+b.dataset.d,1); LS.set('ef_editor_versions',V); } versionsDlg(); }); }}); }
+
+/* ---------- preview ---------- */
+function preview(){ if(!LS.set('ef_world_preview',exportData())) return dlg({title:'Preview too big',html:'<p>Your world is too big to hand to the game through browser storage. Publish it instead.</p>'});
+  LS.set('ef_world_preview_at',[Math.floor(VIEW.x),Math.floor(VIEW.y)]); window.open('index.html?preview=1','_blank'); toast('Opening the preview. You start where the map is centred.'); }
+
+/* ---------- what changed ---------- */
+function showChanges(){ const byT={}, byZ={}; for(const k in ED.tiles){ byT[ED.tiles[k]]=(byT[ED.tiles[k]]||0)+1; } for(const k in ED.zones){ byZ[ED.zones[k]]=(byZ[ED.zones[k]]||0)+1; }
+  const byP={}; for(const p of ED.props) byP[p.k]=(byP[p.k]||0)+1; const byM={}; for(const s of ED.spawns) byM[s.mob]=(byM[s.mob]||0)+s.n;
+  const tbl=(o,f)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div><span>${f(k)}</span><b>${v}</b></div>`).join('');
+  dlg({title:'Everything you changed',wide:1,html:editCount()?`
+    ${Object.keys(byT).length?`<h4>Painted ground</h4><div class="sc">${tbl(byT,k=>esc(TDESC[k]||k))}</div>`:''}
+    ${Object.keys(byZ).length?`<h4>Zones</h4><div class="sc">${tbl(byZ,k=>esc(zoneName(k)))}</div>`:''}
+    ${ED.props.length?`<h4>Props</h4><div class="sc">${tbl(byP,k=>(PROPS[k]||['?',k]).join(' '))}</div>`:''}
+    ${ED.spawns.length?`<h4>Monsters</h4><div class="sc">${tbl(byM,k=>esc(mobName(k)))}</div>`:''}
+    ${ED.npcs.length?`<h4>NPCs</h4><div class="sc">${ED.npcs.map(n=>`<div><span>${esc(n.name)}${n.title?' ‹'+esc(n.title)+'›':''}</span><b>${n.x}, ${n.y}</b></div>`).join('')}</div>`:''}
+    ${ED.pois.length?`<h4>Landmarks</h4><div class="sc">${ED.pois.map(p=>`<div><span>${esc(p.name||'(no name)')}</span><b>${p.x}, ${p.y}</b></div>`).join('')}</div>`:''}`:'<p>You have not changed anything yet.</p>',buttons:[{t:'Close',v:null,pri:1}]}); }
+
+/* ---------- publish ---------- */
+async function publishDlg(){ runChecks(); const errs=problems.filter(p=>p.sev==='err'), warns=problems.filter(p=>p.sev==='warn'); let info=null; try{ const r=await fetch('/api/world/info',{cache:'no-store'}); if(r.ok) info=await r.json(); }catch(e){}
+  const canPub=info&&info.publish, gh=info&&info.github;
+  const html=`<p>Your world: <b>${summary(exportData())}</b>.</p>
+    ${errs.length?`<p class="warnline" style="color:var(--red)">⛔ ${errs.length} problem${errs.length>1?'s':''} will stop part of your world from loading. <a href="#" id="pbProb" style="color:var(--gold)">Show problems</a></p>`:warns.length?`<p class="warnline">⚠ ${warns.length} warning${warns.length>1?'s':''}. <a href="#" id="pbProb" style="color:var(--gold)">Show them</a></p>`:'<p style="color:var(--green)">✓ No problems found.</p>'}
+    <div class="card"><div class="title">⚡ Publish to your realm</div>
+      ${canPub?`<p class="hint" style="margin-top:0">Everyone who opens or reloads the game gets your world straight away. Uses your owner password (the one for <kbd>/gm login</kbd>).</p>
+      <div class="fld"><span>Password</span><input type="password" id="pbPw" autocomplete="current-password" style="background:#0f0b08;border:1px solid var(--line2);border-radius:4px;padding:4px 7px;color:var(--txt)"></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0"><input type="checkbox" id="pbGh" ${gh?'checked':'disabled'}><span>Also save it to GitHub${info.repo?' ('+esc(info.repo)+')':''}, so it stays after the realm restarts. <span style="color:var(--dim)">${gh?'Render redeploys afterwards, which restarts the realm for a moment.':'Needs a GitHub token on the server: see below.'}</span></span></label>
+      <div class="btns"><button class="pri" id="pbGo">Publish now</button></div><div id="pbOut" class="hint"></div>`
+      :`<p class="hint" style="margin-top:0">${info?'Publishing is off because this realm has no <b>GM_PASSWORD</b>. Add one in Render › Environment.':'Publishing works when the editor is opened from your realm (…onrender.com/play/editor.html).'}</p>`}</div>
+    <div class="card"><div class="title">💾 Or upload it yourself</div><ol style="margin-bottom:6px"><li>Download <b>world.js</b>.</li><li>On GitHub, <b>Add file › Upload files</b> next to <code>index.html</code> and commit.</li><li>Render redeploys in 2–3 minutes.</li></ol>
+      <div class="btns"><button id="pbDl">Download world.js</button><button id="pbCopy">Copy the code</button><button id="pbBk">Download a backup (.json)</button></div></div>
+    ${canPub&&!gh?`<p class="hint">To keep published worlds after restarts automatically: in Render › Environment, set <b>WORLD_GITHUB_TOKEN</b> to a GitHub token with <b>Contents: Read and write</b> on your game repository.</p>`:''}`;
+  dlg({title:'Publish your world',wide:1,html,buttons:[{t:'Close',v:null}],onOpen:(o,close)=>{
+    const pp=o.querySelector('#pbProb'); if(pp) pp.onclick=e=>{ e.preventDefault(); close(); showBot('prob'); };
+    o.querySelector('#pbDl').onclick=()=>{ download('world.js',worldJs(),'text/javascript'); toast('Downloaded world.js'); };
+    o.querySelector('#pbCopy').onclick=()=>{ navigator.clipboard.writeText(worldJs()).then(()=>toast('Copied the world.js code'),()=>toast('Copying is blocked here. Use Download instead.',1)); };
+    o.querySelector('#pbBk').onclick=()=>CMDS.backup.run();
+    const go=o.querySelector('#pbGo'); if(go){ const pw=o.querySelector('#pbPw'); pw.focus(); pw.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); go.click(); } };
+      go.onclick=async()=>{ const out=o.querySelector('#pbOut'); if(!pw.value){ out.innerHTML='<span style="color:var(--amber)">Type your password first.</span>'; return pw.focus(); }
+        go.disabled=true; out.textContent='Publishing…';
+        try{ const r=await fetch('/api/world/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pw:pw.value,world:exportData(),github:o.querySelector('#pbGh').checked,who:LS.get('ef_editor_name','')})}); const j=await r.json().catch(()=>({ok:false,msg:'The server answered '+r.status}));
+          if(!j.ok){ out.innerHTML=`<span style="color:var(--red)">${esc(j.msg||'Publishing failed.')}</span>`; go.disabled=false; return; }
+          pw.value=''; LS.set('ef_editor_published',{t:Date.now(),c:editCount()});
+          out.innerHTML=`<span style="color:var(--green)">✓ Published. Your world is live: reload the game to see it.</span>${j.github?`<br><span style="color:${j.github.ok?'var(--green)':'var(--amber)'}">${j.github.ok?'✓':'⚠'} ${esc(j.github.msg)}</span>${j.github.commit?` <a href="${esc(j.github.commit)}" target="_blank" style="color:var(--gold)">View the commit</a>`:''}`:''}`;
+          toast('Your world is live'); go.disabled=false; }
+        catch(e){ out.innerHTML='<span style="color:var(--red)">Could not reach the realm. Check your connection and try again.</span>'; go.disabled=false; } }; } }}); }
+
+/* ---------- help ---------- */
+function showWelcome(){ dlg({title:'Welcome to the World Editor',wide:1,html:`
+  <p>Shape the world of Emberfall: paint ground and zones, place props, villagers, monsters and landmarks, then publish it to your realm.</p>
+  <div class="sc" style="grid-template-columns:1fr 1fr;gap:10px 24px">
+   <div style="display:block;border:0"><b>1. Find your way</b><br><span style="color:var(--dim)">Scroll to zoom, drag with the right mouse button (or hold Space) to move. Ctrl+F finds any NPC, landmark, zone or monster.</span></div>
+   <div style="display:block;border:0"><b>2. Paint</b><br><span style="color:var(--dim)">Brush (B), Line (L), Rectangle (U) and Fill (G) paint ground or zones. Pick what to paint in the Palette on the right.</span></div>
+   <div style="display:block;border:0"><b>3. Place</b><br><span style="color:var(--dim)">Props (P), NPCs (N), Monsters (M) and Landmarks (K). Select (V) to move, copy and edit them in the Inspector.</span></div>
+   <div style="display:block;border:0"><b>4. Check and publish</b><br><span style="color:var(--dim)">The Problems tab lists anything the game would skip. Preview (Ctrl+P) to walk around, then Publish (Ctrl+E).</span></div></div>
+  <p class="hint" style="margin-top:12px">Your work is saved in this browser as you go. Save named versions with Ctrl+S. Press ? for every shortcut.</p>`,buttons:[{t:'Keyboard shortcuts',v:'k'},{t:'Start editing',v:null,pri:1}]}).then(v=>{ if(v==='k') shortcutsDlg(); }); }
+function shortcutsDlg(){ const L=[['Move the map','Right-drag · Space-drag · Arrows'],['Zoom','Wheel · + / −'],['Whole map / town','Home / T'],['Zoom to selection','F'],['Find / commands',MOD+'+F / '+MOD+'+K'],['Go to x, y',MOD+'+G'],
+   ...TOOLS.filter(t=>t!=='|').map(t=>[t.name+' tool',t.key]),['Brush size','[ and ]'],['Ground ↔ zone painting','X'],['Pick ground (painting tools)','Alt+click'],['Rotate props','R / Shift+R'],['Nudge selection','Arrows (Shift: 5 tiles)'],['Add to selection','Shift+click'],['Copy while moving','Alt+drag'],
+   ['Undo / redo',MOD+'+Z / '+(isMac?MOD+'+Shift+Z':MOD+'+Y')],['Copy / cut / paste',MOD+'+C / X / V'],['Duplicate',MOD+'+D'],['Select all',MOD+'+A'],['Delete','Del'],['Cancel / deselect','Esc'],['Zone colours','Z'],['Grid',MOD+"+'"],['Save version',MOD+'+S'],['Preview',MOD+'+P'],['Publish',MOD+'+E']];
+  dlg({title:'Keyboard shortcuts',wide:1,html:`<div class="sc">${L.map(([a,b])=>`<div><span>${a}</span><span>${b.split(' · ').map(x=>`<kbd>${esc(x)}</kbd>`).join(' ')}</span></div>`).join('')}</div>`,buttons:[{t:'Close',v:null,pri:1}]}); }
+
+/* ---------- start ---------- */
+addEventListener('resize',layout);
+addEventListener('beforeunload',()=>{ if(W){ clearTimeout(saveT); LS.set('ef_editor_draft',exportData()); } });
+layout(); start();
 </script></body></html>

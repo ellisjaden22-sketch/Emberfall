@@ -1,9 +1,9 @@
 {
- "version": "v0.96",
- "title": "Beasts of Amberfield",
+ "version": "v0.97",
+ "title": "A real World Editor",
  "date": "21 Nov 2026",
- "text": "Old Rendclaw has a lair of his own, Grimmaw moves like a six-legged beast, and every hero's skin bends cleanly.\n\n✨ Old Rendclaw now has his own lair in a quiet corner of Amberfield, well away from the roads, the town and other creatures\n⬆️ Grimmaw walks on alternating tripods of legs with his body rising and falling, breathes and works his jaws while idle, rears up to bite and rakes with his front claws\n🔧 Grimmaw now faces the way he is moving instead of walking backwards\n⬆️ Smoother skin on every hero: weights were blended across the whole body so shoulders, hips, knees and robes bend without stretching or dragging\n🔧 Fewer stray triangles stretching between arms, legs and the body during runs, attacks and dances",
+ "text": "The World Editor has been rebuilt from the ground up: menus, panels, new painting tools, copy and paste, a problem checker and one-click publishing.\n\n✨ Rebuilt World Editor (/play/editor.html) with a menu bar, a tool bar, a tool options bar, side panels (Palette, Inspector, Objects, Layers, Problems, History), a minimap and a status bar\n✨ New painting tools: brush with round or square tips, straight lines, filled or outlined rectangles, flood fill and an eyedropper. Every tool paints ground or zones\n✨ Box select, multi-select, move, Alt-drag to copy, duplicate, nudge with the arrow keys, and copy and paste of objects together with the ground underneath\n✨ Scatter props with random rotation and size, snap to half tiles, and edit everything in the Inspector: position, rotation, size, names, titles, colours and dialogue\n✨ Problems panel: lists anything the game would skip, such as two NPCs with the same name, monsters on blocked ground or unnamed landmarks, and jumps to it\n✨ Find (Ctrl+F) any NPC, landmark, zone or monster, a command palette (Ctrl+K), a right-click menu, a history you can jump through, saved versions and keyboard shortcuts for everything\n✨ Publish your world to the realm straight from the editor with your owner password, and optionally save it to GitHub so it stays after restarts\n⬆️ Preview in game now starts you where the editor's map was centred",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-21T01:16:15Z"
+ "time": "2026-11-21T01:23:51Z"
 }
