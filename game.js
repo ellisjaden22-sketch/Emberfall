@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 99;
+const VERSION = 100;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -5349,11 +5349,14 @@ function openShop(){ shopOpen=true; const c=me.c;
   toggleWin('invWin',true); shopOpen=true; renderInv(); }
 const needTxt=need=>Object.entries(need).map(([k,v])=>`<span style="color:${(me.c.mats[k]||0)>=v?'#9fd18b':'#ff8a7a'}">${MATS[k].icon} ${MATS[k].name} ${me.c.mats[k]||0}/${v}</span>`).join(' · ');
 function openAlchemy(n){ const c=me.c;
-  dlg(`<h2>Alchemy</h2><p>"Bring me what the land gives, and I'll bottle it."</p>${RECIPES.map(r=>{ const ok=Object.entries(r.need).every(([k,v])=>(c.mats[k]||0)>=v);
-    return `<div class="shoprow"><span><b>${r.name}</b><br><span style="font-size:13px;color:var(--dim)">${r.desc}</span><br><span style="font-size:13px">${needTxt(r.need)}</span></span><button data-r="${r.id}" ${ok?'':'disabled'}>Brew</button></div>`; }).join('')}
+  const alch=profSkill('alchemy')>0;
+  dlg(`<h2>Alchemy</h2><p>"Bring me what the land gives, and I'll bottle it.${alch?'':' Healing draughts I\'ll brew for anyone. Elixirs are for alchemists: learn the craft from me and they\'re yours to make."'}${alch?'"':''}</p>${RECIPES.map(r=>{ const lock=r.buff&&!alch, ok=!lock&&Object.entries(r.need).every(([k,v])=>(c.mats[k]||0)>=v);
+    return `<div class="shoprow"><span><b>${r.name}</b>${lock?' <span style="font-size:12px;color:#ff8a7a">· Alchemists only</span>':''}<br><span style="font-size:13px;color:var(--dim)">${r.desc}</span><br><span style="font-size:13px">${needTxt(r.need)}</span></span><button data-r="${r.id}" ${ok?'':'disabled'}>Brew</button></div>`; }).join('')}
+    ${alch?'':`<div class="btns" style="margin-top:6px"><button id="alLearn">Learn Alchemy</button></div>`}
     <div class="btns" style="margin-top:10px"><button id="bk">Back</button></div>`);
   $('bk').onclick=()=>talk(n);
-  document.querySelectorAll('#dlg [data-r]').forEach(b=>b.onclick=()=>{ const r=RECIPES.find(x=>x.id===b.dataset.r); for(const [k,v] of Object.entries(r.need)) c.mats[k]-=v;
+  if($('alLearn')) $('alLearn').onclick=()=>openTrainer(n);
+  document.querySelectorAll('#dlg [data-r]').forEach(b=>b.onclick=()=>{ const r=RECIPES.find(x=>x.id===b.dataset.r); if(r.buff&&!profSkill('alchemy')) return err('Only alchemists can brew elixirs'); if(!Object.entries(r.need).every(([k,v])=>(c.mats[k]||0)>=v)) return; for(const [k,v] of Object.entries(r.need)) c.mats[k]-=v;
     if(r.give==='pots'){ c.pots+=2; chatLine('You brew 2 Healing Draughts.','c-loot'); } else { c.buffs[r.buff]=Date.now()+600000; chatLine(`You drink the ${r.name}.`,'c-loot'); sparkle(me.x,me.y,'#ffd34a'); recalc(); renderBuffs(); }
     persist(); renderInv(); openAlchemy(n); }); }
 function upCost(it){ if(it&&it.pset) return upCostPvp(it); const k=it.up||0; if(k>=7) return null; const mat=k<2?'copper':k<4?'iron':k<5?'obsidian':'mithril'; return {gold:5*(k+1)+it.lv,mat,n:k<2?2+k:k<4?k:3}; }
@@ -5860,6 +5863,16 @@ setTimeout(()=>ACH.push({id:'prof300',n:'Artisan',d:'Reach skill 300 in a profes
   {id:'fish100',n:'Master Angler',d:'Catch 100 fish',ic:'🎣',f:(c,S)=>(S.fished||0)>=100},
   {id:'orders10',n:'Reliable Hands',d:'Complete 10 work orders',ic:'📜',f:(c,S)=>(S.orders||0)>=10},
   {id:'crafted100',n:'Hands of a Maker',d:'Craft 100 items',ic:'🧰',f:(c,S)=>(S.crafted||0)>=100}),0);   // ACH is declared further down the file
+
+/* ---- v100: filling the gaps ---- */
+// Grimmaw and Skarn were elites without a loot table
+Object.assign(BOSSLOOT,{grimmaw:{n:1,p:[0,45,50,5,0]},skarn:{n:2,p:[0,0,55,45,0]}});
+// levels 8 and 16 had too few quests to level through
+QUESTS.push(
+  {id:'vok2',giver:'vok',pre:'magma',title:'Embers on the Wind',type:'kill',mob:'emberling',n:8,xp:1700,gold:18,lvl:8,text:'Little fire spirits have been drifting up from the Cinderlord\'s lair and setting my supplies alight. Put out eight of them before the whole gate burns.'},
+  {id:'vok3',giver:'vok',pre:'obsidian',title:'Lilies of the Caldera',type:'gather',mat:'emberlily',n:6,xp:1500,gold:16,lvl:8,text:'Emberlilies only bloom where the ground is hot enough to cook on. Mira pays well for them, and so do I. Bring me six.'},
+  {id:'reach11',giver:'fenwick',pre:'reach1',title:'Cinderback Hides',type:'kill',mob:'crusher',n:10,xp:8000,gold:45,lvl:16,text:'The Cinderback Crushers are smashing our supply carts on the east road. Bring their numbers down by ten, and if you skin, their scales make fine armour.'},
+  {id:'reach12',giver:'ilsa',pre:'reach3',title:'Ashbloom for the Wounded',type:'gather',mat:'ashbloom',n:8,xp:7000,gold:40,lvl:16,text:'Ashbloom grows in the burned fields beyond the camp. Its petals stop burns from festering, and we have plenty of burns. Gather eight.'});
 
 /* ---- quests are longer: more to kill and gather, a bit more reward ---- */
 setTimeout(()=>{ for(const q of QUESTS){ if(q._v48) continue; q._v48=1;
@@ -7110,7 +7123,7 @@ function addReachCamp(d){ const cx=REACH.cx+.5, cz=REACH.cy+.5, R=mulberry32(585
 
 /* ---------- v58 quality of life ---------- */
 var LASTTALK=null;
-try{ $('escVer').textContent='Emberfall Online · Beta v0.'+VERSION; }catch(e){}
+try{ $('escVer').textContent='Emberfall Online · Beta '+(VERSION>=100?'v'+(VERSION/100).toFixed(2):'v0.'+VERSION); }catch(e){}
 function homePos(){ const h=me&&me.c.home, n=h&&NPCS.find(q=>q.id===h); if(n&&h==='ilsa') return {x:REACH.cx*TS+16,y:(REACH.cy+2)*TS,name:'Emberwatch'}; if(n) return {x:n.x+40,y:n.y+40,name:"Jarl Hakon's camp"}; return {x:SPAWN.x,y:SPAWN.y,name:'Hearthmere'}; }
 function setHome(n){ me.c.home=n.id==='oriel'?'':n.id; persist(); const H=homePos(); chatLine(`🏠 ${H.name} is now your home. Your hearth (/hearth) brings you here.`,'c-sys'); banner('Home set',H.name); }
 function sortBags(){ const c=me&&me.c; if(!c) return; c.inv.sort((a,b)=>b.rar-a.rar||SLOTS.indexOf(a.slot)-SLOTS.indexOf(b.slot)||b.pow+b.sta-a.pow-a.sta); renderInv(); persist(); }
