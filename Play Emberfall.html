@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.97</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v0.98</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 97;
+const VERSION = 98;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1063,7 +1063,7 @@ function genWorld(){
 const PROPK={tree:{solid:1},pine:{solid:1},deadtree:{solid:1},rock:{solid:1},boulder:{solid:1},house:{solid:1},tent:{solid:1},well:{solid:1},statue:{solid:1},pillar:{solid:1},wall:{solid:1},tower:{solid:1},
   campfire:{},lamp:{},torch:{},crate:{},barrel:{},fence:{},banner:{},stall:{},cart:{},bench:{},flowers:{},mushrooms:{},crystal:{},bush:{},sign:{},grave:{},hay:{}};
 const EDITOR_MODE=/[?&]editor=1/.test(location.search);
-let WE=null; try{ if(/[?&]preview=1/.test(location.search)) WE=JSON.parse(localStorage.getItem('ef_world_preview')||'null'); else if(!EDITOR_MODE&&window.WORLD_EDITS) WE=window.WORLD_EDITS; }catch(e){ WE=null; }
+let WE=null; try{ const PVM=location.search.match(/[?&]preview=([0-9a-f]{12})/); if(PVM){ try{ const x=new XMLHttpRequest(); x.open('GET','/api/world/preview/'+PVM[1],false); x.send(); if(x.status===200){ WE=JSON.parse(x.responseText); window.__WE_AT=WE&&WE.at; } }catch(e){} } else if(/[?&]preview=1/.test(location.search)) WE=JSON.parse(localStorage.getItem('ef_world_preview')||'null'); else if(!EDITOR_MODE&&window.WORLD_EDITS) WE=window.WORLD_EDITS; }catch(e){ WE=null; }
 if(EDITOR_MODE) WE=null; if(WE&&typeof WE!=='object') WE=null;
 genWorld();
 const WE_TILES=new Set();
@@ -2055,7 +2055,7 @@ function enterWorld(name,cls,existing,fresh){ TALC=null;
   me={c,x:SPAWN.x,y:SPAWN.y,face:-Math.PI/2,hp:null,res:null,dead:false,target:null,cast:null,gcd:0,cds:{},auto:false,autoT:0,
     bulwark:0,hots:[],mounted:0,emote:null,jumpH:0,jumpV:0,absorb:0,absorbU:0,rootU:0,dots:[],dash:null,swingT:0,spinT:0,stepT:0,lastCombat:-99,lastSpend:-99,potCd:0,party:'',moving:false,zone:'',tabIdx:0,cp:0,stealth:false,evasionU:0,stepU:0};
   recalc(); me.hp=me.mhp; me.res=CLS[cls].res==='rage'?0:me.mres;
-  if(/[?&]preview=1/.test(location.search)){ try{ const a=JSON.parse(localStorage.getItem('ef_world_preview_at')||'null'); if(a&&a[0]>1&&a[1]>1&&a[0]<MW-1&&a[1]<OWH-1){ const [px,py]=findOpen(a[0]|0,a[1]|0); me.x=px*TS+16; me.y=py*TS+16; } }catch(e){} setTimeout(()=>sysMsg('World Editor preview: only you can see these changes. Close this tab to go back to the editor.','c-gm'),400); }
+  if(/[?&]preview=/.test(location.search)){ try{ const a=window.__WE_AT||JSON.parse(localStorage.getItem('ef_world_preview_at')||'null'); if(a&&a[0]>1&&a[1]>1&&a[0]<MW-1&&a[1]<OWH-1){ const [px,py]=findOpen(a[0]|0,a[1]|0); me.x=px*TS+16; me.y=py*TS+16; } }catch(e){} setTimeout(()=>sysMsg('World Editor preview: only you can see these changes. Close this tab to go back to the editor.','c-gm'),400); }
   persist();
   document.getElementById('login').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');

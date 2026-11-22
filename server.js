@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION='v0.97';
+const SERVER_VERSION='v0.98';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
@@ -194,7 +194,7 @@ function publishWorld(req, res) {
     if (!d || typeof d !== 'object') return json(res, 400, { ok: false, msg: 'The editor sent something the server could not read.' });
     if (!crypto.timingSafeEqual(sha(d.pw || ''), sha(GM_PASSWORD))) { t.n++; pubTries.set(ip, t); return json(res, 403, { ok: false, msg: 'Wrong password. Use the same password as /gm login.' }); }
     const w = cleanWorld(d.world || {}), who = String(d.who || '').replace(/[^\w .'-]/g, '').slice(0, 30);
-    const text = `/* Emberfall world edits, published from the World Editor on ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC.\n   The game reads this file at start-up. Edit it with /play/editor.html. */\nwindow.WORLD_EDITS=${JSON.stringify(w)};\n`;
+    const text = `/* Emberfall world edits, published from the World Editor on ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC.\n   The game reads this file at start-up. Edit it with /editor on your realm. */\nwindow.WORLD_EDITS=${JSON.stringify(w)};\n`;
     try { fs.writeFileSync(WORLD_FILE, text); } catch (e) { return json(res, 500, { ok: false, msg: 'The server could not write world.js: ' + e.message }); }
     log(`# world.js published from the editor${who ? ' by ' + who : ''} (${w.props.length} props, ${w.npcs.length} NPCs, ${w.spawns.length} spawns, ${w.tiles.length} tiles)`);
     const out = { ok: true, live: true, bytes: Buffer.byteLength(text) };
@@ -202,9 +202,27 @@ function publishWorld(req, res) {
     json(res, 200, out);
   });
 }
+
+// previews from an editor opened from disk: the editor hands its world to the realm, the game tab picks it up by id
+const PREVIEWS = new Map(), prevTries = new Map();
+function cors(res) { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); res.setHeader('Access-Control-Max-Age', '600'); }
+function previewPut(req, res) {
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',').pop().trim(), t = prevTries.get(ip) || { n: 0, at: Date.now() };
+  if (Date.now() - t.at > 10 * 60000) { t.n = 0; t.at = Date.now(); } if (++t.n > 30) { prevTries.set(ip, t); return json(res, 429, { ok: false, msg: 'Too many previews. Wait a few minutes.' }); } prevTries.set(ip, t);
+  readBody(req, 6 * 1024 * 1024, body => { let d = null; try { d = JSON.parse(body || 'null'); } catch (e) {}
+    if (!d || typeof d !== 'object' || !d.world) return json(res, 400, { ok: false, msg: 'Nothing to preview.' });
+    const now = Date.now(); for (const [k, v] of PREVIEWS) if (now - v.t > 2 * 3600000) PREVIEWS.delete(k);
+    while (PREVIEWS.size >= 40) PREVIEWS.delete(PREVIEWS.keys().next().value);
+    const id = crypto.randomBytes(6).toString('hex'), at = Array.isArray(d.at) ? [d.at[0] | 0, d.at[1] | 0] : null;
+    PREVIEWS.set(id, { t: now, data: JSON.stringify({ ...cleanWorld(d.world), at }) }); json(res, 200, { ok: true, id }); });
+}
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://x'); let name = decodeURIComponent(url.pathname).replace(/^\/+/, '');
   // ---- API ----
+  if (name.startsWith('api/world/') || name === 'api/version' || name === 'play/world.js') cors(res);
+  if (req.method === 'OPTIONS') { cors(res); res.writeHead(204); return res.end(); }
+  if (name === 'api/world/preview' && req.method === 'POST') return previewPut(req, res);
+  if (name.startsWith('api/world/preview/')) { const p = PREVIEWS.get(name.slice(18)); if (!p) return json(res, 404, { ok: false }); res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(p.data); }
   if (name === 'api/world/publish' && req.method === 'POST') return publishWorld(req, res);
   if (name === 'api/world/info') return json(res, 200, { publish: !!GM_PASSWORD, github: !!WORLD_TOKEN, repo: WORLD_REPO, branch: WORLD_BRANCH, live: fs.existsSync(WORLD_FILE) });
   if (name === 'api/version') { MUSIC_CACHE = null; const music = allMusic().map(f => path.relative(ROOT, f).split(path.sep).join('/')); return json(res, 200, { server: SERVER_VERSION, launcher: LAUNCHER_VERSION, music, musicFound: music.length > 0, online: [...clients.values()].filter(c => c.p && c.p.v).length, connections: clients.size, uptimeMin: Math.round((Date.now() - STARTED) / 60000), memoryMB: Math.round(process.memoryUsage().rss / 1048576), slowClients: [...clients.values()].filter(c => c.slow).length, raidOpen }); }
@@ -224,7 +242,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Length': st.size, 'Content-Disposition': `attachment; filename="${path.basename(f)}"` }); fs.createReadStream(f).pipe(res); }); }
   // ---- the game at /play/ ----
   if (name === 'play') { res.writeHead(302, { Location: '/play/' }); return res.end(); }
-  if (name === 'editor' || name === 'editor.html') { res.writeHead(302, { Location: '/play/editor.html' }); return res.end(); }
+  if (name === 'editor' || name === 'editor/' || name === 'editor.html') return sendFile(res, path.join(ROOT, 'editor.html'));
   if (/^(play\/)?music\/[\w .()-]+\.mp3$/i.test(name)) return sendMusic(req, res, path.join(ROOT, 'music', name.split('/').pop()));
   // 3D models: play/models/NAME.(bin|json|jpg), found in models/ or, if the folder got flattened on upload, next to server.js
   if (/^(play\/)?models\/((nat|props|town|sky)\/)?[a-z0-9_]+\.(bin|json|jpg|png)$/i.test(name)) { const base = path.basename(name), sub = (name.match(/models\/(nat|props|town|sky)\//i) || [, ''])[1];

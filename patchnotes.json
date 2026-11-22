@@ -1,9 +1,9 @@
 {
- "version": "v0.97",
- "title": "A real World Editor",
+ "version": "v0.98",
+ "title": "The World Editor stands on its own",
  "date": "21 Nov 2026",
- "text": "The World Editor has been rebuilt from the ground up: menus, panels, new painting tools, copy and paste, a problem checker and one-click publishing.\n\n✨ Rebuilt World Editor (/play/editor.html) with a menu bar, a tool bar, a tool options bar, side panels (Palette, Inspector, Objects, Layers, Problems, History), a minimap and a status bar\n✨ New painting tools: brush with round or square tips, straight lines, filled or outlined rectangles, flood fill and an eyedropper. Every tool paints ground or zones\n✨ Box select, multi-select, move, Alt-drag to copy, duplicate, nudge with the arrow keys, and copy and paste of objects together with the ground underneath\n✨ Scatter props with random rotation and size, snap to half tiles, and edit everything in the Inspector: position, rotation, size, names, titles, colours and dialogue\n✨ Problems panel: lists anything the game would skip, such as two NPCs with the same name, monsters on blocked ground or unnamed landmarks, and jumps to it\n✨ Find (Ctrl+F) any NPC, landmark, zone or monster, a command palette (Ctrl+K), a right-click menu, a history you can jump through, saved versions and keyboard shortcuts for everything\n✨ Publish your world to the realm straight from the editor with your owner password, and optionally save it to GitHub so it stays after restarts\n⬆️ Preview in game now starts you where the editor's map was centred",
+ "text": "The World Editor is now a separate app with a professional workbench, and it runs without the game, even straight from your computer.\n\n✨ The World Editor is its own app at /editor. The world is built into the editor file, so it opens instantly and works without loading the game\n✨ Download the editor (File › Download this editor) and open it straight from your computer, even offline. It connects to your realm only to load, preview and publish\n✨ A new workbench: Hierarchy and Assets on the left, an Inspector with sections on the right, Problems, History and Output below, rulers, a document tab and a status bar that shows your connection to the realm\n⬆️ The map now shows the land's real relief, so hills, valleys and shores are easy to read\n⬆️ Every panel can be resized or hidden (Ctrl+B, Ctrl+J, Ctrl+I), and the editor remembers your layout\n⬆️ The editor marks changes that are not published yet, and warns you when your realm runs a newer version than the editor",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-21T01:23:51Z"
+ "time": "2026-11-21T01:38:23Z"
 }
