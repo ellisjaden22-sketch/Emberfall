@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 98;
+const VERSION = 99;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -5437,7 +5437,7 @@ function startGather(n){ if(!me||me.dead||me.cast) return; if(me.mounted) dismou
   const pk=MATS[n.mat].kind==='herb'?'herbalism':'mining', sk=profSkill(pk); if(n.rich&&sk<nodeReq(n.mat)) return err(`Requires ${PROF[pk].name} ${nodeReq(n.mat)}`);
   me.cast={ab:{id:'gather',name:(MATS[n.mat].kind==='herb'?'Gathering ':'Mining ')+MATS[n.mat].name},t0:now(),dur:sk?(n.rich?1.5:1.1):1.6,node:n}; }
 function finishGather(n){ if(n.resp>now()) return; const M=MATS[n.mat]; const pk=M.kind==='herb'?'herbalism':'mining', sk=profSkill(pk), rq=nodeReq(n.mat), pro=sk>0&&sk>=rq;
-  const amt=1; me.c.mats[n.mat]=(me.c.mats[n.mat]||0)+amt; n.resp=now()+(n.rich?120:75);
+  const amt=1+(n.rich?1+(Math.random()<.35?1:0):0)+(pro&&sk>=rq+50&&Math.random()<.3?1:0); me.c.mats[n.mat]=(me.c.mats[n.mat]||0)+amt; n.resp=now()+(n.rich?120:75);
   chatLine(`You gather ${amt} ${M.name}.`,'c-loot'); if(sk){ if(!pro) sysMsg(`Your ${PROF[pk].name} skill is too low for a bonus from ${M.name} (needs ${rq}).`); else { profUp(pk,rq); profRare(pk,n); } } const [X,Y,Z]=ph3(n.x,n.y,.4); burst3(X,Y,Z,M.col,22,2.5,{glow:true,up:1.5});
   gainXp(8+4*me.c.lvl); questEvent('gather',n.mat,amt); stat('gathered',amt); stat(M.kind==='herb'?'herbs':'mined',amt); renderInv(); persist(); }
 
@@ -5519,7 +5519,7 @@ for(const [k,n,ic,fx] of FOOD){ const tip=[fx.pow?`+${fx.pow} Power`:'',fx.sta?`
 const CUTS=[['amberstone','Amberstone',3,4],['moonstone','Moonstone',6,8],['fireopal','Fire Opal',10,13],['frostdiamond','Frost Diamond',15,20]];
 CUTS.forEach(([g,n,p,st],i)=>{ MATS['bold_'+g]={name:'Bold '+n,icon:'🔶',col:MATS[g].col,kind:'cut',val:(i+1)*4,gem:{p,n:'Bold '+n}}; MATS['solid_'+g]={name:'Solid '+n,icon:'🔷',col:MATS[g].col,kind:'cut',val:(i+1)*4,gem:{s:st,n:'Solid '+n}}; });
 function PFX(k){ if(!me||!me.c||!me.c.buffs) return 0; let v=0; const T=Date.now(); for(const b in me.c.buffs){ if(!(me.c.buffs[b]>T)) continue;
-    if(b==='whet'&&k==='dmg') v+=[0,.03,.05,.07,.09][me.c.buffLv&&me.c.buffLv.whet||1]; else if(b==='kit'&&k==='armor') v+=[0,.08,.12,.16,.2][me.c.buffLv&&me.c.buffLv.kit||1]; else if(b==='thread'&&k==='pow') v+=[0,3,6,10,14][me.c.buffLv&&me.c.buffLv.thread||1];
+    if(b==='whet'&&k==='dmg') v+=[0,.03,.05,.07,.09,.11][me.c.buffLv&&me.c.buffLv.whet||1]; else if(b==='kit'&&k==='armor') v+=[0,.08,.12,.16,.2,.24][me.c.buffLv&&me.c.buffLv.kit||1]; else if(b==='thread'&&k==='pow') v+=[0,3,6,10,14,18][me.c.buffLv&&me.c.buffLv.thread||1];
     else { const f=BUFFFX[b]; if(f&&f[k]) v+=f[k]; } } return v; }
 function useMat(k){ const c=me.c, M=MATS[k]; if(!M||!(c.mats[k]>0)) return; if(M.kind==='cut') return socketDlg(k); const U=M.use; if(!U) return;
   if(me.dead) return err('You are dead'); if(U.food&&inCombat()) return err("You can't eat in combat");
@@ -5543,14 +5543,14 @@ function bindMats(){ document.querySelectorAll('#gold [data-mat]').forEach(el=>{
 /* ---- skill ---- */
 const profSkill=pk=>(me&&me.c.prof&&me.c.prof[pk])?me.c.prof[pk].s:0;
 const NTIER={sunpetal:0,copper:0,thornbloom:0,mireroot:1,ghostcap:1,iron:1,emberlily:2,obsidian:2,frostbloom:3,mithril:3};
-const nodeReq=k=>[1,75,150,225][NTIER[k]??0];
+const nodeReq=k=>[1,75,150,225,300][NTIER[k]??0];
 function nodeSeen(n){ if(!n.rich) return true; const pk=MATS[n.mat].kind==='herb'?'herbalism':'mining'; return profSkill(pk)>=nodeReq(n.mat); }
 function pcol(sk,req){ const d=sk-req; return d<0?'red':d<25?'orange':d<50?'yellow':d<75?'green':'grey'; }
 function profUp(pk,req){ const P=me.c.prof[pk]; if(!P) return; const cap=PRANK[P.r].max; if(P.s>=cap){ if(!P.capN){ P.capN=1; sysMsg(`${PROF[pk].name} is at ${cap}, the most a ${PRANK[P.r].n} can reach. Visit a trainer to learn more.`); } return; }
   const col=pcol(P.s,req), ch={orange:1,yellow:.7,green:.3}[col]||0; if(Math.random()>=ch) return;
   const before=P.s; P.s=Math.min(cap,P.s+(col==='orange'?2:1)); if(P.s!==before){ chatLine(`Your skill in ${PROF[pk].name} has increased to ${P.s}.`,'c-prof'); if(!$('profWin').classList.contains('hidden')) renderProf(); persist(); } }
 function profRare(pk,n){ const tier=NTIER[n.mat]??0, ch=(n.rich?.35:.06)+profSkill(pk)/3000;
-  if(pk==='mining'&&Math.random()<ch){ const g=['amberstone','moonstone','fireopal','frostdiamond'][tier]; me.c.mats[g]=(me.c.mats[g]||0)+1; chatLine(`You find a ${MATS[g].name} in the rock!`,'c-loot t2'); sparkle(me.x,me.y,MATS[g].col); }
+  if(pk==='mining'&&Math.random()<ch){ const g=['amberstone','moonstone','fireopal','frostdiamond','sunruby'][tier]; me.c.mats[g]=(me.c.mats[g]||0)+1; chatLine(`You find a ${MATS[g].name} in the rock!`,'c-loot t2'); sparkle(me.x,me.y,MATS[g].col); }
   if(pk==='herbalism'&&Math.random()<ch*.7){ me.c.mats.starleaf=(me.c.mats.starleaf||0)+1; chatLine('A rare Starleaf glitters among the stems!','c-loot t2'); sparkle(me.x,me.y,'#fff3a0'); } }
 function primaryCount(){ return Object.keys(me.c.prof).filter(k=>PROF[k]&&PROF[k].kind!=='second').length; }
 /* ---- rich nodes: only specialists see them; bigger yield, more rare finds ---- */
@@ -5561,17 +5561,17 @@ function primaryCount(){ return Object.keys(me.c.prof).filter(k=>PROF[k]&&PROF[k
 /* ---- skinning ---- */
 const SKINK={boar:1,oldtusk:1,wolf:1,fangmaw:1,murkcrab:1,lurker:1,grimmaw:1,crawler:1,siltling:1,siltmother:1,wyrm:1,frostwolf:1,yeti:1};
 const MEATK={boar:'gamemeat',oldtusk:'gamemeat',wolf:'gamemeat',fangmaw:'gamemeat',lurker:'gamemeat',murkcrab:'crabmeat',grimmaw:'crabmeat',crawler:'crabmeat',siltling:'crabmeat',frostwolf:'frostmeat',yeti:'frostmeat'};
-const skinReq=m=>clamp(Math.round((m.lv-2)*22),1,260);
-const skinMat=m=>m.lv<=4?'lightleather':m.lv<=8?'thickhide':m.lv<=10?'scaledhide':'frostpelt';
+const skinReq=m=>m.lv>=15?Math.min(350,300+(m.lv-15)*12):clamp(Math.round((m.lv-2)*22),1,260);
+const skinMat=m=>m.lv>=15&&m.t.key!=='wyrm'&&m.t.key!=='thalassor'?'cinderscale':m.lv<=4?'lightleather':m.lv<=8?'thickhide':m.lv<=10?'scaledhide':'frostpelt';
 const CLOTHK={bogwitch:1,drowned:1,tidecaller:1,cultist:1,cryptmage:1,dacolyte:1,sentinel:1,thrall:1,deathguard:1,wraith:1};
 function profOnKill(m){ const k=m.t.key;
-  if(CLOTHK[k]&&Math.random()<(m.t.boss||m.t.elite?1:.35)){ const ck=m.lv<=5?'linencloth':m.lv<=8?'woolcloth':m.lv<=11?'silkcloth':'runecloth'; me.c.mats[ck]=(me.c.mats[ck]||0)+1; chatLine(`You find a piece of ${MATS[ck].name}.`,'c-loot'); renderInv(); }
+  if(CLOTHK[k]&&Math.random()<(m.t.boss||m.t.elite?1:.35)){ const ck=m.lv>=15?'embersilk':m.lv<=5?'linencloth':m.lv<=8?'woolcloth':m.lv<=11?'silkcloth':'runecloth'; me.c.mats[ck]=(me.c.mats[ck]||0)+1; chatLine(`You find a piece of ${MATS[ck].name}.`,'c-loot'); renderInv(); }
   if(SKINK[k]&&profSkill('skinning')){ m.skinU=now()+35; m.skinned=false; }
   if(MEATK[k]&&profSkill('cooking')&&Math.random()<(m.t.boss||m.t.elite?1:.4)){ const mk=MEATK[k]; me.c.mats[mk]=(me.c.mats[mk]||0)+1; chatLine(`You carve some ${MATS[mk].name}.`,'c-loot'); } }
 function nearSkin(){ if(!profSkill('skinning')) return null; let b=null,bd=80; const t=now(); for(const m of mobs){ if(!m.dead||!(m.skinU>t)||m.skinned) continue; const d=dist(me.x,me.y,m.dx,m.dy); if(d<bd){bd=d;b=m} } return b; }
 function startSkin(m){ if(!me||me.dead||me.cast) return; const rq=skinReq(m); if(profSkill('skinning')<rq) return err(`Requires Skinning ${rq}`); if(me.mounted) dismount(); if(FISH) fishStop();
   me.face=Math.atan2(m.dy-me.y,m.dx-me.x); me.cast={ab:{id:'skin',name:'Skinning'},t0:now(),dur:1.8,fin:()=>finishSkin(m),tick:()=>{ if(Math.random()<.15){ const [X,Y,Z]=ph3(m.dx,m.dy,.4); burst3(X,Y,Z,'#8a1a1a',2,1); } }}; }
-function finishSkin(m){ if(m.skinned||!m.dead) return; m.skinned=true; const k=skinMat(m); const n=1;
+function finishSkin(m){ if(m.skinned||!m.dead) return; m.skinned=true; const k=skinMat(m); const n=1+(profSkill('skinning')>=skinReq(m)+50&&Math.random()<.3?1:0)+(m.t.elite||m.t.boss?1:0);
   me.c.mats[k]=(me.c.mats[k]||0)+n; chatLine(`You skin ${n} ${MATS[k].name}.`,'c-loot'); try{ snd('slash'); }catch(e){}
   if(m.t.key==='wyrm'){ if(Math.random()<.6){ me.c.mats.wyrmscale=(me.c.mats.wyrmscale||0)+1; chatLine('You cut a strip of scorched Cinderhide from the warlord!','c-loot t3'); } }
   profUp('skinning',skinReq(m)); gainXp(4+2*me.c.lvl); renderInv(); persist(); }
@@ -5589,14 +5589,14 @@ function fishTick(dt){ if(!FISH) return; const t=now(); if(!me||me.dead||me.movi
   if(FISH.ph==='bite'&&t-FISH.biteT>1.4){ fishStop('The fish got away.'); }
   if(FISH&&t-FISH.t0>22) fishStop('Nothing is biting. You reel in your line.'); }
 function fishTable(){ const z=zoneAtPx(FISH.x,FISH.y), sk=profSkill('fishing'); const L=[['amberperch',1,10]];
-  if(z==='swamp'||z==='forest') L.push(['mireeel',75,8]); if(z==='lake'||z==='ruins') L.push(['silverfin',130,7]); if(z==='frost'||z==='ash') L.push(['icefin',200,8]);
+  if(z==='swamp'||z==='forest') L.push(['mireeel',75,8]); if(z==='lake'||z==='ruins') L.push(['silverfin',130,7]); if(z==='frost'||z==='ash') L.push(['icefin',200,8]); if(z==='coast'||z==='port') L.push(['stormsnapper',225,8]); if((z==='coast'||z==='port')&&sk>=300) L.push(['tidepearl',300,.6]);
   if(sk>=100) L.push(['mireeel',100,3]); if(sk>=180) L.push(['silverfin',180,3]); if(sk>=240) L.push(['icefin',240,3]); if(sk>=150) L.push(['goldenkoi',150,.25+sk/600]);
   return L.filter(f=>sk>=f[1]); }
 function fishReel(){ if(!FISH||FISH.ph!=='bite') return; const sk=profSkill('fishing'); const T=fishTable(); const z=zoneAtPx(FISH.x,FISH.y); fishStop();
   if(Math.random()<.025+sk/12000){ const g=3+Math.floor(Math.random()*(4+me.c.lvl)); me.c.gold+=g; chatLine(`You fish up a waterlogged chest with ${g} gold inside!`,'c-loot t2'); if(Math.random()<.35) giveItem(genItem(Math.max(1,me.c.lvl),Math.random()<.2?2:1),'Inside the chest'); profUp('fishing',Math.max(1,sk-10)); renderInv(); persist(); return; }
   let tot=0; for(const f of T) tot+=f[2]; let r=Math.random()*tot, pick=T[0]; for(const f of T){ r-=f[2]; if(r<0){ pick=f; break; } }
   const k=pick[0]; me.c.mats[k]=(me.c.mats[k]||0)+1; chatLine(`You catch a ${MATS[k].name}!`,'c-loot'+(k==='goldenkoi'?' t3':'')); try{ snd('potion'); }catch(e){}
-  const zr={swamp:75,forest:50,lake:130,ruins:130,frost:200,ash:200}[z]||1; profUp('fishing',Math.min(sk,Math.max(1,zr+(k==='amberperch'?0:20)))); gainXp(3+me.c.lvl); renderInv(); persist(); }
+  const zr={swamp:75,forest:50,lake:130,ruins:130,frost:200,ash:200,coast:250,port:250}[z]||1; stat('fished',1); profUp('fishing',Math.min(sk,Math.max(1,zr+(k==='amberperch'?0:20)))); gainXp(3+me.c.lvl); renderInv(); persist(); }
 function drawFish(t){ if(!FISH||!me) return; const X=FISH.x/TS, Z=FISH.y/TS; const lit=FISH.ph==='cast'?clamp((t-FISH.t0)/.7,0,1):1;
   const hx=me.x/TS+Math.cos(me.face)*.5, hz=me.y/TS+Math.sin(me.face)*.5, hy=standY(me.x,me.y)+1.45; const tipx=hx+Math.cos(me.face)*1.5, tipz=hz+Math.sin(me.face)*1.5, tipy=hy+1.1;
   for(let i=0;i<=6;i++){ const u=i/6; mreset(); mtr(lerp(hx,tipx,u),lerp(hy,tipy,u)-Math.sin(u*Math.PI)*.08,lerp(hz,tipz,u)); P(GEO.sph,.05-u*.025,.05-u*.025,.05-u*.025,[.36,.24,.12]); }
@@ -5728,8 +5728,9 @@ let PSEL=null, PFILT='', PHAVE=false;
 function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c; const ks=Object.keys(PROF).filter(k=>c.prof[k]);
   if(!ks.length){ el.innerHTML=`<div class="pfr"><p>You haven't learned a profession yet.</p><p style="color:var(--dim)">Trainers in Hearthmere: <b>Doran</b> (Mining, Blacksmithing, Jewelcrafting), <b>Mira</b> (Herbalism, Alchemy), <b>Tamsin</b> (Skinning, Leatherworking), <b>Liesl</b> (Tailoring) and <b>Pell</b> (Cooking, Fishing). You can learn two main professions plus Fishing and Cooking.</p>${Object.values(PROF).map(D=>`<div style="margin:6px 0"><b>${D.icon} ${D.name}</b> <span style="color:var(--dim);font-size:13px">${D.desc}</span></div>`).join('')}</div>`; return; }
   if(!PSEL||!c.prof[PSEL]) PSEL=ks.find(k=>PROF[k].kind==='craft'||k==='cooking')||ks[0];
-  const list=ks.map(k=>{ const P=c.prof[k], R=PRANK[P.r]; return `<div class="pfi ${k===PSEL?'on':''}" data-pf="${k}"><b>${PROF[k].icon} ${PROF[k].name}</b><small>${R.n} · ${P.s} / ${R.max}</small><div class="pbar"><i style="width:${P.s/300*100}%"></i></div></div>`; }).join('');
+  const list=ks.map(k=>{ const P=c.prof[k], R=PRANK[P.r]; return `<div class="pfi ${k===PSEL?'on':''}" data-pf="${k}"><b>${PROF[k].icon} ${PROF[k].name}</b><small>${R.n} · ${P.s} / ${R.max}</small><div class="pbar"><i style="width:${P.s/PROFMAX*100}%"></i></div></div>`; }).join('');
   const P=c.prof[PSEL], D=PROF[PSEL]; let right=`<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><b style="font-family:Cinzel,serif">${D.icon} ${D.name}</b><button id="pfUn" style="font-size:11px;padding:3px 7px">Unlearn</button></div><p style="color:var(--dim);font-size:13px;margin:4px 0 8px">${D.desc}</p>`;
+  { const tr=Object.keys(PTRAIN).find(id=>PTRAIN[id].includes(PSEL)), nm=tr&&NPCS.find(x=>x.id===tr); right+=woRow(PSEL,false).replace('Work order ·',`Work order from ${nm?esc(nm.name):'a trainer'} ·`); }
   const recs=RECIPES2.filter(r=>r.prof===PSEL);
   if(recs.length){ if(PSEL==='blacksmithing') right+=`<div id="pfAnv" class="pfanv"></div>`; right+=`<div class="ptool"><input id="pfQ" placeholder="Search recipes" value="${esc(PFILT)}"><label style="font-size:12px"><input type="checkbox" id="pfH" ${PHAVE?'checked':''}> Have materials</label></div>`;
     let lastT=-1; for(const r of recs){ if(r.tier>P.r) continue; const nm=recName(r); if(PFILT&&!nm.toLowerCase().includes(PFILT.toLowerCase())) continue; const n=canMake(r); if(PHAVE&&!n) continue;
@@ -5739,10 +5740,10 @@ function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c
       const ok=P.s>=r.req&&n>0;
       right+=`<div class="prc ${ok?'':'no'}"><div class="nm"><b class="pc-${col}">${esc(nm)}</b> <small class="pc-${col}">(${r.req})</small>${out}<span>${mats}</span></div><button data-cr="${r.id}" class="${ok?'':'dim'}">Make</button>${r.gear?'':`<button data-cra="${r.id}" class="${ok&&n>1?'':'dim'}" title="Make as many as you can">×${Math.min(n,20)||''}</button>`}</div>`; }
     right+=`<p style="font-size:12px;color:var(--dim);margin-top:8px">Skill-ups: <span class="pc-orange">orange</span> always, <span class="pc-yellow">yellow</span> often, <span class="pc-green">green</span> sometimes, <span class="pc-grey">grey</span> never.${PSEL==='blacksmithing'?' Blacksmithing needs an anvil: the forge by Doran in Hearthmere, Garrick\'s forge in Brinehaven, or the anvil and forge at the camp of Jarl Hakon in Frostwatch (⚒ on the minimap).':''}</p>`; }
-  else if(PSEL==='fishing'){ const T=FISH?[]:null; right+=`<button id="pfFish" class="gold">🎣 Cast a line</button><p style="font-size:13px;margin-top:8px">Face open water and press <kbd>F</kbd> (or this button, or type <b>/fish</b>). When the bobber dips and splashes, press <kbd>F</kbd> or click the bobber within a second.</p><div style="font-size:13px;color:var(--dim)"><div>🐟 Amber Perch: any water</div><div>🐍 Mire Eel: Gloamfen and Thornwood (75+)</div><div>🐠 Silverfin: Mirrowmere and Vael (130+)</div><div>🐡 Icefin Cod: Frostpeak and the Caldera (200+)</div><div>🎏 Golden Koi: very rare, anywhere (150+)</div><div>Sometimes a chest of treasure.</div></div>`; }
-  else if(PSEL==='mining'||PSEL==='herbalism'){ const ok=PSEL==='mining'?['copper','iron','obsidian','mithril']:['sunpetal','thornbloom','mireroot','ghostcap','emberlily','frostbloom'];
+  else if(PSEL==='fishing'){ const T=FISH?[]:null; right+=`<button id="pfFish" class="gold">🎣 Cast a line</button><p style="font-size:13px;margin-top:8px">Face open water and press <kbd>F</kbd> (or this button, or type <b>/fish</b>). When the bobber dips and splashes, press <kbd>F</kbd> or click the bobber within a second.</p><div style="font-size:13px;color:var(--dim)"><div>🐟 Amber Perch: any water</div><div>🐍 Mire Eel: Gloamfen and Thornwood (75+)</div><div>🐠 Silverfin: Mirrowmere and Vael (130+)</div><div>🐡 Icefin Cod: Frostpeak and the Caldera (200+)</div><div>🐟 Storm Snapper: the Stormwake Coast (225+)</div><div>🫧 Tide Pearl: rare, the Stormwake Coast (300+)</div><div>🎏 Golden Koi: very rare, anywhere (150+)</div><div>Sometimes a chest of treasure.</div></div>`; }
+  else if(PSEL==='mining'||PSEL==='herbalism'){ const ok=PSEL==='mining'?['copper','iron','obsidian','mithril','emberite']:['sunpetal','thornbloom','mireroot','ghostcap','emberlily','frostbloom','ashbloom'];
     right+=`<div style="font-size:13px">${ok.map(k=>`<div><span class="pc-${pcol(P.s,nodeReq(k))}">${MATS[k].icon} ${MATS[k].name} (${nodeReq(k)})</span> <span style="color:var(--dim)">${MATS[k].zones.map(z=>ZONES[z]?ZONES[z].name:z).join(', ')}</span></div>`).join('')}</div><p style="font-size:13px;color:var(--dim);margin-top:8px">With the profession you gather faster and find ${PSEL==='mining'?'gems':'Starleaf'}. Every node gives one material. Large glittering <b>rich</b> ${PSEL==='mining'?'veins':'patches'} appear on your map once your skill is high enough.</p>`; }
-  else if(PSEL==='skinning'){ right+=`<p style="font-size:13px">Kill a beast, loot it, then press <kbd>F</kbd> or click its body to skin it. Bodies stay for 35 seconds.</p><div style="font-size:13px;color:var(--dim)"><div>🟫 Light Leather: boars, wolves (1+)</div><div>🟤 Thick Hide: ghouls, lurkers, Fangmaw (66+)</div><div>🦎 Scaled Hide: silt crawlers, the Cinderlord (176+)</div><div>🐾 Frost Pelt: frost wolves, yetis (198+)</div><div>🐉 Cinderhide: only from Gorrakh the Cinderlord</div></div>`; }
+  else if(PSEL==='skinning'){ right+=`<p style="font-size:13px">Kill a beast, loot it, then press <kbd>F</kbd> or click its body to skin it. Bodies stay for 35 seconds.</p><div style="font-size:13px;color:var(--dim)"><div>🟫 Light Leather: boars, wolves (1+)</div><div>🟤 Thick Hide: ghouls, lurkers, Fangmaw (66+)</div><div>🦎 Scaled Hide: silt crawlers, the Cinderlord (176+)</div><div>🐾 Frost Pelt: frost wolves, yetis, coast beasts (198+)</div><div>🦂 Cinderscale: beasts of the Scorched Reach (300+)</div><div>🐉 Cinderhide: only from Gorrakh the Cinderlord</div></div>`; }
   el.innerHTML=`<div class="pfl">${list}</div><div class="pfr">${right}</div>`;
   el.querySelectorAll('[data-pf]').forEach(b=>b.onclick=()=>{ PSEL=b.dataset.pf; renderProf(); });
   const q=$('pfQ'); if(q){ q.oninput=()=>{ PFILT=q.value; const pos=q.selectionStart; renderProf(); const q2=$('pfQ'); q2.focus(); q2.setSelectionRange(pos,pos); }; q.onkeydown=e=>e.stopPropagation(); }
@@ -5751,8 +5752,115 @@ function renderProf(){ const el=$('profBody'); if(!el||!me) return; const c=me.c
   el.querySelectorAll('[data-cra]').forEach(b=>b.onclick=()=>{ const r=RECIPES2.find(x=>x.id===b.dataset.cra); craft(r.id,Math.max(1,Math.min(20,canMake(r)))); });
   const fb=$('pfFish'); if(fb) fb.onclick=()=>{ toggleWin('profWin',false); fishStart(); };
   $('pfUn').onclick=()=>askConfirm(`Unlearn <b>${PROF[PSEL].name}</b>? Your skill (${P.s}) is lost for good.`,'Unlearn',()=>{ delete me.c.prof[PSEL]; chatLine(`You unlearn ${PROF[PSEL].name}.`,'c-prof'); PSEL=null; persist(); renderProf(); },true); }
-function profGM(arg){ const m=String(arg||'').match(/^(\S+)\s+(\d+)$/); if(!m||!PROF[m[1]]) return sysMsg('Usage: /setprof <'+Object.keys(PROF).join('|')+'> <skill 1-300>','c-err');
-  const s=clamp(+m[2],1,300); me.c.prof[m[1]]={s,r:s>225?3:s>150?2:s>75?1:0}; persist(); renderProf(); return sysMsg(`${PROF[m[1]].name} set to ${s}.`); }
+function profGM(arg){ const m=String(arg||'').match(/^(\S+)\s+(\d+)$/); if(!m||!PROF[m[1]]) return sysMsg('Usage: /setprof <'+Object.keys(PROF).join('|')+'> <skill 1-375>','c-err');
+  const s=clamp(+m[2],1,375); me.c.prof[m[1]]={s,r:s>300?4:s>225?3:s>150?2:s>75?1:0}; persist(); renderProf(); return sysMsg(`${PROF[m[1]].name} set to ${s}.`); }
+/* =====================================================================
+   v99: GRANDMASTER PROFESSIONS
+   Professions used to stop at skill 300 and item level 15 while heroes go to 20. This adds a fifth rank
+   (Grandmaster, skill 375), the materials of the Scorched Reach and the Stormwake Coast, level 19–20 crafted gear,
+   bigger yields from rich nodes and skilled hands, and daily work orders from every trainer.
+   ===================================================================== */
+PRANK.push({n:'Grandmaster',max:375,lvl:16,gold:90});
+TIERN.push('Grandmaster');
+const PROFMAX=375;
+Object.assign(MATS,{
+  emberite:{name:'Emberite Ore',icon:'🟥',col:'#ff5a2a',kind:'ore',zones:['reach'],val:3},
+  ashbloom:{name:'Ashbloom',icon:'🥀',col:'#ff8a5a',kind:'herb',zones:['reach'],val:3},
+  sunruby:{name:'Sunfire Ruby',icon:'❤️‍🔥',col:'#ff3a4a',kind:'gem',val:24},
+  cinderscale:{name:'Cinderscale',icon:'🦂',col:'#c8481a',kind:'leather',val:8},
+  embersilk:{name:'Embersilk',icon:'🟧',col:'#ff9a3a',kind:'cloth',val:8},
+  stormsnapper:{name:'Storm Snapper',icon:'🐟',col:'#5a8ab8',kind:'fish',val:8},
+  tidepearl:{name:'Tide Pearl',icon:'🫧',col:'#e8f4ff',kind:'gem',val:30},
+  cindersteak:{name:'Cinder Steak',icon:'🥩',col:'#a83a1a',kind:'meat',val:6},
+});
+NTIER.emberite=4; NTIER.ashbloom=4;
+ORE.push('emberite'); GEM.push('sunruby'); LEA.push('cinderscale');
+// cut rubies and pearls
+MATS.bold_sunruby={name:'Bold Sunfire Ruby',icon:'🔶',col:'#ff3a4a',kind:'cut',val:20,gem:{p:21,n:'Bold Sunfire Ruby'}};
+MATS.solid_sunruby={name:'Solid Sunfire Ruby',icon:'🔷',col:'#ff3a4a',kind:'cut',val:20,gem:{s:28,n:'Solid Sunfire Ruby'}};
+MATS.radiant_pearl={name:'Radiant Pearl',icon:'⚪',col:'#e8f4ff',kind:'cut',val:26,gem:{p:12,s:16,n:'Radiant Pearl'}};
+// grandmaster consumables
+defUse('whet5','Emberite Whetstone','🪨','#ff5a2a',14,{buff:'whet',min:30,lv:5},'+11% damage');
+defUse('kit5','Cinderscale Armour Kit','🧰','#c8481a',14,{buff:'kit',min:30,lv:5},'+24% armour');
+defUse('thread5','Embersilk Spellthread','🧵','#ff9a3a',14,{buff:'thread',min:30,lv:5},'+18 Power');
+defUse('flask_inferno','Flask of the Inferno','🧪','#ff3a1a',16,{buff:'inferno',min:30},'+10% damage and +20 Stamina'); defFx('inferno',{dmg:.10,sta:20});
+defUse('elix_phoenix','Elixir of the Phoenix','⚗️','#ffb03a',18,{buff:'phoenix',min:30},'Heal 0.8% health per second in combat, +80% regeneration out of combat'); defFx('phoenix',{cregen:.008,regen:.8});
+[['snappergrill','Grilled Storm Snapper','🍽️',{sta:30}],['cindersteakmeal','Seared Cinder Steak','🍖',{pow:24}],['tyrantfeast',"Tyrant's Feast",'🍱',{pow:22,sta:30,regen:.5}]].forEach(([k,n,ic,fx])=>{
+  const tip=[fx.pow?`+${fx.pow} Power`:'',fx.sta?`+${fx.sta} Stamina`:'',fx.regen?'+50% regeneration':''].filter(Boolean).join(', ');
+  defUse(k,n,ic,'#ffb05a',1+(fx.pow||0)/3+(fx.sta||0)/4|0,{food:'fed_'+k,min:30},tip); defFx('fed_'+k,fx); });
+/* ---- monsters of the Reach and the Coast now feed professions ---- */
+Object.assign(SKINK,{ravager:1,crusher:1,stalker:1,pyxwhelp:1});
+Object.assign(MEATK,{ravager:'cindersteak',crusher:'cindersteak',stalker:'cindersteak',pyxwhelp:'cindersteak'});
+Object.assign(CLOTHK,{cutthroat:1,slinger:1,deepcaller:1,blackwake:1,zealot:1,skarn:1});
+
+/* ---- Emberite and Ashbloom grow only in the Scorched Reach ---- */
+(function(){ const R=mulberry32(9919); let id=NODES.length+5000;
+  for(const k of ['emberite','ashbloom']) for(const rich of [0,1]){ let n=0,tries=0; const want=rich?8:24;
+    while(n<want&&tries<40000){ tries++; const tx=REACH.x0+Math.floor(R()*(MW-REACH.x0-4)), ty=3+Math.floor(R()*(REACH.y1-3)); if(!inReachT(tx,ty)) continue;
+      const t=tAt(tx,ty); if(SOLID.has(t)||t===T.WATER||t===T.LAVA||t===T.PATH||t===T.BRIDGE) continue; if(Math.hypot(tx-REACH.cx,ty-REACH.cy)<14) continue;
+      if(NODES.some(o=>Math.hypot(o.tx-tx,o.ty-ty)<5)) continue; NODES.push({id:id++,mat:k,tx,ty,x:tx*TS+16,y:ty*TS+16,resp:0,...(rich?{rich:1}:{})}); n++; } } })();
+
+/* ---- recipes: the Grandmaster tier ---- */
+{ const lv=19, b=301;
+  [['Longsword',0],['Greataxe',5],['Morningstar',10],['Daggers',15],['Hand Axe',20],['Warspear',25],['Spellblade',35],['Warstaff',40]].forEach(([base,o])=>
+    R2({prof:'blacksmithing',id:`bs_4_${base}`,req:b+o,tier:4,gear:{slot:'weapon',base,lv,rar:2,name:`Emberite ${base}`},mats:{emberite:12,mithril:3}}));
+  R2({prof:'blacksmithing',id:'bs_4_plate',req:b+30,tier:4,gear:{slot:'armor',base:'Warplate',lv,rar:2,at:'plate',name:'Emberite Warplate'},mats:{emberite:14,cinderscale:3}});
+  R2({prof:'blacksmithing',id:'bs_4_whet',req:b,tier:4,make:'whet5',n:2,mats:{emberite:2}});
+  R2({prof:'leatherworking',id:'lw_4_kit',req:b,tier:4,make:'kit5',n:2,mats:{cinderscale:3}});
+  ARMT.leather.forEach((base,j)=>R2({prof:'leatherworking',id:`lw_4_${j}`,req:b+10+j*15,tier:4,gear:{slot:'armor',base,lv,rar:2,at:'leather',name:`Cinderscale ${base}`},mats:{cinderscale:14+j,frostpelt:3}}));
+  R2({prof:'leatherworking',id:'lw_4_bow',req:b+30,tier:4,gear:{slot:'weapon',base:'Recurve Bow',lv,rar:2,name:'Cinderscale Recurve Bow'},mats:{cinderscale:12,emberite:3}});
+  R2({prof:'jewelcrafting',id:'jc_4_bold',req:b,tier:4,make:'bold_sunruby',n:1,mats:{sunruby:1}});
+  R2({prof:'jewelcrafting',id:'jc_4_solid',req:b+5,tier:4,make:'solid_sunruby',n:1,mats:{sunruby:1}});
+  R2({prof:'jewelcrafting',id:'jc_4_pearl',req:b+25,tier:4,make:'radiant_pearl',n:1,mats:{tidepearl:1},label:'Radiant Pearl',desc:'A gem that gives both Power and Stamina.'});
+  ['Charm','Signet','Talisman'].forEach((base,j)=>R2({prof:'jewelcrafting',id:`jc_4_t${j}`,req:b+12+j*15,tier:4,gear:{slot:'trinket',base,lv,rar:2,name:`Sunfire ${base}`},mats:{emberite:7,sunruby:1}}));
+  R2({prof:'jewelcrafting',id:'jc_4_wand',req:b+40,tier:4,gear:{slot:'weapon',base:'Wand',lv,rar:2,name:'Sunfire Wand'},mats:{emberite:7,sunruby:1,frostdiamond:1}});
+  R2({prof:'jewelcrafting',id:'jc_pro4',req:b+20,tier:4,prospect:'emberite',mats:{emberite:5},label:'Prospect Emberite Ore',desc:'Crush 5 ore and sift out gems (not always).'});
+  R2({prof:'tailoring',id:'tl_4_thread',req:b,tier:4,make:'thread5',n:2,mats:{embersilk:3}});
+  ARMT.cloth.forEach((base,j)=>R2({prof:'tailoring',id:`tl_4_${j}`,req:b+10+j*15,tier:4,gear:{slot:'armor',base,lv,rar:2,at:'cloth',name:`Embersilk ${base}`},mats:{embersilk:14+j,runecloth:3}}));
+  R2({prof:'tailoring',id:'tl_4_charm',req:b+40,tier:4,gear:{slot:'trinket',base:'Charm',lv,rar:2,name:'Embersilk Charm'},mats:{embersilk:9,ashbloom:2}});
+  [[301,{ashbloom:2,frostbloom:1},'flask_inferno',1],[320,{ashbloom:3,sunpetal:2},'pots',5,'Superior Healing Draught ×5'],[340,{emberite:4,ashbloom:2},'sunruby',1,'Transmute: Sunfire Ruby'],[360,{ashbloom:2,starleaf:1},'elix_phoenix',1]]
+    .forEach(([req,mats,make,n,label],j)=>R2({prof:'alchemy',id:'al4_'+j,req,tier:4,make,n,mats,label}));
+  [[301,{stormsnapper:1},'snappergrill'],[320,{cindersteak:2},'cindersteakmeal'],[350,{stormsnapper:1,cindersteak:1,ashbloom:1},'tyrantfeast']]
+    .forEach(([req,mats,make],j)=>R2({prof:'cooking',id:'ck4_'+j,req,tier:4,make,n:2,mats}));
+  // grandmaster epics, item level 20
+  R2({prof:'blacksmithing',id:'bs_e4',req:365,tier:4,gear:{slot:'weapon',base:'Longsword',lv:20,rar:3,name:'Tyrantforged Warblade'},mats:{emberite:16,mithril:6,sunruby:2}});
+  R2({prof:'blacksmithing',id:'bs_e5',req:375,tier:4,gear:{slot:'armor',base:'Warplate',lv:20,rar:3,at:'plate',name:'Tyrantforged Bulwark'},mats:{emberite:18,cinderscale:4,sunruby:2}});
+  R2({prof:'leatherworking',id:'lw_e3',req:370,tier:4,gear:{slot:'armor',base:'Brigandine',lv:20,rar:3,at:'leather',name:'Cinderstalker Brigandine'},mats:{cinderscale:16,wyrmscale:2,sunruby:1}});
+  R2({prof:'tailoring',id:'tl_e4',req:370,tier:4,gear:{slot:'armor',base:'Robes',lv:20,rar:3,at:'cloth',name:'Embersilk Regalia'},mats:{embersilk:16,tidepearl:1,sunruby:1}});
+  R2({prof:'jewelcrafting',id:'jc_e4',req:365,tier:4,gear:{slot:'trinket',base:'Locket',lv:20,rar:3,name:'Sunfire Pendant'},mats:{sunruby:3,emberite:6,tidepearl:1}});
+  R2({prof:'jewelcrafting',id:'jc_e5',req:375,tier:4,gear:{slot:'weapon',base:'Wand',lv:20,rar:3,name:"Tyrant's Eye Wand"},mats:{sunruby:3,frostdiamond:2,tidepearl:1}}); }
+
+/* ---- daily work orders: every trainer has a job for each profession you know ---- */
+const WO_GOODS={mining:[['copper'],['iron'],['obsidian'],['mithril'],['emberite']],herbalism:[['sunpetal','thornbloom'],['mireroot','ghostcap'],['emberlily'],['frostbloom'],['ashbloom']],
+  skinning:[['lightleather'],['thickhide'],['scaledhide'],['frostpelt'],['cinderscale']],fishing:[['amberperch'],['mireeel'],['silverfin'],['icefin'],['stormsnapper']]};
+const woDay=()=>Math.floor((Date.now()+2*3600e3)/864e5);
+function woSeed(s){ let h=2166136261; for(const ch of s) h=Math.imul(h^ch.charCodeAt(0),16777619); return mulberry32(h>>>0); }
+function workOrder(pk){ const c=me.c, P=c.prof[pk]; if(!P) return null; const R=woSeed(woDay()+':'+pk+':'+c.name); const tier=Math.min(P.r,Math.floor(Math.max(0,P.s-1)/75));
+  let mat, n;
+  if(WO_GOODS[pk]){ const L=WO_GOODS[pk][tier]; mat=L[Math.floor(R()*L.length)]; n=pk==='fishing'?4+Math.floor(R()*3):6+Math.floor(R()*4); }
+  else { const all=RECIPES2.filter(r=>r.prof===pk&&!r.gear&&!r.prospect&&r.make!=='pots'&&MATS[r.make]&&r.req<=P.s&&r.tier<=P.r).sort((a,b)=>b.req-a.req); if(!all.length) return null;
+    const cur=all.filter(r=>r.tier===tier), pool=cur.length?cur:all.slice(0,1), r=pool[Math.floor(R()*pool.length)]; mat=r.make; n=Math.max(2,(r.n||1)*(1+Math.floor(R()*2))); }
+  const done=c.wo&&c.wo.d===woDay()&&c.wo.done&&c.wo.done.includes(pk);
+  return {pk,mat,n,tier,done,gold:4+tier*7,xp:Math.round(xpNeed(c.lvl)*.06),skill:3}; }
+function woDeliver(pk){ const c=me.c, o=workOrder(pk); if(!o||o.done) return; if((c.mats[o.mat]||0)<o.n) return err(`You need ${o.n} ${MATS[o.mat].name}`);
+  c.mats[o.mat]-=o.n; if(!c.mats[o.mat]) delete c.mats[o.mat]; if(!c.wo||c.wo.d!==woDay()) c.wo={d:woDay(),done:[]}; c.wo.done.push(pk);
+  c.gold+=o.gold; coinFx(o.gold); gainXp(o.xp); const P=c.prof[pk], cap=PRANK[P.r].max; const before=P.s; P.s=Math.min(cap,P.s+o.skill);
+  chatLine(`Work order complete: +${o.gold} gold${P.s>before?`, ${PROF[pk].name} ${before} → ${P.s}`:''}.`,'c-prof'); stat('orders',1); sparkle(me.x,me.y,'#ffd34a'); try{ sfx('quest'); }catch(e){}
+  persist(); renderInv(); if(!$('profWin').classList.contains('hidden')) renderProf(); }
+function woRow(pk,deliver){ const o=workOrder(pk); if(!o) return ''; const M=MATS[o.mat], have=me.c.mats[o.mat]||0;
+  return `<div class="shoprow"><span><b>📜 Work order · ${PROF[pk].name}</b><br><span style="font-size:13px">Bring <b>${o.n} ${M.icon} ${esc(M.name)}</b> <span style="color:${have>=o.n?'#9fd18b':'#ff8a7a'}">(${have}/${o.n})</span></span><br><span style="font-size:12px;color:var(--dim)">${o.done?'Done for today. A new order comes tomorrow.':`Reward: ${o.gold} gold, experience and +${o.skill} skill`}</span></span>${deliver?`<button data-wo="${pk}" ${o.done||have<o.n?'disabled':''}>${o.done?'Done':'Deliver'}</button>`:''}</div>`; }
+{ const _ot=openTrainer; openTrainer=function(n){ _ot(n); const L=(PTRAIN[n.id]||[]).filter(pk=>me.c.prof[pk]); if(!L.length) return; const box=document.querySelector('#dlg .btns'); if(!box) return;
+    box.insertAdjacentHTML('beforebegin',`<h3 style="margin:12px 0 4px;font-family:Cinzel,serif;font-size:15px">Today's work orders</h3>${L.map(pk=>woRow(pk,true)).join('')}`);
+    document.querySelectorAll('#dlg [data-wo]').forEach(b=>b.onclick=()=>{ woDeliver(b.dataset.wo); openTrainer(n); }); }; }
+
+/* ---- achievements ---- */
+const profMax=c=>Math.max(0,...Object.values(c.prof||{}).map(p=>p.s||0));
+setTimeout(()=>ACH.push({id:'prof300',n:'Artisan',d:'Reach skill 300 in a profession',ic:'⚒️',f:c=>profMax(c)>=300},
+  {id:'prof375',n:'Grandmaster',d:'Reach skill 375 in a profession',ic:'🏆',f:c=>profMax(c)>=375},
+  {id:'fish100',n:'Master Angler',d:'Catch 100 fish',ic:'🎣',f:(c,S)=>(S.fished||0)>=100},
+  {id:'orders10',n:'Reliable Hands',d:'Complete 10 work orders',ic:'📜',f:(c,S)=>(S.orders||0)>=10},
+  {id:'crafted100',n:'Hands of a Maker',d:'Craft 100 items',ic:'🧰',f:(c,S)=>(S.crafted||0)>=100}),0);   // ACH is declared further down the file
+
 /* ---- quests are longer: more to kill and gather, a bit more reward ---- */
 setTimeout(()=>{ for(const q of QUESTS){ if(q._v48) continue; q._v48=1;
   if(q.type==='kill'&&q.n>=3) q.n=Math.ceil(q.n*1.5); else if(q.type==='gather'&&q.n>=3) q.n=Math.ceil(q.n*1.6);
