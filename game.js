@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 100;
+const VERSION = 101;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1814,12 +1814,12 @@ function updateAuto(dt){
   if(me.autoT<=0 && dist(me.x,me.y,te.x,te.y)<=a.rng+(te.e.t?te.e.t.r:12)+(a.proj?0:MELEE_SLACK)&&!losBlocked(me.x,me.y,te.x,te.y)){ me.autoT=a.spd*(1-songFx().as)*(me.rapidU>now()?.5:1);
     const c=Math.random()<.08+(CLS[me.c.cls].crit||0)+TAL('crit'); const d=Math.round((a.dmg+a.dmgL*(me.c.lvl-1)+me.pow*.45)*(1+TAL('dmg'))*(1+songFx().dmg)*(.9+Math.random()*.2)*(c?1.7+TAL('critd'):1)*shoutMul()*(me.markU>now()&&te.kind==='m'&&me.markId===te.e.id?1.15:1)*(me.c.eq.weapon&&me.c.eq.weapon.rar===4?1.1:1));
     const pv=a.proj==='arrow'?40:a.proj?4:0;
-    if(te.kind==='p'){ hitPlayer(te.e,d,pv,c); if(!a.proj) me.swingT=now(); if(CLS[me.c.cls].res==='rage') me.res=Math.min(100,me.res+10); return; }
+    if(te.kind==='p'){ hitPlayer(te.e,d,pv,c); if(!a.proj) me.swingT=now(); if(CLS[me.c.cls].res==='rage') me.res=Math.min(100,me.res+(me.c.cls==='barbarian'?18:10)); return; }
     pushAct(0,te.e.id,d,pv); te.e.atkT=now(); me.lastCombat=now(); meterAdd(te.e,'Auto attack',d,c);
     { const m=te.e, fb=()=>{ if(!m) return; const ang=Math.atan2(m.ry-me.y,m.rx-me.x); fct(m.rx,m.ry-26,c?d+'!':d,c?'#ffb02e':'#fff',c); m.hit=now(); if(!a.proj&&!m.dead){ if(c){ hitStop(m,.07); camPunch(.4); } m.kbA=ang; m.kbK=c?.9:.5; }
         try{ impactFX(m,ang,a.proj?'magic':weapKind(playerLook(me.c.cls,MY_U,myGearVis())),c,a.proj?.5:1); impSnd(m,a.proj?.5:.85); }catch(e){} }; if(a.proj) fb(); else atImpact(fb,IMPACT_DELAY); }
     if(!a.proj) me.swingT=now();
-    if(CLS[me.c.cls].res==='rage') me.res=Math.min(100,me.res+10);
+    if(CLS[me.c.cls].res==='rage') me.res=Math.min(100,me.res+(me.c.cls==='barbarian'?18:10));
     visualAct({x:me.x,y:me.y,u:MY_U},[0,0,te.e.id,d,pv],true);
   }
 }
@@ -5873,6 +5873,16 @@ QUESTS.push(
   {id:'vok3',giver:'vok',pre:'obsidian',title:'Lilies of the Caldera',type:'gather',mat:'emberlily',n:6,xp:1500,gold:16,lvl:8,text:'Emberlilies only bloom where the ground is hot enough to cook on. Mira pays well for them, and so do I. Bring me six.'},
   {id:'reach11',giver:'fenwick',pre:'reach1',title:'Cinderback Hides',type:'kill',mob:'crusher',n:10,xp:8000,gold:45,lvl:16,text:'The Cinderback Crushers are smashing our supply carts on the east road. Bring their numbers down by ten, and if you skin, their scales make fine armour.'},
   {id:'reach12',giver:'ilsa',pre:'reach3',title:'Ashbloom for the Wounded',type:'gather',mat:'ashbloom',n:8,xp:7000,gold:40,lvl:16,text:'Ashbloom grows in the burned fields beyond the camp. Its petals stop burns from festering, and we have plenty of burns. Gather eight.'});
+
+/* ---- v1.01 class balance, measured on a level-20 monster over a 60-second fight with equal epic gear ----
+   Before: Assassin 254, Hunter 251, Bulwark (tank) 233, Arcanist 216, Bard 206, Mender 177, Barbarian 164 damage per second.
+   The tank out-damaged two damage classes and the Barbarian was last. */
+setTimeout(()=>{
+  // Bulwark: a tank, not a damage dealer. Less damage, same threat.
+  for(const a of ABIL.warden) if(a.dmg||a.aoeDmg){ const k=a.dmg?'dmg':'aoeDmg'; a[k]=a[k].map(v=>+(v*.66).toFixed(2)); a.threatMul=+((a.threatMul||1)/.66).toFixed(2); }
+  // Arcanist: ran out of mana a third of the way into a long fight
+  for(const a of ABIL.arcanist) if(a.cost&&(a.hostile||a.aoeDmg)){ a.cost=Math.max(1,Math.round(a.cost*.75)); }
+},0);
 
 /* ---- quests are longer: more to kill and gather, a bit more reward ---- */
 setTimeout(()=>{ for(const q of QUESTS){ if(q._v48) continue; q._v48=1;

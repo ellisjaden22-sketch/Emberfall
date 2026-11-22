@@ -1,9 +1,9 @@
 {
- "version": "v1.00",
- "title": "Loose ends",
+ "version": "v1.01",
+ "title": "Class balance",
  "date": "21 Nov 2026",
- "text": "A sweep through the realm for anything left half done.\n\n⬆️ Mira's elixirs (Might, Fortitude, Emberlily Tonic, Frostbloom Tonic) are now for alchemists only. Anyone can still have her brew Healing Draughts, and she'll teach you Alchemy on the spot\n🔧 Grimmaw the Bonecrawler and Skarn the Ashlord now have proper loot tables, like every other elite\n✨ New quests at level 8 (Embers on the Wind, Lilies of the Caldera) and level 16 (Cinderback Hides, Ashbloom for the Wounded), the two levels where quests ran thin",
+ "text": "Every class was measured fighting a level-20 monster with the same gear. Three were out of line.\n\n⬆️ Barbarian: builds rage almost twice as fast from its own swings. It was starved of rage and dealt the least damage of every class, even less than the Mender. Its damage is now in line with the other damage classes\n⬆️ Bulwark: its attacks deal about a third less damage, but cause exactly the same threat. As a tank it was out-damaging the Arcanist and the Barbarian\n⬆️ Arcanist: damage spells cost 25% less mana. It used to run dry a third of the way into a long fight",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-21T05:35:08Z"
+ "time": "2026-11-21T07:03:03Z"
 }
