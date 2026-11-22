@@ -6,7 +6,7 @@
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 101;
+const VERSION = 102;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -5882,6 +5882,15 @@ setTimeout(()=>{
   for(const a of ABIL.warden) if(a.dmg||a.aoeDmg){ const k=a.dmg?'dmg':'aoeDmg'; a[k]=a[k].map(v=>+(v*.66).toFixed(2)); a.threatMul=+((a.threatMul||1)/.66).toFixed(2); }
   // Arcanist: ran out of mana a third of the way into a long fight
   for(const a of ABIL.arcanist) if(a.cost&&(a.hostile||a.aoeDmg)){ a.cost=Math.max(1,Math.round(a.cost*.75)); }
+},0);
+
+/* ---- v1.02 boss difficulty, measured against a geared tank of the boss's level ----
+   Raid bosses dealt 6–8% of a tank's health per second, except Ignara at 11.7%: half again as much as the bosses after her.
+   The open-world bosses of the Coast and the Reach (Thalassor, Captain Blackwake, Skarn, Pyraxis) dealt about 1% a second,
+   the same as Old Rendclaw at level 3, while Morvath the Lich, their level-15 peer, deals over 2%. */
+setTimeout(()=>{ const tune=(key,k,hp)=>{ const t=MOBT.find(m=>m.key===key); if(!t) return; t.dmg*=k; t.dmgL*=k; if(hp){ t.hp*=hp; t.hpL*=hp; for(const m of mobs) if(m.t===t&&!m.dead){ const f=m.hp/m.mhp; m.mhp=Math.round(m.mhp*hp); m.hp=Math.round(m.mhp*f); } } };
+  tune('ignara',.7);
+  tune('pyraxis',2.2); tune('thalassor',1.9); tune('skarn',1.6); tune('blackwake',1.5);
 },0);
 
 /* ---- quests are longer: more to kill and gather, a bit more reward ---- */

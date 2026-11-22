@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.01</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.02</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 101;
+const VERSION = 102;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -6438,6 +6438,15 @@ setTimeout(()=>{
   for(const a of ABIL.warden) if(a.dmg||a.aoeDmg){ const k=a.dmg?'dmg':'aoeDmg'; a[k]=a[k].map(v=>+(v*.66).toFixed(2)); a.threatMul=+((a.threatMul||1)/.66).toFixed(2); }
   // Arcanist: ran out of mana a third of the way into a long fight
   for(const a of ABIL.arcanist) if(a.cost&&(a.hostile||a.aoeDmg)){ a.cost=Math.max(1,Math.round(a.cost*.75)); }
+},0);
+
+/* ---- v1.02 boss difficulty, measured against a geared tank of the boss's level ----
+   Raid bosses dealt 6–8% of a tank's health per second, except Ignara at 11.7%: half again as much as the bosses after her.
+   The open-world bosses of the Coast and the Reach (Thalassor, Captain Blackwake, Skarn, Pyraxis) dealt about 1% a second,
+   the same as Old Rendclaw at level 3, while Morvath the Lich, their level-15 peer, deals over 2%. */
+setTimeout(()=>{ const tune=(key,k,hp)=>{ const t=MOBT.find(m=>m.key===key); if(!t) return; t.dmg*=k; t.dmgL*=k; if(hp){ t.hp*=hp; t.hpL*=hp; for(const m of mobs) if(m.t===t&&!m.dead){ const f=m.hp/m.mhp; m.mhp=Math.round(m.mhp*hp); m.hp=Math.round(m.mhp*f); } } };
+  tune('ignara',.7);
+  tune('pyraxis',2.2); tune('thalassor',1.9); tune('skarn',1.6); tune('blackwake',1.5);
 },0);
 
 /* ---- quests are longer: more to kill and gather, a bit more reward ---- */

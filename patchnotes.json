@@ -1,9 +1,9 @@
 {
- "version": "v1.01",
- "title": "Class balance",
+ "version": "v1.02",
+ "title": "Boss tuning",
  "date": "21 Nov 2026",
- "text": "Every class was measured fighting a level-20 monster with the same gear. Three were out of line.\n\n⬆️ Barbarian: builds rage almost twice as fast from its own swings. It was starved of rage and dealt the least damage of every class, even less than the Mender. Its damage is now in line with the other damage classes\n⬆️ Bulwark: its attacks deal about a third less damage, but cause exactly the same threat. As a tank it was out-damaging the Arcanist and the Barbarian\n⬆️ Arcanist: damage spells cost 25% less mana. It used to run dry a third of the way into a long fight",
+ "text": "Every boss was measured against a geared tank of its own level.\n\n⬆️ Ignara the Searing (Cinderhold) hits about a quarter less hard. She dealt half again as much damage as the bosses after her, at the second fight of the raid\n⬆️ The world bosses of the Stormwake Coast and the Scorched Reach now hit like bosses: Pyraxis, Thalassor, Skarn the Ashlord and Captain Blackwake deal 50–120% more damage. They dealt about the same share of your health as Old Rendclaw at level 3",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-21T07:03:03Z"
+ "time": "2026-11-21T07:14:30Z"
 }
