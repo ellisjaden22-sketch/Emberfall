@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.03</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.04</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 103;
+const VERSION = 104;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -834,7 +834,7 @@ const SOUTH_SITES=[
   {id:'southwatch',name:'Southwatch Camp',x:203,y:268,r:6},
   {id:'sowing',name:'The Sowing Stones',x:120,y:279,r:5},
   {id:'mirefall',name:'Mirefall Shrine',x:52,y:262,r:6}];
-const SOUTH_PROPS=[];
+let SPI=0; const BASEOBJ={}; const SOUTH_PROPS=[];
 function carveSouth(carve){ const S=Object.fromEntries(SOUTH_SITES.map(s=>[s.id,s]));
   /* roads: from the east gate past the west shore of Mirrowmere, then fanning out across the Southlands */
   const gx=TOWN.x+TOWN.r+2, gy=TOWN.y, J=[136,214];
@@ -843,7 +843,7 @@ function carveSouth(carve){ const S=Object.fromEntries(SOUTH_SITES.map(s=>[s.id,
   /* clear each site and stamp its solid props into the map */
   for(const s of SOUTH_SITES) for(let y=Math.floor(s.y-s.r);y<=s.y+s.r;y++)for(let x=Math.floor(s.x-s.r);x<=s.x+s.r;x++){ if(Math.hypot(x-s.x,y-s.y)>s.r) continue; const t=tAt(x,y);
     if(t===T.TREE||t===T.ROCK) setT(x,y,s.id==='mirefall'?T.SWAMP:T.GRASS); if(s.id==='mirefall'&&t===T.WATER&&Math.hypot(x-s.x,y-s.y)<s.r-1.5) setT(x,y,T.SWAMP); }
-  const add=(k,x,y,r,sc,name)=>{ const tx=Math.floor(x), ty=Math.floor(y), t=tAt(tx,ty); if(t===T.WATER||t===T.PATH||t===T.BRIDGE) return; SOUTH_PROPS.push({k,x,y,r:r||0,s:sc||1,name}); if(PROPK[k]&&PROPK[k].solid) setT(tx,ty,T.PROP); };
+  const add=(k,x,y,r,sc,name)=>{ const bi=SPI++, tx=Math.floor(x), ty=Math.floor(y), t=tAt(tx,ty); if(t===T.WATER||t===T.PATH||t===T.BRIDGE) return; (BASEOBJ.south=BASEOBJ.south||[])[bi]=[x,y,r||0,sc||1,k]; SOUTH_PROPS.push({k,x,y,r:r||0,s:sc||1,name,bi,ot:t}); if(PROPK[k]&&PROPK[k].solid) setT(tx,ty,T.PROP); };
   { const F=S.farmsteads; add('house',F.x-3,F.y-3,.2,1.1); add('house',F.x+3.5,F.y-2.5,-.3,.95); add('house',F.x+2,F.y+3.5,1.4,.9); add('well',F.x,F.y+.5); add('hay',F.x-4,F.y+2); add('hay',F.x-3,F.y+3.4,.6); add('cart',F.x+5,F.y+.8,.4);
     add('barrel',F.x-.8,F.y-4.6); add('crate',F.x+.6,F.y-4.4); add('bench',F.x-1.6,F.y+1.8,1.57); add('flowers',F.x+1.2,F.y-1.4); add('sign',F.x-6.2,F.y+.6,0,1);
     for(let k=0;k<9;k++){ add('fence',F.x-8+k*1.1,F.y-6.5,0); add('fence',F.x-8+k*1.1,F.y-11.5,0); } for(let k=0;k<5;k++){ add('fence',F.x-8.6,F.y-7.5-k,1.57); add('fence',F.x+1.3,F.y-7.5-k,1.57); }
@@ -1072,6 +1072,23 @@ if(WE){ try{ for(const e of (WE.tiles||[])){ const [x,y,n]=e; if(T[n]==null||x<1
     for(const e of (WE.zones||[])){ const [x,y,z]=e; if(!ZONES[z]&&z!=='town'||x<0||y<0||x>=MW||y>=OWH) continue; zmap[(y|0)*MW+(x|0)]=z; }
     T.PROP=T.PROP||16; for(const p of (WE.props||[])) if(PROPK[p.k]&&PROPK[p.k].solid){ const tx=Math.floor(p.x), ty=Math.floor(p.y); if(tAt(tx,ty)!==T.WATER) setT(tx,ty,T.PROP); }
   }catch(e){ console.warn('world edits (tiles) failed',e); } }
+
+/* World Editor overrides for the world's own objects: WE.base[kind][id] = 0 (removed) or [x,y,(r,s)] in tiles (moved).
+   BASEOBJ keeps where everything was first placed, so the editor can show it. */
+const WEB=(WE&&WE.base&&typeof WE.base==='object')?WE.base:{}, MOBMOVED=new Set();
+function baseOv(kind,id){ const o=WEB[kind]; if(!o||!Object.prototype.hasOwnProperty.call(o,id)) return undefined; const v=o[id]; return v===0||Array.isArray(v)?v:undefined; }
+function baseArr(kind,list,toAbs,fromAbs){ BASEOBJ[kind]=list.map(toAbs); const out=[]; list.forEach((e,i)=>{ const v=baseOv(kind,i); if(v===0) return; out.push(Array.isArray(v)?fromAbs(e,v):e); }); return out; }
+// Southlands props are placed before the edits are read, so they are moved or removed here
+for(let i=SOUTH_PROPS.length-1;i>=0;i--){ const p=SOUTH_PROPS[i], v=p.bi==null?undefined:baseOv('south',p.bi); if(v===undefined) continue; const solid=PROPK[p.k]&&PROPK[p.k].solid, ox=Math.floor(p.x), oy=Math.floor(p.y);
+  if(solid&&tAt(ox,oy)===T.PROP) setT(ox,oy,p.ot);
+  if(v===0){ SOUTH_PROPS.splice(i,1); continue; } p.x=v[0]; p.y=v[1]; if(v[2]!=null) p.r=v[2]; if(v[3]!=null) p.s=v[3];
+  const nx=Math.floor(p.x), ny=Math.floor(p.y); p.ot=tAt(nx,ny); if(solid&&p.ot!==T.WATER) setT(nx,ny,T.PROP); }
+function applyBase(){ try{
+  for(const n of NPCS){ const v=baseOv('npc',n.id); if(Array.isArray(v)&&!n._wb){ n._wb=1; n.x=v[0]*TS; n.y=v[1]*TS; for(const [a,b] of [['hx','hy'],['sx','sy'],['ox','oy']]) if(a in n&&b in n){ n[a]=n.x; n[b]=n.y; } } }
+  for(let i=POIS.length-1;i>=0;i--){ const p=POIS[i], v=baseOv('poi',p.id); if(v===0) POIS.splice(i,1); else if(Array.isArray(v)&&!p._wb){ p._wb=1; p.x=Math.round(v[0]-.5); p.y=Math.round(v[1]-.5); } }
+  for(const m of mobs){ if(m._wb) continue; const v=baseOv('mob',m.id); if(v===undefined) continue; m._wb=1;
+    if(v===0){ m.dead=true; m.resp=Infinity; m.gone=1; } else { const x=v[0]*TS, y=v[1]*TS; m.sx=m.x=m.rx=m.wx=x; m.sy=m.y=m.ry=m.wy=y; MOBMOVED.add(m.id); } }
+}catch(e){ console.warn('world editor overrides',e); } }
 const isSolidPx=(px,py)=>{ const tx=Math.floor(px/TS), ty=Math.floor(py/TS), t=tAt(tx,ty); return SOLID.has(t)||(t===T.DOOR&&doorClosedAt(tx,ty)); };
 function blocked(x,y,r){return isSolidPx(x-r,y-r)||isSolidPx(x+r,y-r)||isSolidPx(x-r,y+r)||isSolidPx(x+r,y+r)}
 function moveEnt(e,dx,dy,r){
@@ -1603,6 +1620,7 @@ MOBT.push({...MOBT.find(m=>m.key==='boar'),lv:[2,3],n:4,south:true},{...MOBT.fin
         const mhp=Math.round((mt.hp+mt.hpL*(lv-1))*(mt.critter||mt.raid?1:1.3)*(mt.vault?(mt.boss?2.2:1.7):1)*instHp(mt)); const m={id:id++,ti:-1,t:mt,lv,sx:x,sy:y,x,y,rx:x,ry:y,hp:mhp,mhp,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:R()*6.28,flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
     if(Y) for(let k=0;k<3;k++){ const x=(Y.x+Y.tx*(k-1)*2)*TS, y=(Y.y+Y.ty*(k-1)*2)*TS; const m={id:id++,ti:-1,t:DT,lv:1,sx:x,sy:y,x,y,rx:x,ry:y,hp:100000,mhp:100000,dead:false,evade:false,stunU:0,rootU:0,tgt:'',tag:'',threat:{},atk:0,wT:0,wx:x,wy:y,resp:0,breath:6,face:Math.atan2(TOWN.y-Y.y,TOWN.x-Y.x),flags:0,hit:0}; mobs.push(m); mobById[m.id]=m; } }
 })();
+applyBase(); setTimeout(applyBase,0);
 
 /* =====================================================================
    SAVE / CHARACTER
@@ -3626,6 +3644,7 @@ const GEO={hoodM:mkVAO(HEADK.hoodGeo(64,56)),head:mkVAO(HEADK.geo(72,64)),hair:m
 const HR=2, HN=MW*HR+1, HNZ=MH*HR+1, HG=new Float32Array(HN*HNZ), HLM=new Float32Array(HN*HNZ);
 const WATER_Y=0, LAVA_Y=2.6;
 const LAMPS=[[-6,-3],[6,-3],[-6,6],[6,6],[0,8],[-11,-2],[10,2],[1,-11],[-4,12.5],[4,12.5],[-8,-9],[8,-9],[12,-2],[-12,2],[11,8],[-16,-2],[16,2],[0,-13.5],[0,16],[-12,-13],[12,-13],[-11,12],[9,13]].map(([dx,dy])=>({x:(TOWN.x+dx)*TS+16,y:(TOWN.y+dy)*TS+16})).filter(L=>!SOLID.has(tAt(Math.floor(L.x/TS),Math.floor(L.y/TS))));
+{ const L2=baseArr('lamp',LAMPS,L=>[L.x/TS,L.y/TS],(L,v)=>({x:v[0]*TS,y:v[1]*TS})); LAMPS.length=0; LAMPS.push(...L2); }
 const GC={20:[30,29,31],22:[86,90,92],17:[150,190,218],18:[200,208,222],0:[96,142,62],1:[60,100,46],4:[168,142,98],5:[214,192,140],6:[78,90,52],7:[140,137,126],9:[66,55,51],11:[146,138,120],14:[120,88,55],3:[120,104,78],10:[46,26,20]};
 function groundT(t,tx,ty){ if(t===T.FENCE) t=T.GRASS; else if(t>=20) return t===T.DGATE?T.RUIN:t===T.VOID?T.VOID:T.DFLOOR; const z=zmap[clamp(ty,0,MH-1)*MW+clamp(tx,0,MW-1)];
   if(t===T.TREE||t===T.ROCK||t===T.PROP) return z==='ash'?T.ASH:z==='forest'?T.FOREST:z==='swamp'?T.SWAMP:z==='town'?T.COBBLE:z==='ruins'?T.RUIN:T.GRASS;
@@ -3819,11 +3838,11 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     const gapAt=a=>TOWN.gates.some(g=>{ let d=Math.abs(((a-g.c)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI); return d<(g.b-g.a)/2+.35; });
     for(let i=0;i<16;i++){ const a=i/16*Math.PI*2+Math.PI/16; if(!gapAt(a)&&onWall(a)) tower(a,false); } }
   // market square stalls and crates
-  for(const [ox,oz,col] of [[-4.5,-4.6,[.2,.36,.62]],[4.8,-4.4,[.62,.5,.15]],[-4.6,7.2,[.5,.18,.5]],[9.5,-3.6,[.2,.5,.3]]]){ const mx=TOWN.x+.5+ox, mz=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(mx),Math.floor(mz)))) continue;
+  for(const [ox,oz,col] of baseArr('stall',[[-4.5,-4.6,[.2,.36,.62]],[4.8,-4.4,[.62,.5,.15]],[-4.6,7.2,[.5,.18,.5]],[9.5,-3.6,[.2,.5,.3]]],e=>[TOWN.x+.5+e[0],TOWN.y+.5+e[1]],(e,v)=>[v[0]-TOWN.x-.5,v[1]-TOWN.y-.5,e[2]])){ const mx=TOWN.x+.5+ox, mz=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(mx),Math.floor(mz)))) continue;
     for(const [px,pz] of [[-1,-.5],[1,-.5],[-1,.5],[1,.5]]) box(mx+px,y0+1.1,mz+pz,.1,2.2,.1,wood);
     for(let k=0;k<5;k++) box(mx-.8+k*.4,y0+2.25,mz,.4,.07,1.25,k%2?[.88,.85,.76]:col);
     box(mx,y0+.5,mz,2.1,.1,.9,wood); box(mx,y0+.25,mz,2,.5,.8,[.4,.27,.15]); for(let k=0;k<4;k++) gAdd(d,RS,mx-.6+k*.4,y0+.65,mz,0,.2,.2,.2,[[.9,.3,.2],[.95,.75,.2],[.45,.75,.3],[.8,.5,.8]][k]); }
-  for(const [ox,oz] of [[-8,-8.5],[8.5,-9.5],[-10,9.5],[9.5,10],[12,2.5],[-12.5,-2]]){ const x=TOWN.x+.5+ox, z=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(x),Math.floor(z)))) continue;
+  for(const [ox,oz] of baseArr('crate',[[-8,-8.5],[8.5,-9.5],[-10,9.5],[9.5,10],[12,2.5],[-12.5,-2]],e=>[TOWN.x+.5+e[0],TOWN.y+.5+e[1]],(e,v)=>[v[0]-TOWN.x-.5,v[1]-TOWN.y-.5])){ const x=TOWN.x+.5+ox, z=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(x),Math.floor(z)))) continue;
     box(x,y0+.3,z,.6,.6,.6,[.5,.36,.2],R()); box(x+.55,y0+.3,z+.2,.55,.55,.55,[.46,.33,.18],R()); gAdd(d,RFR,x-.4,y0,z+.55,0,.5,.75,.5,[.42,.28,.15]); }
   // fountain
   { const fx=FOUNTAIN.x, fz=FOUNTAIN.z, y0=.55; gAdd(d,RC,fx,y0,fz,0,3.0,.55,3.0,stone); gAdd(d,RC,fx,y0+.5,fz,0,2.62,.06,2.62,[.2,.45,.6],.15);
@@ -3856,7 +3875,7 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     const ew=(tAt(tx-1,ty)===T.BRIDGE||tAt(tx-1,ty)===T.PATH)&&(tAt(tx+1,ty)===T.BRIDGE||tAt(tx+1,ty)===T.PATH);
     for(let k=0;k<4;k++){ const o=-.375+k*.25; if(ew) box(tx+.5+o,yb+.05,ty+.5,.22,.1,1.05,ash?[.3,.27,.25]:[.42,.29,.17],0); else box(tx+.5,yb+.05,ty+.5+o,1.05,.1,.22,ash?[.3,.27,.25]:[.42,.29,.17],0); } }
   // campfires
-  for(const [cx,cz] of [[48,66],[33,56],[70,70],[62,30]]){ if(SOLID.has(tAt(cx,cz))) continue; const x=cx+.5,z=cz+.5,y0=hgt(x,z);
+  for(const [cx,cz] of baseArr('fire',[[48,66],[33,56],[70,70],[62,30]],e=>[e[0]+.5,e[1]+.5],(e,v)=>[v[0]-.5,v[1]-.5])){ if(SOLID.has(tAt(Math.floor(cx+.5),Math.floor(cz+.5)))) continue; const x=cx+.5,z=cz+.5,y0=hgt(x,z);
     for(let k=0;k<7;k++){ const a=k/7*Math.PI*2; gAdd(d,RBL,x+Math.cos(a)*.55,y0+.08,z+Math.sin(a)*.55,0,.3,.22,.3,[.45,.43,.4]); }
     for(let k=0;k<3;k++) gAdd(d,RC,x,y0+.12,z,k*1.05,.12,.8,.12,[.3,.2,.12],0,Math.PI/2.4);
     gAdd(d,RS,x,y0+.1,z,0,.5,.18,.5,[1,.45,.1],2.5); STAT_LIGHTS.push({x,y:y0+.6,z,r:8,c:[1.4,.6,.2],fire:true}); }
@@ -9300,7 +9319,7 @@ function achestDraw(near,t){ if(!me||me.y<OWH*TS) return; const Q=achestPos(); i
 /* v96: Old Rendclaw gets a quiet corner of Amberfield to himself, as far from the town, the roads, the landmarks and every other
    creature as the meadow allows (worked out the same way on every computer, so everyone finds him in the same place) */
 const REND={done:false,pos:null};
-function rendLair(){ if(REND.done||!mobs||!mobs.length) return; REND.done=true; const ot=mobs.find(m=>m.t.key==='oldtusk'); if(!ot) return;
+function rendLair(){ if(REND.done||!mobs||!mobs.length) return; REND.done=true; const ot=mobs.find(m=>m.t.key==='oldtusk'); if(!ot||MOBMOVED.has(ot.id)||ot.gone) return;
   let best=null, bs=-1;
   for(let ty=8;ty<OWH-8;ty+=2) for(let tx=8;tx<MW-8;tx+=2){ if(zmap[ty*MW+tx]!=='meadow') continue; const x=(tx+.5)*TS, y=(ty+.5)*TS;
     if(Math.hypot(tx-TOWN.x,ty-TOWN.y)<28||blocked(x,y,30)||isWaterAt(x,y)||inTown(x,y)) continue;

@@ -1,9 +1,9 @@
 {
- "version": "v1.03",
- "title": "PvP rewards",
- "date": "21 Nov 2026",
- "text": "PvP gear took far too long to earn: a full Conquest set needed 240 arena kills, and losing a battle gave no Conquest at all.\n\n⬆️ Arena kills give 5 Conquest (was 3), a three-kill streak 8 more (was 5), and your first arena kill each day gives 25 more\n✨ Emberclash Fields now gives Conquest too: 12 for a win, 8 for a draw and 5 for a loss\n⬆️ Defeating a player gives 3 Honor (was 1), and your first Emberclash win each day gives 40 more Honor",
+ "version": "v1.04",
+ "title": "Move anything",
+ "date": "26 Nov 2026",
+ "text": "The World Editor can now move and remove the world's own objects, not only the ones you added.\n\n✨ World Editor: click and drag anything the game placed: street lamps, market stalls, crate stacks, campfires, the Southlands farmsteads and camps, NPCs, monsters and landmarks\n✨ World Editor: delete any of them with Delete (NPCs can be moved but not removed, because quests depend on them). Moved objects show a line back to where they were, and \"Put back where it was\" or \"Restore all\" undoes it\n✨ World Editor: trees and rocks can be dragged to a new spot or deleted too, and the ground underneath fills in to match\n✨ World Editor: Duplicate or copy any original object to get your own copy, to spread lamps, stalls or monsters around the world\n⬆️ World Editor: every original object is listed in the Hierarchy under Original world, with a filter",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-21T07:20:28Z"
+ "time": "2026-11-26T09:54:14Z"
 }
