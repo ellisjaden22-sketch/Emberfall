@@ -1,9 +1,9 @@
 {
- "version": "v1.06",
- "title": "Companions",
+ "version": "v1.07",
+ "title": "Smarter companions",
  "date": "28 Nov 2026",
- "text": "Going in alone? Hire companions at the dungeon, the raid and the great world bosses.\n\n✨ Companions: a Sellsword waits at the Sunken Vault gate, at the Cinderhold Gate and near every great world boss. If you have no party, hire up to 4 companions (7 for Cinderhold) for free: a Bulwark tank, a Mender healer, a Bard, a Hunter, an Arcanist, a Barbarian or an Assassin\n✨ Companions follow you, fight what you fight, and play their role: the tank calls monsters off you and takes the hits, the healer keeps everyone standing, the rest deal damage. They are a little weaker than real players\n✨ Companions stay where you hired them. Leave the dungeon, the raid or the boss's grounds, or join a real party, and they head home. A fallen companion gets back up once the fight is over\n⬆️ You keep all the experience and loot from monsters your companions help you kill",
+ "text": "Your hired companions now fight like a real party.\n\n✨ Every companion has a signature ability: Barbarian Execute on weakened foes, Assassin Eviscerate, Hunter Volley against groups, Arcanist Chain Lightning, Bard Song of Valor (+15% party damage and a small heal)\n✨ The tank raises Shield Wall when badly hurt (half damage for 6 seconds); the Mender casts Circle of Light when several allies are wounded\n• Companions step out of boss ground attacks instead of standing in them\n• Companions now taunt from range when a monster runs for you, and no longer get stuck behind walls in melee",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-28T08:39:46Z"
+ "time": "2026-11-28T10:45:25Z"
 }
