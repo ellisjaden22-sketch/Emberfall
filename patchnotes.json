@@ -1,9 +1,9 @@
 {
- "version": "v1.04",
- "title": "Move anything",
+ "version": "v1.05",
+ "title": "Turn anything",
  "date": "26 Nov 2026",
- "text": "The World Editor can now move and remove the world's own objects, not only the ones you added.\n\n✨ World Editor: click and drag anything the game placed: street lamps, market stalls, crate stacks, campfires, the Southlands farmsteads and camps, NPCs, monsters and landmarks\n✨ World Editor: delete any of them with Delete (NPCs can be moved but not removed, because quests depend on them). Moved objects show a line back to where they were, and \"Put back where it was\" or \"Restore all\" undoes it\n✨ World Editor: trees and rocks can be dragged to a new spot or deleted too, and the ground underneath fills in to match\n✨ World Editor: Duplicate or copy any original object to get your own copy, to spread lamps, stalls or monsters around the world\n⬆️ World Editor: every original object is listed in the Hierarchy under Original world, with a filter",
+ "text": "NPCs and objects can now be turned in the World Editor, and every street lamp in Hearthmere can be moved.\n\n✨ World Editor: turn NPCs, market stalls, crate stacks, Southlands props and your own props. Drag the blue handle on the map, press R (Shift+R turns the other way), or set the angle in the Inspector\n✨ World Editor: NPCs get a Facing setting. They rest facing that way and still turn to look at you when you come close. A small tick on the map shows which way each one faces\n✨ World Editor: the chapel's lamps, the tavern lamp and the lamps along the ring street can now be moved and removed like the other street lamps",
  "url": "https://emberfall-sb6p.onrender.com/#news",
  "play": "https://emberfall-sb6p.onrender.com/play/",
- "time": "2026-11-26T09:54:14Z"
+ "time": "2026-11-26T21:07:00Z"
 }

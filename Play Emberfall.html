@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.04</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.05</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 104;
+const VERSION = 105;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1084,7 +1084,7 @@ for(let i=SOUTH_PROPS.length-1;i>=0;i--){ const p=SOUTH_PROPS[i], v=p.bi==null?u
   if(v===0){ SOUTH_PROPS.splice(i,1); continue; } p.x=v[0]; p.y=v[1]; if(v[2]!=null) p.r=v[2]; if(v[3]!=null) p.s=v[3];
   const nx=Math.floor(p.x), ny=Math.floor(p.y); p.ot=tAt(nx,ny); if(solid&&p.ot!==T.WATER) setT(nx,ny,T.PROP); }
 function applyBase(){ try{
-  for(const n of NPCS){ const v=baseOv('npc',n.id); if(Array.isArray(v)&&!n._wb){ n._wb=1; n.x=v[0]*TS; n.y=v[1]*TS; for(const [a,b] of [['hx','hy'],['sx','sy'],['ox','oy']]) if(a in n&&b in n){ n[a]=n.x; n[b]=n.y; } } }
+  for(const n of NPCS){ const v=baseOv('npc',n.id); if(Array.isArray(v)&&!n._wb){ n._wb=1; n.x=v[0]*TS; n.y=v[1]*TS; if(typeof v[2]==='number') n.rest=v[2]; for(const [a,b] of [['hx','hy'],['sx','sy'],['ox','oy']]) if(a in n&&b in n){ n[a]=n.x; n[b]=n.y; } } }
   for(let i=POIS.length-1;i>=0;i--){ const p=POIS[i], v=baseOv('poi',p.id); if(v===0) POIS.splice(i,1); else if(Array.isArray(v)&&!p._wb){ p._wb=1; p.x=Math.round(v[0]-.5); p.y=Math.round(v[1]-.5); } }
   for(const m of mobs){ if(m._wb) continue; const v=baseOv('mob',m.id); if(v===undefined) continue; m._wb=1;
     if(v===0){ m.dead=true; m.resp=Infinity; m.gone=1; } else { const x=v[0]*TS, y=v[1]*TS; m.sx=m.x=m.rx=m.wx=x; m.sy=m.y=m.ry=m.wy=y; MOBMOVED.add(m.id); } }
@@ -1210,7 +1210,7 @@ addNPC('ysolde','Battlemaster Ysolde','Battlegrounds & Honor',TOWN.x+5,TOWN.y+8,
 addNPC('velma','Auctioneer Velma','Auction House',TOWN.x-1,TOWN.y-6,'#7a5aa0');
 const WE_GREET={};
 if(WE&&Array.isArray(WE.npcs)) for(const n of WE.npcs){ try{ const id='e_'+String(n.id||n.name||'npc').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,20); if(NPCS.some(q=>q.id===id)) continue; const [x,y]=findOpen(n.x|0,n.y|0);
-    NPCS.push({id,name:String(n.name||'Villager').slice(0,28),title:String(n.title||'').slice(0,28),x:x*TS+16,y:y*TS+16,col:/^#[0-9a-f]{6}$/i.test(n.col||'')?n.col:'#8a7a5a'}); if(n.say) WE_GREET[id]='"'+String(n.say).replace(/"/g,"'").slice(0,240)+'"'; }catch(e){} }
+    NPCS.push({id,name:String(n.name||'Villager').slice(0,28),title:String(n.title||'').slice(0,28),x:x*TS+16,y:y*TS+16,col:/^#[0-9a-f]{6}$/i.test(n.col||'')?n.col:'#8a7a5a',...(typeof n.r==='number'?{rest:n.r}:{})}); if(n.say) WE_GREET[id]='"'+String(n.say).replace(/"/g,"'").slice(0,240)+'"'; }catch(e){} }
 if(WE&&Array.isArray(WE.pois)) for(const p of WE.pois){ const nm=String(p.name||'').slice(0,30); if(!nm) continue; POIS.push({id:'e_'+nm.toLowerCase().replace(/[^a-z0-9]+/g,''),name:nm,x:p.x|0,y:p.y|0,r:clamp(p.r|0||5,2,20)}); }
 { const v=NPCS.find(n=>n.id==='varro'); const [gx,gy]=findOpen(Math.floor(v.x/TS),Math.floor(v.y/TS)+2); AR.gate={x:gx*TS+16,y:gy*TS+16}; }
 addNPC('keeperw','Arena Keeper','Leave the arena',Math.round(AR.shr[0][0])-2,Math.round(AR.shr[0][1]),'#8a6a3a'); addNPC('keepere','Arena Keeper','Leave the arena',Math.round(AR.shr[1][0])+2,Math.round(AR.shr[1][1]),'#8a6a3a'); POIS.push({id:'vault',name:'The Sunken Vault',x:99+VGO[0],y:48+VGO[1],r:4});
@@ -3710,7 +3710,8 @@ const LPLANE=(function(){ const d=G0(); for(const [x,z] of [[0,0],[MW,0],[MW,OWH
 const RB=gBox(), RS=gSphere(10,7), RC=gCyl(10,.5,.5), RCN=gCyl(10,0,.5), RP=gPrism(), RFR=gCyl(12,.36,.5), RBL=gSphere(8,6,.45,3);
 const STAT_LIGHTS=[], CHIMNEYS=[], FOUNTAIN={x:TOWN.x+.5,z:TOWN.y+.5};
 function addTownDistricts(d,box,C){ const {wood,dark,stone,iron}=C, y0=.55, R=mulberry32(4141);
-  const lamp=(x,z)=>{ gAdd(d,RC,x,y0,z,0,.12,2.7,.12,iron); gAdd(d,RC,x,y0,z,0,.28,.18,.28,iron); box(x,y0+2.9,z,.32,.42,.32,[1,.62,.25],0,1.3); box(x,y0+3.16,z,.42,.08,.42,iron); gAdd(d,RCN,x,y0+3.2,z,0,.36,.28,.36,iron); STAT_LIGHTS.push({x,y:y0+2.9,z,r:9,c:[1.2,.75,.38],night:true,lamp:true}); };
+  let DLI=0; const lamp=(x,z)=>{ const bi=DLI++; (BASEOBJ.dlamp=BASEOBJ.dlamp||[])[bi]=[x,z]; const v=baseOv('dlamp',bi); if(v===0) return; if(Array.isArray(v)){ x=v[0]; z=v[1]; }
+    const y0=Array.isArray(v)?hgt(x,z):.55; gAdd(d,RC,x,y0,z,0,.12,2.7,.12,iron); gAdd(d,RC,x,y0,z,0,.28,.18,.28,iron); box(x,y0+2.9,z,.32,.42,.32,[1,.62,.25],0,1.3); box(x,y0+3.16,z,.42,.08,.42,iron); gAdd(d,RCN,x,y0+3.2,z,0,.36,.28,.36,iron); STAT_LIGHTS.push({x,y:y0+2.9,z,r:9,c:[1.2,.75,.38],night:true,lamp:true}); };
   // --- the chapel: a stone nave with stained glass and a tall bell tower with a spire
   const ch=TOWN.chapel; if(ch){ const cx=ch.x+ch.w/2, cz=ch.y+ch.h/2, sw=[.7,.67,.6], sd=[.5,.48,.44];
     box(cx,y0+.2,cz,ch.w+.2,.4,ch.h+.2,sd); box(cx,y0+.4+1.7,cz+.5,ch.w-.3,3.4,ch.h-1.2,sw); gAdd(d,RP,cx,y0+3.8,cz+.5,0,ch.w+.4,2.2,ch.h-.9,[.3,.32,.38]);
@@ -3838,12 +3839,13 @@ const STATIC=(function(){ const d=G0(); STATIC_D=d; const R=mulberry32(4242);
     const gapAt=a=>TOWN.gates.some(g=>{ let d=Math.abs(((a-g.c)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI); return d<(g.b-g.a)/2+.35; });
     for(let i=0;i<16;i++){ const a=i/16*Math.PI*2+Math.PI/16; if(!gapAt(a)&&onWall(a)) tower(a,false); } }
   // market square stalls and crates
-  for(const [ox,oz,col] of baseArr('stall',[[-4.5,-4.6,[.2,.36,.62]],[4.8,-4.4,[.62,.5,.15]],[-4.6,7.2,[.5,.18,.5]],[9.5,-3.6,[.2,.5,.3]]],e=>[TOWN.x+.5+e[0],TOWN.y+.5+e[1]],(e,v)=>[v[0]-TOWN.x-.5,v[1]-TOWN.y-.5,e[2]])){ const mx=TOWN.x+.5+ox, mz=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(mx),Math.floor(mz)))) continue;
-    for(const [px,pz] of [[-1,-.5],[1,-.5],[-1,.5],[1,.5]]) box(mx+px,y0+1.1,mz+pz,.1,2.2,.1,wood);
-    for(let k=0;k<5;k++) box(mx-.8+k*.4,y0+2.25,mz,.4,.07,1.25,k%2?[.88,.85,.76]:col);
-    box(mx,y0+.5,mz,2.1,.1,.9,wood); box(mx,y0+.25,mz,2,.5,.8,[.4,.27,.15]); for(let k=0;k<4;k++) gAdd(d,RS,mx-.6+k*.4,y0+.65,mz,0,.2,.2,.2,[[.9,.3,.2],[.95,.75,.2],[.45,.75,.3],[.8,.5,.8]][k]); }
-  for(const [ox,oz] of baseArr('crate',[[-8,-8.5],[8.5,-9.5],[-10,9.5],[9.5,10],[12,2.5],[-12.5,-2]],e=>[TOWN.x+.5+e[0],TOWN.y+.5+e[1]],(e,v)=>[v[0]-TOWN.x-.5,v[1]-TOWN.y-.5])){ const x=TOWN.x+.5+ox, z=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(x),Math.floor(z)))) continue;
-    box(x,y0+.3,z,.6,.6,.6,[.5,.36,.2],R()); box(x+.55,y0+.3,z+.2,.55,.55,.55,[.46,.33,.18],R()); gAdd(d,RFR,x-.4,y0,z+.55,0,.5,.75,.5,[.42,.28,.15]); }
+  for(const [ox,oz,col,ra] of baseArr('stall',[[-4.5,-4.6,[.2,.36,.62]],[4.8,-4.4,[.62,.5,.15]],[-4.6,7.2,[.5,.18,.5]],[9.5,-3.6,[.2,.5,.3]]],e=>[TOWN.x+.5+e[0],TOWN.y+.5+e[1]],(e,v)=>[v[0]-TOWN.x-.5,v[1]-TOWN.y-.5,e[2],+v[2]||0])){ const mx=TOWN.x+.5+ox, mz=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(mx),Math.floor(mz)))) continue;
+    const ca=Math.cos(ra||0), sa=Math.sin(ra||0), P=(a,b)=>[mx+a*ca-b*sa,mz+a*sa+b*ca], RB2=(a,y,b,sx,sy,sz,c)=>{ const [X,Z]=P(a,b); box(X,y,Z,sx,sy,sz,c,-(ra||0)); };
+    for(const [px,pz] of [[-1,-.5],[1,-.5],[-1,.5],[1,.5]]) RB2(px,y0+1.1,pz,.1,2.2,.1,wood);
+    for(let k=0;k<5;k++) RB2(-.8+k*.4,y0+2.25,0,.4,.07,1.25,k%2?[.88,.85,.76]:col);
+    RB2(0,y0+.5,0,2.1,.1,.9,wood); RB2(0,y0+.25,0,2,.5,.8,[.4,.27,.15]); for(let k=0;k<4;k++){ const [X,Z]=P(-.6+k*.4,0); gAdd(d,RS,X,y0+.65,Z,0,.2,.2,.2,[[.9,.3,.2],[.95,.75,.2],[.45,.75,.3],[.8,.5,.8]][k]); } }
+  for(const [ox,oz,ra] of baseArr('crate',[[-8,-8.5],[8.5,-9.5],[-10,9.5],[9.5,10],[12,2.5],[-12.5,-2]],e=>[TOWN.x+.5+e[0],TOWN.y+.5+e[1]],(e,v)=>[v[0]-TOWN.x-.5,v[1]-TOWN.y-.5,+v[2]||0])){ const x=TOWN.x+.5+ox, z=TOWN.y+.5+oz, y0=.55; if(SOLID.has(tAt(Math.floor(x),Math.floor(z)))) continue;
+    const ca=Math.cos(ra||0), sa=Math.sin(ra||0), P=(a,b)=>[x+a*ca-b*sa,z+a*sa+b*ca]; box(x,y0+.3,z,.6,.6,.6,[.5,.36,.2],R()-(ra||0)); { const [X,Z]=P(.55,.2); box(X,y0+.3,Z,.55,.55,.55,[.46,.33,.18],R()-(ra||0)); } { const [X,Z]=P(-.4,.55); gAdd(d,RFR,X,y0,Z,0,.5,.75,.5,[.42,.28,.15]); } }
   // fountain
   { const fx=FOUNTAIN.x, fz=FOUNTAIN.z, y0=.55; gAdd(d,RC,fx,y0,fz,0,3.0,.55,3.0,stone); gAdd(d,RC,fx,y0+.5,fz,0,2.62,.06,2.62,[.2,.45,.6],.15);
     gAdd(d,RC,fx,y0,fz,0,.55,1.4,.55,stone); gAdd(d,RFR,fx,y0+1.35,fz,0,1.2,.3,1.2,stone); gAdd(d,RS,fx,y0+1.85,fz,0,.35,.35,.35,[.85,.68,.3]); gAdd(d,RC,fx,y0+1.58,fz,0,1.0,.05,1.0,[.25,.5,.65],.2); }
@@ -4739,7 +4741,7 @@ function villPos(v,t){ if(v.seg) return villSeg(v,t); const Lr=Math.abs(v.span)*
   if(s<P){ u=0; dir=1; mv=0; } else if(s<P+Lr/v.spd){ u=(s-P)*v.spd/Lr; dir=1; } else if(s<2*P+Lr/v.spd){ u=1; dir=-1; mv=0; } else { u=1-(s-2*P-Lr/v.spd)*v.spd/Lr; dir=-1; }
   const a=v.a0+v.span*u; const x=TOWN.x+.5+Math.cos(a)*v.r, z=TOWN.y+.5+Math.sin(a)*v.r; const tang=a+Math.sign(v.span)*dir*Math.PI/2;
   return {x,z,face:mv?tang:tang+Math.PI*.5,mv,walk:u*Lr*3.4}; }
-function npcLook(n){ let d=0; if(me&&!me.dead&&dist(n.x,n.y,me.x,me.y)<150){ d=Math.atan2(me.y-n.y,me.x-n.x)-(n.face??Math.PI/2); d=clamp(Math.atan2(Math.sin(d),Math.cos(d)),-1,1); } n._lk=lerp(n._lk||0,d,.06); return n._lk; }
+function npcLook(n){ let d=0; if(me&&!me.dead&&dist(n.x,n.y,me.x,me.y)<150){ d=Math.atan2(me.y-n.y,me.x-n.x)-(n.face??n.rest??Math.PI/2); d=clamp(Math.atan2(Math.sin(d),Math.cos(d)),-1,1); } n._lk=lerp(n._lk||0,d,.06); return n._lk; }
 LOOK.keepere=LOOK.keeperw;
 LOOK.barbarian={torso:[.42,.28,.18],legs:[.26,.2,.14],arms:[.62,.42,.3],boots:[.2,.14,.09],gloves:[.28,.2,.12],cape:[.36,.26,.18],trim:[.72,.6,.42],head:'bald',hair:[.5,.24,.12],weapon:'greataxe',straps:true,strapC:[.2,.13,.08]};
 LOOK.hunter={torso:[.24,.36,.2],legs:[.26,.22,.16],arms:[.3,.38,.22],boots:[.2,.15,.1],gloves:[.32,.22,.12],cape:[.16,.28,.14],trim:[.66,.56,.34],head:'hoodopen',hood:[.18,.3,.16],weapon:'bow',straps:true,strapC:[.3,.2,.1]};
@@ -4856,7 +4858,7 @@ function buildScene(dt){
   { const tt=Date.now()/1000, nt=curDark>.6; VILL.forEach((v,i)=>{ if(nt&&i%2) return; const p=villPos(v,tt); if(!near(p.x*TS,p.z*TS,60)) return; const gy=groundY(p.x*TS,p.z*TS); drawHumanoid({x:p.x,y:gy,z:p.z,face:p.face,mv:p.mv,walk:p.walk,dead:-1,L:v.L,skin:SKIN[v.skin]});
       if(nt){ const hx=p.x+Math.cos(p.face+.6)*.42, hz=p.z+Math.sin(p.face+.6)*.42, sw=Math.sin(tt*4+i)*.03*p.mv; mreset(); mtr(hx,gy+.82+sw,hz); P(GEO.box,.13,.18,.13,[1,.8,.4],5,0,0,0); P(GEO.box,.16,.03,.16,[.2,.17,.14],0,0,.1,0); addLight(hx,gy+.9,hz,4.5,[1.2,.78,.36]); } }); }
   try{ drawHarbourLife(t,near); }catch(e){}
-  for(const n of NPCS){ if(!near(n.x,n.y,70)) continue; drawHumanoid({x:n.x/TS,y:groundY(n.x,n.y),z:n.y/TS,face:n.face??Math.PI/2,emote:n.emote,mv:0,walk:0,dead:-1,look:npcLook(n),L:LOOK[n.id]||LOOK.oriel,skin:SKIN[n.id==='mira'?1:2]}); }
+  for(const n of NPCS){ if(!near(n.x,n.y,70)) continue; drawHumanoid({x:n.x/TS,y:groundY(n.x,n.y),z:n.y/TS,face:n.face??n.rest??Math.PI/2,emote:n.emote,mv:0,walk:0,dead:-1,look:npcLook(n),L:LOOK[n.id]||LOOK.oriel,skin:SKIN[n.id==='mira'?1:2]}); }
   drawExtras(near,t);
   for(const m of mobs){ try{
     if(m.dead){ if(m.deathT&&(t-m.deathT<1.6||(m.skinU>t&&!m.skinned))&&near(m.dx,m.dy,70)) drawMob3(m,true); continue; }
@@ -7014,8 +7016,8 @@ function bossDied(m){ if(!bossEng||bossEng.m!==m) return; const Y=BOSSY[m.t.key]
 /* ---------- NPC life ---------- */
 const NPCBARK={oriel:['Keep your blade sharp out there.','The wolves grow bolder every night.','Hearthmere stands because people like you fight for it.'],mira:['Potions! Fresh potions!','Got loot to sell? I pay fair.','Mind the step, traveller.'],doran:['*clang* *clang*','Good steel never lies.','Bring me ore and I\'ll make you a legend.'],hilde:['Easy there, girl... easy.','A good horse is worth ten swords.','Need a ride? I\'ve the finest steeds in the realm.'],hakon:['The cold bites deep here.','Keep moving or freeze.']};
 const NPCGEN=['Well met, traveller.','Safe travels.','Have you seen the smoke over the caldera?','Strange times...'];
-function updateNPCs(dt,t){ if(!me) return; for(const n of NPCS){ const d=dist(me.x,me.y,n.x,n.y); if(n.face===undefined){ n.face=Math.PI/2; n.near=false; n.barkT=0; }
-    const want=d<190?Math.atan2(me.y-n.y,me.x-n.x):Math.PI/2+Math.sin(t*.3+n.x)*.3; let df=want-n.face; while(df>Math.PI) df-=6.283; while(df<-Math.PI) df+=6.283; n.face+=df*Math.min(1,dt*4);
+function updateNPCs(dt,t){ if(!me) return; for(const n of NPCS){ const d=dist(me.x,me.y,n.x,n.y); if(n.face===undefined){ n.face=n.rest??Math.PI/2; n.near=false; n.barkT=0; }
+    const want=d<190?Math.atan2(me.y-n.y,me.x-n.x):(n.rest??Math.PI/2)+Math.sin(t*.3+n.x)*.3; let df=want-n.face; while(df>Math.PI) df-=6.283; while(df<-Math.PI) df+=6.283; n.face+=df*Math.min(1,dt*4);
     if(d<170&&!n.near){ n.near=true; if(t-n.barkT>40){ n.barkT=t; n.emote={k:'wave',t0:t}; n.emoteU=t+2.2; const L=NPCBARK[n.id]||NPCGEN; n.bubble=L[Math.random()*L.length|0]; n.bubbleT=t+4.5; } }
     else if(d>260) n.near=false; if(n.emote&&t>n.emoteU) n.emote=null; } }
 function typeText(el,full){ if(!el) return; el.textContent=''; let i=0; const step=()=>{ if(!el.isConnected) return; i=Math.min(full.length,i+3); el.textContent=full.slice(0,i); if(i<full.length) setTimeout(step,16); }; step(); }

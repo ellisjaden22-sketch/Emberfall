@@ -4,7 +4,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const ROOT = __dirname;
-const SERVER_VERSION='v1.04';
+const SERVER_VERSION='v1.05';
 // The newest desktop app (launcher) build. Raise it when a new app is released and the app tells players to download it.
 const LAUNCHER_VERSION = 2;
 const STARTED = Date.now();
@@ -163,7 +163,7 @@ const pubTries = new Map();
 function readBody(req, max, cb) { let b = [], n = 0, done = false; req.on('data', x => { if (done) return; n += x.length; if (n > max) { done = true; cb(null); req.destroy(); } else b.push(x); }); req.on('end', () => { if (!done) { done = true; cb(Buffer.concat(b).toString('utf8')); } }); req.on('error', () => { if (!done) { done = true; cb(null); } }); }
 // moves and removals of the world's own objects: { kind: { id: 0 | [x, y, r?, s?] } }
 function cleanBase(b) { const out = {}; if (!b || typeof b !== 'object') return out;
-  for (const k of ['npc', 'mob', 'poi', 'lamp', 'stall', 'crate', 'fire', 'south']) { const o = b[k]; if (!o || typeof o !== 'object') continue; const m = {}; let n = 0;
+  for (const k of ['npc', 'mob', 'poi', 'lamp', 'dlamp', 'stall', 'crate', 'fire', 'south']) { const o = b[k]; if (!o || typeof o !== 'object') continue; const m = {}; let n = 0;
     for (const id of Object.keys(o)) { if (n++ > 4000 || !/^[\w-]{1,40}$/.test(id)) continue; const v = o[id];
       if (v === 0) m[id] = 0; else if (Array.isArray(v) && v.length >= 2) m[id] = v.slice(0, 4).map(x => Math.round((+x || 0) * 100) / 100); }
     if (Object.keys(m).length) out[k] = m; }
@@ -175,7 +175,7 @@ function cleanWorld(d) {
     tiles: A(d.tiles).slice(0, 200000).filter(e => Array.isArray(e) && /^[A-Z]{2,8}$/.test(e[2])).map(e => [int(e[0]), int(e[1]), e[2]]),
     zones: A(d.zones).slice(0, 200000).filter(e => Array.isArray(e) && /^[a-z]{2,12}$/.test(e[2])).map(e => [int(e[0]), int(e[1]), e[2]]),
     props: A(d.props).slice(0, 6000).filter(p => p && /^[a-z]{2,16}$/.test(p.k)).map(p => ({ k: p.k, x: num(p.x, 0, 4096), y: num(p.y, 0, 4096), r: num(p.r, -100, 100), s: num(p.s || 1, .3, 4) })),
-    npcs: A(d.npcs).slice(0, 300).filter(n => n && typeof n === 'object').map(n => ({ name: str(n.name, 28), title: str(n.title, 28), x: int(n.x), y: int(n.y), col: /^#[0-9a-f]{6}$/i.test(n.col || '') ? n.col : '#8a7a5a', say: str(n.say, 240) })),
+    npcs: A(d.npcs).slice(0, 300).filter(n => n && typeof n === 'object').map(n => ({ name: str(n.name, 28), title: str(n.title, 28), x: int(n.x), y: int(n.y), col: /^#[0-9a-f]{6}$/i.test(n.col || '') ? n.col : '#8a7a5a', say: str(n.say, 240), ...(typeof n.r === 'number' && isFinite(n.r) ? { r: Math.round(n.r * 100) / 100 } : {}) })),
     spawns: A(d.spawns).slice(0, 1000).filter(x => x && /^[a-z0-9_]{1,24}$/i.test(x.mob)).map(x => ({ mob: x.mob, x: int(x.x), y: int(x.y), n: Math.max(1, Math.min(12, int(x.n) || 1)) })),
     pois: A(d.pois).slice(0, 300).filter(p => p && p.name).map(p => ({ name: str(p.name, 30), x: int(p.x), y: int(p.y), r: Math.max(2, Math.min(20, int(p.r) || 5)) })),
     base: cleanBase(d.base) };
