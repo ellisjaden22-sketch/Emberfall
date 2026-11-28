@@ -439,7 +439,7 @@ body.touch canvas{touch-action:none}
   <div class="lg-bg"></div><div class="embers" id="embers"></div>
   <svg class="lg-hills" viewBox="0 0 1600 300" preserveAspectRatio="none"><path d="M0 300 L0 190 L120 150 L210 175 L330 105 L420 140 L520 80 L600 120 L700 95 L790 150 L900 70 L980 110 L1080 60 L1170 120 L1280 90 L1380 140 L1470 110 L1600 160 L1600 300Z" fill="rgba(10,6,4,.75)"/><path d="M0 300 L0 240 L160 215 L300 235 L460 200 L640 230 L760 210 L820 150 L830 128 L842 150 L852 132 L866 150 L880 210 L1040 225 L1200 205 L1380 235 L1600 215 L1600 300Z" fill="#070403"/></svg>
   <div class="lg-wrap">
-    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.05</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
+    <div class="lg-logo"><div class="lg-rule"><span></span><b>✦</b><span></span></div><h1>EMBERFALL</h1><div class="lg-tag">O N L I N E <span class="beta">BETA v1.06</span></div><div class="sub">An open world of ash and frost. Gather friends, hunt beasts, face the Cinderlord.</div></div>
     <div id="realmBox" class="hidden"><div class="rbt">Join a realm</div><div class="rbr"><input id="realmIn" placeholder="Realm address, e.g. myrealm.onrender.com or 192.168.1.20:8080" spellcheck="false"><button id="realmGo" class="gold">Join</button><button id="realmSolo">Play solo</button></div></div>
     <div id="dlBar" class="hidden"><span>Get the game app:</span><a href="/downloads/Emberfall-Windows.zip" class="dlb" download>⊞ Windows</a><a href="/downloads/Emberfall-Mac.zip" class="dlb" download> Mac</a><a href="/downloads/Emberfall-Linux.zip" class="dlb" download>🐧 Linux</a><a href="#" class="dlb" id="dlMobile">📱 iPhone · iPad · Android</a><small>or just play right here in your browser</small></div>
     <div class="lg-cols">
@@ -562,7 +562,7 @@ window.EMBERFALL_CONFIG = {
    The peer with the lowest label simulates monsters ("world host") and
    publishes them; others send their actions in their own presence.
    ===================================================================== */
-const VERSION = 105;
+const VERSION = 106;
 const TS = 32, MW = 448, OWH = 292, MH = OWH+98;   /* v87: 70 rows of new land along the south (the Southlands) */
 const WS=2.4, TL={x:56,y:82,r:19}, TC={x:112,y:176};
 /* logical (old map) -> physical (new map), and back */
@@ -1737,7 +1737,7 @@ function pushAct(kind,tgt,amt,vis,x,y){ if(kind===0||kind===1||kind===4||kind===
   return a;
 }
 function pushMd(u,amt,mobId,vis){ const a=[++mdSeq,u,Math.round(amt),mobId,vis||0]; myMd.push(a); if(myMd.length>32) myMd.shift();
-  if(u===MY_U) mobHitsMe(a); else visualMobHit(mobById[mobId],u,vis); }
+  if(u===MY_U) mobHitsMe(a); else { const co=isCompU(u)&&othersByU.get(u); if(co&&co.ai) compTakeHit(co,amt,mobById[mobId]); visualMobHit(mobById[mobId],u,vis); } }
 function pushTg(x,y,r,dur,kind){ const a=[++tgSeq,Math.round(x),Math.round(y),Math.round(r),Math.round(dur*1000),kind]; myTg.push(a); if(myTg.length>16) myTg.shift(); addTel(a); return a; }
 function packMobs(){ gmPoolInit(); const t=now(); const ps=[]; if(me) ps.push([me.x,me.y]); for(const o of others.values()) ps.push([o.x,o.y]);
   const out=[], vin=ps.some(p=>p[1]>=(OWH-6)*TS&&p[1]<(AR.y0-3)*TS&&p[0]<RX0*TS), rin=ps.some(p=>p[1]>=OWH*TS&&p[0]>=RX0*TS); for(const m of mobs){ if(!m.tgt&&!(m.t.vault&&vin)&&!(m.t.raid&&rin)&&!ps.some(p=>Math.abs(p[0]-m.x)<1700&&Math.abs(p[1]-m.y)<1700)) continue;
@@ -1837,7 +1837,7 @@ function syncPeers(){
       if(party && (!me||!me.party||o.pt!==me.party)) continue;
       chatLine(txt, party?'c-party':'c-say', party?'[Party] ':'', {n:o.n,col:nameCol(o),gm:o.gm&&isGM}); o.bubble=txt; o.bubbleT=t+6; }
   }
-  for(const [peer,o] of others) if(!seen.has(peer)){ others.delete(peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); if(amHost) for(const m of mobs){ if(m.threat&&m.threat[o.u]) delete m.threat[o.u]; if(m.tgt===o.u) m.tgt=''; if(m.tag===o.u) m.tag=''; } if(me&&seenOnline(o)) sysMsg(`${o.n} has left the realm.`);
+  for(const [peer,o] of others) if(!o.ai&&!seen.has(peer)){ others.delete(peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); if(amHost) for(const m of mobs){ if(m.threat&&m.threat[o.u]) delete m.threat[o.u]; if(m.tgt===o.u) m.tgt=''; if(m.tag===o.u) m.tag=''; } if(me&&seenOnline(o)) sysMsg(`${o.n} has left the realm.`);
     if(me&&me.target&&me.target.kind==='p'&&me.target.id===o.u) me.target=null; }
 }
 function handleRemoteAct(o,a){
@@ -2178,7 +2178,7 @@ function onMobDeath(m){
   m.deathT=now(); m.dx=m.rx; m.dy=m.ry; deathBurst(m);
   if(!me) return; bossDied(m);
   if(me.target && me.target.kind==='m' && me.target.id===m.id){ me.target=null; me.auto=false; if(me.cast&&me.cast.ab.hostile) me.cast=null; }
-  let credit = m.tag===MY_U;
+  let credit = m.tag===MY_U||isCompU(m.tag);
   if(!credit && me.party && m.tag){ const o=othersByU.get(m.tag); if(o && o.pt===me.party && dist(o.x,o.y,me.x,me.y)<1000) credit=true; }
   if(!credit || me.dead) return;
   try{ profOnKill(m); }catch(e){}
@@ -2204,7 +2204,7 @@ function arenaLeave(){ if(!me) return; if(me.dead) release(); me.x=AR.gate.x; me
 function hitPlayer(o,d,vis,crit){ pushAct(12,o.u,Math.round(d*(1+pvpGear('d'))),vis||0); fct(o.rx,o.ry-26,crit?d+'!':d,crit?'#ffb02e':'#ff8a6a',crit); spark(o.rx,o.ry,'#ffd0a0'); me.lastCombat=now(); }
 function arenaHud(){ let el=$('arenaHud'); const on=!!(me&&inArena(me.x,me.y)); if(!on){ if(el) el.style.display='none'; return; }
   if(!el){ el=document.createElement('div'); el.id='arenaHud'; el.className='panel'; document.body.appendChild(el); } el.style.display='block'; const P=me.c.pvp||{k:0,d:0,best:0,st:0}, safe=arenaSafe(me.x,me.y);
-  const foes=[...others.values()].filter(o=>inArena(o.rx,o.ry)&&!(me.party&&o.pt===me.party)).length;
+  const foes=[...others.values()].filter(o=>!o.ai&&inArena(o.rx,o.ry)&&!(me.party&&o.pt===me.party)).length;
   el.innerHTML=`<b>⚔ Bloodsand Arena</b> <span class="${safe?'safe':'war'}">${safe?'Safe zone':'PvP active'}</span><br><small>Kills ${P.k} · Deaths ${P.d} · Streak ${P.st||0} (best ${P.best}) · ${foes} rival${foes===1?'':'s'} here</small><br><small>${achestStatus()}</small>`; }
 function targetEnt(){
   const tg=me.target; if(!tg) return null;
@@ -5874,7 +5874,7 @@ function initBagZones(){ for(const [id,fn] of [['dzSell',sellItem],['dzTrash',as
     z.ondrop=e=>{ e.preventDefault(); z.classList.remove('over'); const it=me&&me.c.inv[dragI]; if(it){ dragOk=true; fn(it); } }; }
   $('bagSort').onclick=()=>{ const c=me.c; c.inv.sort((a,b)=>b.rar-a.rar||SLOTS.indexOf(a.slot)-SLOTS.indexOf(b.slot)||b.pow+b.sta-a.pow-a.sta); renderInv(); persist(); }; }
 function toggleWin(id,force){ const w=$(id); const show=force??w.classList.contains('hidden'); w.classList.toggle('hidden',!show); if(id==='whoWin'&&show) renderWho(); if(id==='invWin'&&show) renderInv(); if(id==='mapWin'&&show) drawWorldMap(); if(id==='charWin'&&show){ renderInv(); renderChar(); } if(id==='talWin'&&show) renderTalents(); if(id==='profWin'&&show) renderProf(); if(id==='soundWin'&&show) renderSound(); if(id==='partyWin'&&show) renderPartyWin(); if(id==='qlogWin'&&show) renderQlog(); if(id==='invWin'&&!show&&shopOpen){shopOpen=false;$('dlg').classList.add('hidden')} }
-function renderWho(){ const l=$('whoList'); const rows=[{n:me.c.name,c:me.c.cls,l:me.c.lvl,z:gZone(me.x,me.y),pt:me.party,you:1},...[...others.values()].filter(seenO).map(o=>({n:o.n,c:o.c,l:o.l,z:o.z,pt:o.pt,u:o.u}))];
+function renderWho(){ const l=$('whoList'); const rows=[{n:me.c.name,c:me.c.cls,l:me.c.lvl,z:gZone(me.x,me.y),pt:me.party,you:1},...[...others.values()].filter(o=>!o.ai&&seenO(o)).map(o=>({n:o.n,c:o.c,l:o.l,z:o.z,pt:o.pt,u:o.u}))];
   const sig=JSON.stringify(rows); if(l.dataset.sig===sig) return; l.dataset.sig=sig; l.innerHTML='';
   for(const r of rows){ const d=document.createElement('div'); d.className='whorow'; const a=document.createElement('span'); a.textContent=`${CLS[r.c].glyph} ${r.n}${r.you?' (you)':''}`; a.style.color=CLS[r.c].col;
     const b=document.createElement('span'); b.style.color='var(--dim)'; b.textContent=`Lv ${r.l} · ${ZONES[r.z]?.name||''}${r.pt?' · '+r.pt:''}`; d.append(a,b); if(!r.you&&canInvite(r.pt)){ const ib=document.createElement('button'); ib.textContent='Invite'; ib.style.cssText='padding:1px 8px;font-size:11px;margin-left:6px'; ib.onclick=()=>inviteTo(othersByU.get(r.u)); d.appendChild(ib); } l.appendChild(d); }
@@ -6471,6 +6471,103 @@ setTimeout(()=>{ const tune=(key,k,hp)=>{ const t=MOBT.find(m=>m.key===key); if(
   tune('pyraxis',2.2); tune('thalassor',1.9); tune('skarn',1.6); tune('blackwake',1.5);
 },0);
 
+/* =====================================================================
+   v1.06 COMPANIONS: computer-controlled party members for heroes who go in alone.
+   A Sellsword waits at the Sunken Vault, at the Cinderhold Gate and near the great world bosses. Companions are free,
+   only for heroes without a real party, and stay where they were hired: leave the dungeon, the raid or the boss's
+   grounds and they head home. They fight with the same rules as players, a little weaker than a good human.
+   ===================================================================== */
+const COMP=[]; let COMPZ=null, compSeq=0;
+const COMPDEF={warden:{n:'Torvald',rng:36,int:1.6,dps:.62,hp:1.35,mit:.55},barbarian:{n:'Grukk',rng:36,int:1.7,dps:.72,hp:1,mit:.85},assassin:{n:'Vesh',rng:34,int:1.4,dps:.72,hp:.9,mit:.9},
+  hunter:{n:'Wren',rng:200,int:1.8,dps:.72,hp:.9,mit:.95},arcanist:{n:'Maelis',rng:190,int:2,dps:.74,hp:.85,mit:1},mender:{n:'Sister Elune',rng:170,int:2,dps:.3,hp:.9,mit:1,heal:.55},bard:{n:'Lyra',rng:120,int:1.8,dps:.55,hp:.9,mit:.95,heal:.2}};
+const COMPD20=240;   // measured damage per second of a level-20 damage class (v1.01)
+const compScale=l=>(2.2+l*1.7)/(2.2+20*1.7);
+const compMax=z=>z&&z.k==='raid'?7:4;
+const isCompU=u=>typeof u==='string'&&u.startsWith('ai-');
+function compZoneHere(){ if(!me) return null; if(inVault(me.x,me.y)||dist(me.x,me.y,VAULT.gate.x,VAULT.gate.y)<420) return {k:'vault',n:'the Sunken Vault'}; if(inRaid(me.x,me.y)||dist(me.x,me.y,RAID.gate.x,RAID.gate.y)<420) return {k:'raid',n:'Cinderhold'};
+  for(const n of NPCS) if(n.sell==='boss'&&dist(me.x,me.y,n.x,n.y)<n.zr) return {k:'boss',n:n.bossName,x:n.bx,y:n.by,r:n.zr+260}; return null; }
+function compInZone(){ const z=COMPZ; if(!z||!me) return false; if(z.k==='vault') return inVault(me.x,me.y)||vaultNear(me.x,me.y)||dist(me.x,me.y,VAULT.gate.x,VAULT.gate.y)<900;
+  if(z.k==='raid') return inRaid(me.x,me.y)||dist(me.x,me.y,RAID.gate.x,RAID.gate.y)<900; return dist(me.x,me.y,z.x,z.y)<z.r; }
+const realParty=()=>partyMembers().filter(o=>!o.ai);
+function compHire(cls){ const z=compZoneHere(); if(!z) return err('Companions only join you at a dungeon, the raid or a world boss.'); if(realParty().length) return err('You already have a party. Companions are for heroes who go in alone.');
+  if(COMPZ&&COMPZ.k!==z.k) compDismissAll(true); if(COMP.length>=compMax(z)) return err(`You can take at most ${compMax(z)} companions here.`);
+  COMPZ=z; const D=COMPDEF[cls], u='ai-'+(++compSeq), lvl=me.c.lvl, a=COMP.length*1.3+1;
+  const o={ai:1,u,peer:'ai:'+u,n:D.n,c:cls,l:lvl,pt:me.party||'',x:me.x-Math.cos(a)*40,y:me.y-Math.sin(a)*40,f:me.face,mhp:Math.round(me.mhp*D.hp),d:false,sl:0,iv:false,mt:0,b:0,wr:2,z:gZone(me.x,me.y),atk:0,cast:0,tgt:null,stuck:0,ooc:0};
+  o.rx=o.x; o.ry=o.y; o.hp=o.mhp; COMP.push(o); others.set(o.peer,o); othersByU.set(u,o);
+  chatLine(`${D.n} the ${CLS[cls].name} joins you.`,'c-party'); renderCompHud(); }
+function compRemove(o){ const i=COMP.indexOf(o); if(i>=0) COMP.splice(i,1); others.delete(o.peer); if(othersByU.get(o.u)===o) othersByU.delete(o.u); for(const m of mobs){ if(m.threat) delete m.threat[o.u]; if(m.tgt===o.u) m.tgt=''; } if(me&&me.target&&me.target.kind==='p'&&me.target.id===o.u) me.target=null; }
+function compDismissAll(quiet,why){ if(!COMP.length) return; for(const o of [...COMP]) compRemove(o); COMPZ=null; if(!quiet) chatLine(why||'Your companions head home.','c-party'); renderCompHud(); }
+// the hire window
+function openHire(n){ const z=compZoneHere()||{k:n.sell==='raid'?'raid':n.sell==='vault'?'vault':'boss',n:n.bossName}, max=compMax(z), solo=!realParty().length;
+  const roleOf=c=>CLS[c].role, row=c=>{ const D=COMPDEF[c]; return `<div class="shoprow"><span><b style="color:${CLS[c].col}">${CLS[c].glyph} ${D.n}</b> · ${CLS[c].name} <span style="color:var(--dim)">(${roleOf(c)})</span><br><span style="font-size:13px;color:var(--dim)">${roleOf(c)==='Tank'?'Takes the hits and keeps enemies off you.':roleOf(c)==='Healer'?'Keeps you and your companions alive.':roleOf(c)==='Support'?'Fights and patches up small wounds.':'Fights whatever you fight.'}</span></span><button data-h="${c}" ${!solo||COMP.length>=max?'disabled':''}>Hire</button></div>`; };
+  dlg(`<h2>${esc(n.name)}</h2><p>"Going in alone? I know a few blades who'll walk with you${z.k==='raid'?' into Cinderhold':z.k==='vault'?' into the Vault':' against '+esc(z.n||'the beast')}. No charge. They stay here when you leave."</p>
+    ${solo?'':'<p style="color:#ff8a7a">You already have a party. Companions are only for heroes who go in alone.</p>'}
+    <p style="font-size:13px;color:var(--dim)">Companions: ${COMP.length} of ${max}${z.k==='raid'?'. Cinderhold needs every hero at level 20.':'.'} They are a little weaker than real players.</p>
+    ${Object.keys(COMPDEF).filter(c=>CLS[c]).map(row).join('')}
+    ${COMP.length?`<h3 style="margin:10px 0 4px">With you</h3>${COMP.map((o,i)=>`<div class="shoprow"><span style="color:${CLS[o.c].col}">${CLS[o.c].glyph} ${esc(o.n)}${o.d?' (fallen)':''}</span><button data-dm="${i}">Dismiss</button></div>`).join('')}`:''}
+    <div class="btns">${COMP.length?'<button id="hDis">Dismiss all</button>':''}<button id="hBk">Close</button></div>`);
+  document.querySelectorAll('#dlg [data-h]').forEach(b=>b.onclick=()=>{ compHire(b.dataset.h); openHire(n); });
+  document.querySelectorAll('#dlg [data-dm]').forEach(b=>b.onclick=()=>{ const o=COMP[+b.dataset.dm]; if(o){ compRemove(o); chatLine(`${o.n} leaves.`,'c-party'); if(!COMP.length) COMPZ=null; renderCompHud(); } openHire(n); });
+  if($('hDis')) $('hDis').onclick=()=>{ compDismissAll(); openHire(n); }; $('hBk').onclick=closeDlg; }
+{ const _talk=talk; talk=function(n){ if(n&&n.sell) return openHire(n); return _talk(n); }; }
+// a small panel with their health
+function renderCompHud(){ let el=$('compHud'); if(!COMP.length){ if(el) el.style.display='none'; return; }
+  if(!el){ el=document.createElement('div'); el.id='compHud'; el.className='panel'; el.style.cssText='position:fixed;left:12px;top:150px;z-index:20;padding:6px 8px;min-width:170px;font-size:12px;pointer-events:none'; document.body.appendChild(el); }
+  el.style.display='block'; el.innerHTML='<div style="font-weight:700;margin-bottom:3px">Companions</div>'+COMP.map(o=>`<div style="margin:3px 0"><span style="color:${CLS[o.c].col}">${CLS[o.c].glyph} ${esc(o.n)}</span><div style="height:5px;background:#0008;border-radius:3px;overflow:hidden;margin-top:2px"><div style="height:100%;width:${o.d?0:Math.round(o.hp/o.mhp*100)}%;background:${o.d?'#555':'#5fbf5f'}"></div></div></div>`).join(''); }
+// a monster hits a companion
+function compTakeHit(o,amt,m){ if(o.d) return; const D=COMPDEF[o.c], d=Math.max(1,Math.round(amt*D.mit)); o.hp-=d; o.hurtT=now(); fct(o.rx,o.ry-26,d,'#ff8a6a'); spark(o.rx,o.ry,'#ffd0a0');
+  if(o.hp<=0){ o.hp=0; o.d=true; o.cast=0; o.b=0; chatLine(`${o.n} has fallen.`,'c-err'); for(const q of mobs){ if(q.threat) delete q.threat[o.u]; if(q.tgt===o.u) q.tgt=''; } } }
+function compTank(){ return COMP.find(o=>!o.d&&COMPDEF[o.c].mit<.6&&dist(o.rx,o.ry,me.x,me.y)<320); }
+{ const _mhm=mobHitsMe; mobHitsMe=function(a){ if(!amHost&&COMP.length){ const t=compTank(); if(t){ compTakeHit(t,a[2],mobById[a[3]]); return; } } return _mhm(a); }; }
+const groupU=()=>new Set([MY_U,...COMP.map(o=>o.u)]);
+function compPickMob(o){ const G=groupU(), D=COMPDEF[o.c], tank=D.mit<.6;
+  const mine=me.target&&me.target.kind==='m'?mobById[me.target.id]:null, engaged=mine&&!mine.dead&&(me.auto||mine.tgt&&G.has(mine.tgt)||now()-(me.lastCombat||0)<4)?mine:null;
+  let best=null,bd=1e9; for(const m of mobs){ if(m.dead||m.evade||m.t.dummy||!m.tgt||!G.has(m.tgt)) continue; const d=dist(m.rx,m.ry,o.rx,o.ry); if(d>520) continue; const sc=d-(tank&&m.tgt!==o.u?400:0); if(sc<bd){ bd=sc; best=m; } }
+  return tank?(best||engaged):(engaged||best); }
+function compStep(o,tx,ty,spd,dt){ const dx=tx-o.x, dy=ty-o.y, d=Math.hypot(dx,dy); if(d<2) { o.moving=false; return; } const s=Math.min(d,spd*dt), nx=o.x+dx/d*s, ny=o.y+dy/d*s;
+  if(!isSolidPx(nx,ny)){ o.x=nx; o.y=ny; } else if(!isSolidPx(nx,o.y)) o.x=nx; else if(!isSolidPx(o.x,ny)) o.y=ny; else o.stuck+=dt;
+  o.f=Math.atan2(dy,dx); o.moving=true; o.rx=o.x; o.ry=o.y; }
+function compTick(dt){ if(!COMP.length) return; const t=now();
+  if(!me||!compInZone()){ compDismissAll(false,'Your companions stay behind and head home.'); return; }
+  if(realParty().length){ compDismissAll(false,'You joined a party, so your companions head home.'); return; }
+  const lvl=me.c.lvl, sc=compScale(lvl); let anyFight=false;
+  COMP.forEach((o,i)=>{ const D=COMPDEF[o.c]; o.l=lvl; o.z=gZone(o.x,o.y); o.pt=me.party||'';
+    if(o.d){ o.moving=false; return; }
+    // fall behind too far (or stuck): catch up
+    if(dist(o.x,o.y,me.x,me.y)>700||o.stuck>2){ const a=i*1.3+1; o.x=me.x-Math.cos(me.face+a)*40; o.y=me.y-Math.sin(me.face+a)*40; o.rx=o.x; o.ry=o.y; o.stuck=0; }
+    if(me.dead){ o.moving=false; o.b=0; return; }
+    // healers first look after the group
+    if(D.heal){ const hurt=[{p:me,hp:me.hp,mhp:me.mhp,x:me.x,y:me.y},...COMP.filter(q=>!q.d).map(q=>({p:q,hp:q.hp,mhp:q.mhp,x:q.x,y:q.y}))].filter(h=>h.hp/h.mhp<(D.heal>.4?.82:.55)).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
+      if(hurt){ const d=dist(o.x,o.y,hurt.x,hurt.y); if(d>D.rng){ compStep(o,hurt.x,hurt.y,185,dt); return; } o.moving=false; o.f=Math.atan2(hurt.y-o.y,hurt.x-o.x);
+        if(!o.cast){ o.cast=t+1.4; o.b|=4; } else if(t>=o.cast){ o.cast=0; o.b&=~4; const amt=Math.round(COMPD20*D.heal*sc*D.int*(.9+Math.random()*.2)); if(hurt.p===me){ me.hp=Math.min(me.mhp,me.hp+amt); fct(me.x,me.y-30,'+'+amt,'#7dff8a'); } else { hurt.p.hp=Math.min(hurt.p.mhp,hurt.p.hp+amt); fct(hurt.p.rx,hurt.p.ry-26,'+'+amt,'#7dff8a'); } spark(hurt.x,hurt.y,'#9effa8'); } anyFight=true; return; } }
+    const m=compPickMob(o);
+    if(!m){ o.b&=~4; o.cast=0; const a=(i/Math.max(1,COMP.length))*Math.PI-Math.PI/2, sx=me.x-Math.cos(me.face)*42+Math.cos(me.face+a)*30, sy=me.y-Math.sin(me.face)*42+Math.sin(me.face+a)*30;
+      if(dist(o.x,o.y,sx,sy)>26) compStep(o,sx,sy,me.mounted?330:Math.max(170,dist(o.x,o.y,sx,sy)*2),dt); else { o.moving=false; o.f=me.face; } return; }
+    anyFight=true; const d=dist(o.x,o.y,m.rx,m.ry);
+    // the tank calls the monster off whoever it is hitting (a shout: works from a distance)
+    if(D.mit<.6&&amHost&&m.tgt!==o.u&&d<260&&t-(o.tauntT||0)>5){ o.tauntT=t; hostApplyAct(o.u,o.c,[0,3,m.id,0,0]); fct(m.rx,m.ry-40,'Taunt','#9ec8ff'); }
+    // close in; a melee fighter who cannot get any nearer (a wall, the monster's bulk) still swings when it is close
+    if(d>D.rng){ const x0=o.x,y0=o.y; compStep(o,m.rx,m.ry,190,dt); const prog=Math.hypot(o.x-x0,o.y-y0); o.blk=prog<190*dt*.3?(o.blk||0)+dt:0; o.b&=~4; o.cast=0; if(!(D.rng<60&&d<140&&o.blk>.5)) return; }
+    o.moving=false; o.f=Math.atan2(m.ry-o.y,m.rx-o.x);
+    if(t<o.atk) return; const ranged=D.rng>60;
+    if(ranged&&!o.cast){ o.cast=t+.8; o.b|=4; return; } if(ranged&&t<o.cast) return; o.cast=0; o.b&=~4;
+    o.atk=t+D.int*(.92+Math.random()*.16); o.swingT=t; const dmg=Math.max(1,Math.round(COMPD20*D.dps*sc*D.int*(.85+Math.random()*.3)*(Math.random()<.12?1.6:1)));
+    if(amHost){ if(!m.tag) m.tag=MY_U; hostApplyAct(o.u,o.c,[0,0,m.id,dmg,0]); } else pushAct(0,m.id,dmg,0);
+    fct(m.rx,m.ry-34,dmg,'#cfd6e0'); spark(m.rx,m.ry,CLS[o.c].col||'#fff'); });
+  // out of combat: back on their feet and resting
+  const fight=anyFight||mobs.some(m=>!m.dead&&m.tgt&&groupU().has(m.tgt));
+  for(const o of COMP){ if(fight){ o.ooc=0; continue; } o.ooc+=dt; if(o.d&&o.ooc>8){ o.d=false; o.hp=Math.round(o.mhp*.4); chatLine(`${o.n} gets back up.`,'c-party'); } else if(!o.d&&o.ooc>2) o.hp=Math.min(o.mhp,o.hp+o.mhp*.04*dt); }
+  if(!compTick.hudT||t-compTick.hudT>.25){ compTick.hudT=t; renderCompHud(); } }
+{ const _upd=update; update=function(dt){ _upd(dt); try{ compTick(dt); }catch(e){ console.warn('companions',e); } }; }
+// the Sellswords: one at each gate, and one near every great world boss
+setTimeout(()=>{ try{
+  const put=(id,name,tx,ty,extra)=>{ const [x,y]=findOpen(Math.floor(tx),Math.floor(ty)); NPCS.push({id,name,title:'Companions for hire',x:x*TS+16,y:y*TS+16,col:'#8a7a5a',sell:1,...extra}); };
+  put('sell_vault','Kael the Sellsword',VAULT.gate.x/TS+4,VAULT.gate.y/TS+2,{sell:'vault'});
+  put('sell_raid','Brannoc the Sellsword',RAID.gate.x/TS+5,RAID.gate.y/TS+3,{sell:'raid'});
+  const seen=new Set(); for(const m of mobs){ const mt=m.t; if(!mt.boss||mt.raid||mt.vault||mt.summon||m.lv<8||m.sy>=OWH*TS||seen.has(mt.key)) continue; seen.add(mt.key);
+    const nm=['Hadrik','Sela','Brom','Ysra','Odran','Tamsin','Corvo'][seen.size%7]; put('sell_'+mt.key,nm+' the Sellsword',m.sx/TS+9,m.sy/TS+2,{sell:'boss',bossName:mt.name,bx:m.sx,by:m.sy,zr:420}); NPCS[NPCS.length-1].title='Companions · '+mt.name.slice(0,22); }
+}catch(e){ console.warn('sellswords',e); } },0);
+
 /* ---- quests are longer: more to kill and gather, a bit more reward ---- */
 setTimeout(()=>{ for(const q of QUESTS){ if(q._v48) continue; q._v48=1;
   if(q.type==='kill'&&q.n>=3) q.n=Math.ceil(q.n*1.5); else if(q.type==='gather'&&q.n>=3) q.n=Math.ceil(q.n*1.6);
@@ -6924,7 +7021,7 @@ function renderGMWin(){ const w=$('gmWin'); if(!w||w.classList.contains('hidden'
   <div class="gmsec"><h4>Cheats</h4>${B('aura','✦ Aura',on(gm.aura))}${B('invis','Invisible',on(gm.invis))}${B('god','God mode',on(gm.god))}${B('nocd','No cooldowns',on(gm.nocd))}${B('fly','Noclip',on(gm.fly))}<span class="gmspd">Speed <input type="range" id="gmSpeed" min="1" max="6" step=".5" value="${gm.speed}"> x<b>${gm.speed}</b></span></div>
   <div class="gmsec"><h4>Items</h4>${B('item 3','<span class="t3">Epic item</span>')}${B('item 2','<span class="t2">Rare item</span>')}${B('mats 10','+10 all herbs & ore')}${B('mount','Unlock all mounts')}</div>
   <div class="gmsec"><h4>World <small>(time and weather change for everyone)</small></h4>${B('kill','Kill target')}${B('kill all','Kill everything nearby')}${B('questdone','Finish quest objectives')}${B('time day','☀ Day')}${B('time dusk','Dusk')}${B('time night','☾ Night')}${B('time auto','Clock')}${B('weather clear','Clear')}${B('weather rain','Rain')}${B('weather storm','Storm')}${B('weather auto','Realm weather')}</div>
-  <div class="gmsec"><h4>Teleport <small>(or Shift+click the world map)</small></h4><div class="gmtp">${gmPlaces().map((p,i)=>`<button data-tpi="${i}">${esc(p.n)}</button>`).join('')}${[...others.values()].map(o=>`<button data-tpp="${esc(o.u)}" style="color:${CLS[o.c].col}">➜ ${esc(o.n)}</button>`).join('')}</div>
+  <div class="gmsec"><h4>Teleport <small>(or Shift+click the world map)</small></h4><div class="gmtp">${gmPlaces().map((p,i)=>`<button data-tpi="${i}">${esc(p.n)}</button>`).join('')}${[...others.values()].filter(o=>!o.ai).map(o=>`<button data-tpp="${esc(o.u)}" style="color:${CLS[o.c].col}">➜ ${esc(o.n)}</button>`).join('')}</div>
     <div class="gmrow">X <input id="gmTx" type="number" min="0" max="${MW-1}" value="${Math.round(me.x/TS)}"> Y <input id="gmTy" type="number" min="0" max="${MH-1}" value="${Math.round(me.y/TS)}"> <button id="gmTgo">Go</button></div></div>
   <div class="gmsec"><h4>Announce to everyone</h4><div class="gmrow"><input id="gmAnn" maxlength="120" placeholder="Server message…" style="flex:1"> <button id="gmAgo">Send</button></div></div>
   <div class="gmsec" style="font-size:13px;color:var(--dim)">Owner character on this device: <b style="color:#ff9a3a">${esc((rosterList().find(c=>c.id===saves.gmChar)||{}).name||'—')}</b>. Your other characters are normal players. Use <code>/movegm name</code> to move GM to another of your characters.</div>
@@ -7026,7 +7123,7 @@ function npcPortrait(n){ const L=LOOK[n.id]; const c=n.col||'#a07a4a'; return `<
 let invSeq=0, myInv=null, myIr=null, myKick=null, pendInv=null; const PARTY_MAX=5, RAID_MAX=20;
 function isRaidGrp(p){ return /^raid-/.test(p||me&&me.party||''); }
 function groupMax(p){ return isRaidGrp(p??(me&&me.party))?RAID_MAX:PARTY_MAX; }
-function partyMembers(){ return me.party?[...others.values()].filter(o=>o.pt===me.party&&seenO(o)):[]; }
+function partyMembers(){ const ai=[...others.values()].filter(o=>o.ai); return (me.party?[...others.values()].filter(o=>!o.ai&&o.pt===me.party&&seenO(o)):[]).concat(ai); }
 function amLeader(){ if(!me.party) return false; if(me.lead) return true; return !partyMembers().some(o=>o.pl); }
 function inviteTo(o){ if(!o) return err('Player not found'); if(o.pt&&o.pt===me.party) return err(o.n+' is already in your party');
   if(me.party&&partyMembers().length+1>=groupMax()) return err(isRaidGrp()?'Your raid group is full ('+RAID_MAX+')':'Your party is full ('+PARTY_MAX+'). The leader can turn it into a raid group of up to '+RAID_MAX+'.');
@@ -7049,7 +7146,7 @@ function renderPartyWin(){ const w=$('partyWin'); if(!w||w.classList.contains('h
   const row=(n,cls,l,hpF,zone,isLead,you,u,dead)=>`<div class="pwrow"><span class="pwic" style="background:${CLS[cls].col}">${CLS[cls].glyph}</span><span class="pwn" style="color:${CLS[cls].col}">${isLead?'<span class="crown">♛</span> ':''}${esc(n)}${you?' <small>(you)</small>':''}</span><span class="pwl">Lv ${l} · ${esc(ZONES[zone]?.name||'')}</span><span class="pwhp"><i style="width:${Math.round(clamp(hpF,0,1)*100)}%"></i></span>${!you&&lead?`<button data-kick="${esc(u)}">Remove</button>`:''}${dead?'<span class="pwdead">Dead</span>':''}</div>`;
   let h=''; if(me.party){ h+=`<div class="pwsub">${isRaidGrp()?'⚔ Raid group':'Party'} <b>${esc(me.party.replace(/^raid-/,''))}</b> · ${mem.length+1}/${groupMax()} members</div>`; if(lead&&!isRaidGrp()) h+=`<div class="btns" style="margin:4px 0 8px"><button id="pwRaid" class="gold" title="A raid group holds up to ${RAID_MAX} players">⚔ Convert to raid group (up to ${RAID_MAX})</button></div>`; h+=row(me.c.name,me.c.cls,me.c.lvl,me.hp/me.mhp,zoneAtPx(me.x,me.y),lead,1,MY_U,me.dead); for(const o of mem) h+=row(o.n,o.c,o.l,o.hp/o.mhp,o.z,!!o.pl,0,o.u,o.d); }
   else h+='<div class="pwsub">You are not in a party. Invite someone below, or click a player and press <b>Invite</b>.</div>';
-  const cand=[...others.values()].filter(o=>seenO(o)&&o.pt!==me.party||(!me.party&&seenO(o)));
+  const cand=[...others.values()].filter(o=>!o.ai&&(seenO(o)&&o.pt!==me.party||(!me.party&&seenO(o))));
   h+=`<h4>Invite players</h4>${cand.length?cand.map(o=>`<div class="pwrow small"><span class="pwic" style="background:${CLS[o.c].col}">${CLS[o.c].glyph}</span><span class="pwn" style="color:${CLS[o.c].col}">${esc(o.n)}</span><span class="pwl">Lv ${o.l}${o.pt?' · in a party':''}</span><button data-inv="${esc(o.u)}" class="gold">Invite</button></div>`).join(''):'<div class="pwsub">No other players online right now.</div>'}`;
   h+=`<div class="btns" style="margin-top:12px">${me.party?'<button id="pwLeave">Leave party</button>':''}<button id="pwName">Join by name…</button>${me.party&&lead?'<button id="pwReady">✔ Ready check</button><button id="pwPull">⏱ Pull in 10</button>':''}</div>`;
   w.querySelector('.pwbody').innerHTML=h;
@@ -7560,10 +7657,10 @@ function vaultCmd(k){ if(!me) return; if(raidCmd(k)) return; if(me.dead) return 
   if(k==='e'){
     if(inVault(me.x,me.y)) return sysMsg('You are already inside the Sunken Vault. Type -o to leave early, or -d once the Drowned King has fallen.','c-err');
     if(!vaultNear(me.x,me.y)) return sysMsg(`Stand within 6 yards of the Sunken Vault gate to enter. You are ${Math.round(Math.hypot(me.x-VAULT.gate.x,me.y-VAULT.gate.y)/10)} yards away.`,'c-err');
-    const mem=partyMembers().filter(o=>!o.d), far=mem.filter(o=>!vaultNear(o.rx,o.ry));
+    const mem=partyMembers().filter(o=>!o.d), far=mem.filter(o=>!o.ai&&!vaultNear(o.rx,o.ry));
     if(mem.length+1>PARTY_MAX&&!isGM){ sysMsg(`The Sunken Vault is a dungeon for up to ${PARTY_MAX} heroes. Your group has ${mem.length+1}: split into parties of ${PARTY_MAX} (raid groups are for Cinderhold).`,'c-err'); return; }
     if(far.length) return sysMsg('Your whole party must stand within 6 yards of the gate. Too far away: '+far.map(o=>o.n).join(', ')+'.','c-err');
-    const busy=[...others.values()].filter(o=>seenO(o)&&inVault(o.rx,o.ry)&&!(me.party&&o.pt===me.party));
+    const busy=[...others.values()].filter(o=>!o.ai&&seenO(o)&&inVault(o.rx,o.ry)&&!(me.party&&o.pt===me.party));
     if(busy.length) return sysMsg('Another group is inside the Sunken Vault ('+busy.map(o=>o.n).join(', ')+'). Wait until they finish.','c-err');
     if(me.party){ myChat.push([++chSeq,3,'E']); if(myChat.length>3) myChat.shift(); }
     vaultEnter(me.party?`You lead your party into the Sunken Vault.`:'You descend into the Sunken Vault.'); return; }
@@ -7936,8 +8033,8 @@ function raidCmd(k){ if(!me) return false; const inside=inRaid(me.x,me.y);
     if(probs.length&&!isGM){ sysMsg('🔥 The Cinderhold Gate will not open:','c-err'); for(const p of probs) sysMsg('• '+p,'c-err'); return true; }
     if(probs.length) sysMsg(`GM override: entering without the full raid requirements (${probs.length} unmet).`,'c-gm');
     if(probs.missing&&probs.missing.length) sysMsg('Suggestion: most raids bring '+probs.missing.join(', ')+'. You can go in without, but it will be harder.','c-sys');
-    const far=mem.filter(o=>!raidNear(o.rx,o.ry)); if(far.length&&!isGM){ sysMsg(`Waiting for ${far.map(o=>o.n).join(', ')}: everyone must stand at the Cinderhold Gate.`,'c-err'); return true; }
-    const busy=[...others.values()].filter(o=>seenO(o)&&inRaid(o.rx,o.ry)&&!(me.party&&o.pt===me.party)); if(busy.length&&!isGM){ sysMsg(`Another group is inside Cinderhold (${busy.slice(0,3).map(o=>o.n).join(', ')}). Wait for them to finish.`,'c-err'); return true; }
+    const far=mem.filter(o=>!o.ai&&!raidNear(o.rx,o.ry)); if(far.length&&!isGM){ sysMsg(`Waiting for ${far.map(o=>o.n).join(', ')}: everyone must stand at the Cinderhold Gate.`,'c-err'); return true; }
+    const busy=[...others.values()].filter(o=>!o.ai&&seenO(o)&&inRaid(o.rx,o.ry)&&!(me.party&&o.pt===me.party)); if(busy.length&&!isGM){ sysMsg(`Another group is inside Cinderhold (${busy.slice(0,3).map(o=>o.n).join(', ')}). Wait for them to finish.`,'c-err'); return true; }
     raidEnter(me.party?'You lead your raid through the Cinderhold Gate.':'You step through the Cinderhold Gate.'); if(me.party){ myChat.push([++chSeq,3,'RE']); if(myChat.length>3) myChat.shift(); } return true; }
   if(k==='o'){ if(!inside) return false; raidLeave('You climb back out of Cinderhold.'); return true; }
   if(k==='d'){ if(!inside) return false; const V=RAID.boss.vyrathos; if(!(V&&V.dead)){ sysMsg('The Ember Tyrant still lives. Type -o to leave early.','c-err'); return true; }
